@@ -13,5 +13,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="load_failed_toast">Loading Error. Please retry later</string>
     <string name="network_error_toast">Network Error. Please retry later</string>
+    <string name="list_loading_text">Loading</string>
 
 </resources>

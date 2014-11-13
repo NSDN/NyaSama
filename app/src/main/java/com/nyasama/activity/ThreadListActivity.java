@@ -3,11 +3,12 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -30,12 +31,14 @@ public class ThreadListActivity extends Activity
     private class Thread {
         public String id;
         public String title;
+        public JSONObject object;
     }
 
     private final String TAG = "ThreadList";
 
     private CommonListAdapter<Thread> mListAdapter;
     private ListView mListView;
+    private View mListFooter;
 
     private List<Thread> mThreads = new ArrayList<Thread>();
     private int mTotalThreadCount = Integer.MAX_VALUE;
@@ -59,6 +62,7 @@ public class ThreadListActivity extends Activity
                                 mThreads.add(new Thread() {{
                                     this.id = thread.getString("tid");
                                     this.title = thread.getString("subject");
+                                    this.object = thread;
                                 }});
                             }
                             mTotalThreadCount = Integer.parseInt(
@@ -77,9 +81,13 @@ public class ThreadListActivity extends Activity
                                 Toast.LENGTH_SHORT).show();
                     }
                     mIsLoading = false;
+                    if (mListFooter != null)
+                        mListFooter.setVisibility(View.GONE);
                 }
             });
             mIsLoading = true;
+            if (mListFooter != null)
+                mListFooter.setVisibility(View.VISIBLE);
         }
         return mIsLoading;
     }
@@ -95,14 +103,22 @@ public class ThreadListActivity extends Activity
         setContentView(R.layout.activity_thread_list);
         if (savedInstanceState == null) {
             mListView = (ListView) findViewById(R.id.thread_list);
+
+            mListFooter = LayoutInflater.from(this)
+                    .inflate(R.layout.fragment_list_loading, null, false);
+            mListView.addFooterView(mListFooter);
+
             mListView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mThreads, R.layout.fragment_thread_item) {
                 @Override
                 public void convert(ViewHolder viewHolder, Thread item) {
-                    ((TextView) viewHolder.getView(R.id.thread_title)).setText(item.title);
-                    ((TextView) viewHolder.getView(R.id.thread_sub)).setText(item.id);
+                    JSONObject object = item.object;
+                    viewHolder.setText(R.id.thread_title, item.title);
+                    viewHolder.setText(R.id.thread_sub,
+                            object.optString("author") + " " + object.optString("lastpost"));
                 }
             });
             mListView.setOnScrollListener(this);
+
             loadMore();
         }
     }

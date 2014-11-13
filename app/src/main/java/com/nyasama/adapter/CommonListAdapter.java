@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
                     .inflate(mLayoutId, parent, false);
             convertView.setTag(new ViewHolder(convertView));
         }
-        convert((ViewHolder)convertView.getTag(), getItem(position));
+        convert((ViewHolder) convertView.getTag(), getItem(position));
         return convertView;
     }
 
@@ -67,6 +68,12 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
                 mViews.put(viewId, view);
             }
             return view;
+        }
+
+        public void setText(int viewId, CharSequence text) {
+            TextView view = (TextView) getView(viewId);
+            if (view != null)
+                view.setText(text);
         }
     }
 }
