@@ -1,5 +1,7 @@
 package com.nyasama.util;
 
+import android.util.Log;
+
 import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.Request;
@@ -67,12 +69,15 @@ public class Discuz {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     JSONObject jsonObject = new JSONObject();
+                    // NOTE: getMessage may return null
+                    String msg = volleyError.getMessage();
                     try {
-                        jsonObject.put("volleyError", volleyError.getMessage());
+                        jsonObject.put("volleyError", msg);
                     }
                     catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
+                    Log.e("VolleyError", msg != null ? msg : "Unknown");
                     response.onResponse(jsonObject);
                 }
             });

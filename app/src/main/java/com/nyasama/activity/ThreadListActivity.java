@@ -1,6 +1,8 @@
 package com.nyasama.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -10,12 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
+import com.nyasama.util.Helper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,7 +34,7 @@ public class ThreadListActivity extends Activity
     private class Thread {
         public String id;
         public String title;
-        public JSONObject object;
+        public String sub;
     }
 
     private final String TAG = "ThreadList";
@@ -48,13 +50,31 @@ public class ThreadListActivity extends Activity
     public boolean loadMore() {
         if (mThreads.size() < mTotalThreadCount && !mIsLoading) {
             Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
-                put("fid", 10);
+                put("fid", getIntent().getStringExtra("fid"));
                 put("tpp", 20);
-                put("page", Math.floor(mThreads.size() / 20.0) + 1);
+                put("page", Math.round(Math.floor(mThreads.size() / 20.0) + 1));
             }}, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.optString("volleyError").equals("")) {
+                    if (jsonObject.has("volleyError")) {
+                        Helper.toast(getApplicationContext(), R.string.network_error_toast);
+                    }
+                    else if (jsonObject.has("Message")) {
+                        JSONObject message = jsonObject.optJSONObject("Message");
+                        mThreads.clear();
+                        mTotalThreadCount = 0;
+                        new AlertDialog.Builder(ThreadListActivity.this)
+                                .setTitle("There is sth wrong...")
+                                .setMessage(message.optString("messagestr"))
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        finish();
+                                    }
+                                })
+                                .show();
+                    }
+                    else {
                         try {
                             JSONObject var = jsonObject.getJSONObject("Variables");
                             JSONArray threads = var.getJSONArray("forum_threadlist");
@@ -63,23 +83,18 @@ public class ThreadListActivity extends Activity
                                 mThreads.add(new Thread() {{
                                     this.id = thread.getString("tid");
                                     this.title = thread.getString("subject");
-                                    this.object = thread;
+                                    this.sub = thread.optString("author") + " " +
+                                            thread.optString("lastpost");
                                 }});
                             }
                             mTotalThreadCount = Integer.parseInt(
                                     var.getJSONObject("forum").getString("threads"));
+                            // NOTE: only update when there is data
+                            mListAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Thread List Failed ("+e.getMessage()+")");
-                            Toast.makeText(getApplicationContext(),
-                                    getString(R.string.load_failed_toast),
-                                    Toast.LENGTH_SHORT).show();
+                            Helper.toast(getApplicationContext(), R.string.load_failed_toast);
                         }
-                        mListAdapter.notifyDataSetChanged();
-                    } else {
-                        Log.e(TAG, "VolleyError: " + jsonObject.optString("volleyError"));
-                        Toast.makeText(getApplicationContext(),
-                                getString(R.string.network_error_toast),
-                                Toast.LENGTH_SHORT).show();
                     }
                     mIsLoading = false;
                     if (mListFooter != null)
@@ -93,10 +108,12 @@ public class ThreadListActivity extends Activity
         return mIsLoading;
     }
 
+    /*
     public boolean reload() {
         mThreads.clear();
         return loadMore();
     }
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +129,8 @@ public class ThreadListActivity extends Activity
             mListView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mThreads, R.layout.fragment_thread_item) {
                 @Override
                 public void convert(ViewHolder viewHolder, Thread item) {
-                    JSONObject object = item.object;
                     viewHolder.setText(R.id.thread_title, item.title);
-                    viewHolder.setText(R.id.thread_sub,
-                            Html.fromHtml(object.optString("author") + " " + object.optString("lastpost")));
+                    viewHolder.setText(R.id.thread_sub, Html.fromHtml(item.sub));
                 }
             });
             mListView.setOnScrollListener(this);
