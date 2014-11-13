@@ -11,9 +11,14 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NoCache;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,13 +26,22 @@ import java.util.Map;
  * utils to handle Discuz data
  */
 public class Discuz {
-    static final String discuzUrl = "";
+    static final String discuzUrl = "http://bbs.discuz.net/api/mobile/index.php";
+    static final String discuzEnc = "utf-8";
+
     static RequestQueue volleyQueue;
     static {
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
         volleyQueue = new RequestQueue(cache, network);
         volleyQueue.start();
+    }
+
+    private static List<NameValuePair> map2list(Map<String, Object> map) {
+        List<NameValuePair> list = new ArrayList<NameValuePair>();
+        for (Map.Entry<String, Object> e : map.entrySet())
+            list.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+        return list;
     }
 
     public static Request execute(String module,
@@ -40,7 +54,9 @@ public class Discuz {
         }
         params.put("module", module);
         //
-        return new JsonObjectRequest(discuzUrl, null,
+        Request request =  new JsonObjectRequest(
+            discuzUrl + "?" + URLEncodedUtils.format(map2list(params), discuzEnc),
+            null,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
@@ -60,5 +76,7 @@ public class Discuz {
                     response.onResponse(jsonObject);
                 }
             });
+        volleyQueue.add(request);
+        return request;
     }
 }
