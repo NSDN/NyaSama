@@ -102,6 +102,7 @@ public class PostListActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_list);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null) {
             ListView listView = (ListView) findViewById(R.id.post_list);
 
@@ -139,6 +140,10 @@ public class PostListActivity extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == android.R.id.home) {
+            finish();
             return true;
         }
 

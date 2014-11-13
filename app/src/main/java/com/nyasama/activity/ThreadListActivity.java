@@ -111,6 +111,7 @@ public class ThreadListActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thread_list);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null) {
             ListView listView = (ListView) findViewById(R.id.thread_list);
 
@@ -149,6 +150,10 @@ public class ThreadListActivity extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
