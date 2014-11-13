@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nyasama" >
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -18,12 +19,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.ThreadListActivity"
+            android:name="com.nyasama.activity.ThreadListActivity"
             android:label="@string/title_activity_thread_list"
             android:parentActivityName="com.nyasama.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nyasama.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.nyasama.activity.PostListActivity"
+            android:label="@string/title_activity_post_list"
+            android:parentActivityName="com.nyasama.activity.ThreadListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nyasama.activity.ThreadListActivity" />
         </activity>
     </application>
 

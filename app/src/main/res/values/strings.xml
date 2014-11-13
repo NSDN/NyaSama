@@ -14,5 +14,6 @@
     <string name="load_failed_toast">Loading Error. Please retry later</string>
     <string name="network_error_toast">Network Error. Please retry later</string>
     <string name="list_loading_text">Loading</string>
+    <string name="title_activity_post_list">PostListActivity</string>
 
 </resources>

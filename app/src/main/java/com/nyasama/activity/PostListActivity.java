@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -12,12 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.android.volley.Response;
-import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
+import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
@@ -29,39 +27,39 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+public class PostListActivity extends Activity
+    implements AbsListView.OnScrollListener {
 
-public class ThreadListActivity extends Activity
-    implements AbsListView.OnScrollListener, AbsListView.OnItemClickListener {
+    private final String TAG = "PostList";
 
-    private final String TAG = "ThreadList";
-
-    private class Thread {
+    private class Post {
         public String id;
-        public String title;
-        public String sub;
+        public String author;
+        public String message;
     }
 
-    private CommonListAdapter<Thread> mListAdapter;
-    private List<Thread> mListData = new ArrayList<Thread>();
+    private CommonListAdapter<Post> mListAdapter;
+    private List<Post> mListData = new ArrayList<Post>();
     private int mListItemCount = Integer.MAX_VALUE;
     private boolean mIsLoading = false;
 
     public boolean loadMore() {
         if (mListData.size() < mListItemCount && !mIsLoading) {
-            Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
-                put("fid", getIntent().getStringExtra("fid"));
-                put("tpp", 20);
-                put("page", Math.round(Math.floor(mListData.size() / 20.0) + 1));
+            Discuz.execute("viewthread", new HashMap<String, Object>() {{
+                put("tid", getIntent().getStringExtra("tid"));
+                put("ppp", 10);
+                put("page", Math.round(Math.floor(mListData.size() / 10 + 1)));
             }}, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
                     if (jsonObject.has("volleyError")) {
                         Helper.toast(getApplicationContext(), R.string.network_error_toast);
-                    } else if (jsonObject.has("Message")) {
+                    }
+                    else if (jsonObject.has("Message")) {
                         JSONObject message = jsonObject.optJSONObject("Message");
                         mListData.clear();
                         mListItemCount = 0;
-                        new AlertDialog.Builder(ThreadListActivity.this)
+                        new AlertDialog.Builder(PostListActivity.this)
                                 .setTitle("There is sth wrong...")
                                 .setMessage(message.optString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -71,24 +69,24 @@ public class ThreadListActivity extends Activity
                                     }
                                 })
                                 .show();
-                    } else {
+                    }
+                    else {
                         try {
                             JSONObject var = jsonObject.getJSONObject("Variables");
-                            JSONArray threads = var.getJSONArray("forum_threadlist");
-                            for (int i = 0; i < threads.length(); i++) {
-                                final JSONObject thread = threads.getJSONObject(i);
-                                mListData.add(new Thread() {{
-                                    this.id = thread.getString("tid");
-                                    this.title = thread.optString("subject");
-                                    this.sub = thread.optString("author") + " " +
-                                            thread.optString("lastpost");
+                            JSONArray postlist = var.getJSONArray("postlist");
+                            for (int i = 0; i < postlist.length(); i ++) {
+                                final JSONObject post = postlist.getJSONObject(i);
+                                mListData.add(new Post() {{
+                                    this.id = post.optString("pid");
+                                    this.author = post.optString("author");
+                                    this.message = post.optString("message");
                                 }});
                             }
                             mListItemCount = Integer.parseInt(
-                                    var.getJSONObject("forum").getString("threads"));
+                                    var.getJSONObject("thread").getString("allreplies"));
                             mListAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
-                            Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
+                            Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
                         }
                     }
@@ -100,33 +98,25 @@ public class ThreadListActivity extends Activity
         return mIsLoading;
     }
 
-    /*
-    public boolean reload() {
-        mListData.clear();
-        return loadMore();
-    }
-    */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_thread_list);
+        setContentView(R.layout.activity_post_list);
         if (savedInstanceState == null) {
-            ListView listView = (ListView) findViewById(R.id.thread_list);
+            ListView listView = (ListView) findViewById(R.id.post_list);
 
             View footer = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_list_loading, null, false);
             listView.addFooterView(footer);
 
-            listView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mListData, R.layout.fragment_thread_item) {
+            listView.setAdapter(mListAdapter = new CommonListAdapter<Post>(mListData, R.layout.fragment_post_item) {
                 @Override
-                public void convert(ViewHolder viewHolder, Thread item) {
-                    viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-                    viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
+                public void convert(ViewHolder viewHolder, Post item) {
+                    viewHolder.setText(R.id.author, item.author);
+                    viewHolder.setText(R.id.message, Html.fromHtml(item.message));
                 }
             });
             listView.setOnScrollListener(this);
-            listView.setOnItemClickListener(this);
 
             loadMore();
         }
@@ -136,7 +126,7 @@ public class ThreadListActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_thread_list, menu);
+        getMenuInflater().inflate(R.menu.menu_post_list, menu);
         return true;
     }
 
@@ -157,6 +147,7 @@ public class ThreadListActivity extends Activity
 
     @Override
     public void onScrollStateChanged(AbsListView absListView, int i) {
+
     }
 
     @Override
@@ -164,12 +155,5 @@ public class ThreadListActivity extends Activity
                          int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if (firstVisibleItem + visibleItemCount >= totalItemCount)
             loadMore();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        Intent intent = new Intent(view.getContext(), PostListActivity.class);
-        intent.putExtra("tid", mListData.get(position).id);
-        startActivity(intent);
     }
 }
