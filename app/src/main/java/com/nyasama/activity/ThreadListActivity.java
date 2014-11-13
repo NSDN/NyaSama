@@ -2,6 +2,7 @@ package com.nyasama.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -114,7 +115,7 @@ public class ThreadListActivity extends Activity
                     JSONObject object = item.object;
                     viewHolder.setText(R.id.thread_title, item.title);
                     viewHolder.setText(R.id.thread_sub,
-                            object.optString("author") + " " + object.optString("lastpost"));
+                            Html.fromHtml(object.optString("author") + " " + object.optString("lastpost")));
                 }
             });
             mListView.setOnScrollListener(this);
