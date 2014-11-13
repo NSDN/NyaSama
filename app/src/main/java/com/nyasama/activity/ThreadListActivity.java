@@ -30,10 +30,6 @@ public class ThreadListActivity extends Activity
     private class Thread {
         public String id;
         public String title;
-        public Thread(String id, String title) {
-            this.id = id;
-            this.title = title;
-        }
     }
 
     private final String TAG = "ThreadList";
@@ -50,7 +46,7 @@ public class ThreadListActivity extends Activity
             Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
                 put("fid", 10);
                 put("tpp", 20);
-                put("page", Math.floor(mThreads.size()/20.0) + 1);
+                put("page", Math.floor(mThreads.size() / 20.0) + 1);
             }}, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
@@ -58,23 +54,26 @@ public class ThreadListActivity extends Activity
                         try {
                             JSONObject var = jsonObject.getJSONObject("Variables");
                             JSONArray threads = var.getJSONArray("forum_threadlist");
-                            for (int i = 0; i < threads.length(); i ++) {
-                                JSONObject thread = threads.getJSONObject(i);
-                                mThreads.add(new Thread(thread.getString("tid"),
-                                        thread.getString("subject")));
+                            for (int i = 0; i < threads.length(); i++) {
+                                final JSONObject thread = threads.getJSONObject(i);
+                                mThreads.add(new Thread() {{
+                                    this.id = thread.getString("tid");
+                                    this.title = thread.getString("subject");
+                                }});
                             }
                             mTotalThreadCount = Integer.parseInt(
                                     var.getJSONObject("forum").getString("threads"));
-                        }
-                        catch (JSONException e) {
-                            throw new RuntimeException(e);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "JsonError: Load Thread List Failed ("+e.getMessage()+")");
+                            Toast.makeText(getApplicationContext(),
+                                    getString(R.string.load_failed_toast),
+                                    Toast.LENGTH_SHORT).show();
                         }
                         mListAdapter.notifyDataSetChanged();
-                    }
-                    else {
+                    } else {
                         Log.e(TAG, "VolleyError: " + jsonObject.optString("volleyError"));
                         Toast.makeText(getApplicationContext(),
-                                "Loading Error. Please retry later",
+                                getString(R.string.network_error_toast),
                                 Toast.LENGTH_SHORT).show();
                     }
                     mIsLoading = false;
@@ -99,11 +98,12 @@ public class ThreadListActivity extends Activity
             mListView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mThreads, R.layout.fragment_thread_item) {
                 @Override
                 public void convert(ViewHolder viewHolder, Thread item) {
-                    ((TextView)viewHolder.getView(R.id.thread_title)).setText(item.title);
-                    ((TextView)viewHolder.getView(R.id.thread_sub)).setText(item.id);
+                    ((TextView) viewHolder.getView(R.id.thread_title)).setText(item.title);
+                    ((TextView) viewHolder.getView(R.id.thread_sub)).setText(item.id);
                 }
             });
             mListView.setOnScrollListener(this);
+            loadMore();
         }
     }
 

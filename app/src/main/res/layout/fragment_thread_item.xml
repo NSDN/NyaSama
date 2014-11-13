@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
-        android:layout_below="@id/thread_list"
+        android:layout_below="@+id/thread_sub"
         android:id="@+id/thread_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
