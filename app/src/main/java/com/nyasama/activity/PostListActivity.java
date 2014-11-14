@@ -82,8 +82,10 @@ public class PostListActivity extends Activity
                                     this.message = post.optString("message");
                                 }});
                             }
-                            mListItemCount = Integer.parseInt(
-                                    var.getJSONObject("thread").getString("allreplies"));
+                            JSONObject thread = var.getJSONObject("thread");
+                            // Note: in x2 there is only "replies"
+                            mListItemCount = Integer.parseInt(thread.has("replies") ?
+                                    thread.getString("replies") : thread.getString("allreplies")) + 1;
                             mListAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");

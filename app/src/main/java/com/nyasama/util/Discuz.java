@@ -19,6 +19,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +30,12 @@ import java.util.Map;
  * utils to handle Discuz data
  */
 public class Discuz {
-    static final String discuzUrl = "http://bbs.discuz.net/api/mobile/index.php";
+    static final String discuzUrl = "http://10.98.106.71:10080/bbs/api/mobile/index.php";
     static final String discuzEnc = "utf-8";
 
     static RequestQueue volleyQueue;
     static {
+        CookieHandler.setDefault(new CookieManager());
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
         volleyQueue = new RequestQueue(cache, network);

@@ -7,4 +7,12 @@
         android:layout_height="match_parent"
         android:footerDividersEnabled="false"
         android:id="@+id/thread_list" />
+    <TextView
+        android:padding="16dp"
+        android:visibility="invisible"
+        android:id="@+id/empty"
+        android:gravity="center"
+        android:text="@string/list_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </FrameLayout>

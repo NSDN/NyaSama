@@ -87,6 +87,7 @@ public class ThreadListActivity extends Activity
                             mListItemCount = Integer.parseInt(
                                     var.getJSONObject("forum").getString("threads"));
                             mListAdapter.notifyDataSetChanged();
+                            Helper.updateVisibility(findViewById(R.id.empty), mListItemCount <= 0);
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
