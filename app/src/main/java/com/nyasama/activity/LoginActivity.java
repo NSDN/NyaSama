@@ -1,8 +1,6 @@
 package com.nyasama.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,17 +14,14 @@ import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
 
 public class LoginActivity extends Activity {
 
     public void doLogin(View view) {
         String username = mUsername.getText().toString();
         String password = mPassword.getText().toString();
-        if (username.equals("") || password.equals("")) {
+        if (username.isEmpty() || password.isEmpty()) {
             mMessage.setText(getString(R.string.login_empty_message));
             return;
         }
@@ -37,19 +32,23 @@ public class LoginActivity extends Activity {
                 if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(LoginActivity.this, R.string.network_error_toast);
                 }
-                else if (!jsonObject.optJSONObject("Message").optString("messagestr").equals("")) {
-                    mMessage.setText(jsonObject.optJSONObject("Message").optString("messagestr"));
-                }
                 else {
-                    try {
-                        // return uid to parent activity
-                        String uid = jsonObject.optJSONObject("Variables").optString("member_uid");
-                        setResult(Integer.parseInt(uid));
+                    JSONObject message = jsonObject.optJSONObject("Message");
+                    String messageval = message.optString("messageval");
+                    if ("login_success".equals(messageval) ||
+                            "location_login_succeed".equals(messageval)) {
+                        try {
+                            // return uid to parent activity
+                            String uid = jsonObject.optJSONObject("Variables").optString("member_uid");
+                            setResult(Integer.parseInt(uid));
+                        }
+                        catch (NumberFormatException e) {
+                            //
+                        }
+                        finish();
                     }
-                    catch (NumberFormatException e) {
-                        //
-                    }
-                    finish();
+                    else
+                        mMessage.setText(message.optString("messagestr"));
                 }
                 mButton.setEnabled(true);
             }

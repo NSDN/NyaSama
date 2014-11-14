@@ -30,6 +30,10 @@
             android:name="com.nyasama.activity.LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
+        <activity
+            android:name="com.nyasama.activity.NewPostActivity"
+            android:label="@string/title_activity_new_post" >
+        </activity>
     </application>
 
 </manifest>

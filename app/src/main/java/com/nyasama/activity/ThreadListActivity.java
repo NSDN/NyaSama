@@ -101,12 +101,11 @@ public class ThreadListActivity extends Activity
         return mIsLoading;
     }
 
-    /*
     public boolean reload() {
         mListData.clear();
+        mListItemCount = Integer.MAX_VALUE;
         return loadMore();
     }
-    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +133,14 @@ public class ThreadListActivity extends Activity
         }
     }
 
+    private final int REQUEST_CODE_NEW_THREAD = 1;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == REQUEST_CODE_NEW_THREAD) {
+            if (resultCode > 0)
+                reload();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -151,6 +158,12 @@ public class ThreadListActivity extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.action_new_post) {
+            startActivityForResult(new Intent(this, NewPostActivity.class) {{
+                putExtra("fid", ThreadListActivity.this.getIntent().getStringExtra("fid"));
+            }}, REQUEST_CODE_NEW_THREAD);
             return true;
         }
         else if (id == android.R.id.home) {
