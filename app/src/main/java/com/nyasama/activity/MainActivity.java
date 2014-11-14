@@ -206,7 +206,9 @@ public class MainActivity extends Activity
             Discuz.execute("forumindex", new HashMap<String, Object>(), new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.optString("volleyError").equals("")) {
+                    if (jsonObject.has("volleyError")) {
+                        Helper.toast(mListView.getContext(), R.string.network_error_toast);
+                    } else{
                         try {
                             JSONObject var = jsonObject.getJSONObject("Variables");
                             JSONArray forumlist = var.getJSONArray("forumlist");
@@ -242,8 +244,6 @@ public class MainActivity extends Activity
                             Helper.toast(mListView.getContext(), R.string.load_failed_toast);
                         }
                     }
-                    else
-                        Helper.toast(mListView.getContext(), R.string.network_error_toast);
                 }
             });
         }
