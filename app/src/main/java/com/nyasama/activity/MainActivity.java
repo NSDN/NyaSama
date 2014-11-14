@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.adapter.CommonListAdapter;
@@ -60,6 +61,28 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        Button btn = (Button) mNavigationDrawerFragment.getView().findViewById(R.id.drawer_login);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivityForResult(intent, REQUEST_CODE_LOGIN);
+            }
+        });
+    }
+
+    private final int REQUEST_CODE_LOGIN = 1;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == REQUEST_CODE_LOGIN) {
+            if (Discuz.sUserInfo != null) {
+                TextView username = (TextView) findViewById(R.id.drawer_username);
+                username.setText(Discuz.sUserInfo.optString("member_username"));
+            }
+            findViewById(R.id.show_logined).setVisibility(resultCode > 0 ? View.VISIBLE : View.GONE);
+            findViewById(R.id.hide_logined).setVisibility(resultCode > 0 ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override
@@ -203,10 +226,10 @@ public class MainActivity extends Activity
             });
         }
         public void loadForums() {
-            Discuz.execute("forumindex", new HashMap<String, Object>(), new Response.Listener<JSONObject>() {
+            Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has("volleyError")) {
+                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(mListView.getContext(), R.string.network_error_toast);
                     } else{
                         try {

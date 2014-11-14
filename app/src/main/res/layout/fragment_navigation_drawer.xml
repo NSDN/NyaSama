@@ -4,14 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#cccc">
+    android:background="#fccc" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="User Actions Here"
-        android:id="@+id/drawer_text" />
+    <LinearLayout
+        android:visibility="gone"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:orientation="vertical"
+        android:id="@+id/show_logined"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/drawer_username" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:id="@+id/hide_logined"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/drawer_login"
+            android:text="@string/drawer_button_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"

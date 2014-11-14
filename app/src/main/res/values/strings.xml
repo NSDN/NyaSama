@@ -16,5 +16,11 @@
     <string name="list_loading_text">Loading</string>
     <string name="title_activity_post_list">PostListActivity</string>
     <string name="list_empty">Nothing Here</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="login_button_text">Login</string>
+    <string name="login_hint_username">User Name</string>
+    <string name="login_hint_password">Password</string>
+    <string name="drawer_button_login">Login</string>
+    <string name="login_empty_message">Username and Password are both required!</string>
 
 </resources>

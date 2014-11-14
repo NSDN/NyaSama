@@ -52,10 +52,10 @@ public class ThreadListActivity extends Activity
                 put("fid", getIntent().getStringExtra("fid"));
                 put("tpp", 20);
                 put("page", Math.round(Math.floor(mListData.size() / 20.0) + 1));
-            }}, new Response.Listener<JSONObject>() {
+            }}, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has("volleyError")) {
+                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(getApplicationContext(), R.string.network_error_toast);
                     } else if (jsonObject.has("Message")) {
                         JSONObject message = jsonObject.optJSONObject("Message");

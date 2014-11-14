@@ -49,10 +49,10 @@ public class PostListActivity extends Activity
                 put("tid", getIntent().getStringExtra("tid"));
                 put("ppp", 10);
                 put("page", Math.round(Math.floor(mListData.size() / 10 + 1)));
-            }}, new Response.Listener<JSONObject>() {
+            }}, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has("volleyError")) {
+                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(getApplicationContext(), R.string.network_error_toast);
                     }
                     else if (jsonObject.has("Message")) {

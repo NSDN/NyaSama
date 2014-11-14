@@ -20,11 +20,15 @@
         </activity>
         <activity
             android:name="com.nyasama.activity.ThreadListActivity"
-            android:label="@string/title_activity_thread_list">
+            android:label="@string/title_activity_thread_list" >
         </activity>
         <activity
             android:name="com.nyasama.activity.PostListActivity"
-            android:label="@string/title_activity_post_list">
+            android:label="@string/title_activity_post_list" >
+        </activity>
+        <activity
+            android:name="com.nyasama.activity.LoginActivity"
+            android:label="@string/title_activity_login" >
         </activity>
     </application>
 

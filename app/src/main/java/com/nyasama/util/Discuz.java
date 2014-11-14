@@ -12,6 +12,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NoCache;
+import com.android.volley.toolbox.StringRequest;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -22,6 +23,7 @@ import org.json.JSONObject;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,16 +32,19 @@ import java.util.Map;
  * utils to handle Discuz data
  */
 public class Discuz {
-    static final String discuzUrl = "http://10.98.106.71:10080/bbs/api/mobile/index.php";
-    static final String discuzEnc = "utf-8";
+    public static String DISCUZ_URL = "http://wls.ofr.me/bbs/api/mobile/index.php";
+    public static String DISCUZ_ENC = "utf-8";
+    public static String VOLLEY_ERROR = "volleyError";
+    public static String sFormHash;
+    public static JSONObject sUserInfo;
 
-    static RequestQueue volleyQueue;
+    static RequestQueue sQueue;
     static {
         CookieHandler.setDefault(new CookieManager());
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
-        volleyQueue = new RequestQueue(cache, network);
-        volleyQueue.start();
+        sQueue = new RequestQueue(cache, network);
+        sQueue.start();
     }
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
@@ -50,8 +55,9 @@ public class Discuz {
     }
 
     public static Request execute(String module,
-                                  Map<String, Object> params,
-                                  final Response.Listener<JSONObject> response) {
+                                  final Map<String, Object> params,
+                                  final Map<String, Object> body,
+                                  final Response.Listener<JSONObject> callback) {
         //
         if (module.equals("forumdisplay")) {
             if (params.get("fid") == null)
@@ -59,13 +65,22 @@ public class Discuz {
         }
         params.put("module", module);
         //
-        Request request =  new JsonObjectRequest(
-            discuzUrl + "?" + URLEncodedUtils.format(map2list(params), discuzEnc),
-            null,
-            new Response.Listener<JSONObject>() {
+        Request request =  new StringRequest(
+            body == null ? Request.Method.GET : Request.Method.POST,
+            DISCUZ_URL + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+            new Response.Listener<String>() {
                 @Override
-                public void onResponse(JSONObject jsonObject) {
-                    response.onResponse(jsonObject);
+                public void onResponse(String response) {
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject = new JSONObject(response);
+                    }
+                    catch (JSONException e) {
+                        //
+                    }
+                    if (jsonObject.optJSONObject("Variables").has("formhash"))
+                        sFormHash = jsonObject.optJSONObject("Variables").optString("formhash");
+                    callback.onResponse(jsonObject);
                 }
             },
             new Response.ErrorListener() {
@@ -75,16 +90,43 @@ public class Discuz {
                     // NOTE: getMessage may return null
                     String msg = volleyError.getMessage();
                     try {
-                        jsonObject.put("volleyError", msg);
+                        jsonObject.put(VOLLEY_ERROR, msg);
                     }
                     catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                     Log.e("VolleyError", msg != null ? msg : "Unknown");
-                    response.onResponse(jsonObject);
+                    callback.onResponse(jsonObject);
                 }
-            });
-        volleyQueue.add(request);
+            }) {
+            @Override
+            protected Map<String, String> getParams() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                for (Map.Entry<String, Object> e : body.entrySet())
+                    params.put(e.getKey().toString(), e.getValue().toString());
+                return params;
+            }
+        };
+        sQueue.add(request);
         return request;
+    }
+
+    public static void login(final String username, final String password,
+                             final Response.Listener<JSONObject> callback) {
+        execute("login", new HashMap<String, Object>() {{
+            put("loginsubmit", "yes");
+            put("loginfield", "auto");
+        }}, new HashMap<String, Object>() {{
+            put("username", username);
+            put("password", password);
+            put("formhash", sFormHash);
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (jsonObject.has("Variables"))
+                    sUserInfo = jsonObject.optJSONObject("Variables");
+                callback.onResponse(jsonObject);
+            }
+        });
     }
 }

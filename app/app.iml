@@ -84,7 +84,6 @@
     <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="library-aar-1.0.0" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
   </component>
 </module>
 
