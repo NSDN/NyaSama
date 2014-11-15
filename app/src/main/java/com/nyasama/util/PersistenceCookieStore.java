@@ -17,23 +17,10 @@ public class PersistenceCookieStore extends InMemoryCookieStore {
 
     private SharedPreferences mPrefs;
 
-    public PersistenceCookieStore(Context context) {
-        mPrefs = context.getSharedPreferences("PersistenceCookiePref", Context.MODE_PRIVATE);
-    }
-
-    public void save() {
-        SharedPreferences.Editor editor = mPrefs.edit();
-        for (URI uri : getURIs()) {
-            Set<String> cookieStrs = new HashSet<String>();
-            for (HttpCookie cookie : get(uri))
-                cookieStrs.add(cookie.toString());
-            editor.putStringSet(uri.toString(), cookieStrs);
-        }
-        editor.apply();
-    }
-
     @SuppressWarnings("unchecked")
-    public void restore() {
+    public PersistenceCookieStore(Context context) {
+        super();
+        mPrefs = context.getSharedPreferences("PersistenceCookiePref", Context.MODE_PRIVATE);
         Map<String, ?> saved = mPrefs.getAll();
         for (Map.Entry<String, ?> entry : saved.entrySet()) {
             URI uri = URI.create(entry.getKey());
@@ -41,5 +28,16 @@ public class PersistenceCookieStore extends InMemoryCookieStore {
                 for (HttpCookie cookie : HttpCookie.parse(cookieStr))
                     add(uri, cookie);
         }
+    }
+
+    @Override
+    public void add(URI uri, HttpCookie cookie) {
+        super.add(uri, cookie);
+        SharedPreferences.Editor editor = mPrefs.edit();
+        Set<String> cookieStrs = new HashSet<String>();
+        for (HttpCookie ck : get(uri))
+            cookieStrs.add(ck.toString());
+        editor.putStringSet(uri.toString(), cookieStrs);
+        editor.apply();
     }
 }

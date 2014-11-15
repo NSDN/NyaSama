@@ -12,6 +12,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.StringRequest;
+import com.nyasama.ThisApp;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -19,6 +20,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +46,7 @@ public class Discuz {
     public static String sUsername;
 
     static RequestQueue sQueue;
+    static PersistenceCookieStore sCookie;
     static {
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -60,6 +65,11 @@ public class Discuz {
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
                                   final Response.Listener<JSONObject> callback) {
+        //
+        if (sCookie == null) {
+            sCookie = new PersistenceCookieStore(ThisApp.getContext());
+            CookieHandler.setDefault(new CookieManager(sCookie, CookiePolicy.ACCEPT_ALL));
+        }
         //
         if (module.equals("forumdisplay")) {
             if (params.get("fid") == null)

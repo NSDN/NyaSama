@@ -25,15 +25,11 @@ import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
-import com.nyasama.util.PersistenceCookieStore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,8 +46,6 @@ public class MainActivity extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-
-    private PersistenceCookieStore mCookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,17 +72,6 @@ public class MainActivity extends Activity
                 }
             });
         }
-
-        mCookie = new PersistenceCookieStore(this);
-        mCookie.restore();
-        CookieHandler.setDefault(
-                new CookieManager(mCookie, CookiePolicy.ACCEPT_ALL));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mCookie.save();
     }
 
     @Override
