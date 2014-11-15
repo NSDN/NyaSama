@@ -17,6 +17,6 @@ public class Helper {
     }
     public static void updateVisibility(View view, boolean show) {
         if (view != null)
-            view.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+            view.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
