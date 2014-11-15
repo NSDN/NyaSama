@@ -78,9 +78,10 @@ public class NewPostActivity extends Activity
                                     .show();
                         }
                     }
-                    catch (JSONException e) { }
-                    catch (NullPointerException e) { }
-                    catch (NumberFormatException e) { }
+                    // TODO: remove these
+                    catch (JSONException e) { /**/ }
+                    catch (NullPointerException e) { /**/ }
+                    catch (NumberFormatException e) { /**/ }
                 }
                 mPostButton.setEnabled(true);
             }

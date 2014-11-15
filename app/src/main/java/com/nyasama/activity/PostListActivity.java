@@ -75,8 +75,9 @@ public class PostListActivity extends Activity
                                     })
                                     .show();
                         }
-                        catch (JSONException e) { }
-                        catch (NullPointerException e) { }
+                        // TODO: remove these
+                        catch (JSONException e) { /**/ }
+                        catch (NullPointerException e) { /**/ }
                     }
                     else {
                         try {
@@ -100,7 +101,8 @@ public class PostListActivity extends Activity
                             Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
                         }
-                        catch (NullPointerException e) { }
+                        // TODO: remove these
+                        catch (NullPointerException e) { /**/ }
                     }
                     Helper.updateVisibility(findViewById(R.id.loading), mIsLoading = false);
                 }
@@ -168,25 +170,21 @@ public class PostListActivity extends Activity
         setContentView(R.layout.activity_post_list);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
-        if (savedInstanceState == null) {
-            ListView listView = (ListView) findViewById(R.id.post_list);
 
-            View footer = LayoutInflater.from(this)
-                    .inflate(R.layout.fragment_list_loading, listView, false);
-            listView.addFooterView(footer, null, false);
+        ListView listView = (ListView) findViewById(R.id.post_list);
+        listView.addFooterView(LayoutInflater.from(this)
+                .inflate(R.layout.fragment_list_loading, listView, false), false, false);
+        listView.setAdapter(mListAdapter = new CommonListAdapter<Post>(mListData, R.layout.fragment_post_item) {
+            @Override
+            public void convert(ViewHolder viewHolder, Post item) {
+                viewHolder.setText(R.id.author, item.author);
+                viewHolder.setText(R.id.message, Html.fromHtml(item.message));
+            }
+        });
+        listView.setOnScrollListener(this);
+        listView.setOnItemClickListener(this);
 
-            listView.setAdapter(mListAdapter = new CommonListAdapter<Post>(mListData, R.layout.fragment_post_item) {
-                @Override
-                public void convert(ViewHolder viewHolder, Post item) {
-                    viewHolder.setText(R.id.author, item.author);
-                    viewHolder.setText(R.id.message, Html.fromHtml(item.message));
-                }
-            });
-            listView.setOnScrollListener(this);
-            listView.setOnItemClickListener(this);
-
-            loadMore();
-        }
+        loadMore();
     }
 
     private final int REQUEST_CODE_REPLY = 1;

@@ -73,8 +73,9 @@ public class ThreadListActivity extends Activity
                                     })
                                     .show();
                         }
-                        catch (JSONException e) { }
-                        catch (NullPointerException e) { }
+                        // TODO: remove these
+                        catch (JSONException e) { /**/ }
+                        catch (NullPointerException e) { /**/ }
                     } else {
                         try {
                             JSONObject var = data.getJSONObject("Variables");
@@ -98,7 +99,8 @@ public class ThreadListActivity extends Activity
                             Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
                         }
-                        catch (NullPointerException e) { }
+                        // TODO: reomve these
+                        catch (NullPointerException e) { /**/ }
                     }
                     Helper.updateVisibility(findViewById(R.id.loading), mIsLoading = false);
                 }
@@ -120,25 +122,21 @@ public class ThreadListActivity extends Activity
         setContentView(R.layout.activity_thread_list);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
-        if (savedInstanceState == null) {
-            ListView listView = (ListView) findViewById(R.id.thread_list);
 
-            View footer = LayoutInflater.from(this)
-                    .inflate(R.layout.fragment_list_loading, listView, false);
-            listView.addFooterView(footer, null, false);
+        ListView listView = (ListView) findViewById(R.id.thread_list);
+        listView.addFooterView(LayoutInflater.from(this)
+                .inflate(R.layout.fragment_list_loading, listView, false), null, false);
+        listView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mListData, R.layout.fragment_thread_item) {
+            @Override
+            public void convert(ViewHolder viewHolder, Thread item) {
+                viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+                viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
+            }
+        });
+        listView.setOnScrollListener(this);
+        listView.setOnItemClickListener(this);
 
-            listView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mListData, R.layout.fragment_thread_item) {
-                @Override
-                public void convert(ViewHolder viewHolder, Thread item) {
-                    viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-                    viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
-                }
-            });
-            listView.setOnScrollListener(this);
-            listView.setOnItemClickListener(this);
-
-            loadMore();
-        }
+        loadMore();
     }
 
     private final int REQUEST_CODE_NEW_THREAD = 1;

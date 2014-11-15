@@ -47,9 +47,10 @@ public class LoginActivity extends Activity {
                         else
                             mMessage.setText(message.optString("messagestr"));
                     }
-                    catch (JSONException e) { }
-                    catch (NullPointerException e) { }
-                    catch (NumberFormatException e) { }
+                    // TODO: remove these
+                    catch (JSONException e) { /**/ }
+                    catch (NullPointerException e) { /**/ }
+                    catch (NumberFormatException e) { /**/ }
                 }
                 mButton.setEnabled(true);
             }

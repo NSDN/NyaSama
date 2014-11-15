@@ -1,6 +1,7 @@
 package com.nyasama.util;
 
 import android.util.Log;
+import android.webkit.CookieSyncManager;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -81,9 +82,11 @@ public class Discuz {
                     catch (JSONException e) {
                         //
                     }
-                    if (data.optJSONObject("Variables").has("formhash"))
-                        sFormHash = data.optJSONObject("Variables").optString("formhash");
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var != null && var.has("formhash"))
+                        sFormHash = var.optString("formhash");
                     callback.onResponse(data);
+                    CookieSyncManager.getInstance().sync();
                 }
             },
             new Response.ErrorListener() {

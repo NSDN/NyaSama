@@ -271,7 +271,8 @@ public class MainActivity extends Activity
                             Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
                             Helper.toast(mListView.getContext(), R.string.load_failed_toast);
                         }
-                        catch (NullPointerException e) { }
+                        // TODO: remove these
+                        catch (NullPointerException e) { /**/ }
                     }
                 }
             });
