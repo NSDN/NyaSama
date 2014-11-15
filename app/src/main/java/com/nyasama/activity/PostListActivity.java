@@ -3,6 +3,7 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -11,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.android.volley.Response;
@@ -26,9 +29,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class PostListActivity extends Activity
-    implements AbsListView.OnScrollListener {
+    implements AbsListView.OnScrollListener, AbsListView.OnItemClickListener {
 
     private final String TAG = "PostList";
 
@@ -87,6 +91,7 @@ public class PostListActivity extends Activity
                             mListItemCount = Integer.parseInt(thread.has("replies") ?
                                     thread.getString("replies") : thread.getString("allreplies")) + 1;
                             mListAdapter.notifyDataSetChanged();
+                            setTitle(thread.getString("subject"));
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
@@ -100,17 +105,70 @@ public class PostListActivity extends Activity
         return mIsLoading;
     }
 
+    public boolean reload() {
+        mListData.clear();
+        mListItemCount = Integer.MAX_VALUE;
+        return loadMore();
+    }
+
+    public void replyThread(final String text) {
+        if (!text.isEmpty()) {
+            Discuz.execute("sendreply", new HashMap<String, Object>() {{
+                put("tid", getIntent().getStringExtra("tid"));
+                put("replysubmit", "yes");
+            }}, new HashMap<String, Object>() {{
+                put("message", text);
+            }}, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject jsonObject) {
+                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+                        Helper.toast(PostListActivity.this, R.string.network_error_toast);
+                    }
+                    else {
+                        JSONObject message = jsonObject.optJSONObject("Message");
+                        String messageval = message.optString("messageval");
+                        if ("post_reply_succeed".equals(messageval)) {
+                            reload();
+                        }
+                        else
+                            Helper.toast(PostListActivity.this, message.optString("messagestr"));
+                    }
+                }
+            });
+        }
+    }
+
+    public void quickReply() {
+        final EditText input = new EditText(this);
+        new AlertDialog.Builder(this)
+                .setTitle("QuickReply")
+                .setMessage("Type Something")
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        replyThread(input.getText().toString());
+                    }
+                }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //
+            }
+        }).show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_list);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null) {
             ListView listView = (ListView) findViewById(R.id.post_list);
 
             View footer = LayoutInflater.from(this)
-                    .inflate(R.layout.fragment_list_loading, null, false);
-            listView.addFooterView(footer);
+                    .inflate(R.layout.fragment_list_loading, listView, false);
+            listView.addFooterView(footer, null, false);
 
             listView.setAdapter(mListAdapter = new CommonListAdapter<Post>(mListData, R.layout.fragment_post_item) {
                 @Override
@@ -120,11 +178,20 @@ public class PostListActivity extends Activity
                 }
             });
             listView.setOnScrollListener(this);
+            listView.setOnItemClickListener(this);
 
             loadMore();
         }
     }
 
+    private final int REQUEST_CODE_REPLY = 1;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == REQUEST_CODE_REPLY) {
+            if (resultCode > 0)
+                reload();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -142,6 +209,10 @@ public class PostListActivity extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.action_reply) {
+            quickReply();
             return true;
         }
         else if (id == android.R.id.home) {
@@ -162,5 +233,36 @@ public class PostListActivity extends Activity
                          int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if (firstVisibleItem + visibleItemCount >= totalItemCount)
             loadMore();
+    }
+
+    private Pattern patt1 = Pattern.compile("\\<span style=\"display:none\"\\>.*?\\</span\\>", Pattern.DOTALL);
+    private Pattern patt2 = Pattern.compile("\\<.+quote\\>.+div\\>", Pattern.DOTALL);
+    private Pattern patt3 = Pattern.compile("<[^<>]*>", Pattern.DOTALL);
+    private String getTrimstr(Post post, String tid) {
+        // Note: see Discuz source net/discuz/source/PostSender.java
+        String message = post.message;
+        message = patt1.matcher(message).replaceAll("");
+        message = Html.fromHtml(message).toString();
+        message = patt2.matcher(message).replaceAll("");
+        message = patt3.matcher(message).replaceAll("");
+        return "[quote]"+
+            "[size=2]"+
+                "[color=#999999]"+post.author+" at "+" <some time> "+"[/color] "+
+                "[url=forum.php?mod=redirect&goto=findpost&pid="+post.id+"&ptid="+tid+
+                    "][img]static/image/common/back.gif[/img][/url]"+
+            "[/size]\n"+
+            message+
+        "[/quote]";
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, final int position, long l) {
+        final Post post = mListData.get(position);
+        final String tid = getIntent().getStringExtra("tid");
+        startActivityForResult(new Intent(this, NewPostActivity.class) {{
+            putExtra("tid", tid);
+            putExtra("thread_title", "Re: #" + position + " (" + post.author + ")");
+            putExtra("notice_trimstr", getTrimstr(post, tid));
+        }}, REQUEST_CODE_REPLY);
     }
 }

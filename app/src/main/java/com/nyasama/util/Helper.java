@@ -9,8 +9,11 @@ import android.widget.Toast;
  *
  */
 public class Helper {
+    public static void toast(Context context, String text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    }
     public static void toast(Context context, int stringId) {
-        Toast.makeText(context, context.getString(stringId), Toast.LENGTH_SHORT).show();
+        toast(context, context.getString(stringId));
     }
     public static void updateVisibility(View view, boolean show) {
         if (view != null)

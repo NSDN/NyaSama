@@ -84,9 +84,11 @@ public class ThreadListActivity extends Activity
                                             thread.optString("lastpost");
                                 }});
                             }
+                            JSONObject forum = var.getJSONObject("forum");
                             mListItemCount = Integer.parseInt(
-                                    var.getJSONObject("forum").getString("threads"));
+                                    forum.getString("threads"));
                             mListAdapter.notifyDataSetChanged();
+                            setTitle(forum.getString("name"));
                             Helper.updateVisibility(findViewById(R.id.empty), mListItemCount <= 0);
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
@@ -111,13 +113,14 @@ public class ThreadListActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thread_list);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null) {
             ListView listView = (ListView) findViewById(R.id.thread_list);
 
             View footer = LayoutInflater.from(this)
-                    .inflate(R.layout.fragment_list_loading, null, false);
-            listView.addFooterView(footer);
+                    .inflate(R.layout.fragment_list_loading, listView, false);
+            listView.addFooterView(footer, null, false);
 
             listView.setAdapter(mListAdapter = new CommonListAdapter<Thread>(mListData, R.layout.fragment_thread_item) {
                 @Override

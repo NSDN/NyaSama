@@ -26,6 +26,7 @@ public class NewPostActivity extends Activity
     public void doPost(View view) {
         final String title = mTitle.getText().toString();
         final String content = mContent.getText().toString();
+        final String noticetrimstr = getIntent().getStringExtra("notice_trimstr");
         if (title.isEmpty() || content.isEmpty()) {
             Helper.toast(this, R.string.post_content_empty_message);
             return;
@@ -37,7 +38,7 @@ public class NewPostActivity extends Activity
         if (fid == null && tid == null)
             throw new RuntimeException("fid or tid is required!");
 
-        Discuz.execute(fid != null ? "newthread" : "sendreplay", new HashMap<String, Object>() {{
+        Discuz.execute(fid != null ? "newthread" : "sendreply", new HashMap<String, Object>() {{
             if (fid != null) {
                 put("fid", fid);
                 put("topicsubmit", "yes");
@@ -47,9 +48,11 @@ public class NewPostActivity extends Activity
                 put("replysubmit", "yes");
             }
         }}, new HashMap<String, Object>() {{
+            put("message", content);
             if (fid != null)
                 put("subject", title);
-            put("message", content);
+            else if (noticetrimstr != null)
+                put("noticetrimstr", noticetrimstr);
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
@@ -59,7 +62,7 @@ public class NewPostActivity extends Activity
                 else {
                     JSONObject message = jsonObject.optJSONObject("Message");
                     String messageval = message.optString("messageval");
-                    if ("post_replay_success".equals(messageval) ||
+                    if ("post_reply_succeed".equals(messageval) ||
                             "post_newthread_succeed".equals(messageval)) {
                         try {
                             // return tid to parent activity
@@ -92,7 +95,8 @@ public class NewPostActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_post);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mTitle = (EditText) findViewById(R.id.input_title);
         mContent = (EditText) findViewById(R.id.input_content);
@@ -146,7 +150,8 @@ public class NewPostActivity extends Activity
 
     @Override
     public void afterTextChanged(Editable editable) {
-        mPostButton.setEnabled(!(mTitle.getText().toString().isEmpty() ||
-                mContent.getText().toString().isEmpty()));
+        if (mPostButton != null)
+            mPostButton.setEnabled(!(mTitle.getText().toString().isEmpty() ||
+                    mContent.getText().toString().isEmpty()));
     }
 }

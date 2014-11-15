@@ -29,5 +29,6 @@
     <string name="post_content_empty_message">Did you forget anything?</string>
     <string name="action_new_post">New Post</string>
     <string name="action_post_now">Post Now</string>
+    <string name="action_reply">Reply</string>
 
 </resources>
