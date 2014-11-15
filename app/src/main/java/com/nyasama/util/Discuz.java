@@ -1,7 +1,6 @@
 package com.nyasama.util;
 
 import android.util.Log;
-import android.webkit.CookieSyncManager;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -20,8 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +32,17 @@ public class Discuz {
     public static String DISCUZ_URL = "http://10.98.106.71:10080/bbs/api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
+
+    public static int REQUEST_CODE_LOGIN = 1;
+    public static int REQUEST_CODE_NEW_THREAD = 2;
+    public static int REQUEST_CODE_REPLY = 3;
+
     public static String sFormHash;
-    public static JSONObject sUserInfo;
+    public static String sAuth;
+    public static String sUsername;
 
     static RequestQueue sQueue;
     static {
-        CookieHandler.setDefault(new CookieManager());
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
         sQueue = new RequestQueue(cache, network);
@@ -83,10 +85,12 @@ public class Discuz {
                         //
                     }
                     JSONObject var = data.optJSONObject("Variables");
-                    if (var != null && var.has("formhash"))
-                        sFormHash = var.optString("formhash");
+                    if (var != null) {
+                        sFormHash = var.optString("formhash", "");
+                        sUsername = var.optString("member_username", "");
+                        if (!var.isNull("auth")) sAuth = var.optString("auth");
+                    }
                     callback.onResponse(data);
-                    CookieSyncManager.getInstance().sync();
                 }
             },
             new Response.ErrorListener() {
@@ -127,14 +131,7 @@ public class Discuz {
             put("username", username);
             put("password", password);
             put("formhash", sFormHash);
-        }}, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject data) {
-                if (data.has("Variables"))
-                    sUserInfo = data.optJSONObject("Variables");
-                callback.onResponse(data);
-            }
-        });
+        }}, callback);
     }
 
 }

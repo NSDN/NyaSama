@@ -1,6 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,8 +21,8 @@ import org.json.JSONObject;
 public class LoginActivity extends Activity {
 
     public void doLogin(View view) {
-        String username = mUsername.getText().toString();
-        String password = mPassword.getText().toString();
+        final String username = mUsername.getText().toString();
+        final String password = mPassword.getText().toString();
         if (username.isEmpty() || password.isEmpty()) {
             mMessage.setText(getString(R.string.login_empty_message));
             return;
@@ -51,6 +52,10 @@ public class LoginActivity extends Activity {
                     catch (JSONException e) { /**/ }
                     catch (NullPointerException e) { /**/ }
                     catch (NumberFormatException e) { /**/ }
+
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    editor.putString("username", username);
+                    editor.apply();
                 }
                 mButton.setEnabled(true);
             }
@@ -62,6 +67,7 @@ public class LoginActivity extends Activity {
     private EditText mPassword;
     private Button mButton;
     private TextView mMessage;
+    private SharedPreferences mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,9 @@ public class LoginActivity extends Activity {
         mPassword = (EditText) findViewById(R.id.password);
         mButton = (Button) findViewById(R.id.login_button);
         mMessage = (TextView) findViewById(R.id.message);
+
+        mPrefs = getSharedPreferences("login_info", MODE_PRIVATE);
+        mUsername.setText(mPrefs.getString("username", ""));
     }
 
 

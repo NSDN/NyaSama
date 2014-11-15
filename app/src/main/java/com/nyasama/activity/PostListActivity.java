@@ -187,10 +187,9 @@ public class PostListActivity extends Activity
         loadMore();
     }
 
-    private final int REQUEST_CODE_REPLY = 1;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_CODE_REPLY) {
+        if (requestCode == Discuz.REQUEST_CODE_REPLY) {
             if (resultCode > 0)
                 reload();
         }
@@ -266,6 +265,6 @@ public class PostListActivity extends Activity
             putExtra("tid", tid);
             putExtra("thread_title", "Re: #" + position + " (" + post.author + ")");
             putExtra("notice_trimstr", getTrimstr(post, tid));
-        }}, REQUEST_CODE_REPLY);
+        }}, Discuz.REQUEST_CODE_REPLY);
     }
 }

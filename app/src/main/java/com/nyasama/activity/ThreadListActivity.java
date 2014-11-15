@@ -139,10 +139,9 @@ public class ThreadListActivity extends Activity
         loadMore();
     }
 
-    private final int REQUEST_CODE_NEW_THREAD = 1;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_CODE_NEW_THREAD) {
+        if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
             if (resultCode > 0)
                 reload();
         }
@@ -169,7 +168,7 @@ public class ThreadListActivity extends Activity
         else if (id == R.id.action_new_post) {
             startActivityForResult(new Intent(this, NewPostActivity.class) {{
                 putExtra("fid", ThreadListActivity.this.getIntent().getStringExtra("fid"));
-            }}, REQUEST_CODE_NEW_THREAD);
+            }}, Discuz.REQUEST_CODE_NEW_THREAD);
             return true;
         }
         else if (id == android.R.id.home) {

@@ -25,15 +25,18 @@ import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.PersistenceCookieStore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -47,6 +50,8 @@ public class MainActivity extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
+    private PersistenceCookieStore mCookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,23 +74,28 @@ public class MainActivity extends Activity
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivityForResult(intent, REQUEST_CODE_LOGIN);
+                    startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
                 }
             });
         }
+
+        mCookie = new PersistenceCookieStore(this);
+        mCookie.restore();
+        CookieHandler.setDefault(
+                new CookieManager(mCookie, CookiePolicy.ACCEPT_ALL));
     }
 
-    private final int REQUEST_CODE_LOGIN = 1;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mCookie.save();
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_CODE_LOGIN) {
-            if (Discuz.sUserInfo != null) {
-                TextView username = (TextView) findViewById(R.id.drawer_username);
-                username.setText(Discuz.sUserInfo.optString("member_username"));
-            }
-            findViewById(R.id.show_logined).setVisibility(resultCode > 0 ? View.VISIBLE : View.GONE);
-            findViewById(R.id.hide_logined).setVisibility(resultCode > 0 ? View.GONE : View.VISIBLE);
-        }
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == Discuz.REQUEST_CODE_LOGIN)
+            updateUserInfo();
     }
 
     @Override
@@ -149,6 +159,15 @@ public class MainActivity extends Activity
         return super.onOptionsItemSelected(item);
     }
 
+    public void updateUserInfo() {
+        if (Discuz.sAuth != null && Discuz.sUsername != null) {
+            TextView username = (TextView) findViewById(R.id.drawer_username);
+            username.setText(Discuz.sUsername);
+        }
+        findViewById(R.id.show_logined).setVisibility(Discuz.sAuth != null ? View.VISIBLE : View.GONE);
+        findViewById(R.id.hide_logined).setVisibility(Discuz.sAuth != null ? View.GONE : View.VISIBLE);
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -158,6 +177,7 @@ public class MainActivity extends Activity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private MainActivity mActivity;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -188,7 +208,8 @@ public class MainActivity extends Activity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
+            mActivity = (MainActivity) activity;
+            mActivity.onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
@@ -266,6 +287,7 @@ public class MainActivity extends Activity
                             }
 
                             displayForums();
+                            mActivity.updateUserInfo();
                         }
                         catch (JSONException e) {
                             Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");

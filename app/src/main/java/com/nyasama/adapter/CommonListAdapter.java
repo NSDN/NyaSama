@@ -39,6 +39,7 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext())
