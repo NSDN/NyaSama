@@ -16,6 +16,7 @@ import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -55,31 +56,31 @@ public class NewPostActivity extends Activity
                 put("noticetrimstr", noticetrimstr);
         }}, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(NewPostActivity.this, R.string.network_error_toast);
                 }
                 else {
-                    JSONObject message = jsonObject.optJSONObject("Message");
-                    String messageval = message.optString("messageval");
-                    if ("post_reply_succeed".equals(messageval) ||
-                            "post_newthread_succeed".equals(messageval)) {
-                        try {
-                            // return tid to parent activity
-                            String tid = jsonObject.optJSONObject("Variables").optString("tid");
-                            setResult(Integer.parseInt(tid));
+                    try {
+                        JSONObject message = data.getJSONObject("Message");
+                        String messageval = message.getString("messageval");
+                        if ("post_reply_succeed".equals(messageval) ||
+                                "post_newthread_succeed".equals(messageval)) {
+                                // return tid to parent activity
+                                String tid = data.getJSONObject("Variables").getString("tid");
+                                setResult(Integer.parseInt(tid));
+                            finish();
                         }
-                        catch (NumberFormatException e) {
-                            //
+                        else {
+                            new AlertDialog.Builder(NewPostActivity.this)
+                                    .setTitle("There is sth wrong...")
+                                    .setMessage(message.getString("messagestr"))
+                                    .show();
                         }
-                        finish();
                     }
-                    else {
-                        new AlertDialog.Builder(NewPostActivity.this)
-                                .setTitle("There is sth wrong...")
-                                .setMessage(message.optString("messagestr"))
-                                .show();
-                    }
+                    catch (JSONException e) { }
+                    catch (NullPointerException e) { }
+                    catch (NumberFormatException e) { }
                 }
                 mPostButton.setEnabled(true);
             }

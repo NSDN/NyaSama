@@ -14,6 +14,7 @@ import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LoginActivity extends Activity {
@@ -28,27 +29,27 @@ public class LoginActivity extends Activity {
 
         Discuz.login(username, password, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(LoginActivity.this, R.string.network_error_toast);
                 }
                 else {
-                    JSONObject message = jsonObject.optJSONObject("Message");
-                    String messageval = message.optString("messageval");
-                    if ("login_success".equals(messageval) ||
-                            "location_login_succeed".equals(messageval)) {
-                        try {
+                    try {
+                        JSONObject message = data.getJSONObject("Message");
+                        String messageval = message.getString("messageval");
+                        if ("login_success".equals(messageval) ||
+                                "location_login_succeed".equals(messageval)) {
                             // return uid to parent activity
-                            String uid = jsonObject.optJSONObject("Variables").optString("member_uid");
+                            String uid = data.getJSONObject("Variables").getString("member_uid");
                             setResult(Integer.parseInt(uid));
+                            finish();
                         }
-                        catch (NumberFormatException e) {
-                            //
-                        }
-                        finish();
+                        else
+                            mMessage.setText(message.optString("messagestr"));
                     }
-                    else
-                        mMessage.setText(message.optString("messagestr"));
+                    catch (JSONException e) { }
+                    catch (NullPointerException e) { }
+                    catch (NumberFormatException e) { }
                 }
                 mButton.setEnabled(true);
             }
@@ -65,7 +66,8 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mUsername = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);

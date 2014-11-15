@@ -62,14 +62,17 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        Button btn = (Button) mNavigationDrawerFragment.getView().findViewById(R.id.drawer_login);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivityForResult(intent, REQUEST_CODE_LOGIN);
-            }
-        });
+        View view = mNavigationDrawerFragment.getView();
+        if (view != null) {
+            Button btn = (Button) view.findViewById(R.id.drawer_login);
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivityForResult(intent, REQUEST_CODE_LOGIN);
+                }
+            });
+        }
     }
 
     private final int REQUEST_CODE_LOGIN = 1;
@@ -110,9 +113,11 @@ public class MainActivity extends Activity
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        if (actionBar != null) {
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle(mTitle);
+        }
     }
 
 
@@ -228,12 +233,12 @@ public class MainActivity extends Activity
         public void loadForums() {
             Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
                 @Override
-                public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+                public void onResponse(JSONObject data) {
+                    if (data.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(mListView.getContext(), R.string.network_error_toast);
                     } else{
                         try {
-                            JSONObject var = jsonObject.getJSONObject("Variables");
+                            JSONObject var = data.getJSONObject("Variables");
                             JSONArray forumlist = var.getJSONArray("forumlist");
                             final JSONObject forums = new JSONObject();
                             for (int i = 0; i < forumlist.length(); i ++) {
@@ -266,6 +271,7 @@ public class MainActivity extends Activity
                             Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
                             Helper.toast(mListView.getContext(), R.string.load_failed_toast);
                         }
+                        catch (NullPointerException e) { }
                     }
                 }
             });

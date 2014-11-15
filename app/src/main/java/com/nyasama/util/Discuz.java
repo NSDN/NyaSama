@@ -74,39 +74,40 @@ public class Discuz {
             new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    JSONObject jsonObject = new JSONObject();
+                    JSONObject data = new JSONObject();
                     try {
-                        jsonObject = new JSONObject(response);
+                        data = new JSONObject(response);
                     }
                     catch (JSONException e) {
                         //
                     }
-                    if (jsonObject.optJSONObject("Variables").has("formhash"))
-                        sFormHash = jsonObject.optJSONObject("Variables").optString("formhash");
-                    callback.onResponse(jsonObject);
+                    if (data.optJSONObject("Variables").has("formhash"))
+                        sFormHash = data.optJSONObject("Variables").optString("formhash");
+                    callback.onResponse(data);
                 }
             },
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    JSONObject jsonObject = new JSONObject();
+                    JSONObject data = new JSONObject();
                     // NOTE: getMessage may return null
                     String msg = volleyError.getMessage();
                     try {
-                        jsonObject.put(VOLLEY_ERROR, msg);
+                        data.put(VOLLEY_ERROR, msg);
                     }
                     catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                     Log.e("VolleyError", msg != null ? msg : "Unknown");
-                    callback.onResponse(jsonObject);
+                    callback.onResponse(data);
                 }
             }) {
             @Override
             protected Map<String, String> getParams() {
                 HashMap<String, String> params = new HashMap<String, String>();
-                for (Map.Entry<String, Object> e : body.entrySet())
-                    params.put(e.getKey(), e.getValue().toString());
+                if (body != null)
+                    for (Map.Entry<String, Object> e : body.entrySet())
+                        params.put(e.getKey(), e.getValue().toString());
                 return params;
             }
         };
@@ -125,19 +126,12 @@ public class Discuz {
             put("formhash", sFormHash);
         }}, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (jsonObject.has("Variables"))
-                    sUserInfo = jsonObject.optJSONObject("Variables");
-                callback.onResponse(jsonObject);
+            public void onResponse(JSONObject data) {
+                if (data.has("Variables"))
+                    sUserInfo = data.optJSONObject("Variables");
+                callback.onResponse(data);
             }
         });
     }
 
-    static {
-        login("admin", "mdd9xx950", new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-            }
-        });
-    }
 }

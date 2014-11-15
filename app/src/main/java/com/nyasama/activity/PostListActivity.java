@@ -55,28 +55,32 @@ public class PostListActivity extends Activity
                 put("page", Math.round(Math.floor(mListData.size() / 10 + 1)));
             }}, null, new Response.Listener<JSONObject>() {
                 @Override
-                public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+                public void onResponse(JSONObject data) {
+                    if (data.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(getApplicationContext(), R.string.network_error_toast);
                     }
-                    else if (jsonObject.has("Message")) {
-                        JSONObject message = jsonObject.optJSONObject("Message");
-                        mListData.clear();
-                        mListItemCount = 0;
-                        new AlertDialog.Builder(PostListActivity.this)
-                                .setTitle("There is sth wrong...")
-                                .setMessage(message.optString("messagestr"))
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        finish();
-                                    }
-                                })
-                                .show();
+                    else if (data.has("Message")) {
+                        try {
+                            JSONObject message = data.getJSONObject("Message");
+                            mListData.clear();
+                            mListItemCount = 0;
+                            new AlertDialog.Builder(PostListActivity.this)
+                                    .setTitle("There is sth wrong...")
+                                    .setMessage(message.getString("messagestr"))
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            finish();
+                                        }
+                                    })
+                                    .show();
+                        }
+                        catch (JSONException e) { }
+                        catch (NullPointerException e) { }
                     }
                     else {
                         try {
-                            JSONObject var = jsonObject.getJSONObject("Variables");
+                            JSONObject var = data.getJSONObject("Variables");
                             JSONArray postlist = var.getJSONArray("postlist");
                             for (int i = 0; i < postlist.length(); i ++) {
                                 final JSONObject post = postlist.getJSONObject(i);
@@ -96,6 +100,7 @@ public class PostListActivity extends Activity
                             Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                             Helper.toast(getApplicationContext(), R.string.load_failed_toast);
                         }
+                        catch (NullPointerException e) { }
                     }
                     Helper.updateVisibility(findViewById(R.id.loading), mIsLoading = false);
                 }
@@ -120,12 +125,12 @@ public class PostListActivity extends Activity
                 put("message", text);
             }}, new Response.Listener<JSONObject>() {
                 @Override
-                public void onResponse(JSONObject jsonObject) {
-                    if (jsonObject.has(Discuz.VOLLEY_ERROR)) {
+                public void onResponse(JSONObject data) {
+                    if (data.has(Discuz.VOLLEY_ERROR)) {
                         Helper.toast(PostListActivity.this, R.string.network_error_toast);
                     }
                     else {
-                        JSONObject message = jsonObject.optJSONObject("Message");
+                        JSONObject message = data.optJSONObject("Message");
                         String messageval = message.optString("messageval");
                         if ("post_reply_succeed".equals(messageval)) {
                             reload();
