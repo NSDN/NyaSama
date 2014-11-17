@@ -33,7 +33,7 @@ import java.util.Map;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://10.98.106.71:10080/bbs/api/mobile/index.php";
+    public static String DISCUZ_URL = "http://wls.ofr.me/bbs/api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
 

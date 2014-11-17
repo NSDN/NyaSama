@@ -25,6 +25,8 @@ import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.umeng.message.PushAgent;
+import com.umeng.message.UmengRegistrar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,6 +74,10 @@ public class MainActivity extends Activity
                 }
             });
         }
+
+        PushAgent mPushAgent = PushAgent.getInstance(this);
+        mPushAgent.enable();
+        Log.d("DEVICETOKEN", UmengRegistrar.getRegistrationId(this));
     }
 
     @Override
