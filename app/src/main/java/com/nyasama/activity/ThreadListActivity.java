@@ -43,15 +43,20 @@ public class ThreadListActivity extends Activity
 
     private CommonListAdapter<Thread> mListAdapter;
     private List<Thread> mListData = new ArrayList<Thread>();
+    private int mPageSize = 10;
     private int mListItemCount = Integer.MAX_VALUE;
     private boolean mIsLoading = false;
 
     public boolean loadMore() {
-        if (mListData.size() < mListItemCount && !mIsLoading) {
+        final int loadPage = (int)Math.round(Math.floor(mListData.size() / mPageSize));
+        final int loadIndex = loadPage * mPageSize;
+        final int currentSize = mListData.size();
+
+        if (currentSize < mListItemCount && !mIsLoading) {
             Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
                 put("fid", getIntent().getStringExtra("fid"));
-                put("tpp", 20);
-                put("page", Math.round(Math.floor(mListData.size() / 20.0) + 1));
+                put("tpp", mPageSize);
+                put("page", loadPage + 1);
             }}, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject data) {
@@ -77,6 +82,9 @@ public class ThreadListActivity extends Activity
                         catch (JSONException e) { /**/ }
                         catch (NullPointerException e) { /**/ }
                     } else {
+                        // remove possible duplicated items
+                        if (loadIndex < currentSize)
+                            mListData.subList(loadIndex, currentSize).clear();
                         try {
                             JSONObject var = data.getJSONObject("Variables");
                             JSONArray threads = var.getJSONArray("forum_threadlist");
@@ -110,9 +118,10 @@ public class ThreadListActivity extends Activity
         return mIsLoading;
     }
 
-    public boolean reload() {
+    public boolean reloadAll() {
         mListData.clear();
         mListItemCount = Integer.MAX_VALUE;
+        mListAdapter.notifyDataSetChanged();
         return loadMore();
     }
 
@@ -143,7 +152,7 @@ public class ThreadListActivity extends Activity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
             if (resultCode > 0)
-                reload();
+                reloadAll();
         }
     }
 

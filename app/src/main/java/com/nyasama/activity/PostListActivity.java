@@ -44,15 +44,20 @@ public class PostListActivity extends Activity
 
     private CommonListAdapter<Post> mListAdapter;
     private List<Post> mListData = new ArrayList<Post>();
+    private int mPageSize = 10;
     private int mListItemCount = Integer.MAX_VALUE;
     private boolean mIsLoading = false;
 
     public boolean loadMore() {
-        if (mListData.size() < mListItemCount && !mIsLoading) {
+        final int loadPage = (int)Math.round(Math.floor(mListData.size() / mPageSize));
+        final int loadIndex = loadPage * mPageSize;
+        final int currentSize = mListData.size();
+
+        if (currentSize < mListItemCount && !mIsLoading) {
             Discuz.execute("viewthread", new HashMap<String, Object>() {{
                 put("tid", getIntent().getStringExtra("tid"));
-                put("ppp", 10);
-                put("page", Math.round(Math.floor(mListData.size() / 10 + 1)));
+                put("ppp", mPageSize);
+                put("page", loadPage + 1);
             }}, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject data) {
@@ -80,6 +85,9 @@ public class PostListActivity extends Activity
                         catch (NullPointerException e) { /**/ }
                     }
                     else {
+                        // remove possible duplicated items
+                        if (loadIndex < currentSize)
+                            mListData.subList(loadIndex, currentSize).clear();
                         try {
                             JSONObject var = data.getJSONObject("Variables");
                             JSONArray postlist = var.getJSONArray("postlist");
@@ -112,8 +120,7 @@ public class PostListActivity extends Activity
         return mIsLoading;
     }
 
-    public boolean reload() {
-        mListData.clear();
+    public boolean reloadLastPage() {
         mListItemCount = Integer.MAX_VALUE;
         return loadMore();
     }
@@ -135,7 +142,7 @@ public class PostListActivity extends Activity
                         JSONObject message = data.optJSONObject("Message");
                         String messageval = message.optString("messageval");
                         if ("post_reply_succeed".equals(messageval)) {
-                            reload();
+                            reloadLastPage();
                         }
                         else
                             Helper.toast(PostListActivity.this, message.optString("messagestr"));
@@ -191,7 +198,7 @@ public class PostListActivity extends Activity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == Discuz.REQUEST_CODE_REPLY) {
             if (resultCode > 0)
-                reload();
+                reloadLastPage();
         }
     }
 
