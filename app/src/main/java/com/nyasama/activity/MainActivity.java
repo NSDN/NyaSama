@@ -21,12 +21,11 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
-import com.umeng.message.PushAgent;
-import com.umeng.message.UmengRegistrar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -168,14 +167,21 @@ public class MainActivity extends Activity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private MainActivity mActivity;
+        public MainActivity mActivity;
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+            PlaceholderFragment fragment = null;
+            if (sectionNumber == 1) {
+                // let's create display forum index
+                fragment = new ForumIndexFragment();
+            }
+            else {
+                fragment = new PlaceholderFragment();
+            }
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -188,12 +194,7 @@ public class MainActivity extends Activity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
-                mListView = (ListView)rootView.findViewById(R.id.forum_cat_list);
-                loadForums();
-            }
-            return rootView;
+            return inflater.inflate(R.layout.fragment_blank, container, false);
         }
 
         @Override
@@ -202,93 +203,6 @@ public class MainActivity extends Activity
             mActivity = (MainActivity) activity;
             mActivity.onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
-        }
-
-        private class Forum {
-            public String id;
-            public String name;
-        }
-        private class ForumCatalog {
-            public String name;
-            public List<Forum> forums;
-        }
-        private List<ForumCatalog> mForumCatalogs;
-        private ListView mListView;
-        public void displayForums() {
-            mListView.setAdapter(new CommonListAdapter<ForumCatalog>(mForumCatalogs,
-                    R.layout.fragment_forum_cat_item) {
-                @Override
-                public void convert(ViewHolder viewHolder, ForumCatalog item) {
-                    viewHolder.setText(R.id.forum_cat_title, item.name);
-                    // bind the grid view
-                    GridView gridView = (GridView)viewHolder.getView(R.id.forum_list);
-                    gridView.setAdapter(new CommonListAdapter<Forum>(item.forums,
-                            R.layout.fragment_forum_item) {
-                        @Override
-                        public void convert(ViewHolder viewHolder, Forum item) {
-                            Button btn = (Button) viewHolder.getView(R.id.button);
-                            btn.setText(item.name);
-                            final String fid = item.id;
-                            btn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                                    intent.putExtra("fid", fid);
-                                    startActivity(intent);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-        public void loadForums() {
-            Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject data) {
-                    if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(R.string.network_error_toast);
-                    } else{
-                        try {
-                            JSONObject var = data.getJSONObject("Variables");
-                            JSONArray forumlist = var.getJSONArray("forumlist");
-                            final JSONObject forums = new JSONObject();
-                            for (int i = 0; i < forumlist.length(); i ++) {
-                                JSONObject forum = forumlist.getJSONObject(i);
-                                forums.put(forum.getString("fid"), forum);
-                            }
-
-                            JSONArray catlist = var.getJSONArray("catlist");
-                            mForumCatalogs = new ArrayList<ForumCatalog>();
-                            for (int i = 0; i < catlist.length(); i ++) {
-                                JSONObject cat = catlist.getJSONObject(i);
-                                ForumCatalog forumCatalog = new ForumCatalog();
-                                forumCatalog.name = cat.getString("name");
-
-                                final JSONArray forumIds = cat.getJSONArray("forums");
-                                forumCatalog.forums = new ArrayList<Forum>();
-                                for (int j = 0; j < forumIds.length(); j ++) {
-                                    final int idx = j;
-                                    forumCatalog.forums.add(new Forum() {{
-                                        this.id = forumIds.getString(idx);
-                                        this.name = forums.getJSONObject(this.id).getString("name");
-                                    }});
-                                }
-                                mForumCatalogs.add(forumCatalog);
-                            }
-
-                            displayForums();
-                            mActivity.updateUserInfo();
-                        }
-                        catch (JSONException e) {
-                            Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
-                            Helper.toast(R.string.load_failed_toast);
-                        }
-                        // TODO: remove these
-                        catch (NullPointerException e) { /**/ }
-                    }
-                }
-            });
         }
     }
 
