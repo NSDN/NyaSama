@@ -44,6 +44,7 @@
             android:label="@string/title_activity_new_post" >
         </activity>
 
+        <!-- TODO: enable this
         <receiver
             android:name="com.umeng.message.NotificationProxyBroadcastReceiver"
             android:exported="false" >
@@ -106,6 +107,7 @@
             android:name="UMENG_CHANNEL"
             android:value="NyaSama_Push" >
         </meta-data>
+        -->
 
     </application>
 

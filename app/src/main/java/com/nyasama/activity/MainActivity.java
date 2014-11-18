@@ -75,9 +75,12 @@ public class MainActivity extends Activity
             });
         }
 
+        /*
+        TODO: enable this
         PushAgent mPushAgent = PushAgent.getInstance(this);
         mPushAgent.enable();
         Log.d("DEVICETOKEN", UmengRegistrar.getRegistrationId(this));
+        */
     }
 
     @Override
