@@ -19,7 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.nyasama.fragment.BlankFragment;
+import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
@@ -187,18 +187,18 @@ public class MainActivity extends FragmentActivity
                             return new ForumIndexFragment();
                         else
                             // TODO: remove this
-                            return new BlankFragment();
+                            return new SimpleLayoutFragment();
                     }
                     @Override
                     public int getCount() {
-                        return 2;
+                        return 3;
                     }
                     @Override
                     public CharSequence getPageTitle(int position) {
                         return position == 0 ?
                                 mActivity.getString(R.string.title_main_home) :
                                 // TODO: rename this
-                                "Blank";
+                                "Blank "+position;
                     }
                 });
                 return rootView;

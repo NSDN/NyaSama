@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import android.view.View;
 import com.android.volley.Response;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
+import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
@@ -124,16 +127,37 @@ public class ThreadListActivity extends FragmentActivity
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mFragment = new CommonListFragment<Thread>();
-        Bundle bundle = new Bundle();
-        bundle.putInt("list_layout", R.layout.fragment_thread_list);
-        bundle.putInt("item_layout", R.layout.fragment_thread_item);
-        bundle.putInt("page_size", mPageSize);
-        mFragment.setArguments(bundle);
+        ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public android.support.v4.app.Fragment getItem(int i) {
+                if (i == 0) {
+                    mFragment = new CommonListFragment<Thread>();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("list_layout", R.layout.fragment_thread_list);
+                    bundle.putInt("item_layout", R.layout.fragment_thread_item);
+                    bundle.putInt("page_size", mPageSize);
+                    mFragment.setArguments(bundle);
+                    return mFragment;
+                } else
+                    // TODO: remove this
+                    return new SimpleLayoutFragment();
+            }
 
-        getFragmentManager().beginTransaction()
-                .replace(R.id.container, mFragment)
-                .commit();
+            @Override
+            public int getCount() {
+                return 2;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return position == 0 ?
+                        // TODO: rename this
+                        "Threads" :
+                        "Sub Forum";
+            }
+        });
+
     }
 
     @Override
