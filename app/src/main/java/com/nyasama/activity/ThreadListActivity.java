@@ -61,7 +61,7 @@ public class ThreadListActivity extends Activity
                 @Override
                 public void onResponse(JSONObject data) {
                     if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(getApplicationContext(), R.string.network_error_toast);
+                        Helper.toast(R.string.network_error_toast);
                     } else if (data.has("Message")) {
                         try {
                             JSONObject message = data.getJSONObject("Message");
@@ -105,7 +105,7 @@ public class ThreadListActivity extends Activity
                             Helper.updateVisibility(findViewById(R.id.empty), mListItemCount <= 0);
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
-                            Helper.toast(getApplicationContext(), R.string.load_failed_toast);
+                            Helper.toast(R.string.load_failed_toast);
                         }
                         // TODO: reomve these
                         catch (NullPointerException e) { /**/ }

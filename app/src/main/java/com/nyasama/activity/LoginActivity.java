@@ -32,7 +32,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onResponse(JSONObject data) {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(LoginActivity.this, R.string.network_error_toast);
+                    Helper.toast(R.string.network_error_toast);
                 }
                 else {
                     try {

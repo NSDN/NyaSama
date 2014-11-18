@@ -29,7 +29,7 @@ public class NewPostActivity extends Activity
         final String content = mContent.getText().toString();
         final String noticetrimstr = getIntent().getStringExtra("notice_trimstr");
         if (title.isEmpty() || content.isEmpty()) {
-            Helper.toast(this, R.string.post_content_empty_message);
+            Helper.toast(R.string.post_content_empty_message);
             return;
         }
 
@@ -58,7 +58,7 @@ public class NewPostActivity extends Activity
             @Override
             public void onResponse(JSONObject data) {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(NewPostActivity.this, R.string.network_error_toast);
+                    Helper.toast(R.string.network_error_toast);
                 }
                 else {
                     try {

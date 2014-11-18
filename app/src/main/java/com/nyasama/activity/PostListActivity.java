@@ -62,7 +62,7 @@ public class PostListActivity extends Activity
                 @Override
                 public void onResponse(JSONObject data) {
                     if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(getApplicationContext(), R.string.network_error_toast);
+                        Helper.toast(R.string.network_error_toast);
                     }
                     else if (data.has("Message")) {
                         try {
@@ -107,7 +107,7 @@ public class PostListActivity extends Activity
                             setTitle(thread.getString("subject"));
                         } catch (JSONException e) {
                             Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
-                            Helper.toast(getApplicationContext(), R.string.load_failed_toast);
+                            Helper.toast(R.string.load_failed_toast);
                         }
                         // TODO: remove these
                         catch (NullPointerException e) { /**/ }
@@ -136,7 +136,7 @@ public class PostListActivity extends Activity
                 @Override
                 public void onResponse(JSONObject data) {
                     if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(PostListActivity.this, R.string.network_error_toast);
+                        Helper.toast(R.string.network_error_toast);
                     }
                     else {
                         JSONObject message = data.optJSONObject("Message");
@@ -145,7 +145,7 @@ public class PostListActivity extends Activity
                             reloadLastPage();
                         }
                         else
-                            Helper.toast(PostListActivity.this, message.optString("messagestr"));
+                            Helper.toast(message.optString("messagestr"));
                     }
                 }
             });

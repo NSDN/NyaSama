@@ -84,10 +84,9 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == Discuz.REQUEST_CODE_LOGIN)
-            updateUserInfo();
+    protected void onResume() {
+        super.onResume();
+        updateUserInfo();
     }
 
     @Override
@@ -248,7 +247,7 @@ public class MainActivity extends Activity
                 @Override
                 public void onResponse(JSONObject data) {
                     if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(mListView.getContext(), R.string.network_error_toast);
+                        Helper.toast(R.string.network_error_toast);
                     } else{
                         try {
                             JSONObject var = data.getJSONObject("Variables");
@@ -283,7 +282,7 @@ public class MainActivity extends Activity
                         }
                         catch (JSONException e) {
                             Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
-                            Helper.toast(mListView.getContext(), R.string.load_failed_toast);
+                            Helper.toast(R.string.load_failed_toast);
                         }
                         // TODO: remove these
                         catch (NullPointerException e) { /**/ }
