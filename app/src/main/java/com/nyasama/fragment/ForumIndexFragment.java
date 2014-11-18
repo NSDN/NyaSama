@@ -1,9 +1,7 @@
 package com.nyasama.fragment;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +12,6 @@ import android.widget.ListView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
-import com.nyasama.activity.MainActivity;
 import com.nyasama.activity.ThreadListActivity;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
@@ -32,7 +29,7 @@ import java.util.List;
  * Created by oxyflour on 2014/11/18.
  *
  */
-public class ForumIndexFragment extends MainActivity.PlaceholderFragment {
+public class ForumIndexFragment extends android.support.v4.app.Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -117,8 +114,6 @@ public class ForumIndexFragment extends MainActivity.PlaceholderFragment {
 
                         // show it
                         displayForums();
-                        // notice the main activity
-                        mActivity.updateUserInfo();
                     } catch (JSONException e) {
                         Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);

@@ -7,7 +7,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,27 +17,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.volley.Response;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.fragment.BlankFragment;
 import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Helper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-public class MainActivity extends Activity
+public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     /**
@@ -174,14 +164,7 @@ public class MainActivity extends Activity
          * number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = null;
-            if (sectionNumber == 1) {
-                // let's create display forum index
-                fragment = new ForumIndexFragment();
-            }
-            else {
-                fragment = new PlaceholderFragment();
-            }
+            PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -194,6 +177,32 @@ public class MainActivity extends Activity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
+                View rootView = inflater.inflate(R.layout.fragment_main_home, container, false);
+                ViewPager pager = (ViewPager) rootView.findViewById(R.id.view_pager);
+                pager.setAdapter(new FragmentStatePagerAdapter(mActivity.getSupportFragmentManager()) {
+                    @Override
+                    public android.support.v4.app.Fragment getItem(int i) {
+                        if (i == 0)
+                            return new ForumIndexFragment();
+                        else
+                            // TODO: remove this
+                            return new BlankFragment();
+                    }
+                    @Override
+                    public int getCount() {
+                        return 2;
+                    }
+                    @Override
+                    public CharSequence getPageTitle(int position) {
+                        return position == 0 ?
+                                mActivity.getString(R.string.title_main_home) :
+                                // TODO: rename this
+                                "Blank";
+                    }
+                });
+                return rootView;
+            }
             return inflater.inflate(R.layout.fragment_blank, container, false);
         }
 
