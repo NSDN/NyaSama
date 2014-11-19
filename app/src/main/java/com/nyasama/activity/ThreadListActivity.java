@@ -41,6 +41,7 @@ public class ThreadListActivity extends FragmentActivity
     private CommonListFragment<Thread> mThreadListFragment;
     private CommonListFragment<Forum> mSubListFragment;
     private List<Forum> mSubList = new ArrayList<Forum>();
+    private FragmentPagerAdapter mPageAdapter;
     private int mPageSize = 20;
 
     @Override
@@ -109,17 +110,19 @@ public class ThreadListActivity extends FragmentActivity
                         // save data to sublist
                         if (var.has("sublist")) {
                             JSONArray sublist = var.getJSONArray("sublist");
-                            mSubList.clear();
-                            for (int i = 0; i < sublist.length(); i ++) {
-                                final JSONObject subforum = sublist.getJSONObject(i);
-                                mSubList.add(new Forum() {{
-                                    this.id = subforum.optString("fid");
-                                    this.name = subforum.optString("name");
-                                }});
+                            if (sublist.length() > 0 && mSubList.size() == 0) {
+                                for (int i = 0; i < sublist.length(); i ++) {
+                                    final JSONObject subforum = sublist.getJSONObject(i);
+                                    mSubList.add(new Forum() {{
+                                        this.id = subforum.optString("fid");
+                                        this.name = subforum.optString("name");
+                                    }});
+                                }
+                                // notify view pager
+                                Helper.updateVisibility(findViewById(R.id.view_strip), true);
+                                mPageAdapter.notifyDataSetChanged();
                             }
                         }
-                        if (mSubListFragment != null)
-                            mSubListFragment.reloadAll();
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
@@ -169,7 +172,7 @@ public class ThreadListActivity extends FragmentActivity
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
-        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+        pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int i) {
                 if (i == 0) {
@@ -195,7 +198,7 @@ public class ThreadListActivity extends FragmentActivity
 
             @Override
             public int getCount() {
-                return 2;
+                return mSubList.size() > 0 ? 2 : 1;
             }
 
             @Override
