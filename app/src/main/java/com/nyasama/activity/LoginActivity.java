@@ -38,7 +38,7 @@ public class LoginActivity extends Activity {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         String messageval = message.getString("messageval");
-                        if ("login_success".equals(messageval) ||
+                        if ("login_succeed".equals(messageval) ||
                                 "location_login_succeed".equals(messageval)) {
                             // return uid to parent activity
                             String uid = data.getJSONObject("Variables").getString("member_uid");

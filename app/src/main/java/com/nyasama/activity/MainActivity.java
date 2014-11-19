@@ -19,11 +19,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.Response;
 import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
+import com.nyasama.util.Helper;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -63,6 +69,17 @@ public class MainActivity extends FragmentActivity
                 }
             });
         }
+
+        // TODO: move this to Splash Activity
+        Discuz.execute("login", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (jsonObject.has(Discuz.VOLLEY_ERROR))
+                    Helper.toast("Sth is wrong with the server...");
+                else
+                    updateUserInfo();
+            }
+        });
 
         /*
         TODO: enable this
