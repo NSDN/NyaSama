@@ -15,12 +15,14 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.HtmlDrawable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -185,7 +187,9 @@ public class PostListActivity extends Activity
             @Override
             public void convert(ViewHolder viewHolder, Post item) {
                 viewHolder.setText(R.id.author, item.author);
-                viewHolder.setText(R.id.message, Html.fromHtml(item.message));
+                TextView textView = (TextView) viewHolder.getView(R.id.message);
+                textView.setText(Html.fromHtml(item.message,
+                        new HtmlDrawable.ImageGetter(textView, Discuz.DISCUZ_URL), null));
             }
         });
         listView.setOnScrollListener(this);

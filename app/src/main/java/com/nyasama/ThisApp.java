@@ -3,8 +3,17 @@ package com.nyasama;
 import android.app.Application;
 import android.content.Context;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.ImageLoader;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.PersistenceCookieStore;
 
+import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -14,15 +23,28 @@ import java.net.CookiePolicy;
  *
  */
 public class ThisApp extends Application {
-    private static Context context;
+    public static Context context;
+    public static RequestQueue requestQueue;
+    public static ImageLoader imageLoader;
+    public static PersistenceCookieStore cookieStore;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        context = getApplicationContext();
-    }
 
-    public static Context getContext() {
-        return context;
+        context = getApplicationContext();
+
+        File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
+        Cache cache = new DiskBasedCache(cacheFile, 1024*1024*4);
+        Network network = new BasicNetwork(new HurlStack());
+        requestQueue = new RequestQueue(cache, network);
+        requestQueue.start();
+
+        ImageLoader.ImageCache imgCache = new BitmapLruCache();
+        imageLoader = new ImageLoader(requestQueue, imgCache);
+
+        cookieStore = new PersistenceCookieStore(context);
+        CookieHandler.setDefault(new CookieManager(cookieStore, CookiePolicy.ACCEPT_ALL));
+
     }
 }

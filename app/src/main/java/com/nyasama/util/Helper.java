@@ -1,6 +1,5 @@
 package com.nyasama.util;
 
-import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,11 +11,12 @@ import com.nyasama.ThisApp;
  */
 public class Helper {
     public static void toast(String text) {
-        if (ThisApp.getContext() != null)
-            Toast.makeText(ThisApp.getContext(), text, Toast.LENGTH_SHORT).show();
+        if (ThisApp.context != null)
+            Toast.makeText(ThisApp.context, text, Toast.LENGTH_SHORT).show();
     }
     public static void toast(int stringId) {
-        toast(ThisApp.getContext().getString(stringId));
+        if (ThisApp.context != null)
+            toast(ThisApp.context.getString(stringId));
     }
     public static void updateVisibility(View view, boolean show) {
         if (view != null)

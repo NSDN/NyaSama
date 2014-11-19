@@ -2,15 +2,9 @@ package com.nyasama.util;
 
 import android.util.Log;
 
-import com.android.volley.Cache;
-import com.android.volley.Network;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.StringRequest;
 import com.nyasama.ThisApp;
 
@@ -20,9 +14,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +24,8 @@ import java.util.Map;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://10.98.106.71:10080/bbs/api/mobile/index.php";
+    public static String DISCUZ_URL = "http://10.98.106.71:10080/bbs/";
+    public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
 
@@ -49,7 +41,6 @@ public class Discuz {
         public String name;
         public List<Forum> forums;
     }
-
     public static class Thread {
         public String id;
         public String title;
@@ -59,15 +50,6 @@ public class Discuz {
     public static String sFormHash;
     public static String sAuth;
     public static String sUsername;
-
-    static RequestQueue sQueue;
-    static PersistenceCookieStore sCookie;
-    static {
-        Cache cache = new NoCache();
-        Network network = new BasicNetwork(new HurlStack());
-        sQueue = new RequestQueue(cache, network);
-        sQueue.start();
-    }
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
@@ -80,10 +62,6 @@ public class Discuz {
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
                                   final Response.Listener<JSONObject> callback) {
-        if (sCookie == null) {
-            sCookie = new PersistenceCookieStore(ThisApp.getContext());
-            CookieHandler.setDefault(new CookieManager(sCookie, CookiePolicy.ACCEPT_ALL));
-        }
         //
         if (module.equals("forumdisplay")) {
             if (params.get("fid") == null)
@@ -97,7 +75,7 @@ public class Discuz {
         //
         Request request =  new StringRequest(
             body == null ? Request.Method.GET : Request.Method.POST,
-            DISCUZ_URL + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
             new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -115,7 +93,7 @@ public class Discuz {
                         if (!var.isNull("auth")) sAuth = var.optString("auth");
                     }
                     callback.onResponse(data);
-                    sCookie.save();
+                    ThisApp.cookieStore.save();
                 }
             },
             new Response.ErrorListener() {
@@ -143,7 +121,7 @@ public class Discuz {
                 return params;
             }
         };
-        sQueue.add(request);
+        ThisApp.requestQueue.add(request);
         return request;
     }
 
