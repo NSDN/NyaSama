@@ -15,20 +15,11 @@ import java.net.CookiePolicy;
  */
 public class ThisApp extends Application {
     private static Context context;
-    private static PersistenceCookieStore cookie;
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        cookie = new PersistenceCookieStore(context);
-        CookieHandler.setDefault(new CookieManager(cookie, CookiePolicy.ACCEPT_ALL));
-    }
-
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-        cookie.save();
     }
 
     public static Context getContext() {

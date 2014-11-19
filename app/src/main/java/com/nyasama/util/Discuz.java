@@ -46,6 +46,7 @@ public class Discuz {
     public static String sUsername;
 
     static RequestQueue sQueue;
+    static PersistenceCookieStore sCookie;
     static {
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -64,6 +65,10 @@ public class Discuz {
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
                                   final Response.Listener<JSONObject> callback) {
+        if (sCookie == null) {
+            sCookie = new PersistenceCookieStore(ThisApp.getContext());
+            CookieHandler.setDefault(new CookieManager(sCookie, CookiePolicy.ACCEPT_ALL));
+        }
         //
         if (module.equals("forumdisplay")) {
             if (params.get("fid") == null)
@@ -95,6 +100,7 @@ public class Discuz {
                         if (!var.isNull("auth")) sAuth = var.optString("auth");
                     }
                     callback.onResponse(data);
+                    sCookie.save();
                 }
             },
             new Response.ErrorListener() {
