@@ -41,6 +41,21 @@ public class Discuz {
     public static int REQUEST_CODE_NEW_THREAD = 2;
     public static int REQUEST_CODE_REPLY = 3;
 
+    public static class Forum {
+        public String id;
+        public String name;
+    }
+    public static class ForumCatalog {
+        public String name;
+        public List<Forum> forums;
+    }
+
+    public static class Thread {
+        public String id;
+        public String title;
+        public String sub;
+    }
+
     public static String sFormHash;
     public static String sAuth;
     public static String sUsername;

@@ -24,15 +24,22 @@ import java.util.List;
 public class CommonListFragment<T> extends Fragment
      implements AbsListView.OnScrollListener, AbsListView.OnItemClickListener {
 
+    public static final String ARG_LIST_LAYOUT = "list_layout_id";
+    public static final String ARG_LIST_VIEW_ID = "list_view_id";
+    public static final String ARG_ITEM_LAYOUT = "item_layout_id";
+    public static final String ARG_PAGE_SIZE = "page_size";
+
     private List<T> mListData = new ArrayList<T>();
     private int mPageSize = 10;
     private int mListItemCount = Integer.MAX_VALUE;
     private boolean mIsLoading = false;
 
     private CommonListAdapter<T> mListAdapter;
+    private View mListLayoutView;
     private Activity mActivity;
-    private int mListLayoutId;
-    private int mItemLayoutId;
+    private int mListLayout;
+    private int mItemLayout;
+    private int mListViewId;
 
     public boolean loadMore() {
         final int loadPage = (int) Math.round(Math.floor(mListData.size() / mPageSize));
@@ -40,8 +47,10 @@ public class CommonListFragment<T> extends Fragment
         final int currentSize = mListData.size();
 
         if (mActivity != null && currentSize < mListItemCount && !mIsLoading) {
-            ((OnListFragmentInteraction) mActivity).onLoadingMore(loadIndex, loadPage, mListData);
-            Helper.updateVisibility(mActivity.findViewById(R.id.loading), mIsLoading = true);
+            ((OnListFragmentInteraction) mActivity)
+                    .onLoadingMore(this, loadIndex, loadPage, mListData);
+            Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
+                    mIsLoading = true);
         }
         return mIsLoading;
     }
@@ -50,7 +59,9 @@ public class CommonListFragment<T> extends Fragment
         mListItemCount = total;
         mListAdapter.notifyDataSetChanged();
         mIsLoading = false;
-        Helper.updateVisibility(mActivity.findViewById(R.id.loading), mListItemCount > mListData.size());
+        Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty), total <= 0);
+        Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
+                mListItemCount > mListData.size());
     }
 
     public boolean reloadAll() {
@@ -83,34 +94,39 @@ public class CommonListFragment<T> extends Fragment
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            mListLayoutId = bundle.getInt("list_layout");
-            mItemLayoutId = bundle.getInt("item_layout");
-            mPageSize = bundle.getInt("page_size");
+            mListLayout = bundle.getInt(ARG_LIST_LAYOUT);
+            mItemLayout = bundle.getInt(ARG_ITEM_LAYOUT);
+            mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
+            mPageSize = bundle.getInt(ARG_PAGE_SIZE);
         }
-        if (mListLayoutId <= 0 || mItemLayoutId <= 0 || mPageSize <= 0)
-            throw new RuntimeException("Incorrect Arguments for ListFragment");
+        if (mListLayout <= 0 || mItemLayout <= 0 || mListViewId <=0 || mPageSize <= 0)
+            throw new RuntimeException("Invalid Arguments for ListFragment");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(mListLayoutId, container, false);
-        ListView listView = (ListView) rootView.findViewById(R.id.list);
-        listView.addFooterView(inflater.inflate(R.layout.fragment_list_loading, listView, false), null, false);
-        listView.setAdapter(mListAdapter = new CommonListAdapter<T>(mListData, mItemLayoutId) {
+        mListLayoutView = inflater.inflate(mListLayout, container, false);
+        AbsListView listView = (ListView) mListLayoutView.findViewById(mListViewId);
+        if (listView instanceof ListView) {
+            View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
+            ((ListView) listView).addFooterView(loading, null, false);
+        }
+        listView.setAdapter(mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
             @Override
             @SuppressWarnings("unchecked")
             public void convert(ViewHolder viewHolder, T item) {
-                ((OnListFragmentInteraction) mActivity).onConvertView(viewHolder, item);
+                ((OnListFragmentInteraction) mActivity)
+                        .onConvertView(CommonListFragment.this, viewHolder, item);
             }
         });
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
-        return rootView;
+        return mListLayoutView;
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        ((OnListFragmentInteraction) mActivity).onItemClick(view, i, l);
+        ((OnListFragmentInteraction) mActivity).onItemClick(this, view, i, l);
     }
 
     @Override
@@ -124,8 +140,11 @@ public class CommonListFragment<T> extends Fragment
     }
 
     public interface OnListFragmentInteraction<T> {
-        public void onItemClick(View view, int position, long id);
-        public void onConvertView(CommonListAdapter.ViewHolder viewHolder, T item);
-        public void onLoadingMore(int position, int page, List data);
+        public void onItemClick(CommonListFragment fragment,
+                                View view, int position, long id);
+        public void onConvertView(CommonListFragment fragment,
+                                  CommonListAdapter.ViewHolder viewHolder, T item);
+        public void onLoadingMore(CommonListFragment fragment,
+                                  int position, int page, List data);
     }
 }

@@ -16,11 +16,11 @@ import java.util.List;
 public abstract class CommonListAdapter<T> extends BaseAdapter {
 
     protected List<T> mList;
-    protected final int mLayoutId;
+    protected int mLayout = android.R.layout.simple_list_item_1;
 
-    public CommonListAdapter(List<T> list, int layoutId) {
+    public CommonListAdapter(List<T> list, int layout) {
         mList = list;
-        mLayoutId = layoutId;
+        mLayout = layout;
     }
 
     @Override
@@ -43,7 +43,7 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext())
-                    .inflate(mLayoutId, parent, false);
+                    .inflate(mLayout, parent, false);
             convertView.setTag(new ViewHolder(convertView));
         }
         convert((ViewHolder) convertView.getTag(), getItem(position));

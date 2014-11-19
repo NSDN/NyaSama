@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -12,47 +13,50 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 
 import com.android.volley.Response;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
-import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.Discuz.Thread;
+import com.nyasama.util.Discuz.Forum;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
 public class ThreadListActivity extends FragmentActivity
-    implements CommonListFragment.OnListFragmentInteraction<ThreadListActivity.Thread> {
+    implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     private final String TAG = "ThreadList";
 
-    public class Thread {
-        public String id;
-        public String title;
-        public String sub;
-    }
-
-    private CommonListFragment<Thread> mFragment;
+    private CommonListFragment<Thread> mThreadListFragment;
+    private CommonListFragment<Forum> mSubListFragment;
+    private List<Forum> mSubList = new ArrayList<Forum>();
     private int mPageSize = 20;
 
     @Override
-    public void onItemClick(View view, int position, long id) {
-        Intent intent = new Intent(view.getContext(), PostListActivity.class);
-        intent.putExtra("tid", mFragment.getData(position).id);
-        startActivity(intent);
+    public void onItemClick(CommonListFragment fragment,
+                            View view, int position, long id) {
+        if (fragment == mThreadListFragment) {
+            Intent intent = new Intent(view.getContext(), PostListActivity.class);
+            intent.putExtra("tid", mThreadListFragment.getData(position).id);
+            startActivity(intent);
+        }
     }
 
     @Override
-    public void onLoadingMore(final int position, final int page, final List listData) {
-        Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
+    public void onLoadingMore(CommonListFragment fragment,
+                              final int position, final int page, final List listData) {
+        if (fragment == mThreadListFragment) Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
             put("fid", getIntent().getStringExtra("fid"));
             put("tpp", mPageSize);
             put("page", page + 1);
@@ -101,7 +105,20 @@ public class ThreadListActivity extends FragmentActivity
                         total = Integer.parseInt(
                                 forum.getString("threads"));
                         setTitle(forum.getString("name"));
-                        Helper.updateVisibility(findViewById(R.id.empty), total <= 0);
+                        // save data to sublist
+                        if (var.has("sublist")) {
+                            JSONArray sublist = var.getJSONArray("sublist");
+                            mSubList.clear();
+                            for (int i = 0; i < sublist.length(); i ++) {
+                                final JSONObject subforum = sublist.getJSONObject(i);
+                                mSubList.add(new Forum() {{
+                                    this.id = subforum.optString("fid");
+                                    this.name = subforum.optString("name");
+                                }});
+                            }
+                        }
+                        if (mSubListFragment != null)
+                            mSubListFragment.reloadAll();
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
@@ -109,15 +126,37 @@ public class ThreadListActivity extends FragmentActivity
                     // TODO: reomve these
                     catch (NullPointerException e) { /**/ }
                 }
-                mFragment.loadMoreDone(total);
+                mThreadListFragment.loadMoreDone(total);
             }
         });
+        else if (fragment == mSubListFragment) {
+            for (Forum forum : mSubList)
+                listData.add(forum);
+            mSubListFragment.loadMoreDone(mSubList.size());
+        }
     }
 
     @Override
-    public void onConvertView(CommonListAdapter.ViewHolder viewHolder, Thread item) {
-        viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-        viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
+    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, Object obj) {
+        if (fragment == mThreadListFragment) {
+            Thread item = (Thread) obj;
+            viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+            viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
+        }
+        else if (fragment == mSubListFragment) {
+            Forum item = (Forum) obj;
+            Button btn = (Button) viewHolder.getView(R.id.button);
+            btn.setText(item.name);
+            final String fid = item.id;
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+                    intent.putExtra("fid", fid);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     @Override
@@ -130,18 +169,26 @@ public class ThreadListActivity extends FragmentActivity
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
         pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
-            public android.support.v4.app.Fragment getItem(int i) {
+            public Fragment getItem(int i) {
                 if (i == 0) {
-                    mFragment = new CommonListFragment<Thread>();
+                    mThreadListFragment = new CommonListFragment<Thread>();
                     Bundle bundle = new Bundle();
-                    bundle.putInt("list_layout", R.layout.fragment_thread_list);
-                    bundle.putInt("item_layout", R.layout.fragment_thread_item);
-                    bundle.putInt("page_size", mPageSize);
-                    mFragment.setArguments(bundle);
-                    return mFragment;
-                } else
-                    // TODO: remove this
-                    return new SimpleLayoutFragment();
+                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_thread_list);
+                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_thread_item);
+                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.list);
+                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, mPageSize);
+                    mThreadListFragment.setArguments(bundle);
+                    return mThreadListFragment;
+                } else {
+                    mSubListFragment = new CommonListFragment<Forum>();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_forum_cat_item);
+                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_forum_item);
+                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.forum_list);
+                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, mPageSize);
+                    mSubListFragment.setArguments(bundle);
+                    return mSubListFragment;
+                }
             }
 
             @Override
@@ -164,7 +211,7 @@ public class ThreadListActivity extends FragmentActivity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
             if (resultCode > 0)
-                mFragment.reloadAll();
+                mThreadListFragment.reloadAll();
         }
     }
 
@@ -199,4 +246,5 @@ public class ThreadListActivity extends FragmentActivity
 
         return super.onOptionsItemSelected(item);
     }
+
 }

@@ -16,6 +16,8 @@ import com.nyasama.activity.ThreadListActivity;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.Discuz.Forum;
+import com.nyasama.util.Discuz.ForumCatalog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,14 +41,6 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
         return rootView;
     }
 
-    private class Forum {
-        public String id;
-        public String name;
-    }
-    private class ForumCatalog {
-        public String name;
-        public List<Forum> forums;
-    }
     private List<ForumCatalog> mForumCatalogs;
     private ListView mListView;
     public void displayForums() {
