@@ -46,22 +46,28 @@ public class CommonListFragment<T> extends Fragment
         final int loadIndex = loadPage * mPageSize;
         final int currentSize = mListData.size();
 
-        if (mActivity != null && currentSize < mListItemCount && !mIsLoading) {
-            ((OnListFragmentInteraction) mActivity)
-                    .onLoadingMore(this, loadIndex, loadPage, mListData);
+        if (mActivity != null && mListLayoutView != null &&
+                currentSize < mListItemCount && !mIsLoading) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
                     mIsLoading = true);
+            ((OnListFragmentInteraction) mActivity)
+                    .onLoadingMore(this, loadIndex, loadPage, mListData);
         }
         return mIsLoading;
     }
 
     public void loadMoreDone(int total) {
         mListItemCount = total;
-        mListAdapter.notifyDataSetChanged();
         mIsLoading = false;
-        Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty), total <= 0);
-        Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
-                mListItemCount > mListData.size());
+        if (mListAdapter != null) {
+            mListAdapter.notifyDataSetChanged();
+        }
+        if (mListLayoutView != null) {
+            Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty),
+                    total <= 0);
+            Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
+                    mListItemCount > mListData.size());
+        }
     }
 
     public boolean reloadAll() {
@@ -106,7 +112,7 @@ public class CommonListFragment<T> extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mListLayoutView = inflater.inflate(mListLayout, container, false);
-        AbsListView listView = (ListView) mListLayoutView.findViewById(mListViewId);
+        AbsListView listView = (AbsListView) mListLayoutView.findViewById(mListViewId);
         if (listView instanceof ListView) {
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);

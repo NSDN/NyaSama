@@ -54,6 +54,7 @@ public class ThreadListActivity extends FragmentActivity
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment,
                               final int position, final int page, final List listData) {
         if (fragment == mThreadListFragment) Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
@@ -130,6 +131,7 @@ public class ThreadListActivity extends FragmentActivity
             }
         });
         else if (fragment == mSubListFragment) {
+            listData.clear();
             for (Forum forum : mSubList)
                 listData.add(forum);
             mSubListFragment.loadMoreDone(mSubList.size());
