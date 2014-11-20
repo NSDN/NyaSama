@@ -10,12 +10,18 @@ import com.nyasama.ThisApp;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,15 +52,28 @@ public class Discuz {
         public String title;
         public String sub;
     }
+    public static class Post {
+        public String id;
+        public String author;
+        public String message;
+        public List<Attachment> attachments;
+    }
+    public static class Attachment {
+        public String name;
+        public String src;
+    }
 
     public static String sFormHash;
+    public static String sUploadHash;
     public static String sAuth;
     public static String sUsername;
+    public static String sUid;
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
         for (Map.Entry<String, Object> e : map.entrySet())
-            list.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+            list.add(new BasicNameValuePair(e.getKey(),
+                    e.getValue() != null ? e.getValue().toString() : ""));
         return list;
     }
 
@@ -68,10 +87,12 @@ public class Discuz {
                 throw new RuntimeException("fid is required for forumdisplay");
         }
         else if (module.equals("newthread") || module.equals("sendreply")) {
+            body.put("allowphoto", 1);
             body.put("formhash", sFormHash);
             body.put("mobiletype", 2);
         }
         params.put("module", module);
+        params.put("submodule", "checkpost");
         //
         Request request =  new StringRequest(
             body == null ? Request.Method.GET : Request.Method.POST,
@@ -90,7 +111,11 @@ public class Discuz {
                     if (var != null) {
                         sFormHash = var.optString("formhash", "");
                         sUsername = var.optString("member_username", "");
-                        if (!var.isNull("auth")) sAuth = var.optString("auth");
+                        sUid = var.optString("member_uid", "");
+                        if (!var.isNull("auth"))
+                            sAuth = var.optString("auth");
+                        if (!var.isNull("allowperm"))
+                            sUploadHash = var.optJSONObject("allowperm").optString("uploadhash");
                     }
                     callback.onResponse(data);
                     ThisApp.cookieStore.save();
@@ -123,6 +148,46 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
         return request;
+    }
+
+    public static void upload(final Map<String, Object> params,
+                              final String filePath,
+                              final Response.Listener<String> callback) {
+
+        if (sUploadHash == null || sUid == null || filePath == null)
+            callback.onResponse(null);
+
+        params.put("module", "forumupload");
+        params.put("hash", sUploadHash);
+        params.put("uid", sUid);
+
+        LinkedHashMap<String, ContentBody> body = new LinkedHashMap<String, ContentBody>();
+        try {
+            body.put("hash", new StringBody(sUploadHash));
+            body.put("uid", new StringBody(sUid));
+            body.put("Filedata", new FileBody(new File(filePath)));
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        Request request = new MultipartRequest(
+            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+            body,
+            new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    callback.onResponse(s);
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    callback.onResponse(null);
+                }
+            }
+        );
+        ThisApp.requestQueue.add(request);
     }
 
     public static void login(final String username, final String password,

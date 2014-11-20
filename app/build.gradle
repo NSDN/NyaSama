@@ -17,10 +17,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
+    // adding this dependency causes gradle problem
+    // REF: http://stackoverflow.com/questions/20673888/duplicate-files-copied-android-studio-0-4-0
+    compile 'org.apache.httpcomponents:httpmime:4.2.2'
 }

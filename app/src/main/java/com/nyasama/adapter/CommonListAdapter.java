@@ -63,6 +63,9 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
         }
 
         public View getView(int viewId) {
+            if (viewId == 0)
+                return mConvertView;
+
             View view = mViews.get(viewId);
             if (view == null) {
                 view = mConvertView.findViewById(viewId);

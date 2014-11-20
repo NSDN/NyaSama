@@ -16,4 +16,11 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/message" />
+
+    <com.nyasama.view.FullGridView
+        android:id="@+id/attach_list"
+        android:numColumns="auto_fit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>

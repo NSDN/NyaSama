@@ -18,9 +18,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
+import com.nyasama.util.Discuz.Post;
+import com.nyasama.util.Discuz.Attachment;
+
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
 
@@ -30,6 +35,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,12 +43,6 @@ public class PostListActivity extends Activity
     implements AbsListView.OnScrollListener, AbsListView.OnItemClickListener {
 
     private final String TAG = "PostList";
-
-    private class Post {
-        public String id;
-        public String author;
-        public String message;
-    }
 
     private CommonListAdapter<Post> mListAdapter;
     private List<Post> mListData = new ArrayList<Post>();
@@ -94,12 +94,25 @@ public class PostListActivity extends Activity
                             JSONObject var = data.getJSONObject("Variables");
                             JSONArray postlist = var.getJSONArray("postlist");
                             for (int i = 0; i < postlist.length(); i ++) {
-                                final JSONObject post = postlist.getJSONObject(i);
-                                mListData.add(new Post() {{
-                                    this.id = post.optString("pid");
-                                    this.author = post.optString("author");
-                                    this.message = post.optString("message");
-                                }});
+                                JSONObject postData = postlist.getJSONObject(i);
+                                Post post = new Post();
+                                post.id = postData.optString("pid");
+                                post.author = postData.optString("author");
+                                post.message = postData.optString("message");
+                                mListData.add(post);
+                                if (postData.has("attachments")) {
+                                    final JSONObject attachlist = postData.getJSONObject("attachments");
+                                    for (Iterator<String> iter = attachlist.keys(); iter.hasNext(); ) {
+                                        String key = iter.next();
+                                        JSONObject attachData = attachlist.getJSONObject(key);
+                                        if (post.attachments == null)
+                                            post.attachments = new ArrayList<Attachment>();
+                                        Attachment attachment = new Attachment();
+                                        attachment.name = attachData.optString("filename");
+                                        attachment.src = attachData.optString("attachment");
+                                        post.attachments.add(attachment);
+                                    }
+                                }
                             }
                             JSONObject thread = var.getJSONObject("thread");
                             // Note: in x2 there is only "replies"
@@ -188,8 +201,20 @@ public class PostListActivity extends Activity
             public void convert(ViewHolder viewHolder, Post item) {
                 viewHolder.setText(R.id.author, item.author);
                 TextView textView = (TextView) viewHolder.getView(R.id.message);
+                // TODO: Important! We need taghandler
                 textView.setText(Html.fromHtml(item.message,
                         new HtmlImageGetter(textView, Discuz.DISCUZ_URL), null));
+                // TODO: Important! Nested listview clickable
+                if (item.attachments != null) {
+                    AbsListView listView = (AbsListView) viewHolder.getView(R.id.attach_list);
+                    listView.setAdapter(new CommonListAdapter<Attachment>(item.attachments, R.layout.fragment_post_attach_item) {
+                        @Override
+                        public void convert(ViewHolder viewHolder, Attachment item) {
+                            NetworkImageView imageView = (NetworkImageView) viewHolder.getView(0);
+                            imageView.setImageUrl(Discuz.DISCUZ_URL + "data/attachment/forum/" + item.src, ThisApp.imageLoader);
+                        }
+                    });
+                }
             }
         });
         listView.setOnScrollListener(this);

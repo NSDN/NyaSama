@@ -31,5 +31,6 @@
     <string name="action_post_now">Post Now</string>
     <string name="action_reply">Reply</string>
     <string name="title_main_home">HomePage</string>
+    <string name="action_add_image">Add Image</string>
 
 </resources>
