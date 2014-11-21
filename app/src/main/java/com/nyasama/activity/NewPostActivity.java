@@ -6,8 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +34,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +44,14 @@ import java.util.List;
 public class NewPostActivity extends Activity
     implements TextWatcher {
 
+    final String TAG = "NewPost";
     final int REQCODE_PICK_IMAGE = 1;
     final int REQCODE_PICK_CAPTURE = 2;
+
+    final int MAX_IMAGE_WIDTH = 500;
+    final int MAX_IMAGE_HEIGHT = 500;
+    final int THUMBNAIL_WIDTH = 100;
+    final int THUMBNAIL_HEIGHT = 100;
 
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
@@ -114,18 +126,6 @@ public class NewPostActivity extends Activity
         mInputContent.getText().insert(start, "[attachimg]"+image.uploadId+"[/attachimg]");
     }
 
-    int getUriId(Uri uri) {
-        String uriString = uri.toString();
-        int index = uriString.lastIndexOf(File.separator);
-        try {
-            return Integer.parseInt(uriString.substring(index + 1));
-        }
-        catch (NumberFormatException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
     // by bluebrain
     String getPathFromUri(Uri uri) {
@@ -177,19 +177,53 @@ public class NewPostActivity extends Activity
         });
     }
 
+    String mPhotoFilePath;
+
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
     // REF: http://developer.android.com/training/camera/photobasics.html#TaskPhotoView
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQCODE_PICK_IMAGE && resultCode == RESULT_OK) {
-            final Uri uri = data.getData();
-            Log.d("URII", uri.toString());
-            final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                    getContentResolver(),
-                    getUriId(uri),
-                    MediaStore.Images.Thumbnails.MICRO_KIND,
-                    null);
+        if ((requestCode == REQCODE_PICK_IMAGE || requestCode == REQCODE_PICK_CAPTURE)
+                && resultCode == RESULT_OK) {
+            //
+            String filePath = requestCode == REQCODE_PICK_IMAGE ?
+                    getPathFromUri(data.getData()) : mPhotoFilePath;
+
+            // resize the image if too large
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+            if (bitmap.getWidth() > MAX_IMAGE_WIDTH || bitmap.getHeight() > MAX_IMAGE_HEIGHT) {
+                int newWidth = MAX_IMAGE_WIDTH;
+                int newHeight = MAX_IMAGE_HEIGHT;
+                if (bitmap.getWidth() * MAX_IMAGE_HEIGHT > bitmap.getHeight() * MAX_IMAGE_WIDTH)
+                    newHeight = bitmap.getHeight() * MAX_IMAGE_WIDTH / bitmap.getWidth();
+                else
+                    newWidth = bitmap.getWidth() * MAX_IMAGE_HEIGHT / bitmap.getHeight();
+                File dir = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES);
+                try {
+                    File file = File.createTempFile("nyasama_resized_", ".jpg", dir);
+                    FileOutputStream stream = new FileOutputStream(file);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    stream.flush();
+                    stream.close();
+                    filePath = file.getAbsolutePath();
+                }
+                catch (FileNotFoundException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
+            //
+            final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
+                bitmap, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+            final String uploadFile = filePath;
+            final String fileName = requestCode == REQCODE_PICK_IMAGE ?
+                    "image #"+mImageAttachments.size() : "photo #"+mImageAttachments.size();
             final AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Uploading")
                     .setCancelable(false)
@@ -197,28 +231,24 @@ public class NewPostActivity extends Activity
             Discuz.upload(new HashMap<String, Object>() {{
                 put("type", "image");
                 put("fid", getIntent().getStringExtra("fid"));
-            }}, getPathFromUri(uri), new Response.Listener<String>() {
+            }}, uploadFile, new Response.Listener<String>() {
                 @Override
                 public void onResponse(final String s) {
                     dialog.cancel();
                     if (s != null) {
                         ImageAttachment image = new ImageAttachment() {{
-                            //bitmap = BitmapFactory.decodeStream(stream);
                             bitmap = thumbnail;
-                            name = uri.toString();
+                            name = fileName;
                             uploadId = s;
                         }};
                         mImageAttachments.add(image);
                         insertImageToContent(image);
                     }
                     else {
-                        Helper.toast("Upload image failed");
+                        Helper.toast(getString(R.string.image_upload_failed_toast));
                     }
                 }
             });
-        }
-        else if (requestCode == REQCODE_PICK_CAPTURE && resultCode == RESULT_OK) {
-            // TODO: finish this
         }
     }
 
@@ -266,6 +296,16 @@ public class NewPostActivity extends Activity
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            File dir = Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_PICTURES);
+                            try {
+                                File file = File.createTempFile("nyasama_", ".jpg", dir);
+                                mPhotoFilePath = file.getAbsolutePath();
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                            }
+                            catch (IOException e) {
+                                Log.e(TAG, "create photo cache failed");
+                            }
                             startActivityForResult(intent, REQCODE_PICK_CAPTURE);
                         }
                     })

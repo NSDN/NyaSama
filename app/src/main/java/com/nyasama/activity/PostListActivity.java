@@ -208,6 +208,7 @@ public class PostListActivity extends Activity
                 String message = compileMessage(item.message);
                 textView.setText(Html.fromHtml(message,
                         new HtmlImageGetter(textView, Discuz.DISCUZ_URL), null));
+                // TODO: display attachments
             }
         });
         listView.setOnScrollListener(this);

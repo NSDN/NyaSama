@@ -32,5 +32,6 @@
     <string name="action_reply">Reply</string>
     <string name="title_main_home">HomePage</string>
     <string name="action_add_image">Add Image</string>
+    <string name="image_upload_failed_toast">Upload image failed</string>
 
 </resources>
