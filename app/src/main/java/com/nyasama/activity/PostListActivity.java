@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class PostListActivity extends Activity
@@ -200,6 +202,7 @@ public class PostListActivity extends Activity
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.addFooterView(LayoutInflater.from(this)
                 .inflate(R.layout.fragment_list_loading, listView, false), false, false);
+        final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
         listView.setAdapter(mListAdapter = new CommonListAdapter<Post>(mListData, R.layout.fragment_post_item) {
             @Override
             public void convert(ViewHolder viewHolder, Post item) {
@@ -207,7 +210,7 @@ public class PostListActivity extends Activity
                 TextView textView = (TextView) viewHolder.getView(R.id.message);
                 String message = compileMessage(item.message);
                 textView.setText(Html.fromHtml(message,
-                        new HtmlImageGetter(textView, Discuz.DISCUZ_URL), null));
+                        new HtmlImageGetter(textView, Discuz.DISCUZ_URL, imageCache), null));
                 // TODO: display attachments
             }
         });
