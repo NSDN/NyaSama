@@ -54,15 +54,15 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
                 gridView.setAdapter(new CommonListAdapter<Forum>(item.forums,
                         R.layout.fragment_forum_item) {
                     @Override
-                    public void convert(ViewHolder viewHolder, Forum item) {
+                    public void convert(ViewHolder viewHolder, final Forum item) {
                         Button btn = (Button) viewHolder.getView(R.id.button);
                         btn.setText(item.name);
-                        final String fid = item.id;
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                                intent.putExtra("fid", fid);
+                                intent.putExtra("fid", item.id);
+                                intent.putExtra("title", item.name);
                                 startActivity(intent);
                             }
                         });

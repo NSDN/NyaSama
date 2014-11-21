@@ -49,7 +49,9 @@ public class ThreadListActivity extends FragmentActivity
                             View view, int position, long id) {
         if (fragment == mThreadListFragment) {
             Intent intent = new Intent(view.getContext(), PostListActivity.class);
-            intent.putExtra("tid", mThreadListFragment.getData(position).id);
+            Thread thread = mThreadListFragment.getData(position);
+            intent.putExtra("tid", thread.id);
+            intent.putExtra("title", thread.title);
             startActivity(intent);
         }
     }
@@ -149,15 +151,15 @@ public class ThreadListActivity extends FragmentActivity
             viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
         }
         else if (fragment == mSubListFragment) {
-            Forum item = (Forum) obj;
+            final Forum item = (Forum) obj;
             Button btn = (Button) viewHolder.getView(R.id.button);
             btn.setText(item.name);
-            final String fid = item.id;
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                    intent.putExtra("fid", fid);
+                    intent.putExtra("fid", item.id);
+                    intent.putExtra("title", item.name);
                     startActivity(intent);
                 }
             });
@@ -170,6 +172,9 @@ public class ThreadListActivity extends FragmentActivity
         setContentView(R.layout.activity_thread_list);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        String title = getIntent().getStringExtra("title");
+        if (title != null) setTitle(title);
 
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
         pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {

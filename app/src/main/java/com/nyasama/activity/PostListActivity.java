@@ -199,6 +199,9 @@ public class PostListActivity extends Activity
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        String title = getIntent().getStringExtra("title");
+        if (title != null) setTitle(title);
+
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.addFooterView(LayoutInflater.from(this)
                 .inflate(R.layout.fragment_list_loading, listView, false), false, false);
