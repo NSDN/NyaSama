@@ -243,8 +243,15 @@ public class PostListActivity extends Activity
         if (id == R.id.action_settings) {
             return true;
         }
-        else if (id == R.id.action_reply) {
+        else if (id == R.id.action_quick_reply) {
             quickReply();
+        }
+        else if (id == R.id.action_reply) {
+            final String tid = getIntent().getStringExtra("tid");
+            startActivityForResult(new Intent(this, NewPostActivity.class) {{
+                putExtra("tid", tid);
+                putExtra("thread_title", "Re: "+getTitle());
+            }}, Discuz.REQUEST_CODE_REPLY);
             return true;
         }
         else if (id == android.R.id.home) {
