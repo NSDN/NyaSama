@@ -142,7 +142,7 @@ public class Discuz {
                 HashMap<String, String> params = new HashMap<String, String>();
                 if (body != null)
                     for (Map.Entry<String, Object> e : body.entrySet())
-                        params.put(e.getKey(), e.getValue().toString());
+                        if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
                 return params;
             }
         };
@@ -165,7 +165,8 @@ public class Discuz {
         try {
             body.put("hash", new StringBody(sUploadHash));
             body.put("uid", new StringBody(sUid));
-            body.put("Filedata", new FileBody(new File(filePath)));
+            if (filePath != null)
+                body.put("Filedata", new FileBody(new File(filePath)));
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);

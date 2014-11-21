@@ -18,9 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
-import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
@@ -186,6 +184,12 @@ public class PostListActivity extends Activity
         }).show();
     }
 
+    // this function compiles the message to display in android TextViews
+    String compileMessage(String message) {
+        return message.replaceAll("<img([^>]*) src=\"static/image/common/none.gif\"", "<img$1 ")
+                .replaceAll("<img([^>]*) file=\"(.*?)\"", "<img$1 src=\"$2\"");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -201,20 +205,9 @@ public class PostListActivity extends Activity
             public void convert(ViewHolder viewHolder, Post item) {
                 viewHolder.setText(R.id.author, item.author);
                 TextView textView = (TextView) viewHolder.getView(R.id.message);
-                // TODO: Important! We need taghandler
-                textView.setText(Html.fromHtml(item.message,
+                String message = compileMessage(item.message);
+                textView.setText(Html.fromHtml(message,
                         new HtmlImageGetter(textView, Discuz.DISCUZ_URL), null));
-                // TODO: Important! Nested listview clickable
-                if (item.attachments != null) {
-                    AbsListView listView = (AbsListView) viewHolder.getView(R.id.attach_list);
-                    listView.setAdapter(new CommonListAdapter<Attachment>(item.attachments, R.layout.fragment_post_attach_item) {
-                        @Override
-                        public void convert(ViewHolder viewHolder, Attachment item) {
-                            NetworkImageView imageView = (NetworkImageView) viewHolder.getView(0);
-                            imageView.setImageUrl(Discuz.DISCUZ_URL + "data/attachment/forum/" + item.src, ThisApp.imageLoader);
-                        }
-                    });
-                }
             }
         });
         listView.setOnScrollListener(this);
