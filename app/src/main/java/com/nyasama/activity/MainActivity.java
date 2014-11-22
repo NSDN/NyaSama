@@ -8,7 +8,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -192,7 +192,7 @@ public class MainActivity extends FragmentActivity
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
                 View rootView = inflater.inflate(R.layout.fragment_main_home, container, false);
                 ViewPager pager = (ViewPager) rootView.findViewById(R.id.view_pager);
-                pager.setAdapter(new FragmentPagerAdapter(mActivity.getSupportFragmentManager()) {
+                pager.setAdapter(new FragmentStatePagerAdapter(mActivity.getSupportFragmentManager()) {
                     @Override
                     public android.support.v4.app.Fragment getItem(int i) {
                         if (i == 0)
