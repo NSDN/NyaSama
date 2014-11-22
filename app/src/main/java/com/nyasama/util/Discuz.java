@@ -42,6 +42,17 @@ public class Discuz {
     public static class Forum {
         public String id;
         public String name;
+        public int posts;
+        public int threads;
+        public int todayPosts;
+
+        public Forum(JSONObject data) {
+            id = data.optString("fid");
+            name = data.optString("name");
+            posts = Integer.parseInt(data.optString("posts"));
+            threads = Integer.parseInt(data.optString("threads"));
+            todayPosts = Integer.parseInt(data.optString("todayposts"));
+        }
     }
     public static class ForumCatalog {
         public String name;
@@ -50,7 +61,24 @@ public class Discuz {
     public static class Thread {
         public String id;
         public String title;
-        public String sub;
+        public String author;
+        public String lastpost;
+        public String dateline;
+        public int replies;
+        public int views;
+        public int attachments;
+
+        public Thread(JSONObject data) {
+            id = data.optString("tid");
+            title = data.optString("subject");
+            author = data.optString("author");
+            lastpost = data.optString("lastpost");
+            dateline = data.optString("dateline");
+            replies = Integer.parseInt(data.optString("replies"));
+            views = Integer.parseInt(data.optString("views"));
+            if (!data.isNull("attachments"))
+                attachments = Integer.parseInt(data.optString("attachments"));
+        }
     }
     public static class Post {
         public String id;

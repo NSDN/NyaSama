@@ -98,12 +98,7 @@ public class ThreadListActivity extends FragmentActivity
                         JSONArray threads = var.getJSONArray("forum_threadlist");
                         for (int i = 0; i < threads.length(); i++) {
                             final JSONObject thread = threads.getJSONObject(i);
-                            listData.add(new Thread() {{
-                                this.id = thread.getString("tid");
-                                this.title = thread.optString("subject");
-                                this.sub = thread.optString("author") + " " +
-                                        thread.optString("lastpost");
-                            }});
+                            listData.add(new Thread(thread));
                         }
                         JSONObject forum = var.getJSONObject("forum");
                         total = Integer.parseInt(
@@ -115,10 +110,7 @@ public class ThreadListActivity extends FragmentActivity
                             if (sublist.length() > 0 && mSubList.size() == 0) {
                                 for (int i = 0; i < sublist.length(); i ++) {
                                     final JSONObject subforum = sublist.getJSONObject(i);
-                                    mSubList.add(new Forum() {{
-                                        this.id = subforum.optString("fid");
-                                        this.name = subforum.optString("name");
-                                    }});
+                                    mSubList.add(new Forum(subforum));
                                 }
                                 // notify view pager
                                 Helper.updateVisibility(findViewById(R.id.view_strip), true);
@@ -148,7 +140,9 @@ public class ThreadListActivity extends FragmentActivity
         if (fragment == mThreadListFragment) {
             Thread item = (Thread) obj;
             viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-            viewHolder.setText(R.id.sub, Html.fromHtml(item.sub));
+            viewHolder.setText(R.id.sub,
+                    Html.fromHtml(item.author + " " + item.lastpost));
+            viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
         }
         else if (fragment == mSubListFragment) {
             final Forum item = (Forum) obj;

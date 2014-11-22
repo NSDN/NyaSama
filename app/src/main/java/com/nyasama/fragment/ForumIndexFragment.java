@@ -97,11 +97,9 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
                             final JSONArray forumIds = cat.getJSONArray("forums");
                             forumCatalog.forums = new ArrayList<Forum>();
                             for (int j = 0; j < forumIds.length(); j++) {
-                                final int idx = j;
-                                forumCatalog.forums.add(new Forum() {{
-                                    this.id = forumIds.getString(idx);
-                                    this.name = forums.getJSONObject(this.id).getString("name");
-                                }});
+                                String id = forumIds.getString(j);
+                                JSONObject forum = forums.getJSONObject(id);
+                                forumCatalog.forums.add(new Forum(forum));
                             }
                             mForumCatalogs.add(forumCatalog);
                         }
