@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +95,34 @@ public class Discuz {
     public static class Post {
         public String id;
         public String author;
+        public int authorId;
+        public int number;
         public String message;
         public String dateline;
         public List<Attachment> attachments;
+
+        public Post(JSONObject data) {
+            id = data.optString("pid");
+            author = data.optString("author");
+            authorId = Integer.parseInt(data.optString("authorid"));
+            number = Integer.parseInt(data.optString("number"));
+            message = data.optString("message");
+            dateline = data.optString("dateline");
+
+            JSONObject attachlist = data.optJSONObject("attachments");
+            if (attachlist != null) {
+                for (Iterator<String> iter = attachlist.keys(); iter.hasNext(); ) {
+                    String key = iter.next();
+                    JSONObject attachData = attachlist.optJSONObject(key);
+                    if (attachments == null)
+                        attachments = new ArrayList<Attachment>();
+                    Attachment attachment = new Attachment();
+                    attachment.name = attachData.optString("filename");
+                    attachment.src = attachData.optString("attachment");
+                    attachments.add(attachment);
+                }
+            }
+        }
     }
     public static class Attachment {
         public String name;
