@@ -188,7 +188,9 @@ public class PostListActivity extends Activity
 
     // this function compiles the message to display in android TextViews
     String compileMessage(String message) {
-        return message.replaceAll("<img([^>]*) src=\"static/image/common/none.gif\"", "<img$1 ")
+        return message
+                .replaceAll("<a .*?</a>", "")
+                .replaceAll("<img([^>]*) src=\"static/image/common/none.gif\"", "<img$1 ")
                 .replaceAll("<img([^>]*) file=\"(.*?)\"", "<img$1 src=\"$2\"");
     }
 
@@ -280,9 +282,10 @@ public class PostListActivity extends Activity
             loadMore();
     }
 
-    private Pattern patt1 = Pattern.compile("\\<span style=\"display:none\"\\>.*?\\</span\\>", Pattern.DOTALL);
-    private Pattern patt2 = Pattern.compile("\\<.+quote\\>.+div\\>", Pattern.DOTALL);
+    private Pattern patt1 = Pattern.compile("<span style=\"display:none\">.*?</span>", Pattern.DOTALL);
+    private Pattern patt2 = Pattern.compile("<.+quote>.+div>", Pattern.DOTALL);
     private Pattern patt3 = Pattern.compile("<[^<>]*>", Pattern.DOTALL);
+    private int MAX_TRIMSTR_LENGTH = 30;
     private String getTrimstr(Post post, String tid) {
         // Note: see Discuz source net/discuz/source/PostSender.java
         String message = post.message;
@@ -290,6 +293,8 @@ public class PostListActivity extends Activity
         message = Html.fromHtml(message).toString();
         message = patt2.matcher(message).replaceAll("");
         message = patt3.matcher(message).replaceAll("");
+        if (message.length() > MAX_TRIMSTR_LENGTH)
+            message = message.substring(0, MAX_TRIMSTR_LENGTH - 3) + "...";
         return "[quote]"+
             "[size=2]"+
                 "[color=#999999]"+post.author+" at "+" <some time> "+"[/color] "+

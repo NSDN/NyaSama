@@ -84,10 +84,8 @@ public class NewPostActivity extends Activity
             else if (noticetrimstr != null)
                 put("noticetrimstr", noticetrimstr);
             // strange, but really works
-            /*
             for (ImageAttachment image : mImageAttachments)
                 put("attachnew["+image.uploadId+"][description]", "");
-                */
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
