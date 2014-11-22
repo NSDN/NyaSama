@@ -35,5 +35,6 @@
     <string name="image_upload_failed_toast">Upload image failed</string>
     <string name="title_activity_user_profile">UserProfileActivity</string>
     <string name="logout_button_text">Log out</string>
+    <string name="action_quick_reply">Quick Reply</string>
 
 </resources>
