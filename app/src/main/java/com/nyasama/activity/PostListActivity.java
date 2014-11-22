@@ -13,7 +13,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -53,37 +55,66 @@ public class PostListActivity extends FragmentActivity
     private CommonListFragment<Post> mListFragment;
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
 
-    public void replyThread(final String text) {
-        if (!text.isEmpty()) {
-            Discuz.execute("sendreply", new HashMap<String, Object>() {{
-                put("tid", getIntent().getStringExtra("tid"));
-                put("replysubmit", "yes");
-            }}, new HashMap<String, Object>() {{
-                put("message", text);
-            }}, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject data) {
-                    if (data.has(Discuz.VOLLEY_ERROR)) {
-                        Helper.toast(R.string.network_error_toast);
-                    }
-                    else {
-                        JSONObject message = data.optJSONObject("Message");
-                        String messageval = message.optString("messageval");
-                        if ("post_reply_succeed".equals(messageval)) {
-                            mListFragment.reloadLast();
-                        }
-                        else if ("replyperm_login_nopermission//1".equals(messageval)) {
-                            startActivity(new Intent(PostListActivity.this, LoginActivity.class));
-                        }
-                        else
-                            Helper.toast(message.optString("messagestr"));
-                    }
+    public void doReply(final String text, final String trimstr) {
+        Discuz.execute("sendreply", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+            put("replysubmit", "yes");
+        }}, new HashMap<String, Object>() {{
+            put("message", text);
+            if (trimstr != null)
+                put("noticetrimstr", trimstr);
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
                 }
-            });
-        }
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    String messageval = message.optString("messageval");
+                    if ("post_reply_succeed".equals(messageval)) {
+                        mListFragment.reloadLast();
+                    }
+                    else if ("replyperm_login_nopermission//1".equals(messageval)) {
+                        startActivity(new Intent(PostListActivity.this, LoginActivity.class));
+                    }
+                    else
+                        Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
     }
 
-    public void quickReply() {
+    public void doComment(final int pid, final String comment) {
+        Discuz.execute("addcomment", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+            put("pid", pid);
+        }}, new HashMap<String, Object>() {{
+            put("message", comment);
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    String messageval = message.optString("messageval");
+                    if ("comment_add_succeed".equals(messageval)) {
+                        List<Comment> comments = mComments.get(pid);
+                        if (comments == null)
+                            mComments.put(pid, comments = new ArrayList<Comment>());
+                        comments.add(0, new Comment(Integer.parseInt(Discuz.sUid), Discuz.sUsername, comment));
+                        mListFragment.getListAdapter().notifyDataSetChanged();
+                    }
+                    else
+                        Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
+    }
+
+    public void quickReply(final Post item) {
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
                 .setTitle("QuickReply")
@@ -92,14 +123,67 @@ public class PostListActivity extends FragmentActivity
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        replyThread(input.getText().toString());
+                        String text = input.getText().toString();
+                        if (!text.isEmpty())
+                            doReply(text, item == null ? null : getTrimstr(item));
                     }
-                }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                //
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void addComment(Post item) {
+        final int pid = item.id;
+        final EditText input = new EditText(this);
+        new AlertDialog.Builder(this)
+                .setTitle("AddComment")
+                .setMessage("Type Something")
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String text = input.getText().toString();
+                        if (!text.isEmpty())
+                            doComment(pid, text);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void gotoReply(final Post item) {
+        startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
+            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+            if (item != null) {
+                putExtra("thread_title", "Re: " + item.author + " #" + mListFragment.getIndex(item));
+                putExtra("notice_trimstr", getTrimstr(item));
             }
-        }).show();
+            else {
+                putExtra("thread_title", "Re: " + getTitle());
+            }
+        }}, Discuz.REQUEST_CODE_REPLY);
+    }
+
+    public void showMenu(View view, final Post item) {
+        PopupMenu menu = new PopupMenu(PostListActivity.this, view);
+        menu.getMenuInflater().inflate(R.menu.menu_post_item, menu.getMenu());
+        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int action = menuItem.getItemId();
+                if (action == R.id.action_comment) {
+                    addComment(item);
+                }
+                else if (action == R.id.action_quick_reply) {
+                    quickReply(item);
+                }
+                else if (action == R.id.action_reply) {
+                    gotoReply(item);
+                }
+                return true;
+            }
+        });
+        menu.show();
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -166,14 +250,10 @@ public class PostListActivity extends FragmentActivity
             return true;
         }
         else if (id == R.id.action_quick_reply) {
-            quickReply();
+            quickReply(null);
         }
         else if (id == R.id.action_reply) {
-            final String tid = getIntent().getStringExtra("tid");
-            startActivityForResult(new Intent(this, NewPostActivity.class) {{
-                putExtra("tid", tid);
-                putExtra("thread_title", "Re: "+getTitle());
-            }}, Discuz.REQUEST_CODE_REPLY);
+            gotoReply(null);
             return true;
         }
         else if (id == android.R.id.home) {
@@ -187,8 +267,9 @@ public class PostListActivity extends FragmentActivity
     private Pattern patt1 = Pattern.compile("<span style=\"display:none\">.*?</span>", Pattern.DOTALL);
     private Pattern patt2 = Pattern.compile("<.+quote>.+div>", Pattern.DOTALL);
     private Pattern patt3 = Pattern.compile("<[^<>]*>", Pattern.DOTALL);
-    private String getTrimstr(Post post, String tid) {
+    private String getTrimstr(Post post) {
         // Note: see Discuz source net/discuz/source/PostSender.java
+        int tid = getIntent().getIntExtra("tid", 0);
         String message = post.message;
         message = patt1.matcher(message).replaceAll("");
         message = Html.fromHtml(message).toString();
@@ -208,32 +289,36 @@ public class PostListActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, final int position, long id) {
-        final Post post = mListFragment.getData(position);
-        final String tid = getIntent().getStringExtra("tid");
-        startActivityForResult(new Intent(this, NewPostActivity.class) {{
-            putExtra("tid", tid);
-            putExtra("thread_title", "Re: #" + position + " (" + post.author + ")");
-            putExtra("notice_trimstr", getTrimstr(post, tid));
-        }}, Discuz.REQUEST_CODE_REPLY);
     }
 
     Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
     @Override
-    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, Post item) {
+    public void onConvertView(CommonListFragment fragment,
+                              CommonListAdapter.ViewHolder viewHolder, final Post item) {
         String avatar_url = Discuz.DISCUZ_URL +
                 "uc_server/avatar.php?uid="+item.authorId+"&size=small";
         ((NetworkImageView) viewHolder.getView(R.id.avatar))
                 .setImageUrl(avatar_url, ThisApp.imageLoader);
+
         viewHolder.setText(R.id.author, item.author);
         viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
         viewHolder.setText(R.id.index, "#"+item.number);
-        TextView textView = (TextView) viewHolder.getView(R.id.message);
-        textView.setText(Html.fromHtml(compileMessage(item.message),
-                new HtmlImageGetter(textView, Discuz.DISCUZ_URL, imageCache), null));
+
+        viewHolder.getView(R.id.menu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showMenu(view, item);
+            }
+        });
+
+        TextView messageText = (TextView) viewHolder.getView(R.id.message);
+        messageText.setText(Html.fromHtml(compileMessage(item.message),
+                new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
+
         // load comments
-        List<Comment> comments = mComments.get(Integer.parseInt(item.id));
+        List<Comment> comments = mComments.get(item.id);
+        AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
         if (comments != null) {
-            AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
             commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
                 @Override
                 public void convert(ViewHolder viewHolder, Comment item) {
@@ -241,6 +326,15 @@ public class PostListActivity extends FragmentActivity
                     viewHolder.setText(R.id.comment, item.comment);
                 }
             });
+            commentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    addComment(item);
+                }
+            });
+        }
+        else {
+            commentList.setAdapter(null);
         }
         // TODO: display attachments
     }
@@ -250,7 +344,7 @@ public class PostListActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment,
                               final int position, final int page, final List listData) {
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
-            put("tid", getIntent().getStringExtra("tid"));
+            put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
@@ -260,7 +354,7 @@ public class PostListActivity extends FragmentActivity
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
-                else if (data.has("Message")) {
+                else if (data.opt("Message") instanceof JSONObject) {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
@@ -275,9 +369,10 @@ public class PostListActivity extends FragmentActivity
                                 })
                                 .show();
                     }
-                    // TODO: remove these
-                    catch (JSONException e) { /**/ }
-                    catch (NullPointerException e) { /**/ }
+                    catch (JSONException e) {
+                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Helper.toast(R.string.load_failed_toast);
+                    }
                 }
                 else {
                     // remove possible duplicated items
@@ -292,7 +387,7 @@ public class PostListActivity extends FragmentActivity
                         }
                         JSONObject thread = var.getJSONObject("thread");
                         // comments
-                        if (var.has("comments")) {
+                        if (var.opt("comments") instanceof JSONObject) {
                             JSONObject comments = var.getJSONObject("comments");
                             for(Iterator<String> iter = comments.keys(); iter.hasNext(); ) {
                                 String key = iter.next();
@@ -314,8 +409,6 @@ public class PostListActivity extends FragmentActivity
                         Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
-                    // TODO: remove these
-                    catch (NullPointerException e) { /**/ }
                 }
                 mListFragment.loadMoreDone(total);
             }

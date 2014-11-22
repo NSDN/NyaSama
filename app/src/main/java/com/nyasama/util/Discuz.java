@@ -43,7 +43,7 @@ public class Discuz {
     public static int REQUEST_CODE_REPLY = 3;
 
     public static class Forum {
-        public String id;
+        public int id;
         public String name;
         public String icon;
         public int posts;
@@ -51,7 +51,7 @@ public class Discuz {
         public int todayPosts;
 
         public Forum(JSONObject data) {
-            id = data.optString("fid");
+            id = Integer.parseInt(data.optString("fid"));
             name = data.optString("name");
             posts = Integer.parseInt(data.optString("posts"));
             threads = Integer.parseInt(data.optString("threads"));
@@ -71,7 +71,7 @@ public class Discuz {
         public List<Forum> forums;
     }
     public static class Thread {
-        public String id;
+        public int id;
         public String title;
         public String author;
         public String lastpost;
@@ -81,7 +81,7 @@ public class Discuz {
         public int attachments;
 
         public Thread(JSONObject data) {
-            id = data.optString("tid");
+            id = Integer.parseInt(data.optString("tid"));
             title = data.optString("subject");
             author = data.optString("author");
             lastpost = data.optString("lastpost");
@@ -93,16 +93,16 @@ public class Discuz {
         }
     }
     public static class Post {
-        public String id;
-        public String author;
+        public int id;
         public int authorId;
         public int number;
+        public String author;
         public String message;
         public String dateline;
         public List<Attachment> attachments;
 
         public Post(JSONObject data) {
-            id = data.optString("pid");
+            id = Integer.parseInt(data.optString("pid"));
             author = data.optString("author");
             authorId = Integer.parseInt(data.optString("authorid"));
             number = Integer.parseInt(data.optString("number"));
@@ -129,14 +129,19 @@ public class Discuz {
         public String src;
     }
     public static class Comment {
-        public String comment;
-        public String author;
         public int authorId;
+        public String author;
+        public String comment;
 
         public Comment(JSONObject data) {
-            comment = data.optString("comment");
-            author = data.optString("author");
             authorId = Integer.parseInt(data.optString("authorid"));
+            author = data.optString("author");
+            comment = data.optString("comment");
+        }
+        public Comment(int authorId, String author, String comment) {
+            this.authorId = authorId;
+            this.author = author;
+            this.comment = comment;
         }
     }
 
@@ -172,6 +177,14 @@ public class Discuz {
             if (body.get("mobiletype") == null)
                 body.put("mobiletype", 2);
         }
+        else if (module.equals("addcomment")) {
+            if (body.get("formhash") == null)
+                body.put("formhash", sFormHash);
+            if (body.get("handlekey") == null)
+                body.put("handlekey", "comment");
+            if (body.get("commentsubmit") == null)
+                body.put("commentsubmit", "yes");
+        }
         params.put("module", module);
         if (params.get("submodule") == null)
             params.put("submodule", "checkpost");
@@ -187,7 +200,7 @@ public class Discuz {
                         data = new JSONObject(response);
                     }
                     catch (JSONException e) {
-                        //
+                        Log.e("JSONError", "Parse JSON failed: "+e.getMessage());
                     }
                     JSONObject var = data.optJSONObject("Variables");
                     if (var != null) {
@@ -208,15 +221,16 @@ public class Discuz {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     JSONObject data = new JSONObject();
-                    // NOTE: getMessage may return null
                     String msg = volleyError.getMessage();
+                    // NOTE: getMessage may return null
+                    if (msg == null) msg = "Unknown";
                     try {
                         data.put(VOLLEY_ERROR, msg);
                     }
                     catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
-                    Log.e("VolleyError", msg != null ? msg : "Unknown");
+                    Log.e("VolleyError", msg);
                     callback.onResponse(data);
                 }
             }) {

@@ -36,5 +36,6 @@
     <string name="title_activity_user_profile">UserProfileActivity</string>
     <string name="logout_button_text">Log out</string>
     <string name="action_quick_reply">Quick Reply</string>
+    <string name="action_comment">Comment</string>
 
 </resources>

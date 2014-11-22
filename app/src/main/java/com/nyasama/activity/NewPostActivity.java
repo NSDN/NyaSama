@@ -80,13 +80,13 @@ public class NewPostActivity extends Activity
         }
 
         Intent intent = getIntent();
-        final String fid = intent.getStringExtra("fid");
-        final String tid = intent.getStringExtra("tid");
-        if (fid == null && tid == null)
+        final int fid = intent.getIntExtra("fid", 0);
+        final int tid = intent.getIntExtra("tid", 0);
+        if (fid == 0 && tid == 0)
             throw new RuntimeException("fid or tid is required!");
 
-        Discuz.execute(fid != null ? "newthread" : "sendreply", new HashMap<String, Object>() {{
-            if (fid != null) {
+        Discuz.execute(fid > 0 ? "newthread" : "sendreply", new HashMap<String, Object>() {{
+            if (fid > 0) {
                 put("fid", fid);
                 put("topicsubmit", "yes");
             }
@@ -96,7 +96,7 @@ public class NewPostActivity extends Activity
             }
         }}, new HashMap<String, Object>() {{
             put("message", content);
-            if (fid != null)
+            if (fid > 0)
                 put("subject", title);
             else if (noticetrimstr != null)
                 put("noticetrimstr", noticetrimstr);
@@ -261,7 +261,7 @@ public class NewPostActivity extends Activity
                     .show();
             Discuz.upload(new HashMap<String, Object>() {{
                 put("type", "image");
-                put("fid", getIntent().getStringExtra("fid"));
+                put("fid", getIntent().getIntExtra("fid", 0));
             }}, uploadFile, new Response.Listener<String>() {
                 @Override
                 public void onResponse(final String s) {

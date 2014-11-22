@@ -124,7 +124,7 @@ public class ThreadListActivity extends FragmentActivity
         }
         else if (id == R.id.action_new_post) {
             startActivityForResult(new Intent(this, NewPostActivity.class) {{
-                putExtra("fid", ThreadListActivity.this.getIntent().getStringExtra("fid"));
+                putExtra("fid", ThreadListActivity.this.getIntent().getIntExtra("fid", 0));
             }}, Discuz.REQUEST_CODE_NEW_THREAD);
             return true;
         }
@@ -160,7 +160,7 @@ public class ThreadListActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment,
                               final int position, final int page, final List listData) {
         if (fragment == mThreadListFragment) Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
-            put("fid", getIntent().getStringExtra("fid"));
+            put("fid", getIntent().getIntExtra("fid", 0));
             put("tpp", PAGE_SIZE_COUNT);
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {

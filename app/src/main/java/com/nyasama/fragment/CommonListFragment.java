@@ -82,15 +82,16 @@ public class CommonListFragment<T> extends Fragment
         return loadMore();
     }
 
-    /*
-    public boolean reloadLast() {
-        mListItemCount = Integer.MAX_VALUE;
-        return loadMore();
-    }
-    */
-
     public T getData(int position) {
         return mListData.get(position);
+    }
+
+    public int getIndex(T data) {
+        return mListData.indexOf(data);
+    }
+
+    public CommonListAdapter getListAdapter() {
+        return mListAdapter;
     }
 
     @Override
@@ -132,6 +133,7 @@ public class CommonListFragment<T> extends Fragment
         });
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
+        registerForContextMenu(listView);
         return mListLayoutView;
     }
 
