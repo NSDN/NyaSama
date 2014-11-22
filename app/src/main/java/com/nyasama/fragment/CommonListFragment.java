@@ -77,6 +77,11 @@ public class CommonListFragment<T> extends Fragment
         return loadMore();
     }
 
+    public boolean reloadLast() {
+        mListItemCount = Integer.MAX_VALUE;
+        return loadMore();
+    }
+
     /*
     public boolean reloadLast() {
         mListItemCount = Integer.MAX_VALUE;

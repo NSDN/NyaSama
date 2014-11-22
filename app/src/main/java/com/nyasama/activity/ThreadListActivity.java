@@ -38,12 +38,103 @@ public class ThreadListActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     private final String TAG = "ThreadList";
+    private final int PAGE_SIZE_COUNT = 20;
 
     private CommonListFragment<Thread> mThreadListFragment;
     private CommonListFragment<Forum> mSubListFragment;
     private List<Forum> mSubList = new ArrayList<Forum>();
     private FragmentPagerAdapter mPageAdapter;
-    private int mPageSize = 20;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_thread_list);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        String title = getIntent().getStringExtra("title");
+        if (title != null) setTitle(title);
+
+        ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
+        pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int i) {
+                if (i == 0) {
+                    mThreadListFragment = new CommonListFragment<Thread>();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_thread_list);
+                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_thread_item);
+                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.list);
+                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, PAGE_SIZE_COUNT);
+                    mThreadListFragment.setArguments(bundle);
+                    return mThreadListFragment;
+                } else {
+                    mSubListFragment = new CommonListFragment<Forum>();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_forum_cat_item);
+                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_forum_item);
+                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.forum_list);
+                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, PAGE_SIZE_COUNT);
+                    mSubListFragment.setArguments(bundle);
+                    return mSubListFragment;
+                }
+            }
+
+            @Override
+            public int getCount() {
+                return mSubList.size() > 0 ? 2 : 1;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return position == 0 ?
+                        // TODO: rename this
+                        "Threads" :
+                        "Sub Forum";
+            }
+        });
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
+            if (resultCode > 0)
+                mThreadListFragment.reloadAll();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_thread_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.action_new_post) {
+            startActivityForResult(new Intent(this, NewPostActivity.class) {{
+                putExtra("fid", ThreadListActivity.this.getIntent().getStringExtra("fid"));
+            }}, Discuz.REQUEST_CODE_NEW_THREAD);
+            return true;
+        }
+        else if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onItemClick(CommonListFragment fragment,
@@ -70,7 +161,7 @@ public class ThreadListActivity extends FragmentActivity
                               final int position, final int page, final List listData) {
         if (fragment == mThreadListFragment) Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
             put("fid", getIntent().getStringExtra("fid"));
-            put("tpp", mPageSize);
+            put("tpp", PAGE_SIZE_COUNT);
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
@@ -160,97 +251,6 @@ public class ThreadListActivity extends FragmentActivity
             ((NetworkImageView) viewHolder.getView(R.id.icon))
                     .setImageUrl(item.icon, ThisApp.imageLoader);
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_thread_list);
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        String title = getIntent().getStringExtra("title");
-        if (title != null) setTitle(title);
-
-        ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
-        pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int i) {
-                if (i == 0) {
-                    mThreadListFragment = new CommonListFragment<Thread>();
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_thread_list);
-                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_thread_item);
-                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.list);
-                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, mPageSize);
-                    mThreadListFragment.setArguments(bundle);
-                    return mThreadListFragment;
-                } else {
-                    mSubListFragment = new CommonListFragment<Forum>();
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_forum_cat_item);
-                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_forum_item);
-                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.forum_list);
-                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, mPageSize);
-                    mSubListFragment.setArguments(bundle);
-                    return mSubListFragment;
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return mSubList.size() > 0 ? 2 : 1;
-            }
-
-            @Override
-            public CharSequence getPageTitle(int position) {
-                return position == 0 ?
-                        // TODO: rename this
-                        "Threads" :
-                        "Sub Forum";
-            }
-        });
-
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
-            if (resultCode > 0)
-                mThreadListFragment.reloadAll();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_thread_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        else if (id == R.id.action_new_post) {
-            startActivityForResult(new Intent(this, NewPostActivity.class) {{
-                putExtra("fid", ThreadListActivity.this.getIntent().getStringExtra("fid"));
-            }}, Discuz.REQUEST_CODE_NEW_THREAD);
-            return true;
-        }
-        else if (id == android.R.id.home) {
-            finish();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }
