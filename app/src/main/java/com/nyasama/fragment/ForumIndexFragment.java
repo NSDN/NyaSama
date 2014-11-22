@@ -6,12 +6,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.GridView;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
 import com.nyasama.activity.ThreadListActivity;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
@@ -50,22 +52,27 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
             public void convert(ViewHolder viewHolder, ForumCatalog item) {
                 viewHolder.setText(R.id.forum_cat_title, item.name);
                 // bind the grid view
-                GridView gridView = (GridView)viewHolder.getView(R.id.forum_list);
-                gridView.setAdapter(new CommonListAdapter<Forum>(item.forums,
+                final List<Forum> forums = item.forums;
+                AbsListView listView = (AbsListView)viewHolder.getView(R.id.forum_list);
+                listView.setAdapter(new CommonListAdapter<Forum>(forums,
                         R.layout.fragment_forum_item) {
                     @Override
                     public void convert(ViewHolder viewHolder, final Forum item) {
-                        Button btn = (Button) viewHolder.getView(R.id.button);
-                        btn.setText(item.name);
-                        btn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                                intent.putExtra("fid", item.id);
-                                intent.putExtra("title", item.name);
-                                startActivity(intent);
-                            }
-                        });
+                        viewHolder.setText(R.id.title, item.name);
+                        viewHolder.setText(R.id.sub,
+                                "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                        ((NetworkImageView) viewHolder.getView(R.id.icon))
+                                .setImageUrl(item.icon, ThisApp.imageLoader);
+                    }
+                });
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        Forum item = forums.get(i);
+                        Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+                        intent.putExtra("fid", item.id);
+                        intent.putExtra("title", item.name);
+                        startActivity(intent);
                     }
                 });
             }

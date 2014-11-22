@@ -99,6 +99,7 @@ public class PostListActivity extends Activity
                                 post.id = postData.optString("pid");
                                 post.author = postData.optString("author");
                                 post.message = postData.optString("message");
+                                post.dateline = postData.optString("dateline");
                                 mListData.add(post);
                                 if (postData.has("attachments")) {
                                     final JSONObject attachlist = postData.getJSONObject("attachments");
@@ -297,7 +298,7 @@ public class PostListActivity extends Activity
             message = message.substring(0, MAX_TRIMSTR_LENGTH - 3) + "...";
         return "[quote]"+
             "[size=2]"+
-                "[color=#999999]"+post.author+" at "+" <some time> "+"[/color] "+
+                "[color=#999999]"+post.author+" at "+post.dateline+"[/color] "+
                 "[url=forum.php?mod=redirect&goto=findpost&pid="+post.id+"&ptid="+tid+
                     "][img]static/image/common/back.gif[/img][/url]"+
             "[/size]\n"+

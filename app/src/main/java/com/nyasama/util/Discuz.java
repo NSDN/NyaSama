@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Oxyflour on 2014/11/13.
@@ -42,6 +44,7 @@ public class Discuz {
     public static class Forum {
         public String id;
         public String name;
+        public String icon;
         public int posts;
         public int threads;
         public int todayPosts;
@@ -52,6 +55,14 @@ public class Discuz {
             posts = Integer.parseInt(data.optString("posts"));
             threads = Integer.parseInt(data.optString("threads"));
             todayPosts = Integer.parseInt(data.optString("todayposts"));
+            if (!data.isNull("icon")) {
+                String html = data.optString("icon");
+                Matcher matcher = Pattern.compile(" src=\"([^\"]+)\"").matcher(html);
+                if (matcher.find())
+                    icon = DISCUZ_URL + matcher.group(1);
+            }
+            if (icon == null)
+                icon = DISCUZ_URL + "static/image/common/" + (todayPosts > 0 ? "forum_new.gif" : "forum.gif");
         }
     }
     public static class ForumCatalog {
@@ -84,6 +95,7 @@ public class Discuz {
         public String id;
         public String author;
         public String message;
+        public String dateline;
         public List<Attachment> attachments;
     }
     public static class Attachment {

@@ -13,9 +13,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.NetworkImageView;
+import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
@@ -52,6 +53,13 @@ public class ThreadListActivity extends FragmentActivity
             Thread thread = mThreadListFragment.getData(position);
             intent.putExtra("tid", thread.id);
             intent.putExtra("title", thread.title);
+            startActivity(intent);
+        }
+        else if (fragment == mSubListFragment) {
+            Forum item = mSubList.get(position);
+            Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+            intent.putExtra("fid", item.id);
+            intent.putExtra("title", item.name);
             startActivity(intent);
         }
     }
@@ -146,17 +154,11 @@ public class ThreadListActivity extends FragmentActivity
         }
         else if (fragment == mSubListFragment) {
             final Forum item = (Forum) obj;
-            Button btn = (Button) viewHolder.getView(R.id.button);
-            btn.setText(item.name);
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                    intent.putExtra("fid", item.id);
-                    intent.putExtra("title", item.name);
-                    startActivity(intent);
-                }
-            });
+            viewHolder.setText(R.id.title, item.name);
+            viewHolder.setText(R.id.sub,
+                    "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+            ((NetworkImageView) viewHolder.getView(R.id.icon))
+                    .setImageUrl(item.icon, ThisApp.imageLoader);
         }
     }
 
