@@ -23,6 +23,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
 
@@ -37,6 +38,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PostListActivity extends Activity
@@ -172,12 +175,19 @@ public class PostListActivity extends Activity
         }).show();
     }
 
+    static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
+    static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
     String compileMessage(String message) {
-        return message
-                .replaceAll("<a .*?</a>", "")
-                .replaceAll("<img([^>]*) src=\"static/image/common/none.gif\"", "<img$1 ")
-                .replaceAll("<img([^>]*) file=\"(.*?)\"", "<img$1 src=\"$2\"");
+        return msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
+                    @Override
+                    public String foundMatch(MatchResult matchResult) {
+                        Matcher pathMatcher = msgPathPattern.matcher(matchResult.group(1));
+                        return !pathMatcher.find() ? "" :
+                                "<img src=\"" + pathMatcher.group(1) + "\" />";
+                    }
+                });
     }
 
     @Override
@@ -288,7 +298,7 @@ public class PostListActivity extends Activity
             message = message.substring(0, MAX_TRIMSTR_LENGTH - 3) + "...";
         return "[quote]"+
             "[size=2]"+
-                "[color=#999999]"+post.author+" at "+post.dateline+"[/color] "+
+                "[color=#999999]"+post.author+" at "+Html.fromHtml(post.dateline)+"[/color] "+
                 "[url=forum.php?mod=redirect&goto=findpost&pid="+post.id+"&ptid="+tid+
                     "][img]static/image/common/back.gif[/img][/url]"+
             "[/size]\n"+
