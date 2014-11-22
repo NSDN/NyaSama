@@ -142,6 +142,9 @@ public class PostListActivity extends Activity
                         if ("post_reply_succeed".equals(messageval)) {
                             reloadLastPage();
                         }
+                        else if ("replyperm_login_nopermission//1".equals(messageval)) {
+                            startActivity(new Intent(PostListActivity.this, LoginActivity.class));
+                        }
                         else
                             Helper.toast(message.optString("messagestr"));
                     }
