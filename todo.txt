@@ -1,44 +1,45 @@
-TODOs
+﻿TODOs
 2014/11/17 rev0.1
 
 
 # Easy
-1. ��Դ���룬Ȼ������ע�ͣ����Լ�������д��ÿ����/�������÷���ע�������ʽ�ο� javadoc
-2. ���ó��򣬶Խ���͹���������飨�ܻ������������
+1. 看源代码，然后完善注释（按自己的理解写上每个类/函数的用法和注意事项，格式参考 javadoc
+2. 试用程序，对界面和功能提出建议（能画出来的最好了
 
 
-# Normal���������д��룬����ǸĶ�/�������ɸ��ļ��ĳ̶�
-0. �������ʱ������������⣨��򵥵İ취��ɾ��һЩ������ȷ�����������⣩
-1. ͼ��ͽ������ƣ��ο� taptalk ���ֺÿ��ĳ���
-2. ����ʱ��ʾһ�����뻭���ٽ� MainActivity���ο� pixiv �ͻ��ˣ�
-3. �� MainActivity ֧�����һ������� bilibili �ͻ��ˣ����ұ���***���ˣ����Բ���
-4. ��ĳЩ ThreadListActivity Ҳ֧�����һ�������Ϊ��Щ������Ӱ�飩
-4. ������������Ҫһ��������
-5. �������ý��棨�����ʲô��˵��
-6. ���û�û�е�¼��ʱ��֧�ִ��κεط����� LoginActivity
-7. ��Ҫһ���������ĵ�ҳ�� UserProfileActivity
-8. ���������б����ɿ������� ThreadListActivity��
-9. ����˽���б�
+# Normal（照着现有代码，大概是改动/增加若干个文件的程度
+[done. @oxyflour] 解决启动时载入过慢的问题（确认主要是umeng在作怪 = =） 
+[1] 图标和界面的设计（参考 taptalk 这种好看的程序）
+[2] 启动时显示一个载入画面再进 MainActivity（参考 pixiv 客户端）
+[done. @oxyflour] 让 MainActivity 支持左右滑动（像 bilibili 客户端），右边是***好了（请脑补）
+[done. @oxyflour] 让某些 ThreadListActivity 也支持左右滑动（因为有些板块有子版块）
+[3] 标题栏顶部需要一个搜索框？
+[4] 新增设置界面（具体放什么再说）
+[5] 当用户没有登录的时候，支持从任何地方启动 LoginActivity
+[6] 需要一个个人中心的页面 UserProfileActivity
+[7] 个人帖子列表（可考虑重用 ThreadListActivity）
+[8] 个人私信列表
+[9] 板块图标
 
 
-# Hard����Ҫ��΢��Ϥһ�� android �����������֪ʶ
-1. ������֧������ͼƬ��ʾ���� Volley �� ImageCache��
-2. ThreadListActivity ��Ҫ֧���Զ�������
-3. ThreadListActivity ��Ҫ֧�ַ�ҳ��
-4. ���ڵ� PostListActivity �� ThreadListActivity ��Ҫ�ϲ��ӿڣ���������ĸ��˷�����˽���б�
-5. ��Ҫƽ��ģʽ��
+# Hard（需要稍微熟悉一点 android 和其他方面的知识
+[done. @oxyflour] 让帖子支持网络图片显示（用 Volley 的 ImageCache）
+[2] ThreadListActivity 需要支持自定义排序
+[3] ThreadListActivity 需要支持分页？
+[4] 现在的 PostListActivity 和 ThreadListActivity 需要合并接口，用于上面的个人发帖和私信列表
+[5] 需要平板模式吗？
 
 
-# Lunatic����Ҫ�ͻ��˷������˵�֪ʶ�������������ϸ��֮����
-1. ֧�ֵ����ӿڣ�ע���ٷ����1.1����֧�ֵģ�������û�ҵ�����
-2. ֧��ͼƬ�������ϴ�����Ҫ�ο���������
+# Lunatic（需要客户端服务器端的知识，最好在讨论完细节之后动手
+[1] 支持点评接口（注：官方插件1.1版是支持的，但是我没找到下载
+[in process. @oxyflour] 支持图片、附件上传（需要参考其他程序
 
 
-# Extra������׼�����Ƶģ�����δ��
-1. ��Ϣ����
-2. �������������Ĵ�ͼ���ģʽ��
-3. ������(sang)��(xin)��(bing)��(kuang)��������ɫ����
+# Extra（后续准备完善的，具体未定
+[1] 消息推送
+[2] 看汉化组漫画的大图浏览模式？
+[3] 其他乱(sang)七(xin)八(bing)糟(kuang)的喵玉特色功能
 
 
-ע1�����ĳ����Ŀ����ں���д������ߵ����֣������ɰ��Ż�ר����һ��ҳ������������б� : )
-ע2����ʱ�Ѵ����ύ�� ofz �ϲ������û�������� git �ɣ��������Ҫ���Խ�һ�� github ��˽�п�
+注1：完成某个项目后会在后面写上完成者的名字，最后完成版大概会专门有一个页面用来放这个列表 : )
+注2：暂时把代码提交给 ofz 合并（大概没几个会用 git 吧），如果需要可以建一个 github 的私有库

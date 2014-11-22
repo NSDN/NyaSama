@@ -84,8 +84,10 @@ public class NewPostActivity extends Activity
             else if (noticetrimstr != null)
                 put("noticetrimstr", noticetrimstr);
             // strange, but really works
+            /*
             for (ImageAttachment image : mImageAttachments)
                 put("attachnew["+image.uploadId+"][description]", "");
+                */
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -104,16 +106,29 @@ public class NewPostActivity extends Activity
                             finish();
                         }
                         else {
-                            new AlertDialog.Builder(NewPostActivity.this)
-                                    .setTitle("There is sth wrong...")
-                                    .setMessage(message.getString("messagestr"))
-                                    .show();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
+                                .setTitle("There is sth wrong...")
+                                .setMessage(message.getString("messagestr"))
+                                .setPositiveButton(android.R.string.ok, null);
+                            if (message.getString("messageval").equals("postperm_login_nopermission//1"))
+                                builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        startActivity(new Intent(NewPostActivity.this, LoginActivity.class));
+                                    }
+                                });
+                            builder.show();
                         }
                     }
-                    // TODO: remove these
-                    catch (JSONException e) { /**/ }
-                    catch (NullPointerException e) { /**/ }
-                    catch (NumberFormatException e) { /**/ }
+                    catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    }
+                    catch (NullPointerException e) {
+                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    }
+                    catch (NumberFormatException e) {
+                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    }
                 }
                 mButtonPost.setEnabled(true);
             }

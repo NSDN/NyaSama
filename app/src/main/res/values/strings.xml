@@ -33,5 +33,7 @@
     <string name="title_main_home">HomePage</string>
     <string name="action_add_image">Add Image</string>
     <string name="image_upload_failed_toast">Upload image failed</string>
+    <string name="title_activity_user_profile">UserProfileActivity</string>
+    <string name="logout_button_text">Log out</string>
 
 </resources>

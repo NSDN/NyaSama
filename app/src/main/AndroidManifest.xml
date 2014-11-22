@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
-        android:name=".ThisApp"
+        android:name="com.nyasama.ThisApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -44,7 +44,8 @@
             android:label="@string/title_activity_new_post" >
         </activity>
 
-        <!-- TODO: enable this
+        <!--
+        TODO: enable this
         <receiver
             android:name="com.umeng.message.NotificationProxyBroadcastReceiver"
             android:exported="false" >
@@ -109,6 +110,10 @@
         </meta-data>
         -->
 
+        <activity
+            android:name="com.nyasama.activity.UserProfileActivity"
+            android:label="@string/title_activity_user_profile" >
+        </activity>
     </application>
 
 </manifest>

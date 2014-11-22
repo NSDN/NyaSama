@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +32,7 @@ public class PersistenceCookieStore extends InMemoryCookieStore {
 
     public void save() {
         SharedPreferences.Editor editor = mPrefs.edit();
+        editor.clear();
         for (URI uri : getURIs()) {
             Set<String> cookieStrs = new HashSet<String>();
             for (HttpCookie ck : get(uri))

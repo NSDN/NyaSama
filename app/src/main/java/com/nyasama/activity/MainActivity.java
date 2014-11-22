@@ -16,10 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.NetworkImageView;
+import com.nyasama.ThisApp;
 import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
@@ -60,12 +61,17 @@ public class MainActivity extends FragmentActivity
 
         View view = mNavigationDrawerFragment.getView();
         if (view != null) {
-            Button btn = (Button) view.findViewById(R.id.drawer_login);
-            btn.setOnClickListener(new View.OnClickListener() {
+            findViewById(R.id.drawer_login).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
+                }
+            });
+            findViewById(R.id.drawer_avatar).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
                 }
             });
         }
@@ -157,12 +163,15 @@ public class MainActivity extends FragmentActivity
     }
 
     public void updateUserInfo() {
-        if (Discuz.sAuth != null && Discuz.sUsername != null) {
-            TextView username = (TextView) findViewById(R.id.drawer_username);
-            username.setText(Discuz.sUsername);
+        if (Discuz.sHasLogined) {
+            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
+            String avatar_url = Discuz.DISCUZ_URL +
+                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
+            ((NetworkImageView) findViewById(R.id.drawer_avatar))
+                    .setImageUrl(avatar_url, ThisApp.imageLoader);
         }
-        findViewById(R.id.show_logined).setVisibility(Discuz.sAuth != null ? View.VISIBLE : View.GONE);
-        findViewById(R.id.hide_logined).setVisibility(Discuz.sAuth != null ? View.GONE : View.VISIBLE);
+        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
+        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
     }
 
     /**

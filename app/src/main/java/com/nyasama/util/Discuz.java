@@ -63,11 +63,11 @@ public class Discuz {
         public String src;
     }
 
-    public static String sFormHash;
-    public static String sUploadHash;
-    public static String sAuth;
-    public static String sUsername;
-    public static String sUid;
+    public static String sFormHash = "";
+    public static String sUploadHash = "";
+    public static String sUsername = "";
+    public static String sUid = "";
+    public static boolean sHasLogined;
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
@@ -87,9 +87,12 @@ public class Discuz {
                 throw new RuntimeException("fid is required for forumdisplay");
         }
         else if (module.equals("newthread") || module.equals("sendreply")) {
-            body.put("allowphoto", 1);
-            body.put("formhash", sFormHash);
-            body.put("mobiletype", 2);
+            if (body.get("allowphoto") == null)
+                body.put("allowphoto", 1);
+            if (body.get("formhash") == null)
+                body.put("formhash", sFormHash);
+            if (body.get("mobiletype") == null)
+                body.put("mobiletype", 2);
         }
         params.put("module", module);
         params.put("submodule", "checkpost");
@@ -112,10 +115,9 @@ public class Discuz {
                         sFormHash = var.optString("formhash", "");
                         sUsername = var.optString("member_username", "");
                         sUid = var.optString("member_uid", "");
-                        if (!var.isNull("auth"))
-                            sAuth = var.optString("auth");
                         if (!var.isNull("allowperm"))
                             sUploadHash = var.optJSONObject("allowperm").optString("uploadhash");
+                        sHasLogined = !var.isNull("auth");
                     }
                     callback.onResponse(data);
                     ThisApp.cookieStore.save();
@@ -201,6 +203,16 @@ public class Discuz {
             put("password", password);
             put("formhash", sFormHash);
         }}, callback);
+    }
+
+    // TODO: "Logout" is not found in the api source =.=
+    public static void logout(final Response.Listener<JSONObject> callback) {
+        sUsername = "";
+        sUid = "0";
+        sHasLogined = false;
+        ThisApp.cookieStore.removeAll();
+        ThisApp.cookieStore.save();
+        callback.onResponse(new JSONObject());
     }
 
 }
