@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
-import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.SimpleLayoutFragment;
@@ -26,11 +25,6 @@ import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Helper;
-
-import org.json.JSONObject;
-
-import java.util.HashMap;
 
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -68,24 +62,13 @@ public class MainActivity extends FragmentActivity
                     startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
                 }
             });
-            findViewById(R.id.drawer_avatar).setOnClickListener(new View.OnClickListener() {
+            findViewById(R.id.show_logined).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
                 }
             });
         }
-
-        // TODO: move this to Splash Activity
-        Discuz.execute("login", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (jsonObject.has(Discuz.VOLLEY_ERROR))
-                    Helper.toast("Sth is wrong with the server...");
-                else
-                    updateUserInfo();
-            }
-        });
 
         /*
         TODO: enable this
@@ -98,7 +81,7 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onResume() {
         super.onResume();
-        updateUserInfo();
+        loadUserInfo();
     }
 
     @Override
@@ -144,6 +127,8 @@ public class MainActivity extends FragmentActivity
             restoreActionBar();
             return true;
         }
+        else
+            loadUserInfo();
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -162,13 +147,14 @@ public class MainActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateUserInfo() {
+    public void loadUserInfo() {
         if (Discuz.sHasLogined) {
-            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
             String avatar_url = Discuz.DISCUZ_URL +
                     "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
             ((NetworkImageView) findViewById(R.id.drawer_avatar))
                     .setImageUrl(avatar_url, ThisApp.imageLoader);
+            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
+            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
         }
         findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
         findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);

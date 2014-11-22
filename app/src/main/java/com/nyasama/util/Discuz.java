@@ -94,6 +94,7 @@ public class Discuz {
     public static String sFormHash = "";
     public static String sUploadHash = "";
     public static String sUsername = "";
+    public static String sGroupName = "";
     public static String sUid = "";
     public static boolean sHasLogined;
 
@@ -123,7 +124,8 @@ public class Discuz {
                 body.put("mobiletype", 2);
         }
         params.put("module", module);
-        params.put("submodule", "checkpost");
+        if (params.get("submodule") == null)
+            params.put("submodule", "checkpost");
         //
         Request request =  new StringRequest(
             body == null ? Request.Method.GET : Request.Method.POST,
@@ -144,7 +146,9 @@ public class Discuz {
                         sUsername = var.optString("member_username", "");
                         sUid = var.optString("member_uid", "");
                         if (!var.isNull("allowperm"))
-                            sUploadHash = var.optJSONObject("allowperm").optString("uploadhash");
+                            sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
+                        if (!var.isNull("group"))
+                            sGroupName = var.optJSONObject("group").optString("grouptitle", "");
                         sHasLogined = !var.isNull("auth");
                     }
                     callback.onResponse(data);
@@ -235,7 +239,6 @@ public class Discuz {
 
     // TODO: "Logout" is not found in the api source =.=
     public static void logout(final Response.Listener<JSONObject> callback) {
-        sUsername = "";
         sUid = "0";
         sHasLogined = false;
         ThisApp.cookieStore.removeAll();
