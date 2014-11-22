@@ -44,14 +44,31 @@ import java.util.List;
 public class NewPostActivity extends Activity
     implements TextWatcher {
 
-    final String TAG = "NewPost";
-    final int REQCODE_PICK_IMAGE = 1;
-    final int REQCODE_PICK_CAPTURE = 2;
+    static class Size {
+        public int width;
+        public int height;
 
-    final int MAX_IMAGE_WIDTH = 500;
-    final int MAX_IMAGE_HEIGHT = 500;
-    final int THUMBNAIL_WIDTH = 100;
-    final int THUMBNAIL_HEIGHT = 100;
+        public Size(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
+    static Size getImageSize(Size source, Size target, boolean coverTarget) {
+        boolean tooWide = source.width * target.height > source.height * target.width;
+        if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
+            target.height = source.height * target.width / source.width;
+        else
+            target.width = source.width * target.height / source.height;
+        return target;
+    }
+
+    static final Size uploadSize = new Size(800, 800);
+    static final Size thumbSize = new Size(100, 100);
+
+    static final String TAG = "NewPost";
+    static final int REQCODE_PICK_IMAGE = 1;
+    static final int REQCODE_PICK_CAPTURE = 2;
 
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
@@ -205,19 +222,15 @@ public class NewPostActivity extends Activity
 
             // resize the image if too large
             Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-            if (bitmap.getWidth() > MAX_IMAGE_WIDTH || bitmap.getHeight() > MAX_IMAGE_HEIGHT) {
-                int newWidth = MAX_IMAGE_WIDTH;
-                int newHeight = MAX_IMAGE_HEIGHT;
-                if (bitmap.getWidth() * MAX_IMAGE_HEIGHT > bitmap.getHeight() * MAX_IMAGE_WIDTH)
-                    newHeight = bitmap.getHeight() * MAX_IMAGE_WIDTH / bitmap.getWidth();
-                else
-                    newWidth = bitmap.getWidth() * MAX_IMAGE_HEIGHT / bitmap.getHeight();
+            Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
+            if (bitmap.getWidth() > uploadSize.width || bitmap.getHeight() > uploadSize.height) {
+                bitmapSize = getImageSize(bitmapSize, uploadSize, false);
                 File dir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES);
                 try {
                     File file = File.createTempFile("nyasama_resized_", ".jpg", dir);
                     FileOutputStream stream = new FileOutputStream(file);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     stream.flush();
                     stream.close();
@@ -231,12 +244,13 @@ public class NewPostActivity extends Activity
                 }
             }
 
-            //
+            Size newSize = getImageSize(bitmapSize, thumbSize, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
-                bitmap, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+                bitmap, newSize.width, newSize.height);
             final String uploadFile = filePath;
-            final String fileName = requestCode == REQCODE_PICK_IMAGE ?
-                    "image #"+mImageAttachments.size() : "photo #"+mImageAttachments.size();
+            final String fileName =
+                    (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +
+                    " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             final AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Uploading")
                     .setCancelable(false)
