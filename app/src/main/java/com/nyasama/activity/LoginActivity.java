@@ -3,6 +3,7 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 
 public class LoginActivity extends Activity {
+
+    private static final String TAG = "Login";
 
     public void doLogin(View view) {
         final String username = mUsername.getText().toString();
@@ -48,19 +51,25 @@ public class LoginActivity extends Activity {
                             // refresh the form hash
                             Discuz.execute("forumindex", new HashMap<String, Object>(), null,
                                     new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject jsonObject) {
-                                    finish();
-                                }
-                            });
+                                        @Override
+                                        public void onResponse(JSONObject jsonObject) {
+                                            finish();
+                                        }
+                                    });
                         }
                         else
                             mMessage.setText(message.optString("messagestr"));
                     }
                     // TODO: remove these
-                    catch (JSONException e) { /**/ }
-                    catch (NullPointerException e) { /**/ }
-                    catch (NumberFormatException e) { /**/ }
+                    catch (JSONException e) {
+                        Log.e(TAG, "Parse Json Failed: " + e.getMessage());
+                    }
+                    catch (NullPointerException e) {
+                        Log.e(TAG, "Parse Result Failed: " + e.getMessage());
+                    }
+                    catch (NumberFormatException e) {
+                        Log.e(TAG, "Parse Number Failed: " + e.getMessage());
+                    }
 
                     SharedPreferences.Editor editor = mPrefs.edit();
                     editor.putString("username", username);
