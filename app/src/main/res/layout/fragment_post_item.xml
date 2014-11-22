@@ -42,4 +42,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <com.nyasama.view.FullGridView
+        android:layout_below="@id/message"
+        android:id="@+id/comment_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </RelativeLayout>

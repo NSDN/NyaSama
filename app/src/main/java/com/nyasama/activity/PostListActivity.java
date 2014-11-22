@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -23,6 +25,7 @@ import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
+import com.nyasama.util.Discuz.Comment;
 
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
@@ -31,7 +34,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.MatchResult;
@@ -46,6 +51,7 @@ public class PostListActivity extends FragmentActivity
     private final String TAG = "PostList";
 
     private CommonListFragment<Post> mListFragment;
+    private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
 
     public void replyThread(final String text) {
         if (!text.isEmpty()) {
@@ -224,6 +230,18 @@ public class PostListActivity extends FragmentActivity
         TextView textView = (TextView) viewHolder.getView(R.id.message);
         textView.setText(Html.fromHtml(compileMessage(item.message),
                 new HtmlImageGetter(textView, Discuz.DISCUZ_URL, imageCache), null));
+        // load comments
+        List<Comment> comments = mComments.get(Integer.parseInt(item.id));
+        if (comments != null) {
+            AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
+            commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
+                @Override
+                public void convert(ViewHolder viewHolder, Comment item) {
+                    viewHolder.setText(R.id.author, item.author);
+                    viewHolder.setText(R.id.comment, item.comment);
+                }
+            });
+        }
         // TODO: display attachments
     }
 
@@ -273,6 +291,21 @@ public class PostListActivity extends FragmentActivity
                             listData.add(new Post(postData));
                         }
                         JSONObject thread = var.getJSONObject("thread");
+                        // comments
+                        if (var.has("comments")) {
+                            JSONObject comments = var.getJSONObject("comments");
+                            for(Iterator<String> iter = comments.keys(); iter.hasNext(); ) {
+                                String key = iter.next();
+                                JSONArray commentListData = comments.getJSONArray(key);
+                                int pid = Integer.parseInt(key);
+                                List<Comment> commentList = new ArrayList<Comment>();
+                                for (int i = 0; i < commentListData.length(); i ++) {
+                                    JSONObject commentData = commentListData.getJSONObject(i);
+                                    commentList.add(new Comment(commentData));
+                                }
+                                mComments.put(pid, commentList);
+                            }
+                        }
                         // Note: in x2 there is only "replies"
                         total = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies")) + 1;

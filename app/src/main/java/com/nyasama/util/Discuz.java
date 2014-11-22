@@ -128,6 +128,17 @@ public class Discuz {
         public String name;
         public String src;
     }
+    public static class Comment {
+        public String comment;
+        public String author;
+        public int authorId;
+
+        public Comment(JSONObject data) {
+            comment = data.optString("comment");
+            author = data.optString("author");
+            authorId = Integer.parseInt(data.optString("authorid"));
+        }
+    }
 
     public static String sFormHash = "";
     public static String sUploadHash = "";
