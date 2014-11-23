@@ -2,6 +2,7 @@ package com.nyasama;
 
 import android.app.Application;
 import android.content.Context;
+import android.webkit.WebView;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -11,6 +12,7 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.nyasama.util.BitmapLruCache;
+import com.nyasama.util.Discuz;
 import com.nyasama.util.PersistenceCookieStore;
 
 import java.io.File;
@@ -27,6 +29,7 @@ public class ThisApp extends Application {
     public static RequestQueue requestQueue;
     public static ImageLoader imageLoader;
     public static PersistenceCookieStore cookieStore;
+    public static WebView webView;
 
     @Override
     public void onCreate() {
@@ -46,5 +49,10 @@ public class ThisApp extends Application {
         cookieStore = new PersistenceCookieStore(context);
         CookieHandler.setDefault(new CookieManager(cookieStore, CookiePolicy.ACCEPT_ALL));
 
+        webView = new WebView(context);
+        webView.getSettings().setJavaScriptEnabled(true);
+
+        // TODO: move this into splash activity
+        Discuz.getSmileies();
     }
 }

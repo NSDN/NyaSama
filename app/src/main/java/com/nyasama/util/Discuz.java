@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -22,6 +23,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -192,6 +194,69 @@ public class Discuz {
                 .build();
         ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
                 .notify(NOTIFICATION_ID, notification);
+    }
+
+    public static class Smiley {
+        public String code;
+        public String image;
+    }
+    public static class SmileyGroup {
+        public String name;
+        public String path;
+        public List<Smiley> list;
+    }
+
+    public static List<SmileyGroup> sSmilies = new ArrayList<SmileyGroup>();
+    private static class JSInterface {
+        @JavascriptInterface
+        public void setSmilies(String json) {
+            try {
+                parseSmilies(new JSONArray(json));
+                Log.d("Discuz", "got smilies!");
+            }
+            catch (JSONException e) {
+                Log.e("Discuz", "load smilies failed");
+            }
+        }
+    }
+    public static void getSmileies() {
+        String content = "<script src=\""+DISCUZ_URL+"data/cache/common_smilies_var.js\"></script>"+
+            "<script>"+
+                "var list = [];" +
+                "var type = smilies_type;" +
+                "var array = smilies_array;" +
+                "for (var k in type) {" +
+                    "var d = type[k];"+
+                    "var i = parseInt(k.substring(1));"+
+                    " if (array[i]) {" +
+                        "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
+                    "}"+
+                "}"+
+                "JSInterface.setSmilies(JSON.stringify(list))"+
+            "</script>";
+        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
+        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
+        ThisApp.webView.loadData(content, "text/html", "utf-8");
+    }
+    private static void parseSmilies(JSONArray data) {
+        sSmilies.clear();
+        for (int i = 0; i < data.length(); i ++) {
+            final JSONObject jsonData = data.optJSONObject(i);
+            final JSONArray jsonList = jsonData.optJSONArray("list");
+            final List<Smiley> smileyList = new ArrayList<Smiley>();
+            for (int j = 0; j < jsonList.length(); j ++) {
+                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                smileyList.add(new Smiley() {{
+                    code = jsonSmiley.optString(1);
+                    image = jsonSmiley.optString(2);
+                }});
+            }
+            sSmilies.add(new SmileyGroup() {{
+                name = jsonData.optString("name");
+                path = jsonData.optString("path");
+                list = smileyList;
+            }});
+        }
     }
 
     public static Request execute(String module,
