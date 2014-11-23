@@ -351,6 +351,8 @@ public class Discuz {
     // TODO: "Logout" is not found in the api source =.=
     public static void logout(final Response.Listener<JSONObject> callback) {
         sUid = 0;
+        sNewMessages = 0;
+        sNewPrompts = 0;
         sHasLogined = false;
         ThisApp.cookieStore.removeAll();
         ThisApp.cookieStore.save();
