@@ -28,7 +28,8 @@
 [in process. @drzzm32] 图标和界面的设计（参考 taptalk 这种好看的程序）
   备注：由 drzzm32 提供了图标
 
-[2] 启动时显示一个载入画面再进 MainActivity（参考 pixiv 客户端）
+[done. @drzzm32 @oxyflour] 启动时显示一个载入画面再进 MainActivity（参考 pixiv 客户端）
+  备注：由 drzzm32 提供了动画
 
 [in process. @oxyflour] 让 MainActivity 支持左右滑动（像 bilibili 客户端）
   备注：右边一个放热门帖子吧

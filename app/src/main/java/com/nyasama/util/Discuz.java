@@ -207,11 +207,14 @@ public class Discuz {
     }
 
     public static List<SmileyGroup> sSmilies = new ArrayList<SmileyGroup>();
+    private static Response.Listener<JSONObject> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
         public void setSmilies(String json) {
             try {
                 parseSmilies(new JSONArray(json));
+                if (mSmiliesCallback != null)
+                    mSmiliesCallback.onResponse(null);
                 Log.d("Discuz", "got smilies!");
             }
             catch (JSONException e) {
@@ -219,7 +222,8 @@ public class Discuz {
             }
         }
     }
-    public static void getSmileies() {
+    public static void getSmileies(Response.Listener<JSONObject> callback) {
+        mSmiliesCallback = callback;
         String content = "<script src=\""+DISCUZ_URL+"data/cache/common_smilies_var.js\"></script>"+
             "<script>"+
                 "var list = [];" +
@@ -257,6 +261,70 @@ public class Discuz {
                 list = smileyList;
             }});
         }
+    }
+
+    public static List<ForumCatalog> sForumCatalogs = new ArrayList<ForumCatalog>();
+
+    public static void loadForums(final Response.Listener<JSONObject> callback) {
+        Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                } else if (!data.isNull("Variables")) {
+                    try {
+                        JSONObject var = data.getJSONObject("Variables");
+                        JSONArray forumlist = var.getJSONArray("forumlist");
+                        final JSONObject forums = new JSONObject();
+                        for (int i = 0; i < forumlist.length(); i++) {
+                            JSONObject forum = forumlist.getJSONObject(i);
+                            forums.put(forum.getString("fid"), forum);
+                        }
+
+                        JSONArray catlist = var.getJSONArray("catlist");
+                        sForumCatalogs.clear();
+                        for (int i = 0; i < catlist.length(); i++) {
+                            JSONObject cat = catlist.getJSONObject(i);
+                            ForumCatalog forumCatalog = new ForumCatalog();
+                            forumCatalog.name = cat.getString("name");
+
+                            final JSONArray forumIds = cat.getJSONArray("forums");
+                            forumCatalog.forums = new ArrayList<Forum>();
+                            for (int j = 0; j < forumIds.length(); j++) {
+                                String id = forumIds.getString(j);
+                                JSONObject forum = forums.getJSONObject(id);
+                                forumCatalog.forums.add(new Forum(forum));
+                            }
+                            sForumCatalogs.add(forumCatalog);
+                        }
+                    } catch (JSONException e) {
+                        Log.d("Discuz", "Load Forum Index Failed (" + e.getMessage() + ")");
+                    }
+                }
+                callback.onResponse(data);
+            }
+        });
+    }
+
+    private static int initJobs = 0;
+
+    public static void init(final Runnable callback) {
+
+        Response.Listener<JSONObject> done = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                initJobs --;
+                if (initJobs == 0)
+                    callback.run();
+            }
+        };
+
+        initJobs ++;
+        getSmileies(done);
+
+        initJobs ++;
+        loadForums(done);
+
     }
 
     public static Request execute(String module,

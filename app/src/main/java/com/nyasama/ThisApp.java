@@ -12,7 +12,6 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.nyasama.util.BitmapLruCache;
-import com.nyasama.util.Discuz;
 import com.nyasama.util.PersistenceCookieStore;
 
 import java.io.File;
@@ -52,7 +51,5 @@ public class ThisApp extends Application {
         webView = new WebView(context);
         webView.getSettings().setJavaScriptEnabled(true);
 
-        // TODO: move this into splash activity
-        Discuz.getSmileies();
     }
 }

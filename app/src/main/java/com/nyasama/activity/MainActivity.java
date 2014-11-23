@@ -29,6 +29,19 @@ import com.nyasama.util.Discuz;
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    public void loadUserInfo() {
+        if (Discuz.sHasLogined) {
+            String avatar_url = Discuz.DISCUZ_URL +
+                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
+            ((NetworkImageView) findViewById(R.id.drawer_avatar))
+                    .setImageUrl(avatar_url, ThisApp.imageLoader);
+            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
+            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
+        }
+        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
+        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+    }
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -76,6 +89,8 @@ public class MainActivity extends FragmentActivity
         mPushAgent.enable();
         Log.d("DEVICETOKEN", UmengRegistrar.getRegistrationId(this));
         */
+
+        loadUserInfo();
     }
 
     @Override
@@ -127,8 +142,6 @@ public class MainActivity extends FragmentActivity
             restoreActionBar();
             return true;
         }
-        else
-            loadUserInfo();
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -145,19 +158,6 @@ public class MainActivity extends FragmentActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void loadUserInfo() {
-        if (Discuz.sHasLogined) {
-            String avatar_url = Discuz.DISCUZ_URL +
-                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
-            ((NetworkImageView) findViewById(R.id.drawer_avatar))
-                    .setImageUrl(avatar_url, ThisApp.imageLoader);
-            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
-            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
-        }
-        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
-        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
     }
 
     /**

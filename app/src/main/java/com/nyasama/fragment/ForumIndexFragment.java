@@ -2,7 +2,6 @@ package com.nyasama.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +16,11 @@ import com.nyasama.ThisApp;
 import com.nyasama.activity.ThreadListActivity;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.Forum;
 import com.nyasama.util.Discuz.ForumCatalog;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -39,14 +33,21 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
         mListView = (ListView) rootView.findViewById(R.id.forum_cat_list);
-        loadForums();
+        if (Discuz.sForumCatalogs.size() > 0) {
+            displayForums();
+        }
+        else Discuz.loadForums(new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                displayForums();
+            }
+        });
         return rootView;
     }
 
-    private List<ForumCatalog> mForumCatalogs;
     private ListView mListView;
     public void displayForums() {
-        mListView.setAdapter(new CommonListAdapter<ForumCatalog>(mForumCatalogs,
+        mListView.setAdapter(new CommonListAdapter<ForumCatalog>(Discuz.sForumCatalogs,
                 R.layout.fragment_forum_cat_item) {
             @Override
             public void convert(ViewHolder viewHolder, ForumCatalog item) {
@@ -78,50 +79,4 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
             }
         });
     }
-    public void loadForums() {
-        Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject data) {
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
-                } else {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-                        JSONArray forumlist = var.getJSONArray("forumlist");
-                        final JSONObject forums = new JSONObject();
-                        for (int i = 0; i < forumlist.length(); i++) {
-                            JSONObject forum = forumlist.getJSONObject(i);
-                            forums.put(forum.getString("fid"), forum);
-                        }
-
-                        JSONArray catlist = var.getJSONArray("catlist");
-                        mForumCatalogs = new ArrayList<ForumCatalog>();
-                        for (int i = 0; i < catlist.length(); i++) {
-                            JSONObject cat = catlist.getJSONObject(i);
-                            ForumCatalog forumCatalog = new ForumCatalog();
-                            forumCatalog.name = cat.getString("name");
-
-                            final JSONArray forumIds = cat.getJSONArray("forums");
-                            forumCatalog.forums = new ArrayList<Forum>();
-                            for (int j = 0; j < forumIds.length(); j++) {
-                                String id = forumIds.getString(j);
-                                JSONObject forum = forums.getJSONObject(id);
-                                forumCatalog.forums.add(new Forum(forum));
-                            }
-                            mForumCatalogs.add(forumCatalog);
-                        }
-
-                        // show it
-                        displayForums();
-                    } catch (JSONException e) {
-                        Log.d("ForumList", "Load Forum Index Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                    // TODO: remove these
-                    catch (NullPointerException e) { /**/ }
-                }
-            }
-        });
-    }
-
 }
