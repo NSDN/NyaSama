@@ -1,12 +1,20 @@
 package com.nyasama.util;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.activity.UserProfileActivity;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -37,6 +45,8 @@ public class Discuz {
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
+
+    public static int NOTIFICATION_ID = 1;
 
     public static int REQUEST_CODE_LOGIN = 1;
     public static int REQUEST_CODE_NEW_THREAD = 2;
@@ -149,7 +159,9 @@ public class Discuz {
     public static String sUploadHash = "";
     public static String sUsername = "";
     public static String sGroupName = "";
-    public static String sUid = "";
+    public static int sUid = 0;
+    public static int sNewMessages = 0;
+    public static int sNewPrompts = 0;
     public static boolean sHasLogined;
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
@@ -158,6 +170,28 @@ public class Discuz {
             list.add(new BasicNameValuePair(e.getKey(),
                     e.getValue() != null ? e.getValue().toString() : ""));
         return list;
+    }
+
+    private static void notifyNewMessage() {
+        Context context = ThisApp.context;
+        Intent intents[] = {new Intent(context, UserProfileActivity.class)};
+        PendingIntent pendingIntent = PendingIntent.getActivities(context,
+                0,
+                intents,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        String text = "you've got " +
+                (sNewMessages > 0 ? sNewMessages+" pms" : "") +
+                (sNewPrompts > 0 ? (sNewMessages>0 ? " and " : "")+sNewPrompts+" prompts" : "");
+        Notification notification = new NotificationCompat.Builder(ThisApp.context)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setContentTitle(context.getString(R.string.notify_title_text))
+                .setContentText(text)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build();
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(NOTIFICATION_ID, notification);
     }
 
     public static Request execute(String module,
@@ -206,12 +240,26 @@ public class Discuz {
                     if (var != null) {
                         sFormHash = var.optString("formhash", "");
                         sUsername = var.optString("member_username", "");
-                        sUid = var.optString("member_uid", "");
+                        sUid = Integer.parseInt(var.optString("member_uid", "0"));
                         if (!var.isNull("allowperm"))
                             sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
                         if (!var.isNull("group"))
                             sGroupName = var.optJSONObject("group").optString("grouptitle", "");
+
+                        // check if login ok
                         sHasLogined = !var.isNull("auth");
+
+                        // check messages && prompts
+                        int newMessages = var.isNull("member_pm") ? 0 :
+                            Integer.parseInt(var.optString("member_pm"));
+                        int newPrompts = var.isNull("member_prompt") ? 0 :
+                                Integer.parseInt(var.optString("member_prompt"));
+                        if (newMessages > sNewMessages || newPrompts > sNewPrompts) {
+                            sNewMessages = newMessages;
+                            sNewPrompts = newPrompts;
+                            notifyNewMessage();
+                        }
+
                     }
                     callback.onResponse(data);
                     ThisApp.cookieStore.save();
@@ -251,7 +299,7 @@ public class Discuz {
                               final String filePath,
                               final Response.Listener<String> callback) {
 
-        if (sUploadHash == null || sUid == null || filePath == null)
+        if (sUploadHash == null || sUid > 0 || filePath == null)
             callback.onResponse(null);
 
         params.put("module", "forumupload");
@@ -261,7 +309,7 @@ public class Discuz {
         LinkedHashMap<String, ContentBody> body = new LinkedHashMap<String, ContentBody>();
         try {
             body.put("hash", new StringBody(sUploadHash));
-            body.put("uid", new StringBody(sUid));
+            body.put("uid", new StringBody(""+sUid));
             if (filePath != null)
                 body.put("Filedata", new FileBody(new File(filePath)));
         }
@@ -302,7 +350,7 @@ public class Discuz {
 
     // TODO: "Logout" is not found in the api source =.=
     public static void logout(final Response.Listener<JSONObject> callback) {
-        sUid = "0";
+        sUid = 0;
         sHasLogined = false;
         ThisApp.cookieStore.removeAll();
         ThisApp.cookieStore.save();

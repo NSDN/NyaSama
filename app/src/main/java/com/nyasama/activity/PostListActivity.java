@@ -104,7 +104,7 @@ public class PostListActivity extends FragmentActivity
                         List<Comment> comments = mComments.get(pid);
                         if (comments == null)
                             mComments.put(pid, comments = new ArrayList<Comment>());
-                        comments.add(0, new Comment(Integer.parseInt(Discuz.sUid), Discuz.sUsername, comment));
+                        comments.add(0, new Comment(Discuz.sUid, Discuz.sUsername, comment));
                         mListFragment.getListAdapter().notifyDataSetChanged();
                     }
                     else
