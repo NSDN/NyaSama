@@ -60,8 +60,8 @@
 
 [11] ForumIndexFragment 因为嵌套了两层 ListView，效率需要提高
 
-[in process. @oxyflour] 表情
-  进度：载入表情 ok
+[done. @oxyflour] 表情
+  备注：萌萌哒
 
 
 #####################################################

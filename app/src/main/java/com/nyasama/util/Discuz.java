@@ -129,6 +129,7 @@ public class Discuz {
                     if (attachments == null)
                         attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
+                    attachment.id = Integer.parseInt(attachData.optString("aid", "0"));
                     attachment.name = attachData.optString("filename");
                     attachment.src = attachData.optString("attachment");
                     attachments.add(attachment);
@@ -137,6 +138,7 @@ public class Discuz {
         }
     }
     public static class Attachment {
+        public int id;
         public String name;
         public String src;
     }

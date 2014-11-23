@@ -28,6 +28,7 @@ import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Discuz.Comment;
+import com.nyasama.util.Discuz.Attachment;
 
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
@@ -54,6 +55,7 @@ public class PostListActivity extends FragmentActivity
 
     private CommonListFragment<Post> mListFragment;
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
+    private SparseArray<Attachment> mAttachemnts = new SparseArray<Attachment>();
 
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
@@ -187,18 +189,29 @@ public class PostListActivity extends FragmentActivity
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
+    static CallbackMatcher msgAttachMatcher = new CallbackMatcher("\\[attach\\](\\d+)\\[/attach\\]", 0);
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
     String compileMessage(String message) {
-        return msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
-                    @Override
-                    public String foundMatch(MatchResult matchResult) {
-                        Matcher pathMatcher = msgPathPattern.matcher(matchResult.group(1));
-                        return !pathMatcher.find() ? "" :
-                                "<img src=\"" + pathMatcher.group(1) + "\" />";
-                    }
-                });
+        message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
+            @Override
+            public String foundMatch(MatchResult matchResult) {
+                Matcher pathMatcher = msgPathPattern.matcher(matchResult.group(1));
+                return !pathMatcher.find() ? "" :
+                        "<img src=\"" + pathMatcher.group(1) + "\" />";
+            }
+        });
+        message = msgAttachMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
+            @Override
+            public String foundMatch(MatchResult matchResult) {
+                int id = Integer.parseInt(matchResult.group(1));
+                Attachment attachment = mAttachemnts.get(id);
+                return attachment == null ? "" :
+                        "<img src=\"data/attachment/forum/" + attachment.src + "\" />";
+            }
+        });
+        return message;
     }
 
     @Override
@@ -334,6 +347,7 @@ public class PostListActivity extends FragmentActivity
         else {
             commentList.setAdapter(null);
         }
+
         // TODO: display attachments
     }
 
@@ -381,7 +395,14 @@ public class PostListActivity extends FragmentActivity
                         JSONArray postlist = var.getJSONArray("postlist");
                         for (int i = 0; i < postlist.length(); i ++) {
                             JSONObject postData = postlist.getJSONObject(i);
-                            listData.add(new Post(postData));
+                            Post post = new Post(postData);
+                            if (post.attachments != null) {
+                                for (int j = 0; j < post.attachments.size(); j ++) {
+                                    Attachment attachment = post.attachments.get(j);
+                                    mAttachemnts.put(attachment.id, attachment);
+                                }
+                            }
+                            listData.add(post);
                         }
                         JSONObject thread = var.getJSONObject("thread");
                         // comments
