@@ -18,17 +18,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.Discuz.SmileyGroup;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +73,13 @@ public class NewPostActivity extends Activity
     static final String TAG = "NewPost";
     static final int REQCODE_PICK_IMAGE = 1;
     static final int REQCODE_PICK_CAPTURE = 2;
+
+    static class ImageAttachment {
+        public Bitmap bitmap;
+        public String name;
+        public String uploadId;
+    }
+    List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
@@ -151,9 +162,13 @@ public class NewPostActivity extends Activity
         mButtonPost.setEnabled(false);
     }
 
-    void insertImageToContent(ImageAttachment image) {
+    void insertCodeToContent(String code) {
         int start = mInputContent.getSelectionStart();
-        mInputContent.getText().insert(start, "[attachimg]"+image.uploadId+"[/attachimg]");
+        mInputContent.getText().insert(start, code);
+    }
+
+    void insertImageToContent(ImageAttachment image) {
+        insertCodeToContent("[attachimg]"+image.uploadId+"[/attachimg]");
     }
 
     // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
@@ -183,6 +198,106 @@ public class NewPostActivity extends Activity
     private EditText mInputContent;
     private MenuItem mButtonPost;
     private MenuItem mButtonAddImg;
+
+    public void showInsertOptions() {
+        View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+                .setTitle("Insert An Image")
+                .setView(view)
+                .setPositiveButton("From Gallery", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                        intent.setType("image/*");
+                        startActivityForResult(intent, REQCODE_PICK_IMAGE);
+                    }
+                })
+                .setNegativeButton("From Camera", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        File dir = Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES);
+                        try {
+                            File file = File.createTempFile("nyasama_", ".jpg", dir);
+                            mPhotoFilePath = file.getAbsolutePath();
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                        } catch (IOException e) {
+                            Log.e(TAG, "create photo cache failed");
+                        }
+                        startActivityForResult(intent, REQCODE_PICK_CAPTURE);
+                    }
+                })
+                .show();
+
+        AbsListView smileyList = (AbsListView) view.findViewById(R.id.smiley_list);
+        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
+            @Override
+            public void convert(ViewHolder viewHolder, SmileyGroup item) {
+                ((TextView) viewHolder.getConvertView()).setText(item.name);
+            }
+        });
+        smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                showSmileyOptions(Discuz.sSmilies.get(i));
+                dialog.cancel();
+            }
+        });
+
+        AbsListView attachList = (AbsListView) view.findViewById(R.id.attachment_list);
+        attachList.setAdapter(new CommonListAdapter<ImageAttachment>(mImageAttachments,
+                R.layout.fragment_select_attachment_item) {
+            @Override
+            public void convert(ViewHolder viewHolder, ImageAttachment item) {
+                ((ImageView) viewHolder.getView(R.id.image_view)).setImageBitmap(item.bitmap);
+                ((TextView) viewHolder.getView(R.id.image_name)).setText(item.name);
+            }
+        });
+        attachList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                insertImageToContent(mImageAttachments.get(i));
+                dialog.cancel();
+            }
+        });
+    }
+
+    public void showSmileyOptions(final SmileyGroup smileyGroup) {
+        GridView view = new GridView(this);
+        view.setNumColumns(4);
+        view.setLayoutParams(new AbsListView.LayoutParams(
+                AbsListView.LayoutParams.WRAP_CONTENT,
+                AbsListView.LayoutParams.WRAP_CONTENT));
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+                .setTitle("Insert An Smiley")
+                .setView(view)
+                .setPositiveButton("Back", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        showInsertOptions();
+                        dialogInterface.cancel();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        view.setAdapter(new CommonListAdapter<Discuz.Smiley>(smileyGroup.list, R.layout.fragment_smiley_item) {
+            @Override
+            public void convert(ViewHolder viewHolder, Discuz.Smiley item) {
+                String url = Discuz.DISCUZ_URL + "static/image/smiley/" +
+                        smileyGroup.path + "/" + item.image;
+                NetworkImageView imageView = (NetworkImageView) viewHolder.getConvertView();
+                imageView.setImageUrl(url, ThisApp.imageLoader);
+            }
+        });
+        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                insertCodeToContent(smileyGroup.list.get(i).code);
+                dialog.cancel();
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,6 +363,7 @@ public class NewPostActivity extends Activity
                 }
             }
 
+            // create thumbnail
             Size newSize = getImageSize(bitmapSize, thumbSize, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                 bitmap, newSize.width, newSize.height);
@@ -311,64 +427,11 @@ public class NewPostActivity extends Activity
             return true;
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
-            ListView selection = mImageAttachments.size() > 0 ? new ListView(this) : null;
-            final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
-                    .setTitle("Insert An Image")
-                    .setView(selection)
-                    .setPositiveButton("From Gallery", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                            intent.setType("image/*");
-                            startActivityForResult(intent, REQCODE_PICK_IMAGE);
-                        }
-                    })
-                    .setNegativeButton("From Camera", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            File dir = Environment.getExternalStoragePublicDirectory(
-                                    Environment.DIRECTORY_PICTURES);
-                            try {
-                                File file = File.createTempFile("nyasama_", ".jpg", dir);
-                                mPhotoFilePath = file.getAbsolutePath();
-                                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-                            }
-                            catch (IOException e) {
-                                Log.e(TAG, "create photo cache failed");
-                            }
-                            startActivityForResult(intent, REQCODE_PICK_CAPTURE);
-                        }
-                    })
-                    .show();
-            if (selection != null) {
-                selection.setAdapter(new CommonListAdapter<ImageAttachment>(mImageAttachments,
-                        R.layout.fragment_select_attachment_item) {
-                    @Override
-                    public void convert(ViewHolder viewHolder, ImageAttachment item) {
-                        ((ImageView) viewHolder.getView(R.id.image_view)).setImageBitmap(item.bitmap);
-                        ((TextView) viewHolder.getView(R.id.image_name)).setText(item.name);
-                    }
-                });
-                selection.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        insertImageToContent(mImageAttachments.get(i));
-                        dialog.cancel();
-                    }
-                });
-            }
+            showInsertOptions();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
-    static class ImageAttachment {
-        public Bitmap bitmap;
-        public String name;
-        public String uploadId;
     }
 
     @Override

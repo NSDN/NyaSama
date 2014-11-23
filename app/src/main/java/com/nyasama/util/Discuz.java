@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://10.98.106.71:10080/bbs/";
+    public static String DISCUZ_URL = "http://tech.touhou.moe/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
@@ -240,7 +240,7 @@ public class Discuz {
             "</script>";
         ThisApp.webView.getSettings().setJavaScriptEnabled(true);
         ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadData(content, "text/html", "utf-8");
+        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "gb18030", null);
     }
     private static void parseSmilies(JSONArray data) {
         sSmilies.clear();
