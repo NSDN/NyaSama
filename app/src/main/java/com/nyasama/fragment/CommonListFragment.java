@@ -41,6 +41,18 @@ public class CommonListFragment<T> extends Fragment
     private int mItemLayout;
     private int mListViewId;
 
+    @SuppressWarnings("unchecked")
+    public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId, int pageSize) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, listLayout);
+        bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, itemLayout);
+        bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, listViewId);
+        bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, pageSize);
+        CommonListFragment<T> fragment = new CommonListFragment<T>();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
     public boolean loadMore() {
         final int loadPage = (int) Math.round(Math.floor(mListData.size() / mPageSize));
         final int loadIndex = loadPage * mPageSize;

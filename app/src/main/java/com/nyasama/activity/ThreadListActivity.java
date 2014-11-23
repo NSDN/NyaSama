@@ -60,23 +60,17 @@ public class ThreadListActivity extends FragmentActivity
             @Override
             public Fragment getItem(int i) {
                 if (i == 0) {
-                    mThreadListFragment = new CommonListFragment<Thread>();
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_thread_list);
-                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_thread_item);
-                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.list);
-                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, PAGE_SIZE_COUNT);
-                    mThreadListFragment.setArguments(bundle);
-                    return mThreadListFragment;
+                    return mThreadListFragment = CommonListFragment.getNewFragment(
+                            Thread.class,
+                            R.layout.fragment_thread_list,
+                            R.layout.fragment_thread_item,
+                            R.id.list, PAGE_SIZE_COUNT);
                 } else {
-                    mSubListFragment = new CommonListFragment<Forum>();
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_forum_cat_item);
-                    bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_forum_item);
-                    bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.forum_list);
-                    bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, PAGE_SIZE_COUNT);
-                    mSubListFragment.setArguments(bundle);
-                    return mSubListFragment;
+                    return mSubListFragment = CommonListFragment.getNewFragment(
+                            Forum.class,
+                            R.layout.fragment_forum_cat_item,
+                            R.layout.fragment_forum_item,
+                            R.id.forum_list, PAGE_SIZE_COUNT);
                 }
             }
 

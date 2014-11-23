@@ -211,13 +211,11 @@ public class PostListActivity extends FragmentActivity
         String title = getIntent().getStringExtra("title");
         if (title != null) setTitle(title);
 
-        mListFragment = new CommonListFragment<Post>();
-        Bundle bundle = new Bundle();
-        bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, R.layout.fragment_post_list);
-        bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, R.layout.fragment_post_item);
-        bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, R.id.list);
-        bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, PAGE_SIZE_COUNT);
-        mListFragment.setArguments(bundle);
+        mListFragment = CommonListFragment.getNewFragment(
+                Post.class,
+                R.layout.fragment_post_list,
+                R.layout.fragment_post_item,
+                R.id.list, PAGE_SIZE_COUNT);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
                 .commit();
