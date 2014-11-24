@@ -202,9 +202,9 @@ public class NewPostActivity extends Activity
     public void showInsertOptions() {
         View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
-                .setTitle("Insert An Image")
+                .setTitle(R.string.diag_insert_options)
                 .setView(view)
-                .setPositiveButton("From Gallery", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -212,7 +212,7 @@ public class NewPostActivity extends Activity
                         startActivityForResult(intent, REQCODE_PICK_IMAGE);
                     }
                 })
-                .setNegativeButton("From Camera", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.diag_insert_from_camera, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -270,7 +270,7 @@ public class NewPostActivity extends Activity
                 AbsListView.LayoutParams.WRAP_CONTENT,
                 AbsListView.LayoutParams.WRAP_CONTENT));
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
-                .setTitle("Insert An Smiley")
+                .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
                 .setPositiveButton("Back", new DialogInterface.OnClickListener() {
                     @Override

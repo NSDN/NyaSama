@@ -83,8 +83,8 @@ public class ThreadListActivity extends FragmentActivity
             public CharSequence getPageTitle(int position) {
                 return position == 0 ?
                         // TODO: rename this
-                        "Threads" :
-                        "Sub Forum";
+                        getString(R.string.thread_list_threads_title) :
+                        getString(R.string.thread_list_subforum_title);
             }
         });
 
@@ -169,7 +169,7 @@ public class ThreadListActivity extends FragmentActivity
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
                         new AlertDialog.Builder(ThreadListActivity.this)
-                                .setTitle("There is sth wrong...")
+                                .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override

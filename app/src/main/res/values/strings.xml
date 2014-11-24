@@ -38,5 +38,14 @@
     <string name="action_quick_reply">快速回复</string>
     <string name="action_comment">评论</string>
     <string name="notify_title_text">来自喵玉殿的消息</string>
+    <string name="thread_list_threads_title">Threads</string>
+    <string name="thread_list_subforum_title">Sub Forum</string>
+    <string name="there_is_something_wrong">There is sth wrong...</string>
+    <string name="diag_insert_options">Insert An Image</string>
+    <string name="diag_insert_from_gallery">From Gallery</string>
+    <string name="diag_insert_from_camera">From Camera</string>
+    <string name="diag_insert_smiley_title">Insert An Smiley</string>
+    <string name="diag_quick_reply_title">QuickReply</string>
+    <string name="diag_hint_type_something">Type Something</string>
 
 </resources>

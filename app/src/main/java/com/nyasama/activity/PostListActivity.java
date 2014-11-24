@@ -119,8 +119,8 @@ public class PostListActivity extends FragmentActivity
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
-                .setTitle("QuickReply")
-                .setMessage("Type Something")
+                .setTitle(R.string.diag_quick_reply_title)
+                .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -371,7 +371,7 @@ public class PostListActivity extends FragmentActivity
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
                         new AlertDialog.Builder(PostListActivity.this)
-                                .setTitle("There is sth wrong...")
+                                .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override
