@@ -1,6 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,21 @@ import org.json.JSONObject;
 
 public class UserProfileActivity extends Activity {
 
+    public void doLogout(View view) {
+        Discuz.logout(new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                finish();
+            }
+        });
+    }
+
+    public void doShowThreads(View view) {
+        Intent intent = new Intent(this, ThreadListActivity.class);
+        intent.putExtra("uid", Discuz.sUid);
+        startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,19 +37,7 @@ public class UserProfileActivity extends Activity {
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        findViewById(R.id.logout_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Discuz.logout(new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        finish();
-                    }
-                });
-            }
-        });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

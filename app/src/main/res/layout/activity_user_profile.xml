@@ -10,6 +10,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/logout_button_text"
-        android:id="@+id/logout_button" />
+        android:id="@+id/logout_button"
+        android:onClick="doLogout" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mythread_button_text"
+        android:id="@+id/button"
+        android:onClick="doShowThreads" />
 
 </LinearLayout>

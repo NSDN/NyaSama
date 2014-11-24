@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/*
+ * Note: this activity handles both forum threads and user threads
+ */
 
 public class ThreadListActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
@@ -82,7 +85,6 @@ public class ThreadListActivity extends FragmentActivity
             @Override
             public CharSequence getPageTitle(int position) {
                 return position == 0 ?
-                        // TODO: rename this
                         getString(R.string.thread_list_threads_title) :
                         getString(R.string.thread_list_subforum_title);
             }
@@ -153,8 +155,19 @@ public class ThreadListActivity extends FragmentActivity
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment,
                               final int position, final int page, final List listData) {
-        if (fragment == mThreadListFragment) Discuz.execute("forumdisplay", new HashMap<String, Object>() {{
-            put("fid", getIntent().getIntExtra("fid", 0));
+
+        Intent intent = getIntent();
+        final int fid = intent.getIntExtra("fid", 0);
+        final int uid = intent.getIntExtra("uid", 0);
+        if (fid == 0 && uid == 0)
+            throw new RuntimeException("fid or uid is required!");
+
+        String module = fid > 0 ? "forumdisplay" : "mythread";
+        if (fragment == mThreadListFragment) Discuz.execute(module, new HashMap<String, Object>() {{
+            if (fid > 0)
+                put("fid", fid);
+            else
+                put("uid", uid);
             put("tpp", PAGE_SIZE_COUNT);
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
@@ -190,17 +203,36 @@ public class ThreadListActivity extends FragmentActivity
                         listData.subList(position, listData.size()).clear();
                     try {
                         JSONObject var = data.getJSONObject("Variables");
-                        JSONArray threads = var.getJSONArray("forum_threadlist");
+
+                        JSONArray threads;
+                        if (var.opt("forum_threadlist") instanceof JSONArray)
+                            threads = var.getJSONArray("forum_threadlist");
+                        else if (var.opt("data") instanceof JSONArray)
+                            threads = var.getJSONArray("data");
+                        else
+                            threads = new JSONArray();
                         for (int i = 0; i < threads.length(); i++) {
                             final JSONObject thread = threads.getJSONObject(i);
                             listData.add(new Thread(thread));
                         }
-                        JSONObject forum = var.getJSONObject("forum");
-                        total = Integer.parseInt(
-                                forum.getString("threads"));
-                        setTitle(forum.getString("name"));
-                        // save data to sublist
-                        if (var.has("sublist")) {
+
+                        if (var.opt("forum") instanceof JSONObject) {
+                            JSONObject forum = var.getJSONObject("forum");
+                            total = Integer.parseInt(
+                                    forum.getString("threads"));
+                            setTitle(forum.getString("name"));
+                        }
+                        else {
+                            // if we don't know the number of items
+                            // just keep loading until there is no more
+                            if (threads.length() < PAGE_SIZE_COUNT)
+                                total = listData.size();
+                            else
+                                total = Integer.MAX_VALUE;
+                        }
+
+                        // save subforums to sublist
+                        if (var.opt("sublist") instanceof JSONArray) {
                             JSONArray sublist = var.getJSONArray("sublist");
                             if (sublist.length() > 0 && mSubList.size() == 0) {
                                 for (int i = 0; i < sublist.length(); i ++) {

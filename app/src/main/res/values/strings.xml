@@ -48,5 +48,6 @@
     <string name="diag_quick_reply_title">QuickReply</string>
     <string name="diag_hint_type_something">Type Something</string>
     <string name="action_reload">Reload</string>
+    <string name="mythread_button_text">Threads</string>
 
 </resources>
