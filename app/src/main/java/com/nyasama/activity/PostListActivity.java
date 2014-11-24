@@ -362,7 +362,7 @@ public class PostListActivity extends FragmentActivity
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
-                int total = 0;
+                int total = -1;
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
@@ -380,6 +380,7 @@ public class PostListActivity extends FragmentActivity
                                     }
                                 })
                                 .show();
+                        total = 0;
                     }
                     catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");

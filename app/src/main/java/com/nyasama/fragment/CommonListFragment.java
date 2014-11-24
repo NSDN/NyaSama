@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.nyasama.R;
@@ -40,6 +41,7 @@ public class CommonListFragment<T> extends Fragment
     private int mListLayout;
     private int mItemLayout;
     private int mListViewId;
+    private boolean mHasError;
 
     @SuppressWarnings("unchecked")
     public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId, int pageSize) {
@@ -62,6 +64,8 @@ public class CommonListFragment<T> extends Fragment
                 currentSize < mListItemCount && !mIsLoading) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
                     mIsLoading = true);
+            Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
+                    mHasError = false);
             ((OnListFragmentInteraction) mActivity)
                     .onLoadingMore(this, loadIndex, loadPage, mListData);
         }
@@ -69,14 +73,17 @@ public class CommonListFragment<T> extends Fragment
     }
 
     public void loadMoreDone(int total) {
-        mListItemCount = total;
+        mHasError = total < 0;
+        mListItemCount = total > 0 ? total : 0;
         mIsLoading = false;
         if (mListAdapter != null) {
             mListAdapter.notifyDataSetChanged();
         }
         if (mListLayoutView != null) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty),
-                    total <= 0);
+                    total <= 0 && !mHasError);
+            Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
+                    mHasError);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
                     mListItemCount > mListData.size());
         }
@@ -130,6 +137,7 @@ public class CommonListFragment<T> extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mListLayoutView = inflater.inflate(mListLayout, container, false);
+
         AbsListView listView = (AbsListView) mListLayoutView.findViewById(mListViewId);
         if (listView instanceof ListView) {
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
@@ -146,6 +154,15 @@ public class CommonListFragment<T> extends Fragment
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
         registerForContextMenu(listView);
+
+        Button reloadButton = (Button) mListLayoutView.findViewById(R.id.reload);
+        if (reloadButton != null) reloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                reloadAll();
+            }
+        });
+
         return mListLayoutView;
     }
 

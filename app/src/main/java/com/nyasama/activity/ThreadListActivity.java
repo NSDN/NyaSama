@@ -161,7 +161,7 @@ public class ThreadListActivity extends FragmentActivity
             @Override
             @SuppressWarnings("unchecked")
             public void onResponse(JSONObject data) {
-                int total = 0;
+                int total = -1;
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 } else if (data.has("Message")) {
@@ -178,10 +178,12 @@ public class ThreadListActivity extends FragmentActivity
                                     }
                                 })
                                 .show();
+                        total = 0;
                     }
-                    // TODO: remove these
-                    catch (JSONException e) { /**/ }
-                    catch (NullPointerException e) { /**/ }
+                    catch (JSONException e) {
+                        Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
+                        Helper.toast(R.string.load_failed_toast);
+                    }
                 } else {
                     // remove possible duplicated items
                     if (position < listData.size())
@@ -214,8 +216,6 @@ public class ThreadListActivity extends FragmentActivity
                         Log.e(TAG, "JsonError: Load Thread List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
-                    // TODO: reomve these
-                    catch (NullPointerException e) { /**/ }
                 }
                 mThreadListFragment.loadMoreDone(total);
             }

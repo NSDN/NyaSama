@@ -47,5 +47,6 @@
     <string name="diag_insert_smiley_title">Insert An Smiley</string>
     <string name="diag_quick_reply_title">QuickReply</string>
     <string name="diag_hint_type_something">Type Something</string>
+    <string name="action_reload">Reload</string>
 
 </resources>
