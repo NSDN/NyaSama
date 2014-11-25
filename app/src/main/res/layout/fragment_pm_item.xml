@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/other_user_avatar"
+        android:paddingRight="5dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp" />
+
+    <RelativeLayout
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:id="@+id/other_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:id="@+id/self_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/self_user_avatar"
+        android:paddingLeft="5dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp" />
+
+</LinearLayout>

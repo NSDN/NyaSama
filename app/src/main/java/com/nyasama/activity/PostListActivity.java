@@ -308,8 +308,16 @@ public class PostListActivity extends FragmentActivity
                               CommonListAdapter.ViewHolder viewHolder, final Post item) {
         String avatar_url = Discuz.DISCUZ_URL +
                 "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-        ((NetworkImageView) viewHolder.getView(R.id.avatar))
-                .setImageUrl(avatar_url, ThisApp.imageLoader);
+        NetworkImageView avatar = (NetworkImageView) viewHolder.getView(R.id.avatar);
+        avatar.setImageUrl(avatar_url, ThisApp.imageLoader);
+        avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(PostListActivity.this, UserProfileActivity.class) {{
+                    putExtra("uid", item.authorId);
+                }});
+            }
+        });
 
         viewHolder.setText(R.id.author, item.author);
         viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
@@ -393,6 +401,7 @@ public class PostListActivity extends FragmentActivity
                         listData.subList(position, listData.size()).clear();
                     try {
                         JSONObject var = data.getJSONObject("Variables");
+
                         JSONArray postlist = var.getJSONArray("postlist");
                         for (int i = 0; i < postlist.length(); i ++) {
                             JSONObject postData = postlist.getJSONObject(i);
@@ -405,7 +414,13 @@ public class PostListActivity extends FragmentActivity
                             }
                             listData.add(post);
                         }
+
+                        // Note: in x2 there is only "replies"
                         JSONObject thread = var.getJSONObject("thread");
+                        total = Integer.parseInt(thread.has("replies") ?
+                                thread.getString("replies") : thread.getString("allreplies")) + 1;
+                        setTitle(thread.getString("subject"));
+
                         // comments
                         if (var.opt("comments") instanceof JSONObject) {
                             JSONObject comments = var.getJSONObject("comments");
@@ -421,10 +436,7 @@ public class PostListActivity extends FragmentActivity
                                 mComments.put(pid, commentList);
                             }
                         }
-                        // Note: in x2 there is only "replies"
-                        total = Integer.parseInt(thread.has("replies") ?
-                                thread.getString("replies") : thread.getString("allreplies")) + 1;
-                        setTitle(thread.getString("subject"));
+
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);

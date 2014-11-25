@@ -29,7 +29,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -158,6 +160,42 @@ public class Discuz {
             this.comment = comment;
         }
     }
+    public static class PMList {
+        public boolean isNew;
+        public String author;
+        public int authorId;
+        public String fromUser;
+        public int fromUserId;
+        public String toUser;
+        public int toUserId;
+        public String message;
+        public int number;
+        public String lastdate;
+
+        public PMList(JSONObject data) {
+            isNew = "1".equals(data.optString("isnew"));
+            author = data.optString("author");
+            authorId = Integer.parseInt(data.optString("authorid"));
+            fromUser = data.optString("msgfrom");
+            fromUserId = Integer.parseInt(data.optString("msgfromid"));
+            toUser = data.optString("tousername");
+            toUserId = Integer.parseInt(data.optString("touid"));
+            message = data.optString("message");
+
+            String dateString = "";
+            if (data.has("lastdateline"))
+                dateString = data.optString("lastdateline");
+            else if (data.has("dateline"))
+                dateString = data.optString("dateline");
+            if (!dateString.isEmpty()) {
+                Date date = new Date();
+                date.setTime(Integer.parseInt(dateString)*1000);
+                lastdate = new SimpleDateFormat("MMM dd HH:mm:ss").format(date);
+            }
+            if (data.has("pmnum"))
+                number = Integer.parseInt(data.optString("pmnum"));
+        }
+    }
 
     public static String sFormHash = "";
     public static String sUploadHash = "";
@@ -212,6 +250,7 @@ public class Discuz {
     private static Response.Listener<JSONObject> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
+        @SuppressWarnings("unused")
         public void setSmilies(String json) {
             try {
                 parseSmilies(new JSONArray(json));

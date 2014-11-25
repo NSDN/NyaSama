@@ -49,5 +49,7 @@
     <string name="diag_hint_type_something">Type Something</string>
     <string name="action_reload">Reload</string>
     <string name="mythread_button_text">Threads</string>
+    <string name="title_activity_personal_messages">PersonalMessagesActivity</string>
+    <string name="title_activity_messages">MessagesActivity</string>
 
 </resources>

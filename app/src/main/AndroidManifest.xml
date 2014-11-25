@@ -19,12 +19,13 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar"
             android:name="com.nyasama.activity.SplashActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -118,6 +119,14 @@
         <activity
             android:name="com.nyasama.activity.UserProfileActivity"
             android:label="@string/title_activity_user_profile" >
+        </activity>
+        <activity
+            android:name="com.nyasama.activity.PMListActivity"
+            android:label="@string/title_activity_personal_messages" >
+        </activity>
+        <activity
+            android:name="com.nyasama.activity.MessagesActivity"
+            android:label="@string/title_activity_messages" >
         </activity>
     </application>
 

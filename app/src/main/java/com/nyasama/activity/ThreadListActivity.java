@@ -158,7 +158,7 @@ public class ThreadListActivity extends FragmentActivity
 
         Intent intent = getIntent();
         final int fid = intent.getIntExtra("fid", 0);
-        final int uid = intent.getIntExtra("uid", 0);
+        final int uid = intent.getIntExtra("uid", Discuz.sUid);
         if (fid == 0 && uid == 0)
             throw new RuntimeException("fid or uid is required!");
 
