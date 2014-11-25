@@ -7,7 +7,7 @@
 #
 #####################################################
 
-[0] 请想办法在不改变逻辑的前提下消除 ide 里面的所有警告信息
+[in process. @larrymario] 请想办法在不改变逻辑的前提下消除 ide 里面的所有警告信息
   备注：包括所有需要提取的字符串资源及其中文化（对不起这其实是 ofz 的问题
 
 [1] 看源代码，然后完善注释
@@ -32,7 +32,7 @@
   备注：由 drzzm32 提供了启动动画
 
 [in process. @oxyflour] 让 MainActivity 支持左右滑动（像 bilibili 客户端）
-  备注：右边一个放热门帖子吧
+  备注：参考 task.txt
 
 [done. @oxyflour] 让某些 ThreadListActivity 也支持左右滑动（因为有些板块有子版块）
   备注：无
@@ -47,11 +47,12 @@
   备注：发帖失败时会提示登录
 
 [in process. @oxyflour] 需要一个个人中心的页面 UserProfileActivity
-  进度：可以注销啦（然后其他什么都还没有...
+  进度：可以注销啦，可以看私信啦，可以给别人发消息啦
 
-[7] 个人帖子列表
+[done. @oxyflour] 用户帖子列表
+  备注：需要测试
 
-[8] 个人私信列表
+[8] 个人提醒列表
 
 [done. @oxyflour] 板块图标
   备注：需要修改服务端代码。在 api 的 viewthread 模块里面加上一个叫 icon 的键值可获得板块图标地址
@@ -77,7 +78,10 @@
 [3] ThreadListActivity 需要支持分页
 
 [in process. @oxyflour] 现在的 PostListActivity 和 ThreadListActivity 需要合并接口，用于上面的个人发帖和私信列表
-  进度：参 CommonListFragment
+  备注：参 CommonListFragment，需要重构
+
+[5] 用户私信聊天需要能自动刷新
+  备注：php http 长连接？
 
 
 #####################################################

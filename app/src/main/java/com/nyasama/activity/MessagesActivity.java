@@ -1,11 +1,14 @@
 package com.nyasama.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
@@ -32,6 +35,53 @@ public class MessagesActivity extends FragmentActivity
 
     private CommonListFragment<PMList> mListFragment;
 
+    public int mPMId;
+
+    public void doSendMessage(final String text) {
+        Discuz.execute("sendpm", new HashMap<String, Object>() {{
+            put("pmid", mPMId);
+            put("touid", getIntent().getIntExtra("touid", 0));
+        }}, new HashMap<String, Object>() {{
+            put("message", text);
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    String messageval = message.optString("messageval");
+                    if ("do_success".equals(messageval)) {
+                        JSONObject var = data.optJSONObject("Variables");
+                        mPMId = Integer.parseInt(var.optString("pmid"));
+                        mListFragment.reloadLast();
+                    }
+                    else
+                        Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
+    }
+
+    public void sendMessage() {
+        final EditText input = new EditText(this);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.diag_quick_reply_title)
+                .setMessage(R.string.diag_hint_type_something)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String text = input.getText().toString();
+                        if (!text.isEmpty())
+                            doSendMessage(text);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +90,7 @@ public class MessagesActivity extends FragmentActivity
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (getIntent().getIntExtra("touid", 0) == 0)
-            throw new RuntimeException("user id is required for messsages!");
+            throw new RuntimeException("user id is required to view messsages!");
 
         mListFragment = CommonListFragment.getNewFragment(
                 PMList.class,
@@ -71,6 +121,10 @@ public class MessagesActivity extends FragmentActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.action_reply) {
+            sendMessage();
             return true;
         }
         else if (id == android.R.id.home) {
@@ -125,6 +179,11 @@ public class MessagesActivity extends FragmentActivity
                         JSONArray list = var.getJSONArray("list");
                         for (int i = 0; i < list.length(); i ++) {
                             listData.add(new PMList(list.getJSONObject(i)));
+                        }
+
+                        // we need pmid to reply
+                        if (var.has("pmid")) {
+                            mPMId = Integer.parseInt(var.getString("pmid"));
                         }
 
                         if (list.length() < PAGE_SIZE_COUNT)

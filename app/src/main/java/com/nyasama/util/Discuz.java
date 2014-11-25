@@ -393,6 +393,12 @@ public class Discuz {
             if (body.get("commentsubmit") == null)
                 body.put("commentsubmit", "yes");
         }
+        else if (module.equals("sendpm")) {
+            if (body.get("formhash") == null)
+                body.put("formhash", sFormHash);
+            if (body.get("pmsubmit") == null)
+                body.put("pmsubmit", "yes");
+        }
         params.put("module", module);
         if (params.get("submodule") == null)
             params.put("submodule", "checkpost");
