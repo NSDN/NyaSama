@@ -1,5 +1,6 @@
 package com.nyasama.util;
 
+import android.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
 
@@ -21,5 +22,11 @@ public class Helper {
     public static void updateVisibility(View view, boolean show) {
         if (view != null)
             view.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+    public static void disableDialog(AlertDialog dialog) {
+        dialog.setCancelable(false);
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
     }
 }

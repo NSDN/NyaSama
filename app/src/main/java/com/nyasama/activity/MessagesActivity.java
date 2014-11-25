@@ -36,6 +36,7 @@ public class MessagesActivity extends FragmentActivity
     private CommonListFragment<PMList> mListFragment;
 
     public int mPMId;
+    public AlertDialog mReplyDialog;
 
     public void doSendMessage(final String text) {
         Discuz.execute("sendpm", new HashMap<String, Object>() {{
@@ -60,26 +61,38 @@ public class MessagesActivity extends FragmentActivity
                     else
                         Helper.toast(message.optString("messagestr"));
                 }
+                if (mReplyDialog != null && mReplyDialog.isShowing())
+                    mReplyDialog.dismiss();
             }
         });
     }
 
     public void sendMessage() {
         final EditText input = new EditText(this);
-        new AlertDialog.Builder(this)
+        mReplyDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String text = input.getText().toString();
-                        if (!text.isEmpty())
-                            doSendMessage(text);
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        mReplyDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                mReplyDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String text = input.getText().toString();
+                        if (!text.isEmpty()) {
+                            Helper.disableDialog(mReplyDialog);
+                            doSendMessage(text);
+                        }
+                    }
+                });
+            }
+        });
+        mReplyDialog.show();
     }
 
     @Override

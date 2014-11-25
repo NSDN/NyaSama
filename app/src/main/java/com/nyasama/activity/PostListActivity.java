@@ -57,6 +57,9 @@ public class PostListActivity extends FragmentActivity
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
     private SparseArray<Attachment> mAttachemnts = new SparseArray<Attachment>();
 
+    private AlertDialog mReplyDialog;
+    private AlertDialog mCommentDialog;
+
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -68,6 +71,8 @@ public class PostListActivity extends FragmentActivity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                if (mReplyDialog != null)
+                    mReplyDialog.dismiss();
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
@@ -96,6 +101,7 @@ public class PostListActivity extends FragmentActivity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                mCommentDialog.dismiss();
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
@@ -118,39 +124,63 @@ public class PostListActivity extends FragmentActivity
 
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
-        new AlertDialog.Builder(this)
+        mReplyDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String text = input.getText().toString();
-                        if (!text.isEmpty())
-                            doReply(text, item == null ? null : getTrimstr(item));
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        mReplyDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                mReplyDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String text = input.getText().toString();
+                            if (!text.isEmpty()) {
+                                Helper.disableDialog(mReplyDialog);
+                                doReply(text, item == null ? null : getTrimstr(item));
+                            }
+                        }
+                    });
+            }
+        });
+        mReplyDialog.show();
     }
 
     public void addComment(Post item) {
         final int pid = item.id;
         final EditText input = new EditText(this);
-        new AlertDialog.Builder(this)
+        mCommentDialog = new AlertDialog.Builder(this)
                 .setTitle("AddComment")
                 .setMessage("Type Something")
                 .setView(input)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String text = input.getText().toString();
-                        if (!text.isEmpty())
-                            doComment(pid, text);
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        mCommentDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                mCommentDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String text = input.getText().toString();
+                            if (!text.isEmpty()) {
+                                Helper.disableDialog(mCommentDialog);
+                                doComment(pid, text);
+                            }
+                        }
+                    });
+            }
+        });
+        mCommentDialog.show();
     }
 
     public void gotoReply(final Post item) {
