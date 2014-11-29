@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
 public class Discuz {
     public static String DISCUZ_URL = "http://wls.ofr.me/test/nya/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
-    public static String DISCUZ_ENC = "utf-8";
+    public static String DISCUZ_ENC = "gbk";
     public static String VOLLEY_ERROR = "volleyError";
 
     public static int NOTIFICATION_ID = 1;
@@ -469,6 +469,10 @@ public class Discuz {
                     for (Map.Entry<String, Object> e : body.entrySet())
                         if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
                 return params;
+            }
+            @Override
+            protected String getParamsEncoding() {
+                return DISCUZ_ENC;
             }
         };
         ThisApp.requestQueue.add(request);
