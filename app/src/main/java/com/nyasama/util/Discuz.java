@@ -509,8 +509,10 @@ public class Discuz {
                               final String filePath,
                               final Response.Listener<String> callback) {
 
-        if (sUploadHash == null || sUid > 0 || filePath == null)
+        if (sUploadHash == null || sUid == 0 || filePath == null) {
             callback.onResponse(null);
+            return;
+        }
 
         params.put("module", "forumupload");
         params.put("hash", sUploadHash);
@@ -520,8 +522,7 @@ public class Discuz {
         try {
             body.put("hash", new StringBody(sUploadHash));
             body.put("uid", new StringBody(""+sUid));
-            if (filePath != null)
-                body.put("Filedata", new FileBody(new File(filePath)));
+            body.put("Filedata", new FileBody(new File(filePath)));
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
