@@ -291,7 +291,6 @@ public class Discuz {
         ThisApp.requestQueue.add(request);
     }
     public static void parseSmileyString(String content) {
-        Log.e("LXX", content);
         content = "<script>" + content + "</script>"+
                 "<script>"+
                     "var list = [];" +

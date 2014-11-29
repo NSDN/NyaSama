@@ -166,6 +166,11 @@ public class MessagesActivity extends FragmentActivity
                 R.id.self_message : R.id.other_message;
         viewHolder.setText(message_id, item.message);
 
+        viewHolder.getView(R.id.self_message).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+        viewHolder.getView(R.id.self_user_avatar).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+        viewHolder.getView(R.id.other_message).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+        viewHolder.getView(R.id.other_user_avatar).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+
     }
 
     @Override
