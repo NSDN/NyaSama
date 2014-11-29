@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -265,23 +266,49 @@ public class Discuz {
     }
     public static void getSmileies(Response.Listener<JSONObject> callback) {
         mSmiliesCallback = callback;
-        String content = "<script src=\""+DISCUZ_URL+"data/cache/common_smilies_var.js\"></script>"+
-            "<script>"+
-                "var list = [];" +
-                "var type = smilies_type;" +
-                "var array = smilies_array;" +
-                "for (var k in type) {" +
-                    "var d = type[k];"+
-                    "var i = parseInt(k.substring(1));"+
-                    " if (array[i]) {" +
-                        "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
+        Request request = new StringRequest(DISCUZ_URL+"data/cache/common_smilies_var.js", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                parseSmileyString(s);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                parseSmileyString("smilies_type = []; smilies_array = []");
+            }
+        }) {
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    // Note: charset not confirmed in other Discuz versions
+                    return Response.success(new String(response.data, "gb18030"), getCacheEntry());
+                }
+                catch (UnsupportedEncodingException e) {
+                    return Response.error(new VolleyError("decode failed!"));
+                }
+            }
+        };
+        ThisApp.requestQueue.add(request);
+    }
+    public static void parseSmileyString(String content) {
+        Log.e("LXX", content);
+        content = "<script>" + content + "</script>"+
+                "<script>"+
+                    "var list = [];" +
+                    "var type = smilies_type;" +
+                    "var array = smilies_array;" +
+                    "for (var k in type) {" +
+                        "var d = type[k];"+
+                        "var i = parseInt(k.substring(1));"+
+                        " if (array[i]) {" +
+                            "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
+                        "}"+
                     "}"+
-                "}"+
                 "JSInterface.setSmilies(JSON.stringify(list))"+
-            "</script>";
+                "</script>";
         ThisApp.webView.getSettings().setJavaScriptEnabled(true);
         ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "gb18030", null);
+        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
     }
     private static void parseSmilies(JSONArray data) {
         sSmilies.clear();
