@@ -37,3 +37,4 @@ The following strings are zh_CN...
 
 ==========
 意见或修改请写在下面，并引用编号：
+13.我试试用GL写个什么。。。有时间看看Android里的GL ES框架。。。
