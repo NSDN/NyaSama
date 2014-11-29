@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://wls.ofr.me/test/bbs/";
+    public static String DISCUZ_URL = "http://wls.ofr.me/test/nya/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "utf-8";
     public static String VOLLEY_ERROR = "volleyError";
