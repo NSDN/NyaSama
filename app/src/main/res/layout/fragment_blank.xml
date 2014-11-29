@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Nyaaaaa..."
+        android:text="@string/fragment_blank_msg"
         android:id="@+id/textView"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>
