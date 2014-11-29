@@ -177,8 +177,9 @@ public class Discuz {
             isNew = "1".equals(data.optString("isnew"));
             author = data.optString("author");
             authorId = Integer.parseInt(data.optString("authorid"));
-            fromUser = data.optString("msgfrom");
-            fromUserId = Integer.parseInt(data.optString("msgfromid"));
+            // Note: anonymous user may send you message =.=
+            fromUser = data.optString("msgfrom", "anonymous");
+            fromUserId = Integer.parseInt(data.optString("msgfromid", "0"));
             toUser = data.optString("tousername");
             toUserId = Integer.parseInt(data.optString("touid"));
             message = data.optString("message");
