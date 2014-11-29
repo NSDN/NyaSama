@@ -8,55 +8,60 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.nyasama.activity.UserProfileActivity">
+    tools:context="com.nyasama.activity.UserProfileActivity"
+    android:weightSum="1">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/avatar"
-        android:layout_width="96dp"
-        android:layout_height="96dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/username" />
+        android:id="@+id/username"
+        android:layout_gravity="center_horizontal" />
 
-    <LinearLayout
-        android:id="@+id/hide_for_others"
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/logout_button_text"
-            android:onClick="doLogout" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="My Messages"
-            android:onClick="doShowMessages" />
-
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:text="@string/mythread_button_text"
+        android:onClick="doShowThreads" />
 
     <LinearLayout
         android:id="@+id/show_for_others"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:weightSum="1">
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send Message"
+            android:text="@string/send_message_button"
             android:onClick="doSendMessage" />
 
     </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/hide_for_others"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/mythread_button_text"
-        android:onClick="doShowThreads" />
+        android:weightSum="1">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/my_message_button"
+            android:onClick="doShowMessages" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/logout_button_text"
+        android:onClick="doLogout" />
 
 </LinearLayout>

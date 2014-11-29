@@ -33,13 +33,17 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:layout_alignParentRight="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/login_button_text"
             android:onClick="doLogin"
             android:id="@+id/login_button"
-            android:layout_gravity="right" />
+            android:layout_gravity="right"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:layout_centerVertical="true"
