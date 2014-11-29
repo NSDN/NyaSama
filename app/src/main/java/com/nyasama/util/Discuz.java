@@ -177,8 +177,9 @@ public class Discuz {
             isNew = "1".equals(data.optString("isnew"));
             author = data.optString("author");
             authorId = Integer.parseInt(data.optString("authorid"));
-            fromUser = data.optString("msgfrom");
-            fromUserId = Integer.parseInt(data.optString("msgfromid"));
+            // Note: anonymous user may send you message =.=
+            fromUser = data.optString("msgfrom", "anonymous");
+            fromUserId = Integer.parseInt(data.optString("msgfromid", "0"));
             toUser = data.optString("tousername");
             toUserId = Integer.parseInt(data.optString("touid"));
             message = data.optString("message");
@@ -509,8 +510,10 @@ public class Discuz {
                               final String filePath,
                               final Response.Listener<String> callback) {
 
-        if (sUploadHash == null || sUid > 0 || filePath == null)
+        if (sUploadHash == null || sUid == 0 || filePath == null) {
             callback.onResponse(null);
+            return;
+        }
 
         params.put("module", "forumupload");
         params.put("hash", sUploadHash);
@@ -520,8 +523,7 @@ public class Discuz {
         try {
             body.put("hash", new StringBody(sUploadHash));
             body.put("uid", new StringBody(""+sUid));
-            if (filePath != null)
-                body.put("Filedata", new FileBody(new File(filePath)));
+            body.put("Filedata", new FileBody(new File(filePath)));
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);

@@ -52,7 +52,8 @@
 [done. @oxyflour] 用户帖子列表
   备注：需要测试
 
-[8] 个人提醒列表
+[in process. @oxyflour] 个人提醒列表
+  备注：需要分成已读未读两部分。数据在全局变量 $GLOBALS['list'] 里面
 
 [done. @oxyflour] 板块图标
   备注：需要修改服务端代码。在 api 的 viewthread 模块里面加上一个叫 icon 的键值可获得板块图标地址
