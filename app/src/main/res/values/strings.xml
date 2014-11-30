@@ -10,7 +10,7 @@
     <string name="action_example">搜索</string>
     <string name="action_settings">设置</string>
     <string name="title_activity_thread_list">主题列表</string>
-    <string name="hello_world">Hello Gensoukyou!</string>
+    <string name="hello_world">Hello Gensokyo !</string>
     <string name="load_failed_toast">读取好像出现问题了。请过会儿再来。</string>
     <string name="network_error_toast">网络好像有问题。请过会儿再试试。</string>
     <string name="list_loading_text">载入中……</string>

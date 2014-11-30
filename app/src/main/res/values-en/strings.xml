@@ -21,7 +21,7 @@
     <string name="login_hint_username">User Name</string>
     <string name="login_hint_password">Password</string>
     <string name="drawer_button_login">Login</string>
-    <string name="login_empty_message">Username and Password are both required!</string>
+    <string name="login_empty_message">Username and password are both required!</string>
     <string name="title_activity_new_post">New Post</string>
     <string name="post_title_hint">Title</string>
     <string name="post_content_hint">Content</string>
@@ -30,7 +30,7 @@
     <string name="action_new_post">New Post</string>
     <string name="action_post_now">Post Now</string>
     <string name="action_reply">Reply</string>
-    <string name="title_main_home">HomePage</string>
+    <string name="title_main_home">Home Page</string>
     <string name="action_add_image">Add Image</string>
     <string name="image_upload_failed_toast">Upload image failed</string>
     <string name="title_activity_user_profile">User Profile</string>
