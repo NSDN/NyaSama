@@ -549,6 +549,7 @@ public class Discuz {
     }
 
     public static void login(final String username, final String password,
+                             final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
         execute("login", new HashMap<String, Object>() {{
             put("loginsubmit", "yes");
@@ -557,6 +558,10 @@ public class Discuz {
             put("username", username);
             put("password", password);
             put("formhash", sFormHash);
+            if (questionId > 0) {
+                put("questionid", questionId);
+                put("answer", answer);
+            }
         }}, callback);
     }
 
