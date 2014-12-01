@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">喵玉殿</string>
     <string name="title_section1">论坛</string>
     <string name="title_section2">设置</string>
@@ -10,11 +9,11 @@
     <string name="action_example">搜索</string>
     <string name="action_settings">设置</string>
     <string name="title_activity_thread_list">主题列表</string>
-    <string name="hello_world">Hello Gensoukyou!</string>
+    <string name="hello_world">Hello Gensokyo !</string>
     <string name="load_failed_toast">读取好像出现问题了。请过会儿再来。</string>
     <string name="network_error_toast">网络好像有问题。请过会儿再试试。</string>
     <string name="list_loading_text">载入中……</string>
-    <string name="title_activity_post_list">我的主题</string>
+    <string name="title_activity_post_list">回复列表</string>
     <string name="list_empty">什么也没找到</string>
     <string name="title_activity_login">登录</string>
     <string name="login_button_text">登录</string>
@@ -25,16 +24,16 @@
     <string name="title_activity_new_post">新建主题</string>
     <string name="post_title_hint">在这里输入标题</string>
     <string name="post_content_hint">在这里输入内容</string>
-    <string name="post_thread_button">Post</string>
+    <string name="post_thread_button">发布</string>
     <string name="post_content_empty_message">是不是把什么忘了啊？</string>
     <string name="action_new_post">新主题</string>
     <string name="action_post_now">发表</string>
     <string name="action_reply">回复</string>
     <string name="title_main_home">主页</string>
     <string name="action_add_image">添加图片</string>
-    <string name="image_upload_failed_toast">上传图片失败</string>
+    <string name="image_upload_failed_toast">图片上传失败</string>
     <string name="title_activity_user_profile">用户信息</string>
-    <string name="logout_button_text">退出</string>
+    <string name="logout_button_text">退出登录</string>
     <string name="action_quick_reply">快速回复</string>
     <string name="action_comment">评论</string>
     <string name="notify_title_text">来自喵玉殿的消息</string>
@@ -42,14 +41,16 @@
     <string name="thread_list_subforum_title">子版块</string>
     <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
     <string name="diag_insert_options">插入图片</string>
-    <string name="diag_insert_from_gallery">图片</string>
-    <string name="diag_insert_from_camera">相册</string>
+    <string name="diag_insert_from_gallery">来自图库</string>
+    <string name="diag_insert_from_camera">来自相机</string>
     <string name="diag_insert_smiley_title">插入表情</string>
     <string name="diag_quick_reply_title">快速回复</string>
     <string name="diag_hint_type_something">在这里输入些什么吧</string>
     <string name="action_reload">重新加载</string>
-    <string name="mythread_button_text">主题</string>
+    <string name="mythread_button_text">我的主题</string>
     <string name="title_activity_personal_messages">私信</string>
     <string name="title_activity_messages">提醒</string>
-
+    <string name="send_message_button">发送信息</string>
+    <string name="fragment_blank_msg">喵......</string>
+    <string name="my_message_button">我的私信</string>
 </resources>
