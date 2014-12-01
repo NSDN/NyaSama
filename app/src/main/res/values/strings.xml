@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">喵玉殿</string>
     <string name="title_section1">论坛</string>
     <string name="title_section2">设置</string>
@@ -38,15 +37,15 @@
     <string name="action_quick_reply">快速回复</string>
     <string name="action_comment">评论</string>
     <string name="notify_title_text">来自喵玉殿的消息</string>
-    <string name="thread_list_threads_title">版区</string>
-    <string name="thread_list_subforum_title">分区</string>
-    <string name="there_is_something_wrong">好像出错了......</string>
+    <string name="thread_list_threads_title">主题</string>
+    <string name="thread_list_subforum_title">子版块</string>
+    <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
     <string name="diag_insert_options">插入图片</string>
     <string name="diag_insert_from_gallery">来自图库</string>
     <string name="diag_insert_from_camera">来自相机</string>
     <string name="diag_insert_smiley_title">插入表情</string>
     <string name="diag_quick_reply_title">快速回复</string>
-    <string name="diag_hint_type_something">输入文字</string>
+    <string name="diag_hint_type_something">在这里输入些什么吧</string>
     <string name="action_reload">重新加载</string>
     <string name="mythread_button_text">我的主题</string>
     <string name="title_activity_personal_messages">私信</string>
@@ -54,5 +53,4 @@
     <string name="send_message_button">发送信息</string>
     <string name="fragment_blank_msg">喵......</string>
     <string name="my_message_button">我的私信</string>
-
 </resources>
