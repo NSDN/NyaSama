@@ -14,7 +14,7 @@
     <string name="load_failed_toast">读取好像出现问题了。请过会儿再来。</string>
     <string name="network_error_toast">网络好像有问题。请过会儿再试试。</string>
     <string name="list_loading_text">载入中……</string>
-    <string name="title_activity_post_list">PostListActivity</string>
+    <string name="title_activity_post_list">我的主题</string>
     <string name="list_empty">什么也没找到</string>
     <string name="title_activity_login">登录</string>
     <string name="login_button_text">登录</string>
@@ -38,18 +38,18 @@
     <string name="action_quick_reply">快速回复</string>
     <string name="action_comment">评论</string>
     <string name="notify_title_text">来自喵玉殿的消息</string>
-    <string name="thread_list_threads_title">Threads</string>
-    <string name="thread_list_subforum_title">Sub Forum</string>
-    <string name="there_is_something_wrong">There is sth wrong...</string>
-    <string name="diag_insert_options">Insert An Image</string>
-    <string name="diag_insert_from_gallery">From Gallery</string>
-    <string name="diag_insert_from_camera">From Camera</string>
-    <string name="diag_insert_smiley_title">Insert An Smiley</string>
-    <string name="diag_quick_reply_title">QuickReply</string>
-    <string name="diag_hint_type_something">Type Something</string>
-    <string name="action_reload">Reload</string>
-    <string name="mythread_button_text">Threads</string>
-    <string name="title_activity_personal_messages">PersonalMessagesActivity</string>
-    <string name="title_activity_messages">MessagesActivity</string>
+    <string name="thread_list_threads_title">主题</string>
+    <string name="thread_list_subforum_title">子版块</string>
+    <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
+    <string name="diag_insert_options">插入图片</string>
+    <string name="diag_insert_from_gallery">图片</string>
+    <string name="diag_insert_from_camera">相册</string>
+    <string name="diag_insert_smiley_title">插入表情</string>
+    <string name="diag_quick_reply_title">快速回复</string>
+    <string name="diag_hint_type_something">在这里输入些什么吧</string>
+    <string name="action_reload">重新加载</string>
+    <string name="mythread_button_text">主题</string>
+    <string name="title_activity_personal_messages">私信</string>
+    <string name="title_activity_messages">提醒</string>
 
 </resources>
