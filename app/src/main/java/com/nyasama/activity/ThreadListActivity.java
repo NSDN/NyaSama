@@ -218,18 +218,14 @@ public class ThreadListActivity extends FragmentActivity
 
                         if (var.opt("forum") instanceof JSONObject) {
                             JSONObject forum = var.getJSONObject("forum");
-                            total = Integer.parseInt(
-                                    forum.getString("threads"));
                             setTitle(forum.getString("name"));
                         }
-                        else {
-                            // if we don't know the number of items
-                            // just keep loading until there is no more
-                            if (threads.length() < PAGE_SIZE_COUNT)
-                                total = listData.size();
-                            else
-                                total = Integer.MAX_VALUE;
-                        }
+                        // if we don't know the number of items
+                        // just keep loading until there is no more
+                        if (threads.length() < PAGE_SIZE_COUNT)
+                            total = listData.size();
+                        else
+                            total = Integer.MAX_VALUE;
 
                         // save subforums to sublist
                         if (var.opt("sublist") instanceof JSONArray) {
