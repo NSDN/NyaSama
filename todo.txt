@@ -50,7 +50,7 @@
   进度：可以注销啦，可以看私信啦，可以给别人发消息啦
 
 [done. @oxyflour] 用户帖子列表
-  备注：需要测试
+  备注：
 
 [in process. @oxyflour] 个人提醒列表
   备注：需要分成已读未读两部分。数据在全局变量 $GLOBALS['list'] 里面
@@ -60,7 +60,7 @@
 
 [10] 附件下载
 
-[11] ForumIndexFragment 因为嵌套了两层 ListView，效率需要提高
+[done. @oxyflour] ForumIndexFragment 因为嵌套了两层 ListView，效率需要提高
 
 [done. @oxyflour] 表情
   备注：萌萌哒

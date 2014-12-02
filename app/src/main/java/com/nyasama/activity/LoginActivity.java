@@ -7,8 +7,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -21,19 +24,21 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity
+    implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "Login";
 
     public void doLogin(View view) {
         final String username = mUsername.getText().toString();
         final String password = mPassword.getText().toString();
+        final String answer = mAnswer.getText().toString();
         if (username.isEmpty() || password.isEmpty()) {
             mMessage.setText(getString(R.string.login_empty_message));
             return;
         }
 
-        Discuz.login(username, password, new Response.Listener<JSONObject>() {
+        Discuz.login(username, password, mQuestionId, answer, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
@@ -85,6 +90,9 @@ public class LoginActivity extends Activity {
     private EditText mPassword;
     private Button mButton;
     private TextView mMessage;
+    private Spinner mQuestion;
+    private int mQuestionId = 0;
+    private EditText mAnswer;
     private SharedPreferences mPrefs;
 
     @Override
@@ -98,6 +106,14 @@ public class LoginActivity extends Activity {
         mPassword = (EditText) findViewById(R.id.password);
         mButton = (Button) findViewById(R.id.login_button);
         mMessage = (TextView) findViewById(R.id.message);
+        mQuestion = (Spinner) findViewById(R.id.question);
+        mAnswer = (EditText) findViewById(R.id.answer);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.login_question, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mQuestion.setAdapter(adapter);
+        mQuestion.setOnItemSelectedListener(this);
 
         mPrefs = getSharedPreferences("login_info", MODE_PRIVATE);
         mUsername.setText(mPrefs.getString("username", ""));
@@ -125,5 +141,15 @@ public class LoginActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        mQuestionId = i;
+        Helper.updateVisibility(mAnswer, mQuestionId > 0);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
     }
 }

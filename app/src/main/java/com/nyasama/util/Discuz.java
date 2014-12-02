@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -83,7 +84,6 @@ public class Discuz {
     }
     public static class ForumCatalog {
         public String name;
-        public List<Forum> forums;
     }
     public static class Thread {
         public int id;
@@ -331,49 +331,6 @@ public class Discuz {
         }
     }
 
-    public static List<ForumCatalog> sForumCatalogs = new ArrayList<ForumCatalog>();
-
-    public static void loadForums(final Response.Listener<JSONObject> callback) {
-        Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject data) {
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
-                } else if (!data.isNull("Variables")) {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-                        JSONArray forumlist = var.getJSONArray("forumlist");
-                        final JSONObject forums = new JSONObject();
-                        for (int i = 0; i < forumlist.length(); i++) {
-                            JSONObject forum = forumlist.getJSONObject(i);
-                            forums.put(forum.getString("fid"), forum);
-                        }
-
-                        JSONArray catlist = var.getJSONArray("catlist");
-                        sForumCatalogs.clear();
-                        for (int i = 0; i < catlist.length(); i++) {
-                            JSONObject cat = catlist.getJSONObject(i);
-                            ForumCatalog forumCatalog = new ForumCatalog();
-                            forumCatalog.name = cat.getString("name");
-
-                            final JSONArray forumIds = cat.getJSONArray("forums");
-                            forumCatalog.forums = new ArrayList<Forum>();
-                            for (int j = 0; j < forumIds.length(); j++) {
-                                String id = forumIds.getString(j);
-                                JSONObject forum = forums.getJSONObject(id);
-                                forumCatalog.forums.add(new Forum(forum));
-                            }
-                            sForumCatalogs.add(forumCatalog);
-                        }
-                    } catch (JSONException e) {
-                        Log.d("Discuz", "Load Forum Index Failed (" + e.getMessage() + ")");
-                    }
-                }
-                callback.onResponse(data);
-            }
-        });
-    }
-
     private static int initJobs = 0;
 
     public static void init(final Runnable callback) {
@@ -389,9 +346,6 @@ public class Discuz {
 
         initJobs ++;
         getSmileies(done);
-
-        initJobs ++;
-        loadForums(done);
 
     }
 
@@ -549,6 +503,7 @@ public class Discuz {
     }
 
     public static void login(final String username, final String password,
+                             final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
         execute("login", new HashMap<String, Object>() {{
             put("loginsubmit", "yes");
@@ -557,7 +512,18 @@ public class Discuz {
             put("username", username);
             put("password", password);
             put("formhash", sFormHash);
-        }}, callback);
+            if (questionId > 0) {
+                put("questionid", questionId);
+                put("answer", answer);
+            }
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                LocalBroadcastManager.getInstance(ThisApp.context)
+                        .sendBroadcast(new Intent("login"));
+                callback.onResponse(jsonObject);
+            }
+        });
     }
 
     // TODO: "Logout" is not found in the api source =.=

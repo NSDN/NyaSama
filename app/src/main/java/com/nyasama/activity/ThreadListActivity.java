@@ -10,9 +10,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
@@ -44,7 +48,6 @@ public class ThreadListActivity extends FragmentActivity
     private final int PAGE_SIZE_COUNT = 20;
 
     private CommonListFragment<Thread> mThreadListFragment;
-    private CommonListFragment<Forum> mSubListFragment;
     private List<Forum> mSubList = new ArrayList<Forum>();
     private FragmentPagerAdapter mPageAdapter;
 
@@ -69,11 +72,36 @@ public class ThreadListActivity extends FragmentActivity
                             R.layout.fragment_thread_item,
                             R.id.list, PAGE_SIZE_COUNT);
                 } else {
-                    return mSubListFragment = CommonListFragment.getNewFragment(
-                            Forum.class,
-                            R.layout.fragment_forum_cat_item,
-                            R.layout.fragment_forum_item,
-                            R.id.forum_list, PAGE_SIZE_COUNT);
+                    return new Fragment() {
+                        @Override
+                        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                                 Bundle savedInstanceState) {
+                            // use forum index again
+                            View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
+                            AbsListView listView = (AbsListView) rootView.findViewById(R.id.list);
+                            listView.setAdapter(new CommonListAdapter<Forum>(mSubList, R.layout.fragment_forum_item) {
+                                @Override
+                                public void convert(ViewHolder viewHolder, Forum item) {
+                                    viewHolder.setText(R.id.title, item.name);
+                                    viewHolder.setText(R.id.sub,
+                                            "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                                    ((NetworkImageView) viewHolder.getView(R.id.icon))
+                                            .setImageUrl(item.icon, ThisApp.imageLoader);
+                                }
+                            });
+                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                    Forum item = mSubList.get(i);
+                                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+                                    intent.putExtra("fid", item.id);
+                                    intent.putExtra("title", item.name);
+                                    startActivity(intent);
+                                }
+                            });
+                            return rootView;
+                        }
+                    };
                 }
             }
 
@@ -135,20 +163,11 @@ public class ThreadListActivity extends FragmentActivity
     @Override
     public void onItemClick(CommonListFragment fragment,
                             View view, int position, long id) {
-        if (fragment == mThreadListFragment) {
-            Intent intent = new Intent(view.getContext(), PostListActivity.class);
-            Thread thread = mThreadListFragment.getData(position);
-            intent.putExtra("tid", thread.id);
-            intent.putExtra("title", thread.title);
-            startActivity(intent);
-        }
-        else if (fragment == mSubListFragment) {
-            Forum item = mSubList.get(position);
-            Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-            intent.putExtra("fid", item.id);
-            intent.putExtra("title", item.name);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(view.getContext(), PostListActivity.class);
+        Thread thread = mThreadListFragment.getData(position);
+        intent.putExtra("tid", thread.id);
+        intent.putExtra("title", thread.title);
+        startActivity(intent);
     }
 
     @Override
@@ -163,7 +182,7 @@ public class ThreadListActivity extends FragmentActivity
             throw new RuntimeException("fid or uid is required!");
 
         String module = fid > 0 ? "forumdisplay" : "mythread";
-        if (fragment == mThreadListFragment) Discuz.execute(module, new HashMap<String, Object>() {{
+        Discuz.execute(module, new HashMap<String, Object>() {{
             if (fid > 0)
                 put("fid", fid);
             else
@@ -248,31 +267,15 @@ public class ThreadListActivity extends FragmentActivity
                 mThreadListFragment.loadMoreDone(total);
             }
         });
-        else if (fragment == mSubListFragment) {
-            listData.clear();
-            for (Forum forum : mSubList)
-                listData.add(forum);
-            mSubListFragment.loadMoreDone(mSubList.size());
-        }
     }
 
     @Override
     public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, Object obj) {
-        if (fragment == mThreadListFragment) {
-            Thread item = (Thread) obj;
-            viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-            viewHolder.setText(R.id.sub,
-                    Html.fromHtml(item.author + " " + item.lastpost));
-            viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
-        }
-        else if (fragment == mSubListFragment) {
-            final Forum item = (Forum) obj;
-            viewHolder.setText(R.id.title, item.name);
-            viewHolder.setText(R.id.sub,
-                    "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
-            ((NetworkImageView) viewHolder.getView(R.id.icon))
-                    .setImageUrl(item.icon, ThisApp.imageLoader);
-        }
+        Thread item = (Thread) obj;
+        viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+        viewHolder.setText(R.id.sub,
+                Html.fromHtml(item.author + " " + item.lastpost));
+        viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
     }
 
 }

@@ -10,6 +10,21 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.nyasama.activity.LoginActivity">
 
+    <TextView
+        android:layout_centerVertical="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:paddingRight="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/login_message"
+        android:id="@+id/message"
+        android:layout_weight="1"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,27 +42,18 @@
         android:id="@+id/password"
         android:layout_weight="1" />
 
-    <RelativeLayout
-        android:orientation="horizontal"
+    <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="28.13">
+        android:id="@+id/question"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1" />
 
-        <TextView
-            android:layout_centerVertical="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:paddingRight="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:id="@+id/message"
-            android:layout_weight="1"
-            android:layout_alignParentTop="false"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true" />
-    </RelativeLayout>
+    <EditText
+        android:visibility="gone"
+        android:id="@+id/answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
         android:layout_width="fill_parent"

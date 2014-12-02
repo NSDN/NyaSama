@@ -53,4 +53,5 @@
     <string name="send_message_button">发送信息</string>
     <string name="fragment_blank_msg">喵......</string>
     <string name="my_message_button">我的私信</string>
+    <string name="login_message">登了个录</string>
 </resources>

@@ -42,14 +42,15 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
     @SuppressWarnings("unchecked")
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = create(parent);
+            convertView = createView(parent, position);
             convertView.setTag(new ViewHolder(convertView));
         }
         convert((ViewHolder) convertView.getTag(), getItem(position));
         return convertView;
     }
 
-    public View create(ViewGroup parent) {
+    @SuppressWarnings("unused")
+    public View createView(ViewGroup parent, int position) {
         return LayoutInflater.from(parent.getContext())
                 .inflate(mLayout, parent, false);
     }
