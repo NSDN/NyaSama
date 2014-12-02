@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -39,7 +38,7 @@ import java.util.List;
  */
 public class ForumIndexFragment extends android.support.v4.app.Fragment {
 
-    private List<ForumCatalog> mForumCatalogs = new ArrayList<ForumCatalog>();
+    private List<Object> mForumListData = new ArrayList<Object>();
     private BroadcastReceiver mLoginReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -64,20 +63,19 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
                         }
 
                         JSONArray catlist = var.getJSONArray("catlist");
-                        mForumCatalogs.clear();
+                        mForumListData.clear();
                         for (int i = 0; i < catlist.length(); i++) {
                             JSONObject cat = catlist.getJSONObject(i);
                             ForumCatalog forumCatalog = new ForumCatalog();
                             forumCatalog.name = cat.getString("name");
+                            mForumListData.add(forumCatalog);
 
                             final JSONArray forumIds = cat.getJSONArray("forums");
-                            forumCatalog.forums = new ArrayList<Forum>();
                             for (int j = 0; j < forumIds.length(); j++) {
                                 String id = forumIds.getString(j);
                                 JSONObject forum = forums.getJSONObject(id);
-                                forumCatalog.forums.add(new Forum(forum));
+                                mForumListData.add(new Forum(forum));
                             }
-                            mForumCatalogs.add(forumCatalog);
                         }
                     } catch (JSONException e) {
                         Log.d("Discuz", "Load Forum Index Failed (" + e.getMessage() + ")");
@@ -92,7 +90,7 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
-        mListView = (ListView) rootView.findViewById(R.id.forum_cat_list);
+        mListView = (ListView) rootView.findViewById(R.id.list);
         LocalBroadcastManager.getInstance(ThisApp.context)
                 .registerReceiver(mLoginReceiver, new IntentFilter("login"));
         loadForums();
@@ -101,35 +99,55 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
 
     private ListView mListView;
     public void displayForums() {
-        mListView.setAdapter(new CommonListAdapter<ForumCatalog>(mForumCatalogs,
+        mListView.setAdapter(new CommonListAdapter<Object>(mForumListData,
                 R.layout.fragment_forum_cat_item) {
+
             @Override
-            public void convert(ViewHolder viewHolder, ForumCatalog item) {
-                viewHolder.setText(R.id.forum_cat_title, item.name);
-                // bind the grid view
-                final List<Forum> forums = item.forums;
-                AbsListView listView = (AbsListView)viewHolder.getView(R.id.forum_list);
-                listView.setAdapter(new CommonListAdapter<Forum>(forums,
-                        R.layout.fragment_forum_item) {
-                    @Override
-                    public void convert(ViewHolder viewHolder, final Forum item) {
-                        viewHolder.setText(R.id.title, item.name);
-                        viewHolder.setText(R.id.sub,
-                                "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
-                        ((NetworkImageView) viewHolder.getView(R.id.icon))
-                                .setImageUrl(item.icon, ThisApp.imageLoader);
-                    }
-                });
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        Forum item = forums.get(i);
-                        Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                        intent.putExtra("fid", item.id);
-                        intent.putExtra("title", item.name);
-                        startActivity(intent);
-                    }
-                });
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return mForumListData.get(position) instanceof ForumCatalog ? 0 : 1;
+            }
+
+            @Override
+            public View createView(ViewGroup parent, int position) {
+                int layout = mForumListData.get(position) instanceof ForumCatalog ?
+                        R.layout.fragment_forum_cat_item :
+                        R.layout.fragment_forum_item;
+                return LayoutInflater.from(parent.getContext())
+                        .inflate(layout, parent, false);
+            }
+
+            @Override
+            public void convert(ViewHolder viewHolder, Object obj) {
+                if (obj instanceof ForumCatalog) {
+                    ForumCatalog item = (ForumCatalog) obj;
+                    viewHolder.setText(R.id.forum_cat_title, item.name);
+                }
+                else {
+                    Forum item = (Forum) obj;
+                    viewHolder.setText(R.id.title, item.name);
+                    viewHolder.setText(R.id.sub,
+                            "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                    ((NetworkImageView) viewHolder.getView(R.id.icon))
+                            .setImageUrl(item.icon, ThisApp.imageLoader);
+                }
+            }
+        });
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Object obj = mForumListData.get(i);
+                if (obj instanceof Forum) {
+                    Forum item = (Forum) obj;
+                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+                    intent.putExtra("fid", item.id);
+                    intent.putExtra("title", item.name);
+                    startActivity(intent);
+                }
             }
         });
     }

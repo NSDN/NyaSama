@@ -84,7 +84,6 @@ public class Discuz {
     }
     public static class ForumCatalog {
         public String name;
-        public List<Forum> forums;
     }
     public static class Thread {
         public int id;
