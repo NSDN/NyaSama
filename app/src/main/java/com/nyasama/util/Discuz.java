@@ -347,6 +347,7 @@ public class Discuz {
         initJobs ++;
         getSmileies(done);
 
+        // TODO: check login
         initJobs ++;
         execute("forumindex",
             new HashMap<String, Object>(),
