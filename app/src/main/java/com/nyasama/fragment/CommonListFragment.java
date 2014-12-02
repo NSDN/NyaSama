@@ -31,19 +31,21 @@ public class CommonListFragment<T> extends Fragment
     public static final String ARG_PAGE_SIZE = "page_size";
 
     private List<T> mListData = new ArrayList<T>();
-    private int mPageSize = 10;
     private int mListItemCount = Integer.MAX_VALUE;
     private boolean mIsLoading = false;
+    private boolean mHasError = false;
 
     private CommonListAdapter<T> mListAdapter;
     private View mListLayoutView;
     private Activity mActivity;
-    private int mListLayout;
-    private int mItemLayout;
-    private int mListViewId;
-    private boolean mHasError;
 
-    @SuppressWarnings("unchecked")
+    protected int mListLayout;
+    protected int mItemLayout;
+    protected int mListViewId = R.id.list;
+    protected int mPageSize = 10;
+    protected boolean mLoadFromTop = false;
+
+    @SuppressWarnings("unchecked unused")
     public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId, int pageSize) {
         Bundle bundle = new Bundle();
         bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, listLayout);
@@ -130,8 +132,6 @@ public class CommonListFragment<T> extends Fragment
             mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
             mPageSize = bundle.getInt(ARG_PAGE_SIZE);
         }
-        if (mListLayout <= 0 || mItemLayout <= 0 || mListViewId <=0 || mPageSize <= 0)
-            throw new RuntimeException("Invalid Arguments for ListFragment");
     }
 
     @Override
@@ -141,7 +141,10 @@ public class CommonListFragment<T> extends Fragment
         AbsListView listView = (AbsListView) mListLayoutView.findViewById(mListViewId);
         if (listView instanceof ListView) {
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
-            ((ListView) listView).addFooterView(loading, null, false);
+            if (mLoadFromTop)
+                ((ListView) listView).addHeaderView(loading, null, false);
+            else
+                ((ListView) listView).addFooterView(loading, null, false);
         }
         listView.setAdapter(mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
             @Override
@@ -177,8 +180,14 @@ public class CommonListFragment<T> extends Fragment
 
     @Override
     public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-        if (i + i2 >= i3)
-            loadMore();
+        if (mLoadFromTop) {
+            if (i == 0)
+                loadMore();
+        }
+        else {
+            if (i + i2 >= i3)
+                loadMore();
+        }
     }
 
     public interface OnListFragmentInteraction<T> {

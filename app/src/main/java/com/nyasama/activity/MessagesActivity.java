@@ -30,13 +30,16 @@ import java.util.List;
 public class MessagesActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
-    public static int PAGE_SIZE_COUNT = 20;
+    // DO NOT CHANGE PAGE_SIZE_COUNT
+    public static int PAGE_SIZE_COUNT = 10;
     public static String TAG = "PMList";
 
     private CommonListFragment<PMList> mListFragment;
 
-    public int mPMId;
-    public AlertDialog mReplyDialog;
+    private int mPMId;
+    private int mPage = Integer.MAX_VALUE;
+    private int mCount = Integer.MAX_VALUE;
+    private AlertDialog mReplyDialog;
 
     public void doSendMessage(final String text) {
         Discuz.execute("sendpm", new HashMap<String, Object>() {{
@@ -105,12 +108,17 @@ public class MessagesActivity extends FragmentActivity
         if (getIntent().getIntExtra("touid", 0) == 0)
             throw new RuntimeException("user id is required to view messsages!");
 
-        mListFragment = CommonListFragment.getNewFragment(
-                PMList.class,
+        mListFragment = new CommonListFragment<PMList>() {
+            @Override
+            public void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
                 // TODO: replace borrowed fragment_post_list
-                R.layout.fragment_post_list,
-                R.layout.fragment_pm_item,
-                R.id.list, PAGE_SIZE_COUNT);
+                mListLayout = R.layout.fragment_post_list;
+                mItemLayout = R.layout.fragment_pm_item;
+                mPageSize = PAGE_SIZE_COUNT;
+                mLoadFromTop = true;
+            }
+        };
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -177,7 +185,9 @@ public class MessagesActivity extends FragmentActivity
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final int position, final int page, final List listData) {
         Discuz.execute("mypm", new HashMap<String, Object>() {{
-            put("page", page + 1);
+            // we don't have to set 'page' when viewing the last page
+            if (mPage != Integer.MAX_VALUE)
+                put("page", mPage - 1);
             put("touid", getIntent().getIntExtra("touid", Discuz.sUid));
             put("subop", "view");
         }}, null, new Response.Listener<JSONObject>() {
@@ -188,26 +198,21 @@ public class MessagesActivity extends FragmentActivity
                     Helper.toast(R.string.network_error_toast);
                 }
                 else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
                         JSONArray list = var.getJSONArray("list");
-                        for (int i = 0; i < list.length(); i ++) {
-                            listData.add(new PMList(list.getJSONObject(i)));
-                        }
+                        for (int i = 0; i < list.length(); i ++)
+                            listData.add(i, new PMList(list.getJSONObject(i)));
 
                         // we need pmid to reply
-                        if (var.has("pmid")) {
+                        if (var.has("pmid"))
                             mPMId = Integer.parseInt(var.getString("pmid"));
-                        }
-
-                        if (list.length() < PAGE_SIZE_COUNT)
-                            total = list.length();
-                        else
-                            total = Integer.MAX_VALUE;
+                        if (var.has("count"))
+                            mCount = Integer.parseInt(var.getString("count"));
+                        if (var.has("page"))
+                            mPage = Integer.parseInt(var.getString("page"));
+                        total = mPage == 1 ? listData.size() : mCount;
 
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Message List Failed (" + e.getMessage() + ")");
