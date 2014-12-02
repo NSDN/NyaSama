@@ -35,7 +35,7 @@
         android:id="@+id/show_for_others"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="1">
+        android:orientation="vertical">
 
         <Button
             android:layout_width="match_parent"
@@ -47,9 +47,9 @@
 
     <LinearLayout
         android:id="@+id/hide_for_others"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="1">
+        android:layout_height="wrap_content">
 
         <Button
             android:layout_width="match_parent"
@@ -57,12 +57,18 @@
             android:text="@string/my_message_button"
             android:onClick="doShowMessages" />
 
-    </LinearLayout>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/my_notice_button"
+            android:onClick="doShowNotice" />
 
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/logout_button_text"
-        android:onClick="doLogout" />
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/logout_button_text"
+            android:onClick="doLogout" />
+
+    </LinearLayout>
 
 </LinearLayout>

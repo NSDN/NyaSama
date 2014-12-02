@@ -128,6 +128,10 @@
             android:name="com.nyasama.activity.MessagesActivity"
             android:label="@string/title_activity_messages" >
         </activity>
+        <activity
+            android:name="com.nyasama.activity.NoticeActivity"
+            android:label="@string/title_activity_notice" >
+        </activity>
     </application>
 
 </manifest>

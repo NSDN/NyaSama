@@ -199,6 +199,16 @@ public class Discuz {
         }
     }
 
+    public static class Notice {
+        public String type;
+        public String note;
+
+        public Notice(JSONObject data) {
+            type = data.optString("type");
+            note = data.optString("note");
+        }
+    }
+
     public static String sFormHash = "";
     public static String sUploadHash = "";
     public static String sUsername = "";
