@@ -335,7 +335,7 @@ public class Discuz {
 
     public static void init(final Runnable callback) {
 
-        Response.Listener<JSONObject> done = new Response.Listener<JSONObject>() {
+        final Response.Listener<JSONObject> done = new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 initJobs --;
@@ -347,6 +347,11 @@ public class Discuz {
         initJobs ++;
         getSmileies(done);
 
+        initJobs ++;
+        execute("forumindex",
+            new HashMap<String, Object>(),
+            new HashMap<String, Object>(),
+            done);
     }
 
     public static Request execute(String module,
