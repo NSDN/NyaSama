@@ -53,6 +53,8 @@ public class CommonListFragment<T> extends Fragment
         bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, pageSize);
         CommonListFragment<T> fragment = new CommonListFragment<T>();
         fragment.setArguments(bundle);
+        // init mListLayout etc
+        fragment.loadArguments(bundle);
         return fragment;
     }
 
@@ -114,6 +116,23 @@ public class CommonListFragment<T> extends Fragment
         return mListAdapter;
     }
 
+    public void loadArguments(Bundle bundle) {
+        mListLayout = bundle.getInt(ARG_LIST_LAYOUT);
+        mItemLayout = bundle.getInt(ARG_ITEM_LAYOUT);
+        mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
+        mPageSize = bundle.getInt(ARG_PAGE_SIZE);
+    }
+
+    public void setListAdapter(CommonListAdapter<T> listAdapter) {
+        if (mListAdapter != null) {
+            throw new RuntimeException("you must set list adapter before fragment created");
+        }
+        else {
+            mListAdapter = listAdapter;
+            listAdapter.setup(mListData, mItemLayout);
+        }
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -125,12 +144,8 @@ public class CommonListFragment<T> extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
-        if (bundle != null) {
-            mListLayout = bundle.getInt(ARG_LIST_LAYOUT);
-            mItemLayout = bundle.getInt(ARG_ITEM_LAYOUT);
-            mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
-            mPageSize = bundle.getInt(ARG_PAGE_SIZE);
-        }
+        if (bundle != null)
+            loadArguments(bundle);
     }
 
     @Override
@@ -142,14 +157,12 @@ public class CommonListFragment<T> extends Fragment
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);
         }
-        listView.setAdapter(mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
+        if (mListAdapter == null) mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
             @Override
-            @SuppressWarnings("unchecked")
-            public void convert(ViewHolder viewHolder, T item) {
-                ((OnListFragmentInteraction) mActivity)
-                        .onConvertView(CommonListFragment.this, viewHolder, item);
+            public void convertView(ViewHolder viewHolder, T item) {
             }
-        });
+        };
+        listView.setAdapter(mListAdapter);
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
         registerForContextMenu(listView);
@@ -180,11 +193,10 @@ public class CommonListFragment<T> extends Fragment
             loadMore();
     }
 
+    @SuppressWarnings("unused")
     public interface OnListFragmentInteraction<T> {
         public void onItemClick(CommonListFragment fragment,
                                 View view, int position, long id);
-        public void onConvertView(CommonListFragment fragment,
-                                  CommonListAdapter.ViewHolder viewHolder, T item);
         public void onLoadingMore(CommonListFragment fragment,
                                   int position, int page, List data);
     }

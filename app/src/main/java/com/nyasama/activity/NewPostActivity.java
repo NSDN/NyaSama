@@ -233,7 +233,7 @@ public class NewPostActivity extends Activity
         AbsListView smileyList = (AbsListView) view.findViewById(R.id.smiley_list);
         smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
             @Override
-            public void convert(ViewHolder viewHolder, SmileyGroup item) {
+            public void convertView(ViewHolder viewHolder, SmileyGroup item) {
                 ((TextView) viewHolder.getConvertView()).setText(item.name);
             }
         });
@@ -249,7 +249,7 @@ public class NewPostActivity extends Activity
         attachList.setAdapter(new CommonListAdapter<ImageAttachment>(mImageAttachments,
                 R.layout.fragment_select_attachment_item) {
             @Override
-            public void convert(ViewHolder viewHolder, ImageAttachment item) {
+            public void convertView(ViewHolder viewHolder, ImageAttachment item) {
                 ((ImageView) viewHolder.getView(R.id.image_view)).setImageBitmap(item.bitmap);
                 ((TextView) viewHolder.getView(R.id.image_name)).setText(item.name);
             }
@@ -283,7 +283,7 @@ public class NewPostActivity extends Activity
                 .show();
         view.setAdapter(new CommonListAdapter<Discuz.Smiley>(smileyGroup.list, R.layout.fragment_smiley_item) {
             @Override
-            public void convert(ViewHolder viewHolder, Discuz.Smiley item) {
+            public void convertView(ViewHolder viewHolder, Discuz.Smiley item) {
                 String url = Discuz.DISCUZ_URL + "static/image/smiley/" +
                         smileyGroup.path + "/" + item.image;
                 NetworkImageView imageView = (NetworkImageView) viewHolder.getConvertView();

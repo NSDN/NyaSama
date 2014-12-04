@@ -122,7 +122,7 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
             }
 
             @Override
-            public void convert(ViewHolder viewHolder, Object obj) {
+            public void convertView(ViewHolder viewHolder, Object obj) {
                 if (obj instanceof ForumCatalog) {
                     ForumCatalog item = (ForumCatalog) obj;
                     viewHolder.setText(R.id.forum_cat_title, item.name);

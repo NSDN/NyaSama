@@ -112,6 +112,25 @@ public class MessagesActivity extends FragmentActivity
                 R.layout.fragment_post_list,
                 R.layout.fragment_pm_item,
                 R.id.list, PAGE_SIZE_COUNT);
+        mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, PMList item) {
+                int avatar_id = item.authorId == Discuz.sUid ?
+                        R.id.self_user_avatar : R.id.other_user_avatar;
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
+                ((NetworkImageView) viewHolder.getView(avatar_id))
+                        .setImageUrl(avatar_url, ThisApp.imageLoader);
+                int message_id = item.authorId == Discuz.sUid ?
+                        R.id.self_message : R.id.other_message;
+                viewHolder.setText(message_id, item.message);
+
+                viewHolder.getView(R.id.self_message).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+                viewHolder.getView(R.id.self_user_avatar).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+                viewHolder.getView(R.id.other_message).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+                viewHolder.getView(R.id.other_user_avatar).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -151,26 +170,6 @@ public class MessagesActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-
-    }
-
-    @Override
-    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, PMList item) {
-
-        int avatar_id = item.authorId == Discuz.sUid ?
-                R.id.self_user_avatar : R.id.other_user_avatar;
-        String avatar_url = Discuz.DISCUZ_URL +
-                "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-        ((NetworkImageView) viewHolder.getView(avatar_id))
-                .setImageUrl(avatar_url, ThisApp.imageLoader);
-        int message_id = item.authorId == Discuz.sUid ?
-                R.id.self_message : R.id.other_message;
-        viewHolder.setText(message_id, item.message);
-
-        viewHolder.getView(R.id.self_message).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.self_user_avatar).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.other_message).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.other_user_avatar).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
 
     }
 

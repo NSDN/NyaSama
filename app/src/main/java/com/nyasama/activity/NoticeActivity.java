@@ -47,6 +47,12 @@ public class NoticeActivity extends FragmentActivity
                 mPageSize = PAGE_SIZE_COUNT;
             }
         };
+        mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, Notice item) {
+                viewHolder.setText(R.id.note, Html.fromHtml(item.note));
+            }
+        });
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -81,11 +87,6 @@ public class NoticeActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-    }
-
-    @Override
-    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, Notice item) {
-        viewHolder.setText(R.id.note, Html.fromHtml(item.note));
     }
 
     @Override

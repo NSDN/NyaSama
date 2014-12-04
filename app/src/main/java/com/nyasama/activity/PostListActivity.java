@@ -259,6 +259,66 @@ public class PostListActivity extends FragmentActivity
                 R.layout.fragment_post_list,
                 R.layout.fragment_post_item,
                 R.id.list, PAGE_SIZE_COUNT);
+
+
+        final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
+        mListFragment.setListAdapter(new CommonListAdapter<Post>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, final Post item) {
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
+                NetworkImageView avatar = (NetworkImageView) viewHolder.getView(R.id.avatar);
+                avatar.setImageUrl(avatar_url, ThisApp.imageLoader);
+                avatar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(PostListActivity.this, UserProfileActivity.class) {{
+                            putExtra("uid", item.authorId);
+                        }});
+                    }
+                });
+
+                viewHolder.setText(R.id.author, item.author);
+                viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
+                viewHolder.setText(R.id.index, "#"+item.number);
+
+                viewHolder.getView(R.id.menu).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showMenu(view, item);
+                    }
+                });
+
+                TextView messageText = (TextView) viewHolder.getView(R.id.message);
+                messageText.setText(Html.fromHtml(compileMessage(item.message),
+                        new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
+
+                // load comments
+                List<Comment> comments = mComments.get(item.id);
+                AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
+                if (comments != null) {
+                    commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
+                        @Override
+                        public void convertView(ViewHolder viewHolder, Comment item) {
+                            viewHolder.setText(R.id.author, item.author);
+                            viewHolder.setText(R.id.comment, item.comment);
+                        }
+                    });
+                    commentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                            addComment(item);
+                        }
+                    });
+                }
+                else {
+                    commentList.setAdapter(null);
+                }
+
+                // TODO: display attachments
+            }
+        });
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
                 .commit();
@@ -330,63 +390,6 @@ public class PostListActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, final int position, long id) {
-    }
-
-    Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
-    @Override
-    public void onConvertView(CommonListFragment fragment,
-                              CommonListAdapter.ViewHolder viewHolder, final Post item) {
-        String avatar_url = Discuz.DISCUZ_URL +
-                "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-        NetworkImageView avatar = (NetworkImageView) viewHolder.getView(R.id.avatar);
-        avatar.setImageUrl(avatar_url, ThisApp.imageLoader);
-        avatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(PostListActivity.this, UserProfileActivity.class) {{
-                    putExtra("uid", item.authorId);
-                }});
-            }
-        });
-
-        viewHolder.setText(R.id.author, item.author);
-        viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
-        viewHolder.setText(R.id.index, "#"+item.number);
-
-        viewHolder.getView(R.id.menu).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showMenu(view, item);
-            }
-        });
-
-        TextView messageText = (TextView) viewHolder.getView(R.id.message);
-        messageText.setText(Html.fromHtml(compileMessage(item.message),
-                new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
-
-        // load comments
-        List<Comment> comments = mComments.get(item.id);
-        AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
-        if (comments != null) {
-            commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
-                @Override
-                public void convert(ViewHolder viewHolder, Comment item) {
-                    viewHolder.setText(R.id.author, item.author);
-                    viewHolder.setText(R.id.comment, item.comment);
-                }
-            });
-            commentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    addComment(item);
-                }
-            });
-        }
-        else {
-            commentList.setAdapter(null);
-        }
-
-        // TODO: display attachments
     }
 
     @Override

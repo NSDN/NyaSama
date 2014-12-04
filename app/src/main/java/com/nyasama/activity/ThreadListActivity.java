@@ -47,7 +47,7 @@ public class ThreadListActivity extends FragmentActivity
     private final String TAG = "ThreadList";
     private final int PAGE_SIZE_COUNT = 20;
 
-    private CommonListFragment<Thread> mThreadListFragment;
+    private CommonListFragment<Thread> mListFragment;
     private List<Forum> mSubList = new ArrayList<Forum>();
     private FragmentPagerAdapter mPageAdapter;
 
@@ -66,11 +66,23 @@ public class ThreadListActivity extends FragmentActivity
             @Override
             public Fragment getItem(int i) {
                 if (i == 0) {
-                    return mThreadListFragment = CommonListFragment.getNewFragment(
+                    mListFragment = CommonListFragment.getNewFragment(
                             Thread.class,
                             R.layout.fragment_thread_list,
                             R.layout.fragment_thread_item,
                             R.id.list, PAGE_SIZE_COUNT);
+
+                    mListFragment.setListAdapter(new CommonListAdapter<Thread>() {
+                        @Override
+                        public void convertView(ViewHolder viewHolder, Thread item) {
+                            viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+                            viewHolder.setText(R.id.sub,
+                                    Html.fromHtml(item.author + " " + item.lastpost));
+                            viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
+                        }
+                    });
+
+                    return mListFragment;
                 } else {
                     return new Fragment() {
                         @Override
@@ -81,7 +93,7 @@ public class ThreadListActivity extends FragmentActivity
                             AbsListView listView = (AbsListView) rootView.findViewById(R.id.list);
                             listView.setAdapter(new CommonListAdapter<Forum>(mSubList, R.layout.fragment_forum_item) {
                                 @Override
-                                public void convert(ViewHolder viewHolder, Forum item) {
+                                public void convertView(ViewHolder viewHolder, Forum item) {
                                     viewHolder.setText(R.id.title, item.name);
                                     viewHolder.setText(R.id.sub,
                                             "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
@@ -124,7 +136,7 @@ public class ThreadListActivity extends FragmentActivity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
             if (resultCode > 0)
-                mThreadListFragment.reloadAll();
+                mListFragment.reloadAll();
         }
     }
 
@@ -164,7 +176,7 @@ public class ThreadListActivity extends FragmentActivity
     public void onItemClick(CommonListFragment fragment,
                             View view, int position, long id) {
         Intent intent = new Intent(view.getContext(), PostListActivity.class);
-        Thread thread = mThreadListFragment.getData(position);
+        Thread thread = mListFragment.getData(position);
         intent.putExtra("tid", thread.id);
         intent.putExtra("title", thread.title);
         startActivity(intent);
@@ -264,18 +276,9 @@ public class ThreadListActivity extends FragmentActivity
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }
-                mThreadListFragment.loadMoreDone(total);
+                mListFragment.loadMoreDone(total);
             }
         });
-    }
-
-    @Override
-    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, Object obj) {
-        Thread item = (Thread) obj;
-        viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-        viewHolder.setText(R.id.sub,
-                Html.fromHtml(item.author + " " + item.lastpost));
-        viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
     }
 
 }
