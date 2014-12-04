@@ -6,6 +6,10 @@ import android.widget.Toast;
 
 import com.nyasama.ThisApp;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Created by oxyflour on 2014/11/13.
  *
@@ -36,5 +40,12 @@ public class Helper {
         catch (NumberFormatException e) {
             return defValue;
         }
+    }
+    public static String datelineToString(int time, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "MMM dd HH:mm:ss" : format);
+        dateFormat.setTimeZone(TimeZone.getDefault());
+        Date date = new Date();
+        date.setTime(time);
+        return dateFormat.format(date);
     }
 }

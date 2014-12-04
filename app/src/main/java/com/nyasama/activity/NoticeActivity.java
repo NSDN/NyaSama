@@ -67,6 +67,7 @@ public class NoticeActivity extends FragmentActivity
                 mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
                     @Override
                     public void convertView(ViewHolder viewHolder, Notice item) {
+                        viewHolder.setText(R.id.date, item.dateline);
                         viewHolder.setText(R.id.note, Html.fromHtml(item.note));
                     }
                 });

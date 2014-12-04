@@ -31,9 +31,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -189,11 +187,8 @@ public class Discuz {
                 dateString = data.optString("lastdateline");
             else if (data.has("dateline"))
                 dateString = data.optString("dateline");
-            if (!dateString.isEmpty()) {
-                Date date = new Date();
-                date.setTime(Integer.parseInt(dateString)*1000);
-                lastdate = new SimpleDateFormat("MMM dd HH:mm:ss").format(date);
-            }
+            if (!dateString.isEmpty()) lastdate = Helper.datelineToString(
+                Integer.parseInt(dateString), null);
             if (data.has("pmnum"))
                 number = Integer.parseInt(data.optString("pmnum"));
         }
@@ -202,10 +197,13 @@ public class Discuz {
     public static class Notice {
         public String type;
         public String note;
+        public String dateline;
 
         public Notice(JSONObject data) {
             type = data.optString("type");
             note = data.optString("note");
+            if (data.has("dateline")) dateline = Helper.datelineToString(
+                Integer.parseInt(data.optString("dateline")), null);
         }
     }
 
