@@ -201,8 +201,9 @@ public class MessagesActivity extends FragmentActivity
                         // we need pmid to reply
                         if (var.has("pmid"))
                             mPMId = Integer.parseInt(var.getString("pmid"));
+                        // Discuz might return false for count!
                         if (var.has("count"))
-                            mCount = Integer.parseInt(var.getString("count"));
+                            mCount = Helper.toSafeInteger(var.getString("count"), 0);
                         if (var.has("page"))
                             mPage = Integer.parseInt(var.getString("page"));
                         total = mPage == 1 ? listData.size() : mCount;

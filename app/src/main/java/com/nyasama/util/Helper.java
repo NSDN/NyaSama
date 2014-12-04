@@ -29,4 +29,12 @@ public class Helper {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
     }
+    public static int toSafeInteger(String string, int defValue) {
+        try {
+            return Integer.parseInt(string);
+        }
+        catch (NumberFormatException e) {
+            return defValue;
+        }
+    }
 }
