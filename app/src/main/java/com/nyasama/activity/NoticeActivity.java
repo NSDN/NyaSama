@@ -38,15 +38,11 @@ public class NoticeActivity extends FragmentActivity
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mListFragment = new CommonListFragment<Notice>() {
-            @Override
-            public void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-                mListLayout = R.layout.fragment_post_list;
-                mItemLayout = R.layout.fragment_notice_item;
-                mPageSize = PAGE_SIZE_COUNT;
-            }
-        };
+        mListFragment = CommonListFragment.getNewFragment(
+                Notice.class,
+                R.layout.fragment_post_list,
+                R.layout.fragment_notice_item,
+                R.id.list, PAGE_SIZE_COUNT);
         mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
             @Override
             public void convertView(ViewHolder viewHolder, Notice item) {
@@ -87,6 +83,7 @@ public class NoticeActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        // TODO:
     }
 
     @Override

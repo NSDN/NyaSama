@@ -2,12 +2,15 @@ package com.nyasama.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.android.volley.Response;
@@ -110,25 +113,35 @@ public class MessagesActivity extends FragmentActivity
 
         mListFragment = CommonListFragment.getNewFragment(PMList.class,
                 R.layout.fragment_post_list,
-                R.layout.fragment_pm_item,
-                R.id.list, PAGE_SIZE_COUNT);
+                0, R.id.list, PAGE_SIZE_COUNT);
+
         mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
+
+            @Override
+            public View createView(ViewGroup parent, int position) {
+                int layout = mListFragment.getData(position).authorId == Discuz.sUid ?
+                        R.layout.fragment_pm_from_me : R.layout.fragment_pm_from_others;
+                return LayoutInflater.from(parent.getContext())
+                        .inflate(layout, parent, false);
+            }
+
             @Override
             public void convertView(ViewHolder viewHolder, PMList item) {
-                int avatar_id = item.authorId == Discuz.sUid ?
-                        R.id.self_user_avatar : R.id.other_user_avatar;
                 String avatar_url = Discuz.DISCUZ_URL +
                         "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-                ((NetworkImageView) viewHolder.getView(avatar_id))
+                ((NetworkImageView) viewHolder.getView(R.id.avatar))
                         .setImageUrl(avatar_url, ThisApp.imageLoader);
-                int message_id = item.authorId == Discuz.sUid ?
-                        R.id.self_message : R.id.other_message;
-                viewHolder.setText(message_id, item.message);
+                viewHolder.setText(R.id.message, item.message);
+            }
 
-                viewHolder.getView(R.id.self_message).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-                viewHolder.getView(R.id.self_user_avatar).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-                viewHolder.getView(R.id.other_message).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-                viewHolder.getView(R.id.other_user_avatar).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
+            @Override
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return mListFragment.getData(position).authorId == Discuz.sUid ? 0 : 1;
             }
         });
 
@@ -170,7 +183,12 @@ public class MessagesActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-
+        int uid = mListFragment.getData(position).authorId;
+        if (uid > 0 && uid != Discuz.sUid) {
+            Intent intent = new Intent(this, UserProfileActivity.class);
+            intent.putExtra("uid", uid);
+            startActivity(intent);
+        }
     }
 
     @Override
