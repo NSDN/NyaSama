@@ -1,5 +1,6 @@
 package com.nyasama.activity;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
@@ -7,6 +8,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.SpinnerAdapter;
 
 import com.android.volley.Response;
 import com.nyasama.R;
@@ -30,28 +33,50 @@ public class NoticeActivity extends FragmentActivity
     public static String TAG = "Notice";
 
     private CommonListFragment<Notice> mListFragment;
+    private boolean mShowRead = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notice);
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mListFragment = CommonListFragment.getNewFragment(
-                Notice.class,
-                R.layout.fragment_post_list,
-                R.layout.fragment_notice_item,
-                R.id.list, PAGE_SIZE_COUNT);
-        mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
+        ActionBar actionBar = getActionBar();
+        if (actionBar == null)
+            return;
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+        String spinnerText[] = {
+                getString(R.string.title_notice_unread),
+                getString(R.string.title_notice_read),
+        };
+        SpinnerAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                android.R.layout.simple_spinner_dropdown_item, spinnerText);
+        actionBar.setListNavigationCallbacks(spinnerAdapter, new ActionBar.OnNavigationListener() {
             @Override
-            public void convertView(ViewHolder viewHolder, Notice item) {
-                viewHolder.setText(R.id.note, Html.fromHtml(item.note));
+            public boolean onNavigationItemSelected(int i, long l) {
+                mShowRead = i != 0;
+
+                mListFragment = CommonListFragment.getNewFragment(
+                        Notice.class,
+                        R.layout.fragment_post_list,
+                        R.layout.fragment_notice_item,
+                        R.id.list, PAGE_SIZE_COUNT);
+                mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
+                    @Override
+                    public void convertView(ViewHolder viewHolder, Notice item) {
+                        viewHolder.setText(R.id.note, Html.fromHtml(item.note));
+                    }
+                });
+
+                getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, mListFragment)
+                    .commit();
+                return true;
             }
         });
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, mListFragment).commit();
     }
 
 
@@ -91,7 +116,8 @@ public class NoticeActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment, final int position, int page, final List listData) {
         Discuz.execute("profile", new HashMap<String, Object>() {{
             put("do", "notice");
-            put("isread", 1);
+            if (mShowRead)
+                put("isread", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
