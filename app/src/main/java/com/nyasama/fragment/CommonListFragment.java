@@ -43,7 +43,6 @@ public class CommonListFragment<T> extends Fragment
     protected int mItemLayout;
     protected int mListViewId = R.id.list;
     protected int mPageSize = 10;
-    protected boolean mLoadFromTop = false;
 
     @SuppressWarnings("unchecked unused")
     public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId, int pageSize) {
@@ -141,10 +140,7 @@ public class CommonListFragment<T> extends Fragment
         AbsListView listView = (AbsListView) mListLayoutView.findViewById(mListViewId);
         if (listView instanceof ListView) {
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
-            if (mLoadFromTop)
-                ((ListView) listView).addHeaderView(loading, null, false);
-            else
-                ((ListView) listView).addFooterView(loading, null, false);
+            ((ListView) listView).addFooterView(loading, null, false);
         }
         listView.setAdapter(mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
             @Override
@@ -180,14 +176,8 @@ public class CommonListFragment<T> extends Fragment
 
     @Override
     public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-        if (mLoadFromTop) {
-            if (i == 0)
-                loadMore();
-        }
-        else {
-            if (i + i2 >= i3)
-                loadMore();
-        }
+        if (i + i2 >= i3)
+            loadMore();
     }
 
     public interface OnListFragmentInteraction<T> {

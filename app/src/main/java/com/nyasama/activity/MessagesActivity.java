@@ -59,7 +59,7 @@ public class MessagesActivity extends FragmentActivity
                     if ("do_success".equals(messageval)) {
                         JSONObject var = data.optJSONObject("Variables");
                         mPMId = Integer.parseInt(var.optString("pmid"));
-                        mListFragment.reloadLast();
+                        mListFragment.reloadAll();
                     }
                     else
                         Helper.toast(message.optString("messagestr"));
@@ -108,17 +108,10 @@ public class MessagesActivity extends FragmentActivity
         if (getIntent().getIntExtra("touid", 0) == 0)
             throw new RuntimeException("user id is required to view messsages!");
 
-        mListFragment = new CommonListFragment<PMList>() {
-            @Override
-            public void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-                // TODO: replace borrowed fragment_post_list
-                mListLayout = R.layout.fragment_post_list;
-                mItemLayout = R.layout.fragment_pm_item;
-                mPageSize = PAGE_SIZE_COUNT;
-                mLoadFromTop = true;
-            }
-        };
+        mListFragment = CommonListFragment.getNewFragment(PMList.class,
+                R.layout.fragment_post_list,
+                R.layout.fragment_pm_item,
+                R.id.list, PAGE_SIZE_COUNT);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -186,7 +179,7 @@ public class MessagesActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment, final int position, final int page, final List listData) {
         Discuz.execute("mypm", new HashMap<String, Object>() {{
             // we don't have to set 'page' when viewing the last page
-            if (mPage != Integer.MAX_VALUE)
+            if (listData.size() > 0)
                 put("page", mPage - 1);
             put("touid", getIntent().getIntExtra("touid", Discuz.sUid));
             put("subop", "view");
@@ -202,8 +195,8 @@ public class MessagesActivity extends FragmentActivity
                         JSONObject var = data.getJSONObject("Variables");
 
                         JSONArray list = var.getJSONArray("list");
-                        for (int i = 0; i < list.length(); i ++)
-                            listData.add(i, new PMList(list.getJSONObject(i)));
+                        for (int i = list.length() - 1; i >= 0; i --)
+                            listData.add(new PMList(list.getJSONObject(i)));
 
                         // we need pmid to reply
                         if (var.has("pmid"))
