@@ -28,7 +28,6 @@ public class CommonListFragment<T> extends Fragment
     public static final String ARG_LIST_LAYOUT = "list_layout_id";
     public static final String ARG_LIST_VIEW_ID = "list_view_id";
     public static final String ARG_ITEM_LAYOUT = "item_layout_id";
-    public static final String ARG_PAGE_SIZE = "page_size";
 
     private List<T> mListData = new ArrayList<T>();
     private int mListItemCount = Integer.MAX_VALUE;
@@ -42,15 +41,13 @@ public class CommonListFragment<T> extends Fragment
     protected int mListLayout;
     protected int mItemLayout;
     protected int mListViewId = R.id.list;
-    protected int mPageSize = 10;
 
     @SuppressWarnings("unchecked unused")
-    public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId, int pageSize) {
+    public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId) {
         Bundle bundle = new Bundle();
         bundle.putInt(CommonListFragment.ARG_LIST_LAYOUT, listLayout);
         bundle.putInt(CommonListFragment.ARG_ITEM_LAYOUT, itemLayout);
         bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, listViewId);
-        bundle.putInt(CommonListFragment.ARG_PAGE_SIZE, pageSize);
         CommonListFragment<T> fragment = new CommonListFragment<T>();
         fragment.setArguments(bundle);
         // init mListLayout etc
@@ -59,8 +56,6 @@ public class CommonListFragment<T> extends Fragment
     }
 
     public boolean loadMore() {
-        final int loadPage = (int) Math.round(Math.floor(mListData.size() / mPageSize));
-        final int loadIndex = loadPage * mPageSize;
         final int currentSize = mListData.size();
 
         if (mActivity != null && mListLayoutView != null &&
@@ -70,7 +65,7 @@ public class CommonListFragment<T> extends Fragment
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
                     mHasError = false);
             ((OnListFragmentInteraction) mActivity)
-                    .onLoadingMore(this, loadIndex, loadPage, mListData);
+                    .onLoadingMore(this, mListData);
         }
         return mIsLoading;
     }
@@ -120,7 +115,6 @@ public class CommonListFragment<T> extends Fragment
         mListLayout = bundle.getInt(ARG_LIST_LAYOUT);
         mItemLayout = bundle.getInt(ARG_ITEM_LAYOUT);
         mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
-        mPageSize = bundle.getInt(ARG_PAGE_SIZE);
     }
 
     public void setListAdapter(CommonListAdapter<T> listAdapter) {
@@ -197,7 +191,6 @@ public class CommonListFragment<T> extends Fragment
     public interface OnListFragmentInteraction<T> {
         public void onItemClick(CommonListFragment fragment,
                                 View view, int position, long id);
-        public void onLoadingMore(CommonListFragment fragment,
-                                  int position, int page, List data);
+        public void onLoadingMore(CommonListFragment fragment, List data);
     }
 }

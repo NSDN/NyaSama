@@ -63,7 +63,7 @@ public class NoticeActivity extends FragmentActivity
                         Notice.class,
                         R.layout.fragment_post_list,
                         R.layout.fragment_notice_item,
-                        R.id.list, PAGE_SIZE_COUNT);
+                        R.id.list);
                 mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
                     @Override
                     public void convertView(ViewHolder viewHolder, Notice item) {
@@ -114,7 +114,9 @@ public class NoticeActivity extends FragmentActivity
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment, final int position, int page, final List listData) {
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
+        final int position = page * PAGE_SIZE_COUNT;
         Discuz.execute("profile", new HashMap<String, Object>() {{
             put("do", "notice");
             if (mShowRead)

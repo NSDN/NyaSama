@@ -70,7 +70,7 @@ public class ThreadListActivity extends FragmentActivity
                             Thread.class,
                             R.layout.fragment_thread_list,
                             R.layout.fragment_thread_item,
-                            R.id.list, PAGE_SIZE_COUNT);
+                            R.id.list);
 
                     mListFragment.setListAdapter(new CommonListAdapter<Thread>() {
                         @Override
@@ -184,8 +184,9 @@ public class ThreadListActivity extends FragmentActivity
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment,
-                              final int position, final int page, final List listData) {
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
+        final int position = page * PAGE_SIZE_COUNT;
 
         Intent intent = getIntent();
         final int fid = intent.getIntExtra("fid", 0);

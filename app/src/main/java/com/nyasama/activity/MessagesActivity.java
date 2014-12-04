@@ -33,8 +33,6 @@ import java.util.List;
 public class MessagesActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
-    // DO NOT CHANGE PAGE_SIZE_COUNT
-    public static int PAGE_SIZE_COUNT = 10;
     public static String TAG = "PMList";
 
     private CommonListFragment<PMList> mListFragment;
@@ -112,8 +110,7 @@ public class MessagesActivity extends FragmentActivity
             throw new RuntimeException("user id is required to view messsages!");
 
         mListFragment = CommonListFragment.getNewFragment(PMList.class,
-                R.layout.fragment_post_list,
-                0, R.id.list, PAGE_SIZE_COUNT);
+                R.layout.fragment_post_list, 0, R.id.list);
 
         mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
 
@@ -193,7 +190,7 @@ public class MessagesActivity extends FragmentActivity
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment, final int position, final int page, final List listData) {
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
         Discuz.execute("mypm", new HashMap<String, Object>() {{
             // we don't have to set 'page' when viewing the last page
             if (listData.size() > 0)

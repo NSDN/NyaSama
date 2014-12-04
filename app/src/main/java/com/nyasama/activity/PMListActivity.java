@@ -45,7 +45,7 @@ public class PMListActivity extends FragmentActivity
                 // TODO: replace borrowed fragment_post_list
                 R.layout.fragment_post_list,
                 R.layout.fragment_pmlist_item,
-                R.id.list, PAGE_SIZE_COUNT);
+                R.id.list);
 
         mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
             @Override
@@ -106,7 +106,9 @@ public class PMListActivity extends FragmentActivity
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment, final int position, final int page, final List listData) {
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
+        final int position = page * PAGE_SIZE_COUNT;
         Discuz.execute("mypm", new HashMap<String, Object>() {{
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
