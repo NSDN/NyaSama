@@ -17,6 +17,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.activity.NoticeActivity;
+import com.nyasama.activity.PMListActivity;
 import com.nyasama.activity.UserProfileActivity;
 
 import org.apache.http.NameValuePair;
@@ -225,8 +227,13 @@ public class Discuz {
     }
 
     private static void notifyNewMessage() {
+        Class activityClass = UserProfileActivity.class;
+        if (sNewMessages > 0 && sNewPrompts == 0)
+            activityClass = PMListActivity.class;
+        else if (sNewMessages == 0 && sNewPrompts > 0)
+            activityClass = NoticeActivity.class;
         Context context = ThisApp.context;
-        Intent intents[] = {new Intent(context, UserProfileActivity.class)};
+        Intent intents[] = {new Intent(context, activityClass)};
         PendingIntent pendingIntent = PendingIntent.getActivities(context,
                 0,
                 intents,
