@@ -58,9 +58,8 @@ public class PMListActivity extends FragmentActivity
                 ((NetworkImageView) viewHolder.getView(R.id.avatar))
                         .setImageUrl(avatar_url, ThisApp.imageLoader);
 
-                viewHolder.setText(R.id.author, username);
+                viewHolder.setText(R.id.author, username + " (" + item.number + ")");
                 viewHolder.setText(R.id.message, item.message);
-                viewHolder.setText(R.id.number, ""+item.number);
                 viewHolder.setText(R.id.date, item.lastdate);
             }
         });
