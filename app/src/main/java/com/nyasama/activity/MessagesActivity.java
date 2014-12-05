@@ -2,12 +2,15 @@ package com.nyasama.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.android.volley.Response;
@@ -30,13 +33,14 @@ import java.util.List;
 public class MessagesActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
-    public static int PAGE_SIZE_COUNT = 20;
     public static String TAG = "PMList";
 
     private CommonListFragment<PMList> mListFragment;
 
-    public int mPMId;
-    public AlertDialog mReplyDialog;
+    private int mPMId;
+    private int mPage = Integer.MAX_VALUE;
+    private int mCount = Integer.MAX_VALUE;
+    private AlertDialog mReplyDialog;
 
     public void doSendMessage(final String text) {
         Discuz.execute("sendpm", new HashMap<String, Object>() {{
@@ -56,7 +60,7 @@ public class MessagesActivity extends FragmentActivity
                     if ("do_success".equals(messageval)) {
                         JSONObject var = data.optJSONObject("Variables");
                         mPMId = Integer.parseInt(var.optString("pmid"));
-                        mListFragment.reloadLast();
+                        mListFragment.reloadAll();
                     }
                     else
                         Helper.toast(message.optString("messagestr"));
@@ -105,12 +109,38 @@ public class MessagesActivity extends FragmentActivity
         if (getIntent().getIntExtra("touid", 0) == 0)
             throw new RuntimeException("user id is required to view messsages!");
 
-        mListFragment = CommonListFragment.getNewFragment(
-                PMList.class,
-                // TODO: replace borrowed fragment_post_list
-                R.layout.fragment_post_list,
-                R.layout.fragment_pm_item,
-                R.id.list, PAGE_SIZE_COUNT);
+        mListFragment = CommonListFragment.getNewFragment(PMList.class,
+                R.layout.fragment_post_list, 0, R.id.list);
+
+        mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
+
+            @Override
+            public View createView(ViewGroup parent, int position) {
+                int layout = mListFragment.getData(position).authorId == Discuz.sUid ?
+                        R.layout.fragment_pm_from_me : R.layout.fragment_pm_from_others;
+                return LayoutInflater.from(parent.getContext())
+                        .inflate(layout, parent, false);
+            }
+
+            @Override
+            public void convertView(ViewHolder viewHolder, PMList item) {
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
+                ((NetworkImageView) viewHolder.getView(R.id.avatar))
+                        .setImageUrl(avatar_url, ThisApp.imageLoader);
+                viewHolder.setText(R.id.message, item.message);
+            }
+
+            @Override
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return mListFragment.getData(position).authorId == Discuz.sUid ? 0 : 1;
+            }
+        });
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -150,34 +180,21 @@ public class MessagesActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-
-    }
-
-    @Override
-    public void onConvertView(CommonListFragment fragment, CommonListAdapter.ViewHolder viewHolder, PMList item) {
-
-        int avatar_id = item.authorId == Discuz.sUid ?
-                R.id.self_user_avatar : R.id.other_user_avatar;
-        String avatar_url = Discuz.DISCUZ_URL +
-                "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-        ((NetworkImageView) viewHolder.getView(avatar_id))
-                .setImageUrl(avatar_url, ThisApp.imageLoader);
-        int message_id = item.authorId == Discuz.sUid ?
-                R.id.self_message : R.id.other_message;
-        viewHolder.setText(message_id, item.message);
-
-        viewHolder.getView(R.id.self_message).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.self_user_avatar).setVisibility(item.authorId == Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.other_message).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-        viewHolder.getView(R.id.other_user_avatar).setVisibility(item.authorId != Discuz.sUid ? View.VISIBLE : View.INVISIBLE);
-
+        int uid = mListFragment.getData(position).authorId;
+        if (uid > 0 && uid != Discuz.sUid) {
+            Intent intent = new Intent(this, UserProfileActivity.class);
+            intent.putExtra("uid", uid);
+            startActivity(intent);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment, final int position, final int page, final List listData) {
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
         Discuz.execute("mypm", new HashMap<String, Object>() {{
-            put("page", page + 1);
+            // we don't have to set 'page' when viewing the last page
+            if (listData.size() > 0)
+                put("page", mPage - 1);
             put("touid", getIntent().getIntExtra("touid", Discuz.sUid));
             put("subop", "view");
         }}, null, new Response.Listener<JSONObject>() {
@@ -188,26 +205,22 @@ public class MessagesActivity extends FragmentActivity
                     Helper.toast(R.string.network_error_toast);
                 }
                 else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
                         JSONArray list = var.getJSONArray("list");
-                        for (int i = 0; i < list.length(); i ++) {
+                        for (int i = list.length() - 1; i >= 0; i --)
                             listData.add(new PMList(list.getJSONObject(i)));
-                        }
 
                         // we need pmid to reply
-                        if (var.has("pmid")) {
+                        if (var.has("pmid"))
                             mPMId = Integer.parseInt(var.getString("pmid"));
-                        }
-
-                        if (list.length() < PAGE_SIZE_COUNT)
-                            total = list.length();
-                        else
-                            total = Integer.MAX_VALUE;
+                        // Discuz might return false for count!
+                        if (var.has("count"))
+                            mCount = Helper.toSafeInteger(var.getString("count"), 0);
+                        if (var.has("page"))
+                            mPage = Integer.parseInt(var.getString("page"));
+                        total = mPage == 1 ? listData.size() : mCount;
 
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Message List Failed (" + e.getMessage() + ")");

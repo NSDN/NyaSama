@@ -1,80 +1,90 @@
 package com.nyasama.activity;
 
-import android.content.Intent;
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.SpinnerAdapter;
 
 import com.android.volley.Response;
-import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
-import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Discuz.PMList;
+import com.nyasama.util.Discuz.Notice;
 import com.nyasama.util.Helper;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
-public class PMListActivity extends FragmentActivity
-    implements CommonListFragment.OnListFragmentInteraction<PMList> {
+public class NoticeActivity extends FragmentActivity
+    implements CommonListFragment.OnListFragmentInteraction<Notice> {
 
     public static int PAGE_SIZE_COUNT = 20;
-    public static String TAG = "PMList";
+    public static String TAG = "Notice";
 
-    private CommonListFragment<PMList> mListFragment;
+    private CommonListFragment<Notice> mListFragment;
+    private boolean mShowRead = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pm_list);
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        setContentView(R.layout.activity_notice);
 
-        mListFragment = CommonListFragment.getNewFragment(
-                PMList.class,
-                // TODO: replace borrowed fragment_post_list
-                R.layout.fragment_post_list,
-                R.layout.fragment_pmlist_item,
-                R.id.list);
+        ActionBar actionBar = getActionBar();
+        if (actionBar == null)
+            return;
 
-        mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+        String spinnerText[] = {
+                getString(R.string.title_notice_unread),
+                getString(R.string.title_notice_read),
+        };
+        SpinnerAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                android.R.layout.simple_spinner_dropdown_item, spinnerText);
+        actionBar.setListNavigationCallbacks(spinnerAdapter, new ActionBar.OnNavigationListener() {
             @Override
-            public void convertView(ViewHolder viewHolder, PMList item) {
-                int uid = item.fromUserId != Discuz.sUid ? item.fromUserId : item.toUserId;
-                String username = item.fromUserId != Discuz.sUid ? item.fromUser : item.toUser;
+            public boolean onNavigationItemSelected(int i, long l) {
+                mShowRead = i != 0;
 
-                String avatar_url = Discuz.DISCUZ_URL +
-                        "uc_server/avatar.php?uid=" + uid + "&size=small";
-                ((NetworkImageView) viewHolder.getView(R.id.avatar))
-                        .setImageUrl(avatar_url, ThisApp.imageLoader);
+                mListFragment = CommonListFragment.getNewFragment(
+                        Notice.class,
+                        R.layout.fragment_post_list,
+                        R.layout.fragment_notice_item,
+                        R.id.list);
+                mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
+                    @Override
+                    public void convertView(ViewHolder viewHolder, Notice item) {
+                        viewHolder.setText(R.id.date, item.dateline);
+                        viewHolder.setText(R.id.note, Html.fromHtml(item.note));
+                    }
+                });
 
-                viewHolder.setText(R.id.author, username);
-                viewHolder.setText(R.id.message, item.message);
-                viewHolder.setText(R.id.number, ""+item.number);
-                viewHolder.setText(R.id.date, item.lastdate);
+                getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, mListFragment)
+                    .commit();
+                return true;
             }
         });
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, mListFragment).commit();
-
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_pm_list, menu);
+        getMenuInflater().inflate(R.menu.menu_notice, menu);
         return true;
     }
 
@@ -99,9 +109,7 @@ public class PMListActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        Intent intent = new Intent(this, MessagesActivity.class);
-        intent.putExtra("touid", ((PMList) fragment.getData(position)).toUserId);
-        startActivity(intent);
+        // TODO:
     }
 
     @Override
@@ -109,8 +117,10 @@ public class PMListActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
         final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
         final int position = page * PAGE_SIZE_COUNT;
-        Discuz.execute("mypm", new HashMap<String, Object>() {{
-            put("page", page + 1);
+        Discuz.execute("profile", new HashMap<String, Object>() {{
+            put("do", "notice");
+            if (mShowRead)
+                put("isread", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -125,12 +135,17 @@ public class PMListActivity extends FragmentActivity
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
-                        JSONArray list = var.getJSONArray("list");
-                        for (int i = 0; i < list.length(); i ++) {
-                            listData.add(new PMList(list.getJSONObject(i)));
+                        int len = 0;
+                        if (var.opt("list") instanceof JSONObject) {
+                            JSONObject list = var.getJSONObject("list");
+                            for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {
+                                String key = iter.next();
+                                listData.add(new Notice(list.getJSONObject(key)));
+                                len ++;
+                            }
                         }
 
-                        if (list.length() < PAGE_SIZE_COUNT)
+                        if (len < PAGE_SIZE_COUNT)
                             total = listData.size();
                         else
                             total = Integer.MAX_VALUE;

@@ -18,7 +18,14 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
     protected List<T> mList;
     protected int mLayout;
 
+    public CommonListAdapter() {
+    }
+
     public CommonListAdapter(List<T> list, int layout) {
+        setup(list, layout);
+    }
+
+    public void setup(List<T> list, int layout) {
         mList = list;
         mLayout = layout;
     }
@@ -45,7 +52,7 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
             convertView = createView(parent, position);
             convertView.setTag(new ViewHolder(convertView));
         }
-        convert((ViewHolder) convertView.getTag(), getItem(position));
+        convertView((ViewHolder) convertView.getTag(), getItem(position));
         return convertView;
     }
 
@@ -55,7 +62,7 @@ public abstract class CommonListAdapter<T> extends BaseAdapter {
                 .inflate(mLayout, parent, false);
     }
 
-    public abstract void convert(ViewHolder viewHolder, T item);
+    public abstract void convertView(ViewHolder viewHolder, T item);
 
     public class ViewHolder {
 

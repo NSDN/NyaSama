@@ -53,7 +53,7 @@ public class LoginActivity extends Activity
                             // return uid to parent activity
                             String uid = data.getJSONObject("Variables").getString("member_uid");
                             setResult(Integer.parseInt(uid));
-                            // refresh the form hash
+                            // TODO: refresh the form hash
                             Discuz.execute("forumindex", new HashMap<String, Object>(), null,
                                     new Response.Listener<JSONObject>() {
                                         @Override

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">喵玉殿</string>
     <string name="title_section1">论坛</string>
     <string name="title_section2">设置</string>
@@ -54,4 +55,9 @@
     <string name="fragment_blank_msg">喵......</string>
     <string name="my_message_button">我的私信</string>
     <string name="login_message">登了个录</string>
+    <string name="title_activity_notice">我的提醒</string>
+    <string name="my_notice_button">我的提醒</string>
+    <string name="title_notice_read">已读提醒</string>
+    <string name="title_notice_unread">未读提醒</string>
+
 </resources>
