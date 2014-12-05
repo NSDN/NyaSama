@@ -47,23 +47,6 @@ public class PMListActivity extends FragmentActivity
                 R.layout.fragment_pmlist_item,
                 R.id.list);
 
-        mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
-            @Override
-            public void convertView(ViewHolder viewHolder, PMList item) {
-                int uid = item.fromUserId != Discuz.sUid ? item.fromUserId : item.toUserId;
-                String username = item.fromUserId != Discuz.sUid ? item.fromUser : item.toUser;
-
-                String avatar_url = Discuz.DISCUZ_URL +
-                        "uc_server/avatar.php?uid=" + uid + "&size=small";
-                ((NetworkImageView) viewHolder.getView(R.id.avatar))
-                        .setImageUrl(avatar_url, ThisApp.imageLoader);
-
-                viewHolder.setText(R.id.author, username + " (" + item.number + ")");
-                viewHolder.setText(R.id.message, item.message);
-                viewHolder.setText(R.id.date, item.lastdate);
-            }
-        });
-
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
 
@@ -94,6 +77,26 @@ public class PMListActivity extends FragmentActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<PMList>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, PMList item) {
+                int uid = item.fromUserId != Discuz.sUid ? item.fromUserId : item.toUserId;
+                String username = item.fromUserId != Discuz.sUid ? item.fromUser : item.toUser;
+
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid=" + uid + "&size=small";
+                ((NetworkImageView) viewHolder.getView(R.id.avatar))
+                        .setImageUrl(avatar_url, ThisApp.imageLoader);
+
+                viewHolder.setText(R.id.author, username + " (" + item.number + ")");
+                viewHolder.setText(R.id.message, item.message);
+                viewHolder.setText(R.id.date, item.lastdate);
+            }
+        };
     }
 
     @Override

@@ -64,13 +64,6 @@ public class NoticeActivity extends FragmentActivity
                         R.layout.fragment_post_list,
                         R.layout.fragment_notice_item,
                         R.id.list);
-                mListFragment.setListAdapter(new CommonListAdapter<Notice>() {
-                    @Override
-                    public void convertView(ViewHolder viewHolder, Notice item) {
-                        viewHolder.setText(R.id.date, item.dateline);
-                        viewHolder.setText(R.id.note, Html.fromHtml(item.note));
-                    }
-                });
 
                 getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, mListFragment)
@@ -105,6 +98,17 @@ public class NoticeActivity extends FragmentActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<Notice>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, Notice item) {
+                viewHolder.setText(R.id.date, item.dateline);
+                viewHolder.setText(R.id.note, Html.fromHtml(item.note));
+            }
+        };
     }
 
     @Override

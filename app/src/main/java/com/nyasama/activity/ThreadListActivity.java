@@ -72,16 +72,6 @@ public class ThreadListActivity extends FragmentActivity
                             R.layout.fragment_thread_item,
                             R.id.list);
 
-                    mListFragment.setListAdapter(new CommonListAdapter<Thread>() {
-                        @Override
-                        public void convertView(ViewHolder viewHolder, Thread item) {
-                            viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-                            viewHolder.setText(R.id.sub,
-                                    Html.fromHtml(item.author + " " + item.lastpost));
-                            viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
-                        }
-                    });
-
                     return mListFragment;
                 } else {
                     return new Fragment() {
@@ -173,9 +163,21 @@ public class ThreadListActivity extends FragmentActivity
     }
 
     @Override
-    public void onItemClick(CommonListFragment fragment,
-                            View view, int position, long id) {
-        Intent intent = new Intent(view.getContext(), PostListActivity.class);
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<Thread>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, Thread item) {
+                viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+                viewHolder.setText(R.id.sub,
+                        Html.fromHtml(item.author + " " + item.lastpost));
+                viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
+            }
+        };
+    }
+
+    @Override
+    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        Intent intent = new Intent(this, PostListActivity.class);
         Thread thread = mListFragment.getData(position);
         intent.putExtra("tid", thread.id);
         intent.putExtra("title", thread.title);
