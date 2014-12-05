@@ -3,6 +3,7 @@ package com.nyasama.fragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,15 +72,18 @@ public class CommonListFragment<T> extends Fragment
     }
 
     public void loadMoreDone(int total) {
-        mHasError = total < 0;
-        mListItemCount = total > 0 ? total : 0;
-        mIsLoading = false;
-        if (mListAdapter != null) {
-            mListAdapter.notifyDataSetChanged();
+        mListItemCount = total;
+        if (mHasError = total < 0) {
+            mListItemCount = 0;
+            mListData.clear();
+            Log.e("ListFragment", "load failed");
         }
+
+        mIsLoading = false;
+        mListAdapter.notifyDataSetChanged();
         if (mListLayoutView != null) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty),
-                    total <= 0 && !mHasError);
+                    mListItemCount == 0 && !mHasError);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
                     mHasError);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
