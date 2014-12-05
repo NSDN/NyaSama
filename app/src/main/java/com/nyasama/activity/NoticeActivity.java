@@ -29,7 +29,6 @@ import java.util.List;
 public class NoticeActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Notice> {
 
-    public static int PAGE_SIZE_COUNT = 20;
     public static String TAG = "Notice";
 
     private CommonListFragment<Notice> mListFragment;
@@ -119,8 +118,6 @@ public class NoticeActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
-        final int position = page * PAGE_SIZE_COUNT;
         Discuz.execute("profile", new HashMap<String, Object>() {{
             put("do", "notice");
             if (mShowRead)
@@ -133,26 +130,19 @@ public class NoticeActivity extends FragmentActivity
                     Helper.toast(R.string.network_error_toast);
                 }
                 else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
-                        int len = 0;
                         if (var.opt("list") instanceof JSONObject) {
                             JSONObject list = var.getJSONObject("list");
                             for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {
                                 String key = iter.next();
                                 listData.add(new Notice(list.getJSONObject(key)));
-                                len ++;
                             }
                         }
 
-                        if (len < PAGE_SIZE_COUNT)
-                            total = listData.size();
-                        else
-                            total = Integer.MAX_VALUE;
+                        // No pager
+                        total = listData.size();
 
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load PM Lists Failed (" + e.getMessage() + ")");
