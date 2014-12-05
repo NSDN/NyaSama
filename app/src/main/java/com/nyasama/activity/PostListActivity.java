@@ -9,12 +9,12 @@ import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -330,6 +330,7 @@ public class PostListActivity extends FragmentActivity
     }
 
     final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
+    final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -364,25 +365,31 @@ public class PostListActivity extends FragmentActivity
                         new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
 
                 // load comments
-                List<Comment> comments = mComments.get(item.id);
-                AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
-                if (comments != null) {
-                    commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
-                        @Override
-                        public void convertView(ViewHolder viewHolder, Comment item) {
-                            viewHolder.setText(R.id.author, item.author);
-                            viewHolder.setText(R.id.comment, item.comment);
-                        }
-                    });
-                    commentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                            addComment(item);
-                        }
-                    });
+                LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
+                commentList.removeAllViews();
+                List<View> cachedViews = commentsCache.get(item.id);
+                if (cachedViews == null) {
+                    cachedViews = new ArrayList<View>();
+                    commentsCache.put(item.id, cachedViews);
                 }
-                else {
-                    commentList.setAdapter(null);
+                List<Comment> comments = mComments.get(item.id);
+                if (comments != null) {
+                    LayoutInflater inflater = getLayoutInflater();
+                    for (int i = 0; i < comments.size(); i ++) {
+                        Comment comment = comments.get(i);
+                        View commentView;
+                        if (i < cachedViews.size()) {
+                            commentView = cachedViews.get(i);
+                        }
+                        else {
+                            commentView = inflater
+                                .inflate(R.layout.fragment_comment_item, commentList, false);
+                            cachedViews.add(commentView);
+                        }
+                        ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
+                        ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        commentList.addView(commentView);
+                    }
                 }
 
                 // TODO: display attachments

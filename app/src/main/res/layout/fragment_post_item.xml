@@ -54,10 +54,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.nyasama.view.FullGridView
+    <LinearLayout
         android:layout_toLeftOf="@+id/menu"
         android:layout_below="@id/message"
         android:id="@+id/comment_list"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
