@@ -256,7 +256,7 @@ public class PostListActivity extends FragmentActivity
 
         mListFragment = CommonListFragment.getNewFragment(
                 Post.class,
-                R.layout.fragment_post_list,
+                R.layout.fragment_simple_list,
                 R.layout.fragment_post_item,
                 R.id.list);
 

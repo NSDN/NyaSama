@@ -60,7 +60,7 @@ public class NoticeActivity extends FragmentActivity
 
                 mListFragment = CommonListFragment.getNewFragment(
                         Notice.class,
-                        R.layout.fragment_post_list,
+                        R.layout.fragment_simple_list,
                         R.layout.fragment_notice_item,
                         R.id.list);
 

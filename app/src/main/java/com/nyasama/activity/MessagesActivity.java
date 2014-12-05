@@ -110,7 +110,7 @@ public class MessagesActivity extends FragmentActivity
             throw new RuntimeException("user id is required to view messsages!");
 
         mListFragment = CommonListFragment.getNewFragment(PMList.class,
-                R.layout.fragment_post_list, 0, R.id.list);
+                R.layout.fragment_simple_list, 0, R.id.list);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();

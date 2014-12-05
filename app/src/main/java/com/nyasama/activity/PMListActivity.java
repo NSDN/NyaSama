@@ -42,8 +42,7 @@ public class PMListActivity extends FragmentActivity
 
         mListFragment = CommonListFragment.getNewFragment(
                 PMList.class,
-                // TODO: replace borrowed fragment_post_list
-                R.layout.fragment_post_list,
+                R.layout.fragment_simple_list,
                 R.layout.fragment_pmlist_item,
                 R.id.list);
 

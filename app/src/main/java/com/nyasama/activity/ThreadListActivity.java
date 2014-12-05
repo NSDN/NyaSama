@@ -78,7 +78,7 @@ public class ThreadListActivity extends FragmentActivity
                 if (i == 0) {
                     return CommonListFragment.getNewFragment(
                             Thread.class,
-                            R.layout.fragment_thread_list,
+                            R.layout.fragment_simple_list,
                             R.layout.fragment_thread_item,
                             R.id.list);
                 } else {
