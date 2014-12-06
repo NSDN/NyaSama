@@ -13,6 +13,7 @@
 
     <TextView
         android:id="@+id/error"
+        android:visibility="gone"
         android:text="@string/load_failed_toast"
         android:gravity="center"
         android:layout_width="match_parent"
