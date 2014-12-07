@@ -31,8 +31,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
     // adding this dependency causes gradle problem
     // REF: http://stackoverflow.com/questions/20673888/duplicate-files-copied-android-studio-0-4-0
     compile 'org.apache.httpcomponents:httpmime:4.2.2'
-    compile project(':PhotoViewer')
 }
