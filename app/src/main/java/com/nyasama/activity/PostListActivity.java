@@ -392,8 +392,10 @@ public class PostListActivity extends FragmentActivity
                 }
 
                 // show attachments
-                View attachments = viewHolder.getView(R.id.attachment_list);
+                TextView attachments = (TextView) viewHolder.getView(R.id.attachment_list);
                 Helper.updateVisibility(attachments, item.attachments.size() > 0);
+                attachments.setText(getString(R.string.text_view_attachments) +
+                        " (" + item.attachments.size() + ")");
                 attachments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
