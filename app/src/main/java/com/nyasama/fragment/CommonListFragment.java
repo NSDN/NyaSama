@@ -3,6 +3,7 @@ package com.nyasama.fragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ import java.util.List;
  *
  */
 public class CommonListFragment<T> extends Fragment
-     implements AbsListView.OnScrollListener, AbsListView.OnItemClickListener {
+     implements AbsListView.OnScrollListener {
 
     public static final String ARG_LIST_LAYOUT = "list_layout_id";
     public static final String ARG_LIST_VIEW_ID = "list_view_id";
@@ -71,15 +72,18 @@ public class CommonListFragment<T> extends Fragment
     }
 
     public void loadMoreDone(int total) {
-        mHasError = total < 0;
-        mListItemCount = total > 0 ? total : 0;
-        mIsLoading = false;
-        if (mListAdapter != null) {
-            mListAdapter.notifyDataSetChanged();
+        mListItemCount = total;
+        if (mHasError = total < 0) {
+            mListItemCount = 0;
+            mListData.clear();
+            Log.e("ListFragment", "load failed");
         }
+
+        mIsLoading = false;
+        mListAdapter.notifyDataSetChanged();
         if (mListLayoutView != null) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty),
-                    total <= 0 && !mHasError);
+                    mListItemCount == 0 && !mHasError);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
                     mHasError);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
@@ -117,16 +121,6 @@ public class CommonListFragment<T> extends Fragment
         mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
     }
 
-    public void setListAdapter(CommonListAdapter<T> listAdapter) {
-        if (mListAdapter != null) {
-            throw new RuntimeException("you must set list adapter before fragment created");
-        }
-        else {
-            mListAdapter = listAdapter;
-            listAdapter.setup(mListData, mItemLayout);
-        }
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -143,6 +137,7 @@ public class CommonListFragment<T> extends Fragment
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mListLayoutView = inflater.inflate(mListLayout, container, false);
 
@@ -151,15 +146,18 @@ public class CommonListFragment<T> extends Fragment
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);
         }
-        if (mListAdapter == null) mListAdapter = new CommonListAdapter<T>(mListData, mItemLayout) {
-            @Override
-            public void convertView(ViewHolder viewHolder, T item) {
-            }
-        };
+
+        final OnListFragmentInteraction interaction = (OnListFragmentInteraction) mActivity;
+        mListAdapter = interaction.getListViewAdaptor(this);
+        mListAdapter.setup(mListData, mItemLayout);
         listView.setAdapter(mListAdapter);
         listView.setOnScrollListener(this);
-        listView.setOnItemClickListener(this);
-        registerForContextMenu(listView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                interaction.onItemClick(CommonListFragment.this, view, i, l);
+            }
+        });
 
         Button reloadButton = (Button) mListLayoutView.findViewById(R.id.reload);
         if (reloadButton != null) reloadButton.setOnClickListener(new View.OnClickListener() {
@@ -170,11 +168,6 @@ public class CommonListFragment<T> extends Fragment
         });
 
         return mListLayoutView;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        ((OnListFragmentInteraction) mActivity).onItemClick(this, view, i, l);
     }
 
     @Override
@@ -189,6 +182,7 @@ public class CommonListFragment<T> extends Fragment
 
     @SuppressWarnings("unused")
     public interface OnListFragmentInteraction<T> {
+        public CommonListAdapter getListViewAdaptor(CommonListFragment fragment);
         public void onItemClick(CommonListFragment fragment,
                                 View view, int position, long id);
         public void onLoadingMore(CommonListFragment fragment, List data);

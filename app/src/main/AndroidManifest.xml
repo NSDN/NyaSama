@@ -132,6 +132,10 @@
             android:name="com.nyasama.activity.NoticeActivity"
             android:label="@string/title_activity_notice" >
         </activity>
+        <activity
+            android:name="com.nyasama.activity.AttachmentViewer"
+            android:label="@string/title_activity_attachment_viewer" >
+        </activity>
     </application>
 
 </manifest>

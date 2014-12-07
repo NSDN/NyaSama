@@ -110,37 +110,7 @@ public class MessagesActivity extends FragmentActivity
             throw new RuntimeException("user id is required to view messsages!");
 
         mListFragment = CommonListFragment.getNewFragment(PMList.class,
-                R.layout.fragment_post_list, 0, R.id.list);
-
-        mListFragment.setListAdapter(new CommonListAdapter<PMList>() {
-
-            @Override
-            public View createView(ViewGroup parent, int position) {
-                int layout = mListFragment.getData(position).authorId == Discuz.sUid ?
-                        R.layout.fragment_pm_from_me : R.layout.fragment_pm_from_others;
-                return LayoutInflater.from(parent.getContext())
-                        .inflate(layout, parent, false);
-            }
-
-            @Override
-            public void convertView(ViewHolder viewHolder, PMList item) {
-                String avatar_url = Discuz.DISCUZ_URL +
-                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-                ((NetworkImageView) viewHolder.getView(R.id.avatar))
-                        .setImageUrl(avatar_url, ThisApp.imageLoader);
-                viewHolder.setText(R.id.message, item.message);
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                return 2;
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                return mListFragment.getData(position).authorId == Discuz.sUid ? 0 : 1;
-            }
-        });
+                R.layout.fragment_simple_list, 0, R.id.list);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
@@ -176,6 +146,39 @@ public class MessagesActivity extends FragmentActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<PMList>() {
+
+            @Override
+            public View createView(ViewGroup parent, int position) {
+                int layout = mListFragment.getData(position).authorId == Discuz.sUid ?
+                        R.layout.fragment_pm_from_me : R.layout.fragment_pm_from_others;
+                return LayoutInflater.from(parent.getContext())
+                        .inflate(layout, parent, false);
+            }
+
+            @Override
+            public void convertView(ViewHolder viewHolder, PMList item) {
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
+                ((NetworkImageView) viewHolder.getView(R.id.avatar))
+                        .setImageUrl(avatar_url, ThisApp.imageLoader);
+                viewHolder.setText(R.id.message, item.message);
+            }
+
+            @Override
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return mListFragment.getData(position).authorId == Discuz.sUid ? 0 : 1;
+            }
+        };
     }
 
     @Override

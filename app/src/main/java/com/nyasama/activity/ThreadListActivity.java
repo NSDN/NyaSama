@@ -63,26 +63,24 @@ public class ThreadListActivity extends FragmentActivity
 
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
         pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+            // REF: http://stackoverflow.com/questions/8785221/retrieve-a-fragment-from-a-viewpager
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object instantiateItem(ViewGroup container, int position) {
+                Object item = super.instantiateItem(container, position);
+                if (position == 0)
+                    mListFragment = (CommonListFragment) item;
+                return item;
+            }
+
             @Override
             public Fragment getItem(int i) {
                 if (i == 0) {
-                    mListFragment = CommonListFragment.getNewFragment(
+                    return CommonListFragment.getNewFragment(
                             Thread.class,
-                            R.layout.fragment_thread_list,
+                            R.layout.fragment_simple_list,
                             R.layout.fragment_thread_item,
                             R.id.list);
-
-                    mListFragment.setListAdapter(new CommonListAdapter<Thread>() {
-                        @Override
-                        public void convertView(ViewHolder viewHolder, Thread item) {
-                            viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-                            viewHolder.setText(R.id.sub,
-                                    Html.fromHtml(item.author + " " + item.lastpost));
-                            viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
-                        }
-                    });
-
-                    return mListFragment;
                 } else {
                     return new Fragment() {
                         @Override
@@ -96,7 +94,7 @@ public class ThreadListActivity extends FragmentActivity
                                 public void convertView(ViewHolder viewHolder, Forum item) {
                                     viewHolder.setText(R.id.title, item.name);
                                     viewHolder.setText(R.id.sub,
-                                            "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                                            "threads:" + item.threads + "  posts:" + item.todayPosts + "/" + item.posts);
                                     ((NetworkImageView) viewHolder.getView(R.id.icon))
                                             .setImageUrl(item.icon, ThisApp.imageLoader);
                                 }
@@ -173,9 +171,21 @@ public class ThreadListActivity extends FragmentActivity
     }
 
     @Override
-    public void onItemClick(CommonListFragment fragment,
-                            View view, int position, long id) {
-        Intent intent = new Intent(view.getContext(), PostListActivity.class);
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<Thread>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, Thread item) {
+                viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+                viewHolder.setText(R.id.sub,
+                        Html.fromHtml(item.author + " " + item.lastpost));
+                viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
+            }
+        };
+    }
+
+    @Override
+    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        Intent intent = new Intent(this, PostListActivity.class);
         Thread thread = mListFragment.getData(position);
         intent.putExtra("tid", thread.id);
         intent.putExtra("title", thread.title);

@@ -46,12 +46,19 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
         }
     };
 
+    public void displayError(boolean show) {
+        View rootView = getView();
+        if (rootView != null)
+            Helper.updateVisibility(rootView.findViewById(R.id.error), show);
+    }
     public void loadForums() {
+        displayError(false);
         Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
+                    displayError(true);
                 } else if (!data.isNull("Variables")) {
                     try {
                         JSONObject var = data.getJSONObject("Variables");

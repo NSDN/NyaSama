@@ -9,12 +9,12 @@ import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -55,7 +55,6 @@ public class PostListActivity extends FragmentActivity
 
     private CommonListFragment<Post> mListFragment;
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
-    private SparseArray<Attachment> mAttachemnts = new SparseArray<Attachment>();
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
@@ -223,7 +222,7 @@ public class PostListActivity extends FragmentActivity
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
-    String compileMessage(String message) {
+    String compileMessage(String message, final List<Attachment> attachments) {
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -236,9 +235,9 @@ public class PostListActivity extends FragmentActivity
             @Override
             public String foundMatch(MatchResult matchResult) {
                 int id = Integer.parseInt(matchResult.group(1));
-                Attachment attachment = mAttachemnts.get(id);
+                Attachment attachment = attachments.get(id);
                 return attachment == null ? "" :
-                        "<img src=\"data/attachment/forum/" + attachment.src + "\" />";
+                        "<img src=\"" + attachment.src + "\" />";
             }
         });
         return message;
@@ -256,68 +255,9 @@ public class PostListActivity extends FragmentActivity
 
         mListFragment = CommonListFragment.getNewFragment(
                 Post.class,
-                R.layout.fragment_post_list,
+                R.layout.fragment_simple_list,
                 R.layout.fragment_post_item,
                 R.id.list);
-
-
-        final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
-        mListFragment.setListAdapter(new CommonListAdapter<Post>() {
-            @Override
-            public void convertView(ViewHolder viewHolder, final Post item) {
-                String avatar_url = Discuz.DISCUZ_URL +
-                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
-                NetworkImageView avatar = (NetworkImageView) viewHolder.getView(R.id.avatar);
-                avatar.setImageUrl(avatar_url, ThisApp.imageLoader);
-                avatar.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(new Intent(PostListActivity.this, UserProfileActivity.class) {{
-                            putExtra("uid", item.authorId);
-                        }});
-                    }
-                });
-
-                viewHolder.setText(R.id.author, item.author);
-                viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
-                viewHolder.setText(R.id.index, "#"+item.number);
-
-                viewHolder.getView(R.id.menu).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        showMenu(view, item);
-                    }
-                });
-
-                TextView messageText = (TextView) viewHolder.getView(R.id.message);
-                messageText.setText(Html.fromHtml(compileMessage(item.message),
-                        new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
-
-                // load comments
-                List<Comment> comments = mComments.get(item.id);
-                AbsListView commentList = (AbsListView) viewHolder.getView(R.id.comment_list);
-                if (comments != null) {
-                    commentList.setAdapter(new CommonListAdapter<Comment>(comments, R.layout.fragment_comment_item) {
-                        @Override
-                        public void convertView(ViewHolder viewHolder, Comment item) {
-                            viewHolder.setText(R.id.author, item.author);
-                            viewHolder.setText(R.id.comment, item.comment);
-                        }
-                    });
-                    commentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                            addComment(item);
-                        }
-                    });
-                }
-                else {
-                    commentList.setAdapter(null);
-                }
-
-                // TODO: display attachments
-            }
-        });
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
@@ -388,8 +328,88 @@ public class PostListActivity extends FragmentActivity
         "[/quote]";
     }
 
+    final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
+    final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
     @Override
-    public void onItemClick(CommonListFragment fragment, View view, final int position, long id) {
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter<Post>() {
+            @Override
+            public void convertView(ViewHolder viewHolder, final Post item) {
+                String avatar_url = Discuz.DISCUZ_URL +
+                        "uc_server/avatar.php?uid="+item.authorId+"&size=small";
+                NetworkImageView avatar = (NetworkImageView) viewHolder.getView(R.id.avatar);
+                avatar.setImageUrl(avatar_url, ThisApp.imageLoader);
+                avatar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(PostListActivity.this, UserProfileActivity.class) {{
+                            putExtra("uid", item.authorId);
+                        }});
+                    }
+                });
+
+                viewHolder.setText(R.id.author, item.author);
+                viewHolder.setText(R.id.date, Html.fromHtml(item.dateline));
+                viewHolder.setText(R.id.index, "#"+item.number);
+
+                viewHolder.getView(R.id.menu).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showMenu(view, item);
+                    }
+                });
+
+                TextView messageText = (TextView) viewHolder.getView(R.id.message);
+                messageText.setText(Html.fromHtml(item.message,
+                        new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
+
+                // load comments
+                LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
+                commentList.removeAllViews();
+                List<View> cachedViews = commentsCache.get(item.id);
+                if (cachedViews == null) {
+                    cachedViews = new ArrayList<View>();
+                    commentsCache.put(item.id, cachedViews);
+                }
+                List<Comment> comments = mComments.get(item.id);
+                if (comments != null) {
+                    LayoutInflater inflater = getLayoutInflater();
+                    for (int i = 0; i < comments.size(); i ++) {
+                        Comment comment = comments.get(i);
+                        View commentView;
+                        if (i < cachedViews.size()) {
+                            commentView = cachedViews.get(i);
+                        }
+                        else {
+                            commentView = inflater
+                                .inflate(R.layout.fragment_comment_item, commentList, false);
+                            cachedViews.add(commentView);
+                        }
+                        ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
+                        ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        commentList.addView(commentView);
+                    }
+                }
+
+                // show attachments
+                View attachments = viewHolder.getView(R.id.attachment_list);
+                Helper.updateVisibility(attachments, item.attachments.size() > 0);
+                attachments.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
+                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+                            putExtra("index", mListFragment.getIndex(item));
+                        }});
+                    }
+                });
+            }
+        };
+    }
+
+    @Override
+    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        // TODO:
     }
 
     @Override
@@ -440,12 +460,8 @@ public class PostListActivity extends FragmentActivity
                         for (int i = 0; i < postlist.length(); i ++) {
                             JSONObject postData = postlist.getJSONObject(i);
                             Post post = new Post(postData);
-                            if (post.attachments != null) {
-                                for (int j = 0; j < post.attachments.size(); j ++) {
-                                    Attachment attachment = post.attachments.get(j);
-                                    mAttachemnts.put(attachment.id, attachment);
-                                }
-                            }
+                            // Note: replace attachments
+                            post.message = compileMessage(post.message, post.attachments);
                             listData.add(post);
                         }
 
