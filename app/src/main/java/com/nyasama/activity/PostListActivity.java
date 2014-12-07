@@ -238,7 +238,7 @@ public class PostListActivity extends FragmentActivity
                 int id = Integer.parseInt(matchResult.group(1));
                 Attachment attachment = mAttachemnts.get(id);
                 return attachment == null ? "" :
-                        "<img src=\"data/attachment/forum/" + attachment.src + "\" />";
+                        "<img src=\"" + attachment.src + "\" />";
             }
         });
         return message;
@@ -392,8 +392,18 @@ public class PostListActivity extends FragmentActivity
                     }
                 }
 
-                // TODO: display attachments
-
+                // show attachments
+                View attachments = viewHolder.getView(R.id.attachment_list);
+                Helper.updateVisibility(attachments, item.attachments.size() > 0);
+                attachments.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
+                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+                            putExtra("index", mListFragment.getIndex(item));
+                        }});
+                    }
+                });
             }
         };
     }

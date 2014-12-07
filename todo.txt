@@ -58,9 +58,11 @@
 [done. @oxyflour] 板块图标
   备注：需要修改服务端代码。在 api 的 viewthread 模块里面加上一个叫 icon 的键值可获得板块图标地址
 
-[10] 附件下载
+[in process. @oxyflour] 附件下载
+  进度：可以显示（真的要下载吗？
 
 [done. @oxyflour] ForumIndexFragment 因为嵌套了两层 ListView，效率需要提高
+  备注：重构了 CommonListFragment
 
 [done. @oxyflour] 表情
   备注：萌萌哒

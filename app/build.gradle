@@ -34,4 +34,5 @@ dependencies {
     // adding this dependency causes gradle problem
     // REF: http://stackoverflow.com/questions/20673888/duplicate-files-copied-android-studio-0-4-0
     compile 'org.apache.httpcomponents:httpmime:4.2.2'
+    compile project(':PhotoViewer')
 }

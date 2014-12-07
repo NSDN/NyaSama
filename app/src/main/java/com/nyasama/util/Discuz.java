@@ -124,17 +124,18 @@ public class Discuz {
             message = data.optString("message");
             dateline = data.optString("dateline");
 
+            attachments = new ArrayList<Attachment>();
             JSONObject attachlist = data.optJSONObject("attachments");
             if (attachlist != null) {
                 for (Iterator<String> iter = attachlist.keys(); iter.hasNext(); ) {
                     String key = iter.next();
                     JSONObject attachData = attachlist.optJSONObject(key);
-                    if (attachments == null)
-                        attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
                     attachment.id = Integer.parseInt(attachData.optString("aid", "0"));
                     attachment.name = attachData.optString("filename");
-                    attachment.src = attachData.optString("attachment");
+                    attachment.src = attachData.optString("url") + attachData.optString("attachment");
+                    attachment.size = attachData.optString("attachsize");
+                    attachment.isImage = "1".equals(attachData.optString("isimage"));
                     attachments.add(attachment);
                 }
             }
@@ -142,8 +143,10 @@ public class Discuz {
     }
     public static class Attachment {
         public int id;
+        public boolean isImage;
         public String name;
         public String src;
+        public String size;
     }
     public static class Comment {
         public int authorId;
