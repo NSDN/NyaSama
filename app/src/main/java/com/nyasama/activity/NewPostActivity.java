@@ -136,11 +136,13 @@ public class NewPostActivity extends Activity
                                 .setTitle("There is sth wrong...")
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.ok, null);
-                            if (message.getString("messageval").equals("postperm_login_nopermission//1"))
+                            if ("postperm_login_nopermission//1".equals(messageval) ||
+                                    "replyperm_login_nopermission//1".equals(messageval))
                                 builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(NewPostActivity.this, LoginActivity.class));
+                                        startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
+                                                Discuz.REQUEST_CODE_LOGIN);
                                     }
                                 });
                             builder.show();
@@ -299,6 +301,20 @@ public class NewPostActivity extends Activity
         });
     }
 
+    public void refreshFormHash() {
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Updating User Info...").setCancelable(false)
+                .show();
+        // refresh the form hash, or posting will fail
+        Discuz.execute("forumindex", new HashMap<String, Object>(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        dialog.cancel();
+                    }
+                });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,6 +340,7 @@ public class NewPostActivity extends Activity
                     mButtonAddImg.setVisible(b);
             }
         });
+
     }
 
     String mPhotoFilePath;
@@ -372,8 +389,7 @@ public class NewPostActivity extends Activity
                     (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             final AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Uploading")
-                    .setCancelable(false)
+                    .setTitle("Uploading").setCancelable(false)
                     .show();
             Discuz.upload(new HashMap<String, Object>() {{
                 put("type", "image");
@@ -396,6 +412,9 @@ public class NewPostActivity extends Activity
                     }
                 }
             });
+        }
+        else if (requestCode == Discuz.REQUEST_CODE_LOGIN && resultCode > 0) {
+            refreshFormHash();
         }
     }
 

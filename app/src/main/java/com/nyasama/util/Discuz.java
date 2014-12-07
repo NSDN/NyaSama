@@ -58,6 +58,8 @@ public class Discuz {
     public static int REQUEST_CODE_NEW_THREAD = 2;
     public static int REQUEST_CODE_REPLY = 3;
 
+    public static String BROADCAST_FILTER_LOGIN = "login";
+
     public static class Forum {
         public int id;
         public String name;
@@ -432,7 +434,12 @@ public class Discuz {
                             sGroupName = var.optJSONObject("group").optString("grouptitle", "");
 
                         // check if login ok
-                        sHasLogined = !var.isNull("auth");
+                        boolean hasLogined = !var.isNull("auth");
+                        if (sHasLogined != hasLogined) {
+                            LocalBroadcastManager.getInstance(ThisApp.context)
+                                    .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
+                            sHasLogined = hasLogined;
+                        }
 
                         // check messages && prompts
                         int newMessages = var.isNull("member_pm") ? 0 :
@@ -540,14 +547,7 @@ public class Discuz {
                 put("questionid", questionId);
                 put("answer", answer);
             }
-        }}, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                LocalBroadcastManager.getInstance(ThisApp.context)
-                        .sendBroadcast(new Intent("login"));
-                callback.onResponse(jsonObject);
-            }
-        });
+        }}, callback);
     }
 
     // TODO: "Logout" is not found in the api source =.=
@@ -558,6 +558,8 @@ public class Discuz {
         sHasLogined = false;
         ThisApp.cookieStore.removeAll();
         ThisApp.cookieStore.save();
+        LocalBroadcastManager.getInstance(ThisApp.context)
+                .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
         callback.onResponse(new JSONObject());
     }
 
