@@ -55,7 +55,6 @@ public class PostListActivity extends FragmentActivity
 
     private CommonListFragment<Post> mListFragment;
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
-    private SparseArray<Attachment> mAttachemnts = new SparseArray<Attachment>();
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
@@ -223,7 +222,7 @@ public class PostListActivity extends FragmentActivity
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
-    String compileMessage(String message) {
+    String compileMessage(String message, final List<Attachment> attachments) {
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -236,7 +235,7 @@ public class PostListActivity extends FragmentActivity
             @Override
             public String foundMatch(MatchResult matchResult) {
                 int id = Integer.parseInt(matchResult.group(1));
-                Attachment attachment = mAttachemnts.get(id);
+                Attachment attachment = attachments.get(id);
                 return attachment == null ? "" :
                         "<img src=\"" + attachment.src + "\" />";
             }
@@ -361,7 +360,7 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
-                messageText.setText(Html.fromHtml(compileMessage(item.message),
+                messageText.setText(Html.fromHtml(item.message,
                         new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
 
                 // load comments
@@ -461,12 +460,8 @@ public class PostListActivity extends FragmentActivity
                         for (int i = 0; i < postlist.length(); i ++) {
                             JSONObject postData = postlist.getJSONObject(i);
                             Post post = new Post(postData);
-                            if (post.attachments != null) {
-                                for (int j = 0; j < post.attachments.size(); j ++) {
-                                    Attachment attachment = post.attachments.get(j);
-                                    mAttachemnts.put(attachment.id, attachment);
-                                }
-                            }
+                            // Note: replace attachments
+                            post.message = compileMessage(post.message, post.attachments);
                             listData.add(post);
                         }
 
