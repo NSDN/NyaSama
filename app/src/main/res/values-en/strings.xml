@@ -54,5 +54,12 @@
     <string name="title_activity_messages">Messages</string>
     <string name="title_activity_personal_messages">Personal Messages</string>
     <string name="my_message_button">My Messages</string>
+    <string name="login_message">Drop In Genso!</string>
+    <string name="my_notice_button">My Notice</string>
+    <string name="text_view_attachments">[View Attachments]</string>
+    <string name="title_activity_attachment_viewer">View Attachments</string>
+    <string name="title_activity_notice">My Notice</string>
+    <string name="title_notice_read">Read Notice</string>
+    <string name="title_notice_unread">Unread Notice</string>
 
 </resources>
