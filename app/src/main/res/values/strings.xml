@@ -60,6 +60,6 @@
     <string name="title_notice_read">已读提醒</string>
     <string name="title_notice_unread">未读提醒</string>
     <string name="title_activity_attachment_viewer">查看附件</string>
-    <string name="text_view_attachments">查看附件</string>
+    <string name="text_view_attachments">[查看附件]</string>
 
 </resources>
