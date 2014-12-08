@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -21,24 +22,36 @@ import com.nyasama.activity.NoticeActivity;
 import com.nyasama.activity.PMListActivity;
 import com.nyasama.activity.UserProfileActivity;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -531,6 +544,86 @@ public class Discuz {
             }
         );
         ThisApp.requestQueue.add(request);
+    }
+
+    public static void upload(final Map<String, Object> params,
+                              final String filePath,
+                              final Response.Listener<String> callback,
+                              final Response.Listener<Integer> process) {
+
+        if (sUploadHash == null || sUid == 0 || filePath == null) {
+            callback.onResponse(null);
+            return;
+        }
+
+        params.put("module", "forumupload");
+        params.put("hash", sUploadHash);
+        params.put("uid", sUid);
+
+        final String url = DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+        AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            @Override
+            protected String doInBackground(Object[] objects) {
+
+                final MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE,
+                        "----------" + UUID.randomUUID().toString().replace("-", ""),
+                        Charset.forName(DISCUZ_ENC)) {
+                    {
+                        try {
+                            addPart("hash", new StringBody(sUploadHash));
+                            addPart("uid", new StringBody("" + sUid));
+                            addPart("Filedata", new FileBody(new File(filePath)));
+                        }
+                        catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    @Override
+                    public void writeTo(final OutputStream outstream) throws IOException {
+                        final int total = (int) getContentLength();
+                        // create a stream to count the transferred size
+                        super.writeTo(new FilterOutputStream(outstream) {
+                            private int transferred = 0;
+                            @Override
+                            public void write(byte[] buffer, int offset, int length) throws IOException {
+                                int sent = 0;
+                                while (sent < length) {
+                                    int toSend = Math.min(64, length - sent);
+                                    out.write(buffer, offset + sent, toSend);
+                                    out.flush();
+                                    publishProgress((transferred += toSend) * 100 / total);
+                                    sent += toSend;
+                                }
+                            }
+                            @Override
+                            public void write(int oneByte) throws IOException {
+                                out.write(oneByte);
+                                publishProgress((transferred += 1) * 100 / total);
+                            }
+                        });
+                    }
+                };
+
+                HttpPost post = new HttpPost(url) {{ setEntity(entity); }};
+                try {
+                    return EntityUtils.toString(new DefaultHttpClient().execute(post).getEntity());
+                }
+                catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                process.onResponse(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callback.onResponse(s);
+            }
+        };
+        task.execute();
     }
 
     public static void login(final String username, final String password,

@@ -12,9 +12,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -383,14 +387,21 @@ public class NewPostActivity extends Activity
             // create thumbnail
             Size newSize = getImageSize(bitmapSize, thumbSize, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
-                bitmap, newSize.width, newSize.height);
+                    bitmap, newSize.width, newSize.height);
             final String uploadFile = filePath;
             final String fileName =
                     (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
+            View loadingView = LayoutInflater.from(this)
+                    .inflate(R.layout.fragment_upload_process, null, false);
             final AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Uploading").setCancelable(false)
+                    .setView(loadingView)
                     .show();
+            final ContentLoadingProgressBar progressBar =
+                    (ContentLoadingProgressBar) loadingView.findViewById(R.id.processBar);
+            final TextView progressText =
+                    (TextView) loadingView.findViewById(R.id.processText);
             Discuz.upload(new HashMap<String, Object>() {{
                 put("type", "image");
                 put("fid", getIntent().getIntExtra("fid", 0));
@@ -410,6 +421,12 @@ public class NewPostActivity extends Activity
                     else {
                         Helper.toast(getString(R.string.image_upload_failed_toast));
                     }
+                }
+            }, new Response.Listener<Integer>() {
+                @Override
+                public void onResponse(final Integer integer) {
+                    progressBar.setProgress(integer);
+                    progressText.setText(integer + "%");
                 }
             });
         }
