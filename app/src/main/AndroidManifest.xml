@@ -134,6 +134,7 @@
         </activity>
         <activity
             android:name="com.nyasama.activity.AttachmentViewer"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:label="@string/title_activity_attachment_viewer" >
         </activity>
         <activity
