@@ -192,12 +192,12 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(int position) {
         if (mCallbacks != null) {
-            final int newPosition = mCallbacks.onNavigationDrawerItemSelected(position);
-            if (newPosition >= 0) {
+            if (mCallbacks.onNavigationDrawerItemSelected(position) && mDrawerListView != null) {
+                // let's reset the older selected item
                 mDrawerListView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mDrawerListView.setItemChecked(newPosition, true);
+                        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
                     }
                 }, 500);
                 return;
@@ -288,6 +288,6 @@ public class NavigationDrawerFragment extends Fragment {
         /**
          * Called when an item in the navigation drawer is selected.
          */
-        int onNavigationDrawerItemSelected(int position);
+        boolean onNavigationDrawerItemSelected(int position);
     }
 }

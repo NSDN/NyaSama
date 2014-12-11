@@ -106,18 +106,18 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public int onNavigationDrawerItemSelected(int position) {
+    public boolean onNavigationDrawerItemSelected(int position) {
         // return >=0 to prevent item from checked
         if (position == 1) {
             startActivity(new Intent(this, SettingActivity.class));
-            return 0;
+            return true;
         }
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
-        return -1;
+        return false;
     }
 
     public void onSectionAttached(int number) {
