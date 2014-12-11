@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -42,6 +43,7 @@ public class AttachmentViewer extends FragmentActivity {
 
     private FragmentPagerAdapter mPageAdapter;
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
+    private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
 
     public void loadAttachments() {
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
@@ -110,16 +112,24 @@ public class AttachmentViewer extends FragmentActivity {
                         Attachment attachment = mAttachmentList.get(i);
                         if (attachment.isImage) {
                             final ImageView imageView = new ImageView(container.getContext());
-                            imageView.setImageResource(android.R.drawable.ic_menu_gallery);
-                            String url = Discuz.DISCUZ_URL + attachment.src;
-                            ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
-                                @Override
-                                public void onResponse(Bitmap bitmap) {
-                                    imageView.setImageBitmap(bitmap);
-                                    new PhotoViewAttacher(imageView);
-                                }
-                            }, 0, 0, null, null);
-                            ThisApp.requestQueue.add(imageRequest);
+                            final String url = Discuz.DISCUZ_URL + attachment.src;
+                            Bitmap bitmap = mBitmapCache.get(url);
+                            if (bitmap != null) {
+                                imageView.setImageBitmap(bitmap);
+                                new PhotoViewAttacher(imageView);
+                            }
+                            else {
+                                imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+                                ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+                                    @Override
+                                    public void onResponse(Bitmap bitmap) {
+                                        mBitmapCache.put(url, bitmap);
+                                        imageView.setImageBitmap(bitmap);
+                                        new PhotoViewAttacher(imageView);
+                                    }
+                                }, 0, 0, null, null);
+                                ThisApp.requestQueue.add(imageRequest);
+                            }
                             return imageView;
                         }
                         else {
