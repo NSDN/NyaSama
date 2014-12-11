@@ -46,6 +46,7 @@ public class ThisApp extends Application {
         return Locale.getDefault();
     }
 
+    // REF: http://aleung.github.io/blog/2012/10/06/change-locale-in-android-application/
     private static void loadLocaleFromPreference(SharedPreferences preferences) {
         Locale locale = getLocale(preferences);
         Locale.setDefault(locale);

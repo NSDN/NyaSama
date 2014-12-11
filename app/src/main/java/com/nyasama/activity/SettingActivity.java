@@ -9,6 +9,8 @@ import android.preference.PreferenceActivity;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 
+// REF: http://blog.csdn.net/lincyang/article/details/20609673
+
 public class SettingActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -17,7 +19,6 @@ public class SettingActivity extends PreferenceActivity
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference);
     }
-
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
