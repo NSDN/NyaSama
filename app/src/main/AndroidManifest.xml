@@ -136,6 +136,10 @@
             android:name="com.nyasama.activity.AttachmentViewer"
             android:label="@string/title_activity_attachment_viewer" >
         </activity>
+        <activity
+            android:name="com.nyasama.activity.SettingActivity"
+            android:label="@string/title_activity_setting" >
+        </activity>
     </application>
 
 </manifest>
