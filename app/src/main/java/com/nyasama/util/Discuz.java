@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -42,7 +43,10 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +65,10 @@ public class Discuz {
     public static String DISCUZ_URL = "http://tech.touhou.moe/nya/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
+
+    public static int IMAGE_THUMB_WIDTH = 268;
+    public static int IMAGE_THUMB_HEIGHT = 380;
+
     public static String VOLLEY_ERROR = "volleyError";
 
     public static int NOTIFICATION_ID = 1;
@@ -240,6 +248,27 @@ public class Discuz {
             list.add(new BasicNameValuePair(e.getKey(),
                     e.getValue() != null ? e.getValue().toString() : ""));
         return list;
+    }
+
+    // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
+    public static String getImageThumbUrl(int attachmentId) {
+        String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
+        String key;
+        try {
+            byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
+            key = String.format("%032x", new BigInteger(1, buffer));
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("module", "forumimage");
+        params.put("version", 2);
+        params.put("aid", attachmentId);
+        params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
+        params.put("key", key);
+        params.put("type", "fixnone");
+        return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
     }
 
     private static void notifyNewMessage() {
@@ -481,6 +510,7 @@ public class Discuz {
         return request;
     }
 
+    @SuppressWarnings("unused")
     public static void upload(final Map<String, Object> params,
                               final String filePath,
                               final Response.Listener<String> callback) {
@@ -523,6 +553,7 @@ public class Discuz {
         ThisApp.requestQueue.add(request);
     }
 
+    @SuppressWarnings("unchecked")
     public static void upload(final Map<String, Object> params,
                               final String filePath,
                               final Response.Listener<String> callback,
@@ -562,9 +593,9 @@ public class Discuz {
                         super.writeTo(new FilterOutputStream(outstream) {
                             private int transferred = 0;
                             @Override
-                            public void write(byte[] buffer, int offset, int length) throws IOException {
+                            public void write(@Nullable byte[] buffer, int offset, int length) throws IOException {
                                 int sent = 0;
-                                while (sent < length) {
+                                while (buffer != null && sent < length) {
                                     int toSend = Math.min(64, length - sent);
                                     out.write(buffer, offset + sent, toSend);
                                     out.flush();
