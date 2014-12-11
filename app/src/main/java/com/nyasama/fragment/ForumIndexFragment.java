@@ -138,8 +138,9 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
                     viewHolder.setText(R.id.title, item.name);
                     viewHolder.setText(R.id.sub,
                             "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
-                    ((NetworkImageView) viewHolder.getView(R.id.icon))
-                            .setImageUrl(item.icon, ThisApp.imageLoader);
+                    NetworkImageView icon = ((NetworkImageView) viewHolder.getView(R.id.icon));
+                    icon.setDefaultImageResId(R.drawable.default_board_icon);
+                    icon.setImageUrl(item.icon, ThisApp.imageLoader);
                 }
             }
         });
