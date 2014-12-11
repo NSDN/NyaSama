@@ -15,7 +15,6 @@ import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,7 +25,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -137,7 +135,7 @@ public class NewPostActivity extends Activity
                         }
                         else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
-                                .setTitle("There is sth wrong...")
+                                .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
@@ -307,7 +305,7 @@ public class NewPostActivity extends Activity
 
     public void refreshFormHash() {
         final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Updating User Info...").setCancelable(false)
+                .setTitle(R.string.dialog_update_user).setCancelable(false)
                 .show();
         // refresh the form hash, or posting will fail
         Discuz.execute("forumindex", new HashMap<String, Object>(), null,
@@ -395,7 +393,7 @@ public class NewPostActivity extends Activity
             View loadingView = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_upload_process, null, false);
             final AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Uploading").setCancelable(false)
+                    .setTitle(R.string.dialog_uploading).setCancelable(false)
                     .setView(loadingView)
                     .show();
             final ContentLoadingProgressBar progressBar =
@@ -463,7 +461,21 @@ public class NewPostActivity extends Activity
             return true;
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
-            showInsertOptions();
+            if (Discuz.sSmilies == null) {
+                final AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.diag_loading_smilies).setCancelable(false)
+                        .show();
+                Discuz.getSmileies(new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        dialog.cancel();
+                        showInsertOptions();
+                    }
+                });
+            }
+            else {
+                showInsertOptions();
+            }
             return true;
         }
 

@@ -22,9 +22,7 @@ import com.nyasama.activity.NoticeActivity;
 import com.nyasama.activity.PMListActivity;
 import com.nyasama.activity.UserProfileActivity;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -281,7 +279,7 @@ public class Discuz {
         public List<Smiley> list;
     }
 
-    public static List<SmileyGroup> sSmilies = new ArrayList<SmileyGroup>();
+    public static List<SmileyGroup> sSmilies;
     private static Response.Listener<JSONObject> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
@@ -296,6 +294,48 @@ public class Discuz {
             catch (JSONException e) {
                 Log.e("Discuz", "load smilies failed");
             }
+        }
+    }
+    private static void parseSmileyString(String content) {
+        content = "<script>" + content + "</script>"+
+                "<script>"+
+                "var list = [];" +
+                "var type = smilies_type;" +
+                "var array = smilies_array;" +
+                "for (var k in type) {" +
+                "var d = type[k];"+
+                "var i = parseInt(k.substring(1));"+
+                " if (array[i]) {" +
+                "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
+                "}"+
+                "}"+
+                "JSInterface.setSmilies(JSON.stringify(list))"+
+                "</script>";
+        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
+        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
+        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
+    }
+    private static void parseSmilies(JSONArray data) {
+        if (sSmilies == null)
+            sSmilies = new ArrayList<SmileyGroup>();
+        else
+            sSmilies.clear();
+        for (int i = 0; i < data.length(); i ++) {
+            final JSONObject jsonData = data.optJSONObject(i);
+            final JSONArray jsonList = jsonData.optJSONArray("list");
+            final List<Smiley> smileyList = new ArrayList<Smiley>();
+            for (int j = 0; j < jsonList.length(); j ++) {
+                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                smileyList.add(new Smiley() {{
+                    code = jsonSmiley.optString(1);
+                    image = jsonSmiley.optString(2);
+                }});
+            }
+            sSmilies.add(new SmileyGroup() {{
+                name = jsonData.optString("name");
+                path = jsonData.optString("path");
+                list = smileyList;
+            }});
         }
     }
     public static void getSmileies(Response.Listener<JSONObject> callback) {
@@ -323,69 +363,6 @@ public class Discuz {
             }
         };
         ThisApp.requestQueue.add(request);
-    }
-    public static void parseSmileyString(String content) {
-        content = "<script>" + content + "</script>"+
-                "<script>"+
-                    "var list = [];" +
-                    "var type = smilies_type;" +
-                    "var array = smilies_array;" +
-                    "for (var k in type) {" +
-                        "var d = type[k];"+
-                        "var i = parseInt(k.substring(1));"+
-                        " if (array[i]) {" +
-                            "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
-                        "}"+
-                    "}"+
-                "JSInterface.setSmilies(JSON.stringify(list))"+
-                "</script>";
-        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
-        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
-    }
-    private static void parseSmilies(JSONArray data) {
-        sSmilies.clear();
-        for (int i = 0; i < data.length(); i ++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j ++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
-                }});
-            }
-            sSmilies.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
-        }
-    }
-
-    private static int initJobs = 0;
-
-    public static void init(final Runnable callback) {
-
-        final Response.Listener<JSONObject> done = new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                initJobs --;
-                if (initJobs == 0)
-                    callback.run();
-            }
-        };
-
-        initJobs ++;
-        getSmileies(done);
-
-        // TODO: check login
-        initJobs ++;
-        execute("forumindex",
-            new HashMap<String, Object>(),
-            new HashMap<String, Object>(),
-            done);
     }
 
     public static Request execute(String module,
