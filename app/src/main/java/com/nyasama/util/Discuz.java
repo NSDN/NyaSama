@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://tech.touhou.moe/nya/";
+    public static String DISCUZ_URL = "http://bbs.nyasama.com/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 

@@ -32,8 +32,10 @@ public class HtmlImageGetter implements Html.ImageGetter {
 
     @Override
     public Drawable getDrawable(String s) {
+        if (s == null) return null;
 
-        final String url = s.startsWith("/") || s.startsWith(baseUrl) ? s : baseUrl + s;
+        final String url = s.startsWith("https://") || s.startsWith("http://") ?
+                s : baseUrl + s;
         final LevelListDrawable drawable = new LevelListDrawable();
 
         Bitmap cachedImage = cache == null ? null : cache.get(url);

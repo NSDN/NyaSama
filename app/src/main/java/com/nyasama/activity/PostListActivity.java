@@ -304,6 +304,8 @@ public class PostListActivity extends FragmentActivity
         for (Attachment attachment : attachments)
             srcAttachMap.put(attachment.src, attachment);
 
+        message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
+
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
