@@ -50,11 +50,13 @@ public class PostListActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
     private final int PAGE_SIZE_COUNT = 10;
+    private final int COMMENT_PAGE_SIZE = 10;
     private final int MAX_TRIMSTR_LENGTH = 30;
     private final String TAG = "PostList";
 
     private CommonListFragment<Post> mListFragment;
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
+    private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
@@ -112,10 +114,42 @@ public class PostListActivity extends FragmentActivity
                         if (comments == null)
                             mComments.put(pid, comments = new ArrayList<Comment>());
                         comments.add(0, new Comment(Discuz.sUid, Discuz.sUsername, comment));
+                        mCommentCount.put(pid, comments.size());
                         mListFragment.getListAdapter().notifyDataSetChanged();
                     }
                     else
                         Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
+    }
+
+    public void doLoadComment(final int pid, final int page) {
+        Discuz.execute("morecomment", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+            put("pid", pid);
+            put("page", page + 1);
+        }}, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                mCommentCount.put(pid, Integer.MAX_VALUE);
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Variables") instanceof JSONObject) {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var.opt("comments") instanceof JSONArray) {
+                        JSONArray commentList = var.optJSONArray("comments");
+                        List<Comment> comments = mComments.get(pid);
+                        // remove duplicated items
+                        if (page * COMMENT_PAGE_SIZE < comments.size())
+                            comments.subList(page * COMMENT_PAGE_SIZE, comments.size()).clear();
+                        for (int i = 0; i < commentList.length(); i ++) {
+                            comments.add(new Comment(commentList.optJSONObject(i)));
+                        }
+                        mCommentCount.put(pid, Helper.toSafeInteger(var.optString("count"), 0));
+                        mListFragment.getListAdapter().notifyDataSetChanged();
+                    }
                 }
             }
         });
@@ -182,6 +216,22 @@ public class PostListActivity extends FragmentActivity
         mCommentDialog.show();
     }
 
+    public void loadComment(Post item) {
+        int count = mCommentCount.get(item.id);
+        // give up if it's loading now
+        if (count < 0)
+            return;
+
+        final int pid = item.id;
+        List<Comment> comments = mComments.get(pid);
+        if (comments.size() >= count)
+            return;
+
+        // set count to negative
+        mCommentCount.put(pid, -1);
+        doLoadComment(pid, (int)Math.floor(comments.size()/10));
+    }
+
     public void gotoReply(final Post item) {
         startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
@@ -198,12 +248,21 @@ public class PostListActivity extends FragmentActivity
     public void showMenu(View view, final Post item) {
         PopupMenu menu = new PopupMenu(PostListActivity.this, view);
         menu.getMenuInflater().inflate(R.menu.menu_post_item, menu.getMenu());
+
+        boolean showLoadCommentMenu = mComments.get(item.id) != null &&
+                mComments.get(item.id).size() >= COMMENT_PAGE_SIZE &&
+                mComments.get(item.id).size() < mCommentCount.get(item.id);
+        menu.getMenu().findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
+
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int action = menuItem.getItemId();
                 if (action == R.id.action_comment) {
                     addComment(item);
+                }
+                else if (action == R.id.action_more_comment) {
+                    loadComment(item);
                 }
                 else if (action == R.id.action_quick_reply) {
                     quickReply(item);
@@ -487,6 +546,7 @@ public class PostListActivity extends FragmentActivity
                                     commentList.add(new Comment(commentData));
                                 }
                                 mComments.put(pid, commentList);
+                                mCommentCount.put(pid, Integer.MAX_VALUE);
                             }
                         }
 
