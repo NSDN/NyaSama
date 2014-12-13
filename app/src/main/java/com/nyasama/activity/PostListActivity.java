@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -501,6 +502,8 @@ public class PostListActivity extends FragmentActivity
                         }
                         ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
                         ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        if (commentView.getParent() != null)
+                            ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
                     }
                 }
