@@ -2,7 +2,9 @@ package com.nyasama.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -211,7 +213,7 @@ public class AttachmentViewer extends FragmentActivity {
                     @Override
                     public View onCreateView(LayoutInflater inflater,
                                              ViewGroup container, Bundle savedInstanceState) {
-                        Attachment attachment = mAttachmentList.get(i);
+                        final Attachment attachment = mAttachmentList.get(i);
                         if (attachment.isImage) {
                             final ImageView imageView = new ImageView(container.getContext());
                             final String url = attachment.src.startsWith("http://") || attachment.src.startsWith("https://") ?
@@ -237,6 +239,13 @@ public class AttachmentViewer extends FragmentActivity {
                             View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
                             TextView textView = (TextView) view.findViewById(R.id.name);
                             textView.setText(attachment.name + " (" + attachment.size + ")");
+                            view.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Intent.ACTION_VIEW,
+                                            Uri.parse(Discuz.getSafeUrl(attachment.src))));
+                                }
+                            });
                             return view;
                         }
                     }
