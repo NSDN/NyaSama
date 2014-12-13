@@ -66,5 +66,6 @@
     <string name="diag_loading_smilies">Loading Smileies</string>
     <string name="dialog_update_user">Updating User Info...</string>
     <string name="dialog_uploading">Uploading</string>
+    <string name="title_activity_setting">Settings</string>
 
 </resources>
