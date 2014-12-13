@@ -37,7 +37,7 @@ public class CommonListFragment<T> extends Fragment
 
     private CommonListAdapter<T> mListAdapter;
     private View mListLayoutView;
-    private Activity mActivity;
+    private OnListFragmentInteraction<T> mInteractionInterface;
 
     protected int mListLayout;
     protected int mItemLayout;
@@ -59,14 +59,14 @@ public class CommonListFragment<T> extends Fragment
     public boolean loadMore() {
         final int currentSize = mListData.size();
 
-        if (mActivity != null && mListLayoutView != null &&
+        if (mListLayoutView != null &&
                 currentSize < mListItemCount && !mIsLoading) {
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
                     mIsLoading = true);
             Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
                     mHasError = false);
-            ((OnListFragmentInteraction) mActivity)
-                    .onLoadingMore(this, mListData);
+            if (mInteractionInterface != null)
+                mInteractionInterface.onLoadingMore(this, mListData);
         }
         return mIsLoading;
     }
@@ -122,9 +122,15 @@ public class CommonListFragment<T> extends Fragment
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity = activity;
+        if (this instanceof OnListFragmentInteraction)
+            mInteractionInterface = (OnListFragmentInteraction) this;
+        else if (activity instanceof OnListFragmentInteraction)
+            mInteractionInterface = (OnListFragmentInteraction) activity;
+        else
+            throw new RuntimeException("you should implement OnListFragmentInteraction on activity or subclass");
         loadMore();
     }
 
@@ -147,15 +153,14 @@ public class CommonListFragment<T> extends Fragment
             ((ListView) listView).addFooterView(loading, null, false);
         }
 
-        final OnListFragmentInteraction interaction = (OnListFragmentInteraction) mActivity;
-        mListAdapter = interaction.getListViewAdaptor(this);
+        mListAdapter = mInteractionInterface.getListViewAdaptor(this);
         mListAdapter.setup(mListData, mItemLayout);
         listView.setAdapter(mListAdapter);
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                interaction.onItemClick(CommonListFragment.this, view, i, l);
+                mInteractionInterface.onItemClick(CommonListFragment.this, view, i, l);
             }
         });
 

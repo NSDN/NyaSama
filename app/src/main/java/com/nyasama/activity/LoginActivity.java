@@ -22,8 +22,6 @@ import com.nyasama.util.Helper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-
 public class LoginActivity extends Activity
     implements AdapterView.OnItemSelectedListener {
 
@@ -53,14 +51,7 @@ public class LoginActivity extends Activity
                             // return uid to parent activity
                             String uid = data.getJSONObject("Variables").getString("member_uid");
                             setResult(Integer.parseInt(uid));
-                            // TODO: refresh the form hash
-                            Discuz.execute("forumindex", new HashMap<String, Object>(), null,
-                                    new Response.Listener<JSONObject>() {
-                                        @Override
-                                        public void onResponse(JSONObject jsonObject) {
-                                            finish();
-                                        }
-                                    });
+                            finish();
                         }
                         else
                             mMessage.setText(message.optString("messagestr"));

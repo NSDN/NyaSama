@@ -54,5 +54,10 @@
     <string name="title_activity_messages">Messages</string>
     <string name="title_activity_personal_messages">Personal Messages</string>
     <string name="my_message_button">My Messages</string>
+    <string name="pref_category_general">General</string>
+    <string name="alert_need_reboot">We need restart the application to apply this change</string>
+    <string name="diag_loading_smilies">Loading Smileies</string>
+    <string name="dialog_update_user">Updating User Info...</string>
+    <string name="dialog_uploading">Uploading</string>
 
 </resources>

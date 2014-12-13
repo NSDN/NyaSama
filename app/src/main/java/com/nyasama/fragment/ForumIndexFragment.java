@@ -39,12 +39,6 @@ import java.util.List;
 public class ForumIndexFragment extends android.support.v4.app.Fragment {
 
     private List<Object> mForumListData = new ArrayList<Object>();
-    private BroadcastReceiver mLoginReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            loadForums();
-        }
-    };
 
     public void displayError(boolean show) {
         View rootView = getView();
@@ -98,9 +92,14 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
         mListView = (ListView) rootView.findViewById(R.id.list);
-        LocalBroadcastManager.getInstance(ThisApp.context)
-                .registerReceiver(mLoginReceiver, new IntentFilter("login"));
         loadForums();
+        LocalBroadcastManager.getInstance(ThisApp.context)
+                .registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        loadForums();
+                    }
+                }, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
         return rootView;
     }
 
@@ -139,8 +138,9 @@ public class ForumIndexFragment extends android.support.v4.app.Fragment {
                     viewHolder.setText(R.id.title, item.name);
                     viewHolder.setText(R.id.sub,
                             "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
-                    ((NetworkImageView) viewHolder.getView(R.id.icon))
-                            .setImageUrl(item.icon, ThisApp.imageLoader);
+                    NetworkImageView icon = ((NetworkImageView) viewHolder.getView(R.id.icon));
+                    icon.setDefaultImageResId(R.drawable.default_board_icon);
+                    icon.setImageUrl(item.icon, ThisApp.imageLoader);
                 }
             }
         });

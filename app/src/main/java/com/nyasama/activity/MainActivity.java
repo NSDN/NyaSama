@@ -5,10 +5,14 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -91,21 +95,29 @@ public class MainActivity extends FragmentActivity
         */
 
         loadUserInfo();
+
+        LocalBroadcastManager.getInstance(ThisApp.context)
+                .registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        loadUserInfo();
+                    }
+                }, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadUserInfo();
-    }
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
+    public boolean onNavigationDrawerItemSelected(int position) {
+        // return >=0 to prevent item from checked
+        if (position == 1) {
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
+        }
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
+        return false;
     }
 
     public void onSectionAttached(int number) {

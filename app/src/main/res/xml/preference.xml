@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/pref_category_general">
+        <ListPreference
+            android:key="language"
+            android:defaultValue="默认"
+            android:title="语言"
+            android:summary="%s"
+            android:entries="@array/language_preference"
+            android:entryValues="@array/language_preference"
+            android:dialogTitle="选择语言" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

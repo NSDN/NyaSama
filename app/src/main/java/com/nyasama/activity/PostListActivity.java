@@ -218,26 +218,27 @@ public class PostListActivity extends FragmentActivity
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
-    static CallbackMatcher msgAttachMatcher = new CallbackMatcher("\\[attach\\](\\d+)\\[/attach\\]", 0);
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
     String compileMessage(String message, final List<Attachment> attachments) {
+
+        final Map<String, Attachment> srcAttachMap = new HashMap<String, Attachment>();
+        for (Attachment attachment : attachments)
+            srcAttachMap.put(attachment.src, attachment);
+
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
                 Matcher pathMatcher = msgPathPattern.matcher(matchResult.group(1));
-                return !pathMatcher.find() ? "" :
-                        "<img src=\"" + pathMatcher.group(1) + "\" />";
-            }
-        });
-        message = msgAttachMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
-            @Override
-            public String foundMatch(MatchResult matchResult) {
-                int id = Integer.parseInt(matchResult.group(1));
-                Attachment attachment = attachments.get(id);
-                return attachment == null ? "" :
-                        "<img src=\"" + attachment.src + "\" />";
+                if (pathMatcher.find()) {
+                    String src = pathMatcher.group(1);
+                    Attachment attachment = srcAttachMap.get(src);
+                    if (attachment != null)
+                        return "<img src=\"" + Discuz.getImageThumbUrl(attachment.id) + "\" />";
+                }
+                Log.w(TAG, "attachment image not found");
+                return "";
             }
         });
         return message;
@@ -392,8 +393,10 @@ public class PostListActivity extends FragmentActivity
                 }
 
                 // show attachments
-                View attachments = viewHolder.getView(R.id.attachment_list);
+                TextView attachments = (TextView) viewHolder.getView(R.id.attachment_list);
                 Helper.updateVisibility(attachments, item.attachments.size() > 0);
+                attachments.setText(getString(R.string.text_view_attachments) +
+                        " (" + item.attachments.size() + ")");
                 attachments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
