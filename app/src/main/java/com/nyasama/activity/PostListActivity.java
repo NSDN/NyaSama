@@ -155,6 +155,24 @@ public class PostListActivity extends FragmentActivity
         });
     }
 
+    public void doMarkFavourite() {
+        Discuz.execute("favthread", new HashMap<String, Object>() {{
+            put("id", getIntent().getIntExtra("tid", 0));
+        }}, new HashMap<String, Object>() {{
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
+    }
+
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
         mReplyDialog = new AlertDialog.Builder(this)
@@ -352,9 +370,14 @@ public class PostListActivity extends FragmentActivity
         }
         else if (id == R.id.action_quick_reply) {
             quickReply(null);
+            return true;
         }
         else if (id == R.id.action_reply) {
             gotoReply(null);
+            return true;
+        }
+        else if (id == R.id.action_mark_fav) {
+            doMarkFavourite();
             return true;
         }
         else if (id == android.R.id.home) {

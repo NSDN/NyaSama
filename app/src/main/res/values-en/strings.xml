@@ -67,5 +67,7 @@
     <string name="dialog_update_user">Updating User Info...</string>
     <string name="dialog_uploading">Uploading</string>
     <string name="action_more_comments">more comments</string>
+    <string name="show_favs_button">My Favourites</string>
+    <string name="action_mark_fav">Mark Favourite</string>
 
 </resources>
