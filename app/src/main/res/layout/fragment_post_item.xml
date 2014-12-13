@@ -34,9 +34,11 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:textColor="#999999"
+        android:textColor="@android:color/holo_orange_dark"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="30dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/index"
@@ -68,6 +70,9 @@
         android:id="@+id/attachment_list"
         android:text="@string/text_view_attachments"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_green_dark"
+        android:textStyle="bold"
+        android:textSize="16dp" />
 
 </RelativeLayout>
