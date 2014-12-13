@@ -67,5 +67,9 @@
     <string name="diag_loading_smilies">载入表情</string>
     <string name="dialog_update_user">更新用户信息</string>
     <string name="dialog_uploading">正在上传</string>
+    <string name="action_more_comments">更多点评</string>
+    <string name="show_favs_button">我的收藏</string>
+    <string name="action_mark_fav">收藏</string>
+    <string name="title_activity_fav_list">FavListActivity</string>
 
 </resources>

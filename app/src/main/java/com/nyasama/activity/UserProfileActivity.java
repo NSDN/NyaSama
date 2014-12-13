@@ -40,6 +40,11 @@ public class UserProfileActivity extends Activity {
         startActivity(intent);
     }
 
+    public void doShowFavs(View view) {
+        Intent intent = new Intent(this, FavListActivity.class);
+        startActivity(intent);
+    }
+
     public void doShowNotice(View view) {
         Intent intent = new Intent(this, NoticeActivity.class);
         startActivity(intent);

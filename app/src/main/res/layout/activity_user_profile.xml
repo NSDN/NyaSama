@@ -54,6 +54,18 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/mythread_button_text"
+            android:onClick="doShowThreads" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/show_favs_button"
+            android:onClick="doShowFavs" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/my_message_button"
             android:onClick="doShowMessages" />
 

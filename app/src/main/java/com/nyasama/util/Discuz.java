@@ -233,6 +233,23 @@ public class Discuz {
         }
     }
 
+    public static class FavItem {
+        public int id;
+        public String type;
+        public int dataId;
+        public String title;
+        public String dateline;
+
+        public FavItem(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("favid"), 0);
+            type = data.optString("idtype");
+            dataId = Helper.toSafeInteger(data.optString("id"), 0);
+            title = data.optString("title");
+            if (data.has("dateline")) dateline = Helper.datelineToString(
+                    Integer.parseInt(data.optString("dateline")), null);
+        }
+    }
+
     public static String sFormHash = "";
     public static String sUploadHash = "";
     public static String sUsername = "";
@@ -424,6 +441,12 @@ public class Discuz {
                 body.put("formhash", sFormHash);
             if (body.get("pmsubmit") == null)
                 body.put("pmsubmit", "yes");
+        }
+        else if (module.equals("favthread")) {
+            if (body.get("formhash") == null)
+                body.put("formhash", sFormHash);
+            if (body.get("favoritesubmit") == null)
+                body.put("favoritesubmit", "yes");
         }
         params.put("module", module);
         if (params.get("submodule") == null)

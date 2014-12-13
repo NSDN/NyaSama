@@ -81,10 +81,12 @@ public class ThisApp extends Application {
 
     public static void restart() {
         // REF: http://stackoverflow.com/questions/6609414/howto-programatically-restart-android-app
-        Intent[] intents = {new Intent(context, SplashActivity.class)};
+        Intent intent = new Intent(context, SplashActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent[] intents = {intent};
         PendingIntent pendingIntent = PendingIntent.getActivities(ThisApp.context, 0,
                 intents,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_ONE_SHOT);
         AlarmManager mgr = (AlarmManager) ThisApp.context.getSystemService(Context.ALARM_SERVICE);
         mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
         System.exit(2);

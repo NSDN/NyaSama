@@ -134,12 +134,16 @@
         </activity>
         <activity
             android:name="com.nyasama.activity.AttachmentViewer"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-            android:label="@string/title_activity_attachment_viewer" >
+            android:label="@string/title_activity_attachment_viewer"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
         </activity>
         <activity
             android:name="com.nyasama.activity.SettingActivity"
             android:label="@string/title_activity_setting" >
+        </activity>
+        <activity
+            android:name="com.nyasama.activity.FavListActivity"
+            android:label="@string/title_activity_fav_list" >
         </activity>
     </application>
 
