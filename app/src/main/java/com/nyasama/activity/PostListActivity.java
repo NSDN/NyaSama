@@ -305,8 +305,6 @@ public class PostListActivity extends FragmentActivity
         for (Attachment attachment : attachments)
             srcAttachMap.put(attachment.src, attachment);
 
-        message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
-
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -317,10 +315,13 @@ public class PostListActivity extends FragmentActivity
                     if (attachment != null)
                         return "<img src=\"" + Discuz.getImageThumbUrl(attachment.id) + "\" />";
                 }
-                Log.w(TAG, "attachment image not found");
+                Log.w(TAG, "attachment image not found (" + matchResult.group(1) + ")");
                 return "";
             }
         });
+
+        message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
+
         return message;
     }
 
