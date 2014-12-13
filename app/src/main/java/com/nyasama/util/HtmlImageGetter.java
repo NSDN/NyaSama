@@ -20,13 +20,11 @@ import java.util.Map;
  */
 public class HtmlImageGetter implements Html.ImageGetter {
 
-    private String baseUrl;
     private TextView container;
     private Map<String, Bitmap> cache;
 
-    public HtmlImageGetter(TextView container, String baseUrl, Map<String, Bitmap> cache) {
+    public HtmlImageGetter(TextView container, Map<String, Bitmap> cache) {
         this.container = container;
-        this.baseUrl = baseUrl;
         this.cache = cache;
     }
 
@@ -34,8 +32,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
     public Drawable getDrawable(String s) {
         if (s == null) return null;
 
-        final String url = s.startsWith("https://") || s.startsWith("http://") ?
-                s : baseUrl + s;
+        final String url = Discuz.getSafeUrl(s);
         final LevelListDrawable drawable = new LevelListDrawable();
 
         Bitmap cachedImage = cache == null ? null : cache.get(url);

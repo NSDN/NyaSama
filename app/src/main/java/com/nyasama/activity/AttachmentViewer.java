@@ -198,14 +198,15 @@ public class AttachmentViewer extends FragmentActivity {
                         Attachment attachment = mAttachmentList.get(i);
                         if (attachment.isImage) {
                             final ImageView imageView = new ImageView(container.getContext());
-                            final String url = Discuz.DISCUZ_URL + attachment.src;
+                            final String url = attachment.src.startsWith("http://") || attachment.src.startsWith("https://") ?
+                                    attachment.src : Discuz.DISCUZ_URL + attachment.src;
                             Bitmap bitmap = mBitmapCache.get(url);
                             if (bitmap != null) {
                                 imageView.setImageBitmap(bitmap);
                                 new PhotoViewAttacher(imageView);
                             } else {
                                 imageView.setImageResource(android.R.drawable.ic_menu_gallery);
-                                ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+                                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(url), new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap bitmap) {
                                         mBitmapCache.put(url, bitmap);

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -446,7 +447,8 @@ public class PostListActivity extends FragmentActivity
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 messageText.setText(Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
+                        new HtmlImageGetter(messageText, imageCache), null));
+                messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
                 // load comments
                 LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);

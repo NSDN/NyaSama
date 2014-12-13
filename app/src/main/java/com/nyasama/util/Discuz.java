@@ -62,7 +62,8 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://bbs.nyasama.com/";
+    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
@@ -409,6 +410,17 @@ public class Discuz {
             }
         };
         ThisApp.requestQueue.add(request);
+    }
+    public static String getSafeUrl(String url) {
+        if (url == null)
+            return "";
+        url = url.replace(" ", "%20");
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;
+        else if (url.startsWith("/"))
+            return DISCUZ_HOST + url;
+        else
+            return DISCUZ_URL + url;
     }
 
     public static Request execute(String module,
