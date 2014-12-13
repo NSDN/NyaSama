@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_preference">
+        <!-- Note: remember to update ThisApp.getLocale if items are modified -->
+        <item>默认</item>
+        <item>English</item>
+    </string-array>
+</resources>

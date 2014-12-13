@@ -191,15 +191,24 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(int position) {
+        if (mCallbacks != null) {
+            if (mCallbacks.onNavigationDrawerItemSelected(position) && mDrawerListView != null) {
+                // let's reset the older selected item
+                mDrawerListView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+                    }
+                }, 500);
+                return;
+            }
+        }
         mCurrentSelectedPosition = position;
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
-        }
-        if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(position);
         }
     }
 
@@ -279,6 +288,6 @@ public class NavigationDrawerFragment extends Fragment {
         /**
          * Called when an item in the navigation drawer is selected.
          */
-        void onNavigationDrawerItemSelected(int position);
+        boolean onNavigationDrawerItemSelected(int position);
     }
 }

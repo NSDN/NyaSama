@@ -12,9 +12,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -133,14 +135,16 @@ public class NewPostActivity extends Activity
                         }
                         else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
-                                .setTitle("There is sth wrong...")
+                                .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.ok, null);
-                            if (message.getString("messageval").equals("postperm_login_nopermission//1"))
+                            if ("postperm_login_nopermission//1".equals(messageval) ||
+                                    "replyperm_login_nopermission//1".equals(messageval))
                                 builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(NewPostActivity.this, LoginActivity.class));
+                                        startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
+                                                Discuz.REQUEST_CODE_LOGIN);
                                     }
                                 });
                             builder.show();
@@ -299,6 +303,20 @@ public class NewPostActivity extends Activity
         });
     }
 
+    public void refreshFormHash() {
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_update_user).setCancelable(false)
+                .show();
+        // refresh the form hash, or posting will fail
+        Discuz.execute("forumindex", new HashMap<String, Object>(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        dialog.cancel();
+                    }
+                });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,6 +342,7 @@ public class NewPostActivity extends Activity
                     mButtonAddImg.setVisible(b);
             }
         });
+
     }
 
     String mPhotoFilePath;
@@ -366,15 +385,21 @@ public class NewPostActivity extends Activity
             // create thumbnail
             Size newSize = getImageSize(bitmapSize, thumbSize, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
-                bitmap, newSize.width, newSize.height);
+                    bitmap, newSize.width, newSize.height);
             final String uploadFile = filePath;
             final String fileName =
                     (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
+            View loadingView = LayoutInflater.from(this)
+                    .inflate(R.layout.fragment_upload_process, null, false);
             final AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Uploading")
-                    .setCancelable(false)
+                    .setTitle(R.string.dialog_uploading).setCancelable(false)
+                    .setView(loadingView)
                     .show();
+            final ContentLoadingProgressBar progressBar =
+                    (ContentLoadingProgressBar) loadingView.findViewById(R.id.processBar);
+            final TextView progressText =
+                    (TextView) loadingView.findViewById(R.id.processText);
             Discuz.upload(new HashMap<String, Object>() {{
                 put("type", "image");
                 put("fid", getIntent().getIntExtra("fid", 0));
@@ -395,7 +420,16 @@ public class NewPostActivity extends Activity
                         Helper.toast(getString(R.string.image_upload_failed_toast));
                     }
                 }
+            }, new Response.Listener<Integer>() {
+                @Override
+                public void onResponse(final Integer integer) {
+                    progressBar.setProgress(integer);
+                    progressText.setText(integer + "%");
+                }
             });
+        }
+        else if (requestCode == Discuz.REQUEST_CODE_LOGIN && resultCode > 0) {
+            refreshFormHash();
         }
     }
 
@@ -427,7 +461,21 @@ public class NewPostActivity extends Activity
             return true;
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
-            showInsertOptions();
+            if (Discuz.sSmilies == null) {
+                final AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.diag_loading_smilies).setCancelable(false)
+                        .show();
+                Discuz.getSmileies(new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        dialog.cancel();
+                        showInsertOptions();
+                    }
+                });
+            }
+            else {
+                showInsertOptions();
+            }
             return true;
         }
 

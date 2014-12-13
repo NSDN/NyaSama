@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -22,23 +24,36 @@ import com.nyasama.activity.PMListActivity;
 import com.nyasama.activity.UserProfileActivity;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +65,10 @@ public class Discuz {
     public static String DISCUZ_URL = "http://tech.touhou.moe/nya/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
+
+    public static int IMAGE_THUMB_WIDTH = 268;
+    public static int IMAGE_THUMB_HEIGHT = 380;
+
     public static String VOLLEY_ERROR = "volleyError";
 
     public static int NOTIFICATION_ID = 1;
@@ -57,6 +76,8 @@ public class Discuz {
     public static int REQUEST_CODE_LOGIN = 1;
     public static int REQUEST_CODE_NEW_THREAD = 2;
     public static int REQUEST_CODE_REPLY = 3;
+
+    public static String BROADCAST_FILTER_LOGIN = "login";
 
     public static class Forum {
         public int id;
@@ -229,6 +250,27 @@ public class Discuz {
         return list;
     }
 
+    // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
+    public static String getImageThumbUrl(int attachmentId) {
+        String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
+        String key;
+        try {
+            byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
+            key = String.format("%032x", new BigInteger(1, buffer));
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("module", "forumimage");
+        params.put("version", 2);
+        params.put("aid", attachmentId);
+        params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
+        params.put("key", key);
+        params.put("type", "fixnone");
+        return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+    }
+
     private static void notifyNewMessage() {
         Class activityClass = UserProfileActivity.class;
         if (sNewMessages > 0 && sNewPrompts == 0)
@@ -266,7 +308,7 @@ public class Discuz {
         public List<Smiley> list;
     }
 
-    public static List<SmileyGroup> sSmilies = new ArrayList<SmileyGroup>();
+    public static List<SmileyGroup> sSmilies;
     private static Response.Listener<JSONObject> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
@@ -281,6 +323,48 @@ public class Discuz {
             catch (JSONException e) {
                 Log.e("Discuz", "load smilies failed");
             }
+        }
+    }
+    private static void parseSmileyString(String content) {
+        content = "<script>" + content + "</script>"+
+                "<script>"+
+                "var list = [];" +
+                "var type = smilies_type;" +
+                "var array = smilies_array;" +
+                "for (var k in type) {" +
+                "var d = type[k];"+
+                "var i = parseInt(k.substring(1));"+
+                " if (array[i]) {" +
+                "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
+                "}"+
+                "}"+
+                "JSInterface.setSmilies(JSON.stringify(list))"+
+                "</script>";
+        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
+        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
+        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
+    }
+    private static void parseSmilies(JSONArray data) {
+        if (sSmilies == null)
+            sSmilies = new ArrayList<SmileyGroup>();
+        else
+            sSmilies.clear();
+        for (int i = 0; i < data.length(); i ++) {
+            final JSONObject jsonData = data.optJSONObject(i);
+            final JSONArray jsonList = jsonData.optJSONArray("list");
+            final List<Smiley> smileyList = new ArrayList<Smiley>();
+            for (int j = 0; j < jsonList.length(); j ++) {
+                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                smileyList.add(new Smiley() {{
+                    code = jsonSmiley.optString(1);
+                    image = jsonSmiley.optString(2);
+                }});
+            }
+            sSmilies.add(new SmileyGroup() {{
+                name = jsonData.optString("name");
+                path = jsonData.optString("path");
+                list = smileyList;
+            }});
         }
     }
     public static void getSmileies(Response.Listener<JSONObject> callback) {
@@ -308,69 +392,6 @@ public class Discuz {
             }
         };
         ThisApp.requestQueue.add(request);
-    }
-    public static void parseSmileyString(String content) {
-        content = "<script>" + content + "</script>"+
-                "<script>"+
-                    "var list = [];" +
-                    "var type = smilies_type;" +
-                    "var array = smilies_array;" +
-                    "for (var k in type) {" +
-                        "var d = type[k];"+
-                        "var i = parseInt(k.substring(1));"+
-                        " if (array[i]) {" +
-                            "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
-                        "}"+
-                    "}"+
-                "JSInterface.setSmilies(JSON.stringify(list))"+
-                "</script>";
-        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
-        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
-    }
-    private static void parseSmilies(JSONArray data) {
-        sSmilies.clear();
-        for (int i = 0; i < data.length(); i ++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j ++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
-                }});
-            }
-            sSmilies.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
-        }
-    }
-
-    private static int initJobs = 0;
-
-    public static void init(final Runnable callback) {
-
-        final Response.Listener<JSONObject> done = new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                initJobs --;
-                if (initJobs == 0)
-                    callback.run();
-            }
-        };
-
-        initJobs ++;
-        getSmileies(done);
-
-        // TODO: check login
-        initJobs ++;
-        execute("forumindex",
-            new HashMap<String, Object>(),
-            new HashMap<String, Object>(),
-            done);
     }
 
     public static Request execute(String module,
@@ -432,7 +453,12 @@ public class Discuz {
                             sGroupName = var.optJSONObject("group").optString("grouptitle", "");
 
                         // check if login ok
-                        sHasLogined = !var.isNull("auth");
+                        boolean hasLogined = !var.isNull("auth");
+                        if (sHasLogined != hasLogined) {
+                            LocalBroadcastManager.getInstance(ThisApp.context)
+                                    .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
+                            sHasLogined = hasLogined;
+                        }
 
                         // check messages && prompts
                         int newMessages = var.isNull("member_pm") ? 0 :
@@ -484,6 +510,7 @@ public class Discuz {
         return request;
     }
 
+    @SuppressWarnings("unused")
     public static void upload(final Map<String, Object> params,
                               final String filePath,
                               final Response.Listener<String> callback) {
@@ -526,6 +553,87 @@ public class Discuz {
         ThisApp.requestQueue.add(request);
     }
 
+    @SuppressWarnings("unchecked")
+    public static void upload(final Map<String, Object> params,
+                              final String filePath,
+                              final Response.Listener<String> callback,
+                              final Response.Listener<Integer> process) {
+
+        if (sUploadHash == null || sUid == 0 || filePath == null) {
+            callback.onResponse(null);
+            return;
+        }
+
+        params.put("module", "forumupload");
+        params.put("hash", sUploadHash);
+        params.put("uid", sUid);
+
+        final String url = DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+        AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            @Override
+            protected String doInBackground(Object[] objects) {
+
+                final MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE,
+                        "----------" + UUID.randomUUID().toString().replace("-", ""),
+                        Charset.forName(DISCUZ_ENC)) {
+                    {
+                        try {
+                            addPart("hash", new StringBody(sUploadHash));
+                            addPart("uid", new StringBody("" + sUid));
+                            addPart("Filedata", new FileBody(new File(filePath)));
+                        }
+                        catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    @Override
+                    public void writeTo(final OutputStream outstream) throws IOException {
+                        final int total = (int) getContentLength();
+                        // create a stream to count the transferred size
+                        super.writeTo(new FilterOutputStream(outstream) {
+                            private int transferred = 0;
+                            @Override
+                            public void write(@Nullable byte[] buffer, int offset, int length) throws IOException {
+                                int sent = 0;
+                                while (buffer != null && sent < length) {
+                                    int toSend = Math.min(64, length - sent);
+                                    out.write(buffer, offset + sent, toSend);
+                                    out.flush();
+                                    publishProgress((transferred += toSend) * 100 / total);
+                                    sent += toSend;
+                                }
+                            }
+                            @Override
+                            public void write(int oneByte) throws IOException {
+                                out.write(oneByte);
+                                publishProgress((transferred += 1) * 100 / total);
+                            }
+                        });
+                    }
+                };
+
+                HttpPost post = new HttpPost(url) {{ setEntity(entity); }};
+                try {
+                    return EntityUtils.toString(new DefaultHttpClient().execute(post).getEntity());
+                }
+                catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                process.onResponse(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callback.onResponse(s);
+            }
+        };
+        task.execute();
+    }
+
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
@@ -540,14 +648,7 @@ public class Discuz {
                 put("questionid", questionId);
                 put("answer", answer);
             }
-        }}, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                LocalBroadcastManager.getInstance(ThisApp.context)
-                        .sendBroadcast(new Intent("login"));
-                callback.onResponse(jsonObject);
-            }
-        });
+        }}, callback);
     }
 
     // TODO: "Logout" is not found in the api source =.=
@@ -558,6 +659,8 @@ public class Discuz {
         sHasLogined = false;
         ThisApp.cookieStore.removeAll();
         ThisApp.cookieStore.save();
+        LocalBroadcastManager.getInstance(ThisApp.context)
+                .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
         callback.onResponse(new JSONObject());
     }
 
