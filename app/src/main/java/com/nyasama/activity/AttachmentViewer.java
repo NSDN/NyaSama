@@ -91,25 +91,29 @@ public class AttachmentViewer extends FragmentActivity {
     static Pattern msgMatcher = Pattern.compile("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     static List<Attachment> compileAttachments(String message, final List<Attachment> attachments) {
-        List<Attachment> newAttachments = new ArrayList<Attachment>();
+        List<Attachment> list = new ArrayList<Attachment>();
 
         Map<String, Attachment> map = new HashMap<String, Attachment>();
-        for (Attachment attachment : attachments) {
+        for (Attachment attachment : attachments)
             map.put(attachment.src, attachment);
-            if (!attachment.isImage)
-                newAttachments.add(attachment);
-        }
 
         Matcher matcher = msgMatcher.matcher(message);
         while (matcher.find()) {
             Matcher pathMatcher = msgPathPattern.matcher(matcher.group(1));
             if (pathMatcher.find()) {
-                Attachment attachment = map.get(pathMatcher.group(1));
-                if (attachment != null) newAttachments.add(attachment);
+                String src = pathMatcher.group(1);
+                Attachment attachment = map.get(src);
+                if (attachment != null) {
+                    list.add(attachment);
+                    map.remove(src);
+                }
             }
         }
 
-        return newAttachments;
+        for (Map.Entry<String, Attachment> entry : map.entrySet())
+            list.add(entry.getValue());
+
+        return list;
     }
 
     public void loadAttachments() {
@@ -154,6 +158,18 @@ public class AttachmentViewer extends FragmentActivity {
                             mAttachmentList = compileAttachments(post.message, post.attachments);
                         }
                         mPageAdapter.notifyDataSetChanged();
+
+                        final int aid = getIntent().getIntExtra("aid", 0);
+                        if (aid > 0) mPager.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int index = 0;
+                                for (int i = 0; i < mAttachmentList.size(); i ++)
+                                    if (mAttachmentList.get(i).id == aid) index = i;
+                                mPager.setCurrentItem(index);
+                            }
+                        });
+
                         position = 0;
                     }
                     catch (JSONException e) {
