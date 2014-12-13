@@ -25,17 +25,17 @@
         android:id="@+id/username"
         android:layout_gravity="center_horizontal" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/mythread_button_text"
+        android:onClick="doShowThreads" />
+
     <LinearLayout
         android:id="@+id/show_for_others"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/mythread_button_text"
-            android:onClick="doShowThreads" />
 
         <Button
             android:layout_width="match_parent"
