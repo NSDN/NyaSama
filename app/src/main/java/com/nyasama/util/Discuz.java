@@ -157,7 +157,8 @@ public class Discuz {
                     attachment.name = attachData.optString("filename");
                     attachment.src = attachData.optString("url") + attachData.optString("attachment");
                     attachment.size = attachData.optString("attachsize");
-                    attachment.isImage = "1".equals(attachData.optString("isimage"));
+                    // Note: Discuz may set isimage 1 or -1
+                    attachment.isImage = !"0".equals(attachData.optString("isimage"));
                     attachments.add(attachment);
                 }
             }
