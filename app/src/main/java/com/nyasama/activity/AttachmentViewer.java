@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -51,15 +52,18 @@ public class AttachmentViewer extends FragmentActivity {
     private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
 
     public void showAttachmentList() {
-        ListView listView = new ListView(this);
         List<String> names = new ArrayList<String>();
         for (Attachment attachment : mAttachmentList)
             names.add(attachment.name);
+
+        final ListView listView = new ListView(this);
         listView.setAdapter(new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 names));
+        listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        listView.setItemChecked(mPager.getCurrentItem(), true);
         final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Attachments")
                 .setView(listView)
@@ -74,15 +78,12 @@ public class AttachmentViewer extends FragmentActivity {
     }
 
     public void updatePagerTitle(int position) {
-        mTitle.setVisibility(position >= 0 && mAttachmentList.size() > 0 ?
-                View.VISIBLE : View.GONE);
-        if (position >= 0) {
-            int len = mAttachmentList.size();
-            Attachment item = mAttachmentList.get(position);
-            String text = item.name;
-            if (len > 1)
-                text += " (" + (position+1) + "/" + mAttachmentList.size() + ")";
-            mTitle.setText(text);
+        if (position >= 0 && position < mAttachmentList.size()) {
+            mTitle.setVisibility(View.VISIBLE);
+            mTitle.setText((position+1) + "/" + mAttachmentList.size());
+        }
+        else {
+            mTitle.setVisibility(View.GONE);
         }
     }
 
