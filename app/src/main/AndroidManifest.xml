@@ -145,6 +145,11 @@
             android:name="com.nyasama.activity.FavListActivity"
             android:label="@string/title_activity_fav_list" >
         </activity>
+        <activity
+            android:name="com.nyasama.activity.AboutActivity"
+            android:label="About"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
+        </activity>
     </application>
 
 </manifest>

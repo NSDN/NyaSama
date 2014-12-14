@@ -71,5 +71,6 @@
     <string name="action_mark_fav">Mark Favourite</string>
     <string name="title_activity_fav_list">My Favourites</string>
     <string name="title_activity_setting">Settings</string>
+    <string name="thread_list_toplist_title">Top List</string>
 
 </resources>

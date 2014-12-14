@@ -112,6 +112,10 @@ public class MainActivity extends FragmentActivity
             startActivity(new Intent(this, SettingActivity.class));
             return true;
         }
+        else if (position == 2) {
+            startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        }
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
