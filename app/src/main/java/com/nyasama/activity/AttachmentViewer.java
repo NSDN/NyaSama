@@ -170,10 +170,11 @@ public class AttachmentViewer extends FragmentActivity {
                         if (aid > 0) mPager.post(new Runnable() {
                             @Override
                             public void run() {
-                                int index = 0;
                                 for (int i = 0; i < mAttachmentList.size(); i ++)
-                                    if (mAttachmentList.get(i).id == aid) index = i;
-                                mPager.setCurrentItem(index);
+                                    if (mAttachmentList.get(i).id == aid) {
+                                        mPager.setCurrentItem(i, false);
+                                        break;
+                                    }
                             }
                         });
 
