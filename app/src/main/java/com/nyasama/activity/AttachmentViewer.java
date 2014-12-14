@@ -253,9 +253,16 @@ public class AttachmentViewer extends FragmentActivity {
                                         // images larger than 2048x2048 will not be rendered,
                                         // thus we should resize it
                                         if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
-                                                bitmap.getHeight() > MAX_TEXTURE_SIZE)
-                                            bitmap = Helper.getFittedBitmap(bitmap,
-                                                    MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                                                bitmap.getHeight() > MAX_TEXTURE_SIZE) {
+                                            try {
+                                                bitmap = Helper.getFittedBitmap(bitmap,
+                                                        MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                                            }
+                                            catch (OutOfMemoryError e) {
+                                                bitmap = Helper.getFittedBitmap(bitmap,
+                                                        MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                                            }
+                                        }
                                         mBitmapCache.put(attachment.src, bitmap);
                                         mThumbCache.put(attachment.src, Helper.getFittedBitmap(bitmap,
                                                 IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
