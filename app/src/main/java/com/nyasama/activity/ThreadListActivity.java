@@ -24,6 +24,7 @@ import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
+import com.nyasama.fragment.TopListFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.Thread;
@@ -81,7 +82,11 @@ public class ThreadListActivity extends FragmentActivity
                             R.layout.fragment_simple_list,
                             R.layout.fragment_thread_item,
                             R.id.list);
-                } else {
+                }
+                else if (i == 1) {
+                    return TopListFragment.getNewFragment(getIntent().getIntExtra("fid", 0));
+                }
+                else {
                     return new Fragment() {
                         @Override
                         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -117,14 +122,20 @@ public class ThreadListActivity extends FragmentActivity
 
             @Override
             public int getCount() {
-                return mSubList.size() > 0 ? 2 : 1;
+                if (getIntent().getIntExtra("fid", 0) > 0)
+                    return mSubList.size() > 0 ? 3 : 2;
+                else
+                    return 1;
             }
 
             @Override
             public CharSequence getPageTitle(int position) {
-                return position == 0 ?
-                        getString(R.string.thread_list_threads_title) :
-                        getString(R.string.thread_list_subforum_title);
+                String[] titles = {
+                        getString(R.string.thread_list_threads_title),
+                        getString(R.string.thread_list_toplist_title),
+                        getString(R.string.thread_list_subforum_title)
+                };
+                return titles[position];
             }
         });
 
@@ -133,7 +144,7 @@ public class ThreadListActivity extends FragmentActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
-            if (resultCode > 0)
+            if (resultCode > 0 && mListFragment != null)
                 mListFragment.reloadAll();
         }
     }
@@ -142,6 +153,7 @@ public class ThreadListActivity extends FragmentActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_thread_list, menu);
+        menu.findItem(R.id.action_new_post).setVisible(getIntent().getIntExtra("fid", 0) > 0);
         return true;
     }
 
@@ -277,8 +289,6 @@ public class ThreadListActivity extends FragmentActivity
                                     final JSONObject subforum = sublist.getJSONObject(i);
                                     mSubList.add(new Forum(subforum));
                                 }
-                                // notify view pager
-                                Helper.updateVisibility(findViewById(R.id.view_strip), true);
                                 mPageAdapter.notifyDataSetChanged();
                             }
                         }
