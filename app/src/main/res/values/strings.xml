@@ -70,6 +70,6 @@
     <string name="action_more_comments">更多点评</string>
     <string name="show_favs_button">我的收藏</string>
     <string name="action_mark_fav">收藏</string>
-    <string name="title_activity_fav_list">FavListActivity</string>
+    <string name="title_activity_fav_list">我的收藏</string>
 
 </resources>

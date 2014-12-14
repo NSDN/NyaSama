@@ -69,5 +69,7 @@
     <string name="action_more_comments">more comments</string>
     <string name="show_favs_button">My Favourites</string>
     <string name="action_mark_fav">Mark Favourite</string>
+    <string name="title_activity_fav_list">My Favourites</string>
+    <string name="title_activity_setting">Settings</string>
 
 </resources>
