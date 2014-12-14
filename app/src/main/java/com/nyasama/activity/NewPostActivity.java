@@ -270,8 +270,8 @@ public class NewPostActivity extends Activity
         view.setAdapter(new CommonListAdapter<Discuz.Smiley>(smileyGroup.list, R.layout.fragment_smiley_item) {
             @Override
             public void convertView(ViewHolder viewHolder, Discuz.Smiley item) {
-                String url = Discuz.DISCUZ_URL + "static/image/smiley/" +
-                        smileyGroup.path + "/" + item.image;
+                String url = Discuz.getSafeUrl("static/image/smiley/" +
+                        smileyGroup.path + "/" + item.image);
                 NetworkImageView imageView = (NetworkImageView) viewHolder.getConvertView();
                 imageView.setImageUrl(url, ThisApp.imageLoader);
             }
@@ -451,7 +451,12 @@ public class NewPostActivity extends Activity
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         dialog.cancel();
-                        showInsertOptions();
+                        mInputContent.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                showInsertOptions();
+                            }
+                        }, 200);
                     }
                 });
             }
