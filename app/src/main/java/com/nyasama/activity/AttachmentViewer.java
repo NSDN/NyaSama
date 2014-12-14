@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -41,17 +40,22 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class AttachmentViewer extends FragmentActivity {
 
     private static String TAG = "ImageViewer";
+    private static int MAX_TEXTURE_SIZE = 2048;
+    private static int IMAGE_THUMB_SIZE = 128;
+    private static int MAX_MEMORY_BYTES = 16*1024*1024;
 
     private ViewPager mPager;
     private TextView mTitle;
     private FragmentPagerAdapter mPageAdapter;
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
     private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
+    private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
 
     public void showAttachmentList() {
         List<String> names = new ArrayList<String>();
@@ -208,6 +212,22 @@ public class AttachmentViewer extends FragmentActivity {
         });
         mPager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                super.destroyItem(container, position, object);
+                final Attachment attachment = mAttachmentList.get(position);
+                Bitmap bitmap = mBitmapCache.get(attachment.src);
+                if (bitmap != null) {
+                    int memoryBytes = 0;
+                    for (Map.Entry<String, Bitmap> entry :mBitmapCache.entrySet())
+                        memoryBytes += entry.getValue().getByteCount();
+                    if (memoryBytes > MAX_MEMORY_BYTES) {
+                        bitmap.recycle();
+                        mBitmapCache.remove(attachment.src);
+                    }
+                }
+            }
+
+            @Override
             public Fragment getItem(final int i) {
                 return new Fragment() {
                     @Override
@@ -215,26 +235,36 @@ public class AttachmentViewer extends FragmentActivity {
                                              ViewGroup container, Bundle savedInstanceState) {
                         final Attachment attachment = mAttachmentList.get(i);
                         if (attachment.isImage) {
-                            final ImageView imageView = new ImageView(container.getContext());
-                            final String url = attachment.src.startsWith("http://") || attachment.src.startsWith("https://") ?
-                                    attachment.src : Discuz.DISCUZ_URL + attachment.src;
-                            Bitmap bitmap = mBitmapCache.get(url);
+                            final PhotoView photoView = new PhotoView(container.getContext());
+                            Bitmap bitmap = mBitmapCache.get(attachment.src);
                             if (bitmap != null) {
-                                imageView.setImageBitmap(bitmap);
-                                new PhotoViewAttacher(imageView);
+                                photoView.setImageBitmap(bitmap);
+                                new PhotoViewAttacher(photoView);
                             } else {
-                                imageView.setImageResource(android.R.drawable.ic_menu_gallery);
-                                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(url), new Response.Listener<Bitmap>() {
+                                Bitmap thumb = mThumbCache.get(attachment.src);
+                                if (thumb != null)
+                                    photoView.setImageBitmap(thumb);
+                                else
+                                    photoView.setImageResource(android.R.drawable.ic_menu_gallery);
+                                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(attachment.src), new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap bitmap) {
-                                        mBitmapCache.put(url, bitmap);
-                                        imageView.setImageBitmap(bitmap);
-                                        new PhotoViewAttacher(imageView);
+                                        // Note: on some old devices like Galaxy Nexus,
+                                        // images larger than 2048x2048 will not be rendered,
+                                        // thus we should resize it
+                                        if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
+                                                bitmap.getHeight() > MAX_TEXTURE_SIZE)
+                                            bitmap = Helper.getFittedBitmap(bitmap,
+                                                    MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                                        mBitmapCache.put(attachment.src, bitmap);
+                                        mThumbCache.put(attachment.src, Helper.getFittedBitmap(bitmap,
+                                                IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
+                                        photoView.setImageBitmap(bitmap);
                                     }
                                 }, 0, 0, null, null);
                                 ThisApp.requestQueue.add(imageRequest);
                             }
-                            return imageView;
+                            return photoView;
                         } else {
                             View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
                             TextView textView = (TextView) view.findViewById(R.id.name);

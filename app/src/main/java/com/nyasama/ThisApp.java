@@ -62,7 +62,7 @@ public class ThisApp extends Application {
         context = getApplicationContext();
 
         File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
-        Cache cache = new DiskBasedCache(cacheFile, 1024*1024*4);
+        Cache cache = new DiskBasedCache(cacheFile, 1024*1024*32);
         Network network = new BasicNetwork(new HurlStack());
         requestQueue = new RequestQueue(cache, network);
         requestQueue.start();

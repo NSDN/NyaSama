@@ -1,6 +1,7 @@
 package com.nyasama.util;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.Toast;
 
@@ -47,5 +48,32 @@ public class Helper {
         Date date = new Date();
         date.setTime(time);
         return dateFormat.format(date);
+    }
+
+    public static class Size {
+        public int width;
+        public int height;
+
+        public Size(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
+    public static Size getFittedSize(Size source, Size target, boolean coverTarget) {
+        boolean tooWide = source.width * target.height > source.height * target.width;
+        if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
+            target.height = source.height * target.width / source.width;
+        else
+            target.width = source.width * target.height / source.height;
+        return target;
+    }
+
+    public static Bitmap getFittedBitmap(Bitmap bitmap, int width, int height, boolean coverTarget) {
+        Size newSize = getFittedSize(
+                new Size(bitmap.getWidth(), bitmap.getHeight()),
+                new Size(width, height),
+                coverTarget);
+        return Bitmap.createScaledBitmap(bitmap, newSize.width, newSize.height, true);
     }
 }
