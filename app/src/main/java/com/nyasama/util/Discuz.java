@@ -62,7 +62,8 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_URL = "http://tech.touhou.moe/nya/";
+    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
@@ -156,7 +157,8 @@ public class Discuz {
                     attachment.name = attachData.optString("filename");
                     attachment.src = attachData.optString("url") + attachData.optString("attachment");
                     attachment.size = attachData.optString("attachsize");
-                    attachment.isImage = "1".equals(attachData.optString("isimage"));
+                    // Note: Discuz may set isimage 1 or -1
+                    attachment.isImage = !"0".equals(attachData.optString("isimage"));
                     attachments.add(attachment);
                 }
             }
@@ -230,6 +232,23 @@ public class Discuz {
             note = data.optString("note");
             if (data.has("dateline")) dateline = Helper.datelineToString(
                 Integer.parseInt(data.optString("dateline")), null);
+        }
+    }
+
+    public static class FavItem {
+        public int id;
+        public String type;
+        public int dataId;
+        public String title;
+        public String dateline;
+
+        public FavItem(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("favid"), 0);
+            type = data.optString("idtype");
+            dataId = Helper.toSafeInteger(data.optString("id"), 0);
+            title = data.optString("title");
+            if (data.has("dateline")) dateline = Helper.datelineToString(
+                    Integer.parseInt(data.optString("dateline")), null);
         }
     }
 
@@ -393,6 +412,17 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
     }
+    public static String getSafeUrl(String url) {
+        if (url == null)
+            return "";
+        url = url.replace(" ", "%20");
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;
+        else if (url.startsWith("/"))
+            return DISCUZ_HOST + url;
+        else
+            return DISCUZ_URL + url;
+    }
 
     public static Request execute(String module,
                                   final Map<String, Object> params,
@@ -424,6 +454,12 @@ public class Discuz {
                 body.put("formhash", sFormHash);
             if (body.get("pmsubmit") == null)
                 body.put("pmsubmit", "yes");
+        }
+        else if (module.equals("favthread")) {
+            if (body.get("formhash") == null)
+                body.put("formhash", sFormHash);
+            if (body.get("favoritesubmit") == null)
+                body.put("favoritesubmit", "yes");
         }
         params.put("module", module);
         if (params.get("submodule") == null)

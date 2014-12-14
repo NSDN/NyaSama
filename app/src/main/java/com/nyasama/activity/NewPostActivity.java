@@ -35,6 +35,7 @@ import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
+import com.nyasama.util.Helper.Size;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,25 +50,6 @@ import java.util.List;
 
 public class NewPostActivity extends Activity
     implements TextWatcher {
-
-    static class Size {
-        public int width;
-        public int height;
-
-        public Size(int width, int height) {
-            this.width = width;
-            this.height = height;
-        }
-    }
-
-    static Size getImageSize(Size source, Size target, boolean coverTarget) {
-        boolean tooWide = source.width * target.height > source.height * target.width;
-        if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
-            target.height = source.height * target.width / source.width;
-        else
-            target.width = source.width * target.height / source.height;
-        return target;
-    }
 
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);
@@ -362,7 +344,7 @@ public class NewPostActivity extends Activity
             Bitmap bitmap = BitmapFactory.decodeFile(filePath);
             Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
             if (bitmap.getWidth() > uploadSize.width || bitmap.getHeight() > uploadSize.height) {
-                bitmapSize = getImageSize(bitmapSize, uploadSize, false);
+                bitmapSize = Helper.getFittedSize(bitmapSize, uploadSize, false);
                 File dir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES);
                 try {
@@ -383,7 +365,7 @@ public class NewPostActivity extends Activity
             }
 
             // create thumbnail
-            Size newSize = getImageSize(bitmapSize, thumbSize, true);
+            Size newSize = Helper.getFittedSize(bitmapSize, thumbSize, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                     bitmap, newSize.width, newSize.height);
             final String uploadFile = filePath;

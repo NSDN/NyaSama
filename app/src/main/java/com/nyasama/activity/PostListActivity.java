@@ -7,12 +7,18 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -49,12 +55,15 @@ import java.util.regex.Pattern;
 public class PostListActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
-    private final int PAGE_SIZE_COUNT = 10;
-    private final int MAX_TRIMSTR_LENGTH = 30;
-    private final String TAG = "PostList";
+    private static final int PAGE_SIZE_COUNT = 10;
+    private static final int COMMENT_PAGE_SIZE = 10;
+    private static final int MAX_TRIMSTR_LENGTH = 30;
+    private static final String TAG = "PostList";
 
     private CommonListFragment<Post> mListFragment;
+    Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
+    private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
@@ -112,10 +121,60 @@ public class PostListActivity extends FragmentActivity
                         if (comments == null)
                             mComments.put(pid, comments = new ArrayList<Comment>());
                         comments.add(0, new Comment(Discuz.sUid, Discuz.sUsername, comment));
+                        mCommentCount.put(pid, comments.size());
                         mListFragment.getListAdapter().notifyDataSetChanged();
                     }
                     else
                         Helper.toast(message.optString("messagestr"));
+                }
+            }
+        });
+    }
+
+    public void doLoadComment(final int pid, final int page) {
+        Discuz.execute("morecomment", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+            put("pid", pid);
+            put("page", page + 1);
+        }}, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                mCommentCount.put(pid, Integer.MAX_VALUE);
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Variables") instanceof JSONObject) {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var.opt("comments") instanceof JSONArray) {
+                        JSONArray commentList = var.optJSONArray("comments");
+                        List<Comment> comments = mComments.get(pid);
+                        // remove duplicated items
+                        if (page * COMMENT_PAGE_SIZE < comments.size())
+                            comments.subList(page * COMMENT_PAGE_SIZE, comments.size()).clear();
+                        for (int i = 0; i < commentList.length(); i ++) {
+                            comments.add(new Comment(commentList.optJSONObject(i)));
+                        }
+                        mCommentCount.put(pid, Helper.toSafeInteger(var.optString("count"), 0));
+                        mListFragment.getListAdapter().notifyDataSetChanged();
+                    }
+                }
+            }
+        });
+    }
+
+    public void doMarkFavourite() {
+        Discuz.execute("favthread", new HashMap<String, Object>() {{
+            put("id", getIntent().getIntExtra("tid", 0));
+        }}, new HashMap<String, Object>() {{
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    Helper.toast(message.optString("messagestr"));
                 }
             }
         });
@@ -182,6 +241,22 @@ public class PostListActivity extends FragmentActivity
         mCommentDialog.show();
     }
 
+    public void loadComment(Post item) {
+        int count = mCommentCount.get(item.id);
+        // give up if it's loading now
+        if (count < 0)
+            return;
+
+        final int pid = item.id;
+        List<Comment> comments = mComments.get(pid);
+        if (comments.size() >= count)
+            return;
+
+        // set count to negative
+        mCommentCount.put(pid, -1);
+        doLoadComment(pid, (int)Math.floor(comments.size()/10));
+    }
+
     public void gotoReply(final Post item) {
         startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
@@ -198,12 +273,21 @@ public class PostListActivity extends FragmentActivity
     public void showMenu(View view, final Post item) {
         PopupMenu menu = new PopupMenu(PostListActivity.this, view);
         menu.getMenuInflater().inflate(R.menu.menu_post_item, menu.getMenu());
+
+        boolean showLoadCommentMenu = mComments.get(item.id) != null &&
+                mComments.get(item.id).size() >= COMMENT_PAGE_SIZE &&
+                mComments.get(item.id).size() < mCommentCount.get(item.id);
+        menu.getMenu().findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
+
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int action = menuItem.getItemId();
                 if (action == R.id.action_comment) {
                     addComment(item);
+                }
+                else if (action == R.id.action_more_comment) {
+                    loadComment(item);
                 }
                 else if (action == R.id.action_quick_reply) {
                     quickReply(item);
@@ -221,26 +305,27 @@ public class PostListActivity extends FragmentActivity
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
-    String compileMessage(String message, final List<Attachment> attachments) {
-
-        final Map<String, Attachment> srcAttachMap = new HashMap<String, Attachment>();
-        for (Attachment attachment : attachments)
-            srcAttachMap.put(attachment.src, attachment);
-
+    static String compileMessage(String message, final Map<String, Attachment> attachments) {
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
                 Matcher pathMatcher = msgPathPattern.matcher(matchResult.group(1));
                 if (pathMatcher.find()) {
                     String src = pathMatcher.group(1);
-                    Attachment attachment = srcAttachMap.get(src);
-                    if (attachment != null)
-                        return "<img src=\"" + Discuz.getImageThumbUrl(attachment.id) + "\" />";
+                    Attachment attachment = attachments.get(src);
+                    if (attachment != null) {
+                        String url = Discuz.getImageThumbUrl(attachment.id);
+                        attachments.put(url, attachment);
+                        return "<img src=\"" + url + "\" />";
+                    }
                 }
-                Log.w(TAG, "attachment image not found");
+                Log.w(TAG, "attachment image not found (" + matchResult.group(1) + ")");
                 return "";
             }
         });
+
+        message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
+
         return message;
     }
 
@@ -293,9 +378,14 @@ public class PostListActivity extends FragmentActivity
         }
         else if (id == R.id.action_quick_reply) {
             quickReply(null);
+            return true;
         }
         else if (id == R.id.action_reply) {
             gotoReply(null);
+            return true;
+        }
+        else if (id == R.id.action_mark_fav) {
+            doMarkFavourite();
             return true;
         }
         else if (id == android.R.id.home) {
@@ -361,8 +451,32 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
-                messageText.setText(Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, Discuz.DISCUZ_URL, imageCache), null));
+                Spannable messageContent = (Spannable) Html.fromHtml(item.message,
+                        new HtmlImageGetter(messageText, imageCache), null);
+
+                // set the images clickale
+                ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);
+                for (final ImageSpan image : images) {
+                    messageContent.setSpan(
+                            new ClickableSpan() {
+                                @Override
+                                public void onClick(View view) {
+                                    final Attachment attachment = mAttachmentMap.get(image.getSource());
+                                    if (attachment != null) {
+                                        startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
+                                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+                                            putExtra("index", mListFragment.getIndex(item));
+                                            putExtra("aid", attachment.id);
+                                        }});
+                                    }
+                                }
+                            },
+                            messageContent.getSpanStart(image),
+                            messageContent.getSpanEnd(image),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                messageText.setText(messageContent);
+                messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
                 // load comments
                 LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
@@ -388,6 +502,8 @@ public class PostListActivity extends FragmentActivity
                         }
                         ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
                         ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        if (commentView.getParent() != null)
+                            ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
                     }
                 }
@@ -463,8 +579,9 @@ public class PostListActivity extends FragmentActivity
                         for (int i = 0; i < postlist.length(); i ++) {
                             JSONObject postData = postlist.getJSONObject(i);
                             Post post = new Post(postData);
-                            // Note: replace attachments
-                            post.message = compileMessage(post.message, post.attachments);
+                            for (Attachment attachment : post.attachments)
+                                mAttachmentMap.put(attachment.src, attachment);
+                            post.message = compileMessage(post.message, mAttachmentMap);
                             listData.add(post);
                         }
 
@@ -487,6 +604,7 @@ public class PostListActivity extends FragmentActivity
                                     commentList.add(new Comment(commentData));
                                 }
                                 mComments.put(pid, commentList);
+                                mCommentCount.put(pid, Integer.MAX_VALUE);
                             }
                         }
 

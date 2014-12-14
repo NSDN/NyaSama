@@ -2,7 +2,9 @@ package com.nyasama.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -15,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,17 +40,22 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class AttachmentViewer extends FragmentActivity {
 
     private static String TAG = "ImageViewer";
+    private static int MAX_TEXTURE_SIZE = 2048;
+    private static int IMAGE_THUMB_SIZE = 128;
+    private static int MAX_MEMORY_BYTES = 16*1024*1024;
 
     private ViewPager mPager;
     private TextView mTitle;
     private FragmentPagerAdapter mPageAdapter;
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
     private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
+    private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
 
     public void showAttachmentList() {
         List<String> names = new ArrayList<String>();
@@ -91,25 +97,29 @@ public class AttachmentViewer extends FragmentActivity {
     static Pattern msgMatcher = Pattern.compile("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     static List<Attachment> compileAttachments(String message, final List<Attachment> attachments) {
-        List<Attachment> newAttachments = new ArrayList<Attachment>();
+        List<Attachment> list = new ArrayList<Attachment>();
 
         Map<String, Attachment> map = new HashMap<String, Attachment>();
-        for (Attachment attachment : attachments) {
+        for (Attachment attachment : attachments)
             map.put(attachment.src, attachment);
-            if (!attachment.isImage)
-                newAttachments.add(attachment);
-        }
 
         Matcher matcher = msgMatcher.matcher(message);
         while (matcher.find()) {
             Matcher pathMatcher = msgPathPattern.matcher(matcher.group(1));
             if (pathMatcher.find()) {
-                Attachment attachment = map.get(pathMatcher.group(1));
-                if (attachment != null) newAttachments.add(attachment);
+                String src = pathMatcher.group(1);
+                Attachment attachment = map.get(src);
+                if (attachment != null) {
+                    list.add(attachment);
+                    map.remove(src);
+                }
             }
         }
 
-        return newAttachments;
+        for (Map.Entry<String, Attachment> entry : map.entrySet())
+            list.add(entry.getValue());
+
+        return list;
     }
 
     public void loadAttachments() {
@@ -154,6 +164,18 @@ public class AttachmentViewer extends FragmentActivity {
                             mAttachmentList = compileAttachments(post.message, post.attachments);
                         }
                         mPageAdapter.notifyDataSetChanged();
+
+                        final int aid = getIntent().getIntExtra("aid", 0);
+                        if (aid > 0) mPager.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int index = 0;
+                                for (int i = 0; i < mAttachmentList.size(); i ++)
+                                    if (mAttachmentList.get(i).id == aid) index = i;
+                                mPager.setCurrentItem(index);
+                            }
+                        });
+
                         position = 0;
                     }
                     catch (JSONException e) {
@@ -190,36 +212,70 @@ public class AttachmentViewer extends FragmentActivity {
         });
         mPager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                super.destroyItem(container, position, object);
+                final Attachment attachment = mAttachmentList.get(position);
+                Bitmap bitmap = mBitmapCache.get(attachment.src);
+                if (bitmap != null) {
+                    int memoryBytes = 0;
+                    for (Map.Entry<String, Bitmap> entry :mBitmapCache.entrySet())
+                        memoryBytes += entry.getValue().getByteCount();
+                    if (memoryBytes > MAX_MEMORY_BYTES) {
+                        bitmap.recycle();
+                        mBitmapCache.remove(attachment.src);
+                    }
+                }
+            }
+
+            @Override
             public Fragment getItem(final int i) {
                 return new Fragment() {
                     @Override
                     public View onCreateView(LayoutInflater inflater,
                                              ViewGroup container, Bundle savedInstanceState) {
-                        Attachment attachment = mAttachmentList.get(i);
+                        final Attachment attachment = mAttachmentList.get(i);
                         if (attachment.isImage) {
-                            final ImageView imageView = new ImageView(container.getContext());
-                            final String url = Discuz.DISCUZ_URL + attachment.src;
-                            Bitmap bitmap = mBitmapCache.get(url);
+                            final PhotoView photoView = new PhotoView(container.getContext());
+                            Bitmap bitmap = mBitmapCache.get(attachment.src);
                             if (bitmap != null) {
-                                imageView.setImageBitmap(bitmap);
-                                new PhotoViewAttacher(imageView);
+                                photoView.setImageBitmap(bitmap);
+                                new PhotoViewAttacher(photoView);
                             } else {
-                                imageView.setImageResource(android.R.drawable.ic_menu_gallery);
-                                ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+                                Bitmap thumb = mThumbCache.get(attachment.src);
+                                if (thumb != null)
+                                    photoView.setImageBitmap(thumb);
+                                else
+                                    photoView.setImageResource(android.R.drawable.ic_menu_gallery);
+                                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(attachment.src), new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap bitmap) {
-                                        mBitmapCache.put(url, bitmap);
-                                        imageView.setImageBitmap(bitmap);
-                                        new PhotoViewAttacher(imageView);
+                                        // Note: on some old devices like Galaxy Nexus,
+                                        // images larger than 2048x2048 will not be rendered,
+                                        // thus we should resize it
+                                        if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
+                                                bitmap.getHeight() > MAX_TEXTURE_SIZE)
+                                            bitmap = Helper.getFittedBitmap(bitmap,
+                                                    MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                                        mBitmapCache.put(attachment.src, bitmap);
+                                        mThumbCache.put(attachment.src, Helper.getFittedBitmap(bitmap,
+                                                IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
+                                        photoView.setImageBitmap(bitmap);
                                     }
                                 }, 0, 0, null, null);
                                 ThisApp.requestQueue.add(imageRequest);
                             }
-                            return imageView;
+                            return photoView;
                         } else {
                             View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
                             TextView textView = (TextView) view.findViewById(R.id.name);
                             textView.setText(attachment.name + " (" + attachment.size + ")");
+                            view.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Intent.ACTION_VIEW,
+                                            Uri.parse(Discuz.getSafeUrl(attachment.src))));
+                                }
+                            });
                             return view;
                         }
                     }

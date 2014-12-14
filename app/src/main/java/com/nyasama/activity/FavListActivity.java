@@ -9,13 +9,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.android.volley.Response;
-import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
-import com.nyasama.ThisApp;
 import com.nyasama.adapter.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Discuz.PMList;
+import com.nyasama.util.Discuz.FavItem;
 import com.nyasama.util.Helper;
 
 import org.json.JSONArray;
@@ -25,37 +23,36 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class PMListActivity extends FragmentActivity
-    implements CommonListFragment.OnListFragmentInteraction<PMList> {
+public class FavListActivity extends FragmentActivity
+    implements CommonListFragment.OnListFragmentInteraction<FavItem> {
 
-    public static int PAGE_SIZE_COUNT = 20;
-    public static String TAG = "PMList";
+    final static int PAGE_SIZE_COUNT = 20;
+    public static String TAG = "FavList";
 
-    private CommonListFragment<PMList> mListFragment;
+    private CommonListFragment<FavItem> mListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pm_list);
+        setContentView(R.layout.activity_fav_list);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mListFragment = CommonListFragment.getNewFragment(
-                PMList.class,
+                FavItem.class,
                 R.layout.fragment_simple_list,
-                R.layout.fragment_pmlist_item,
+                R.layout.fragment_fav_item,
                 R.id.list);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment).commit();
-
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_pm_list, menu);
+        getMenuInflater().inflate(R.menu.menu_fav_list, menu);
         return true;
     }
 
@@ -80,29 +77,24 @@ public class PMListActivity extends FragmentActivity
 
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
-        return new CommonListAdapter<PMList>() {
+        return new CommonListAdapter<FavItem>() {
             @Override
-            public void convertView(ViewHolder viewHolder, PMList item) {
-                int uid = item.fromUserId != Discuz.sUid ? item.fromUserId : item.toUserId;
-                String username = item.fromUserId != Discuz.sUid ? item.fromUser : item.toUser;
-
-                String avatar_url = Discuz.DISCUZ_URL +
-                        "uc_server/avatar.php?uid=" + uid + "&size=small";
-                ((NetworkImageView) viewHolder.getView(R.id.avatar))
-                        .setImageUrl(avatar_url, ThisApp.imageLoader);
-
-                viewHolder.setText(R.id.author, username + " (" + item.number + ")");
-                viewHolder.setText(R.id.message, item.message);
-                viewHolder.setText(R.id.date, item.lastdate);
+            public void convertView(ViewHolder viewHolder, FavItem item) {
+                viewHolder.setText(R.id.title, item.title);
+                viewHolder.setText(R.id.date, item.dateline);
             }
         };
     }
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        Intent intent = new Intent(this, MessagesActivity.class);
-        intent.putExtra("touid", ((PMList) fragment.getData(position)).toUserId);
-        startActivity(intent);
+        FavItem item = mListFragment.getData(position);
+        if ("tid".equals(item.type)) {
+            Intent intent = new Intent(this, PostListActivity.class);
+            intent.putExtra("tid", item.dataId);
+            intent.putExtra("title", item.title);
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -110,7 +102,7 @@ public class PMListActivity extends FragmentActivity
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
         final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
         final int position = page * PAGE_SIZE_COUNT;
-        Discuz.execute("mypm", new HashMap<String, Object>() {{
+        Discuz.execute("myfavthread", new HashMap<String, Object>() {{
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
@@ -118,8 +110,7 @@ public class PMListActivity extends FragmentActivity
                 int total = -1;
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     // remove possible duplicated items
                     if (position < listData.size())
                         listData.subList(position, listData.size()).clear();
@@ -127,8 +118,8 @@ public class PMListActivity extends FragmentActivity
                         JSONObject var = data.getJSONObject("Variables");
 
                         JSONArray list = var.getJSONArray("list");
-                        for (int i = 0; i < list.length(); i ++) {
-                            listData.add(new PMList(list.getJSONObject(i)));
+                        for (int i = 0; i < list.length(); i++) {
+                            listData.add(new FavItem(list.getJSONObject(i)));
                         }
 
                         total = Helper.toSafeInteger(var.getString("count"), listData.size());

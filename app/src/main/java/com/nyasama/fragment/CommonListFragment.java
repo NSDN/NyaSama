@@ -152,6 +152,8 @@ public class CommonListFragment<T> extends Fragment
             View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);
         }
+        // the loading view should initial hidden
+        Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading), false);
 
         mListAdapter = mInteractionInterface.getListViewAdaptor(this);
         mListAdapter.setup(mListData, mItemLayout);
