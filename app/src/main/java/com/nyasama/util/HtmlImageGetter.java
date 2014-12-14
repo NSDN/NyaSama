@@ -22,6 +22,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
 
     private TextView container;
     private Map<String, Bitmap> cache;
+    private int jobs;
 
     public HtmlImageGetter(TextView container, Map<String, Bitmap> cache) {
         this.container = container;
@@ -44,6 +45,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
         drawable.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
 
         if (cachedImage == null) {
+            jobs ++;
             ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
                 @Override
                 public void onResponse(final Bitmap bitmap) {
@@ -53,8 +55,12 @@ public class HtmlImageGetter implements Html.ImageGetter {
                     // save to cache
                     if (cache != null)
                         cache.put(url, bitmap);
-                    // there should be a better way to refresh the layout
-                    container.setText(container.getText());
+                    // refresh layout
+                    jobs --;
+                    if (jobs == 0) {
+                        // TODO: there should be a better way to refresh the layout
+                        container.setText(container.getText());
+                    }
                 }
             }, 0, 0, null, null);
             ThisApp.requestQueue.add(request);
