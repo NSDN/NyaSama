@@ -4,14 +4,14 @@ import android.app.Activity;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
@@ -49,7 +49,7 @@ public class MainActivity extends FragmentActivity
                     public void onResponse(JSONObject jsonObject) {
                         if (Discuz.sHasLogined) {
                             String avatar_url = Discuz.DISCUZ_URL +
-                                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
+                                    "uc_server/avatar.php?uid=" + Discuz.sUid + "&size=medium";
                             ((NetworkImageView) findViewById(R.id.drawer_avatar))
                                     .setImageUrl(avatar_url, ThisApp.imageLoader);
                             ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
@@ -128,7 +128,7 @@ public class MainActivity extends FragmentActivity
             return true;
         }
         // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
@@ -236,8 +236,11 @@ public class MainActivity extends FragmentActivity
                         if (i == 0)
                             return new DiscuzForumIndexFragment();
                         else if (i == 1)
-                            // Note: it returns 50 hot threads by default
+                            // Note: Discuz returns 50 hot threads by default.
+                            // we set the page size to be 60 so that it will not load more
                             return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
+                        else if (i == 2)
+                            return DiscuzThreadListFragment.getNewFragment(3, 0, 20);
                         else
                             return new SimpleLayoutFragment();
                     }
@@ -250,6 +253,7 @@ public class MainActivity extends FragmentActivity
                         int[] titles = {
                                 R.string.title_main_home,
                                 R.string.title_main_hot_threads,
+                                R.string.title_main_translated,
                         };
                         return position < titles.length ? getString(titles[position]) : "Blank "+position;
                     }
