@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
+import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
@@ -32,21 +33,32 @@ import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         DiscuzThreadListFragment.OnThreadListInteraction{
 
     public void loadUserInfo() {
-        if (Discuz.sHasLogined) {
-            String avatar_url = Discuz.DISCUZ_URL +
-                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
-            ((NetworkImageView) findViewById(R.id.drawer_avatar))
-                    .setImageUrl(avatar_url, ThisApp.imageLoader);
-            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
-            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
-        }
-        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
-        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+        // TODO: just use forumindex to refresh group name
+        Discuz.execute("forumindex", new HashMap<String, Object>(),
+                null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (Discuz.sHasLogined) {
+                            String avatar_url = Discuz.DISCUZ_URL +
+                                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
+                            ((NetworkImageView) findViewById(R.id.drawer_avatar))
+                                    .setImageUrl(avatar_url, ThisApp.imageLoader);
+                            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
+                            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
+                        }
+                        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
+                        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+                    }
+                });
     }
 
     /**
