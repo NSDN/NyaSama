@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
@@ -166,7 +169,9 @@ public class MessagesActivity extends FragmentActivity
                         "uc_server/avatar.php?uid="+item.authorId+"&size=small";
                 ((NetworkImageView) viewHolder.getView(R.id.avatar))
                         .setImageUrl(avatar_url, ThisApp.imageLoader);
-                viewHolder.setText(R.id.message, item.message);
+                TextView message = (TextView) viewHolder.getView(R.id.message);
+                message.setText(Html.fromHtml(item.message));
+                message.setMovementMethod(LinkMovementMethod.getInstance());
             }
 
             @Override
