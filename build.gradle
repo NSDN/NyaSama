@@ -12,6 +12,18 @@ buildscript {
     }
 }
 
+project(":app") {
+    apply plugin: "android"
+
+    configurations { natives }
+
+    dependencies {
+        natives "com.badlogicgames.gdx:gdx-platform:1.5.0:natives-armeabi"
+        natives "com.badlogicgames.gdx:gdx-platform:1.5.0:natives-armeabi-v7a"
+        natives "com.badlogicgames.gdx:gdx-platform:1.5.0:natives-x86"
+    }
+}
+
 allprojects {
     repositories {
         jcenter()
