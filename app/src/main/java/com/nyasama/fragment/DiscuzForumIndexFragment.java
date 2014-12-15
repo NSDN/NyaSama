@@ -36,7 +36,7 @@ import java.util.List;
  * Created by oxyflour on 2014/11/18.
  *
  */
-public class ForumIndexFragment extends android.support.v4.app.Fragment {
+public class DiscuzForumIndexFragment extends android.support.v4.app.Fragment {
 
     private List<Object> mForumListData = new ArrayList<Object>();
 

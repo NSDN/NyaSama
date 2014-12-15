@@ -25,9 +25,9 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.fragment.SimpleLayoutFragment;
-import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
@@ -222,7 +222,7 @@ public class MainActivity extends FragmentActivity
                     @Override
                     public android.support.v4.app.Fragment getItem(int i) {
                         if (i == 0)
-                            return new ForumIndexFragment();
+                            return new DiscuzForumIndexFragment();
                         else if (i == 1)
                             // Note: it returns 50 hot threads by default
                             return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
