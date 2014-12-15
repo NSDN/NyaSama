@@ -54,6 +54,12 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/signin_button_text"
+            android:onClick="doSignin" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/mythread_button_text"
             android:onClick="doShowThreads" />
 

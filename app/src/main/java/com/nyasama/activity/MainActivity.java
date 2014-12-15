@@ -61,6 +61,15 @@ public class MainActivity extends FragmentActivity
                 });
     }
 
+    public void gotoLogin(View view) {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
+    }
+
+    public void gotoProfile(View view) {
+        startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
+    }
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -84,23 +93,6 @@ public class MainActivity extends FragmentActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        View view = mNavigationDrawerFragment.getView();
-        if (view != null) {
-            findViewById(R.id.drawer_login).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
-                }
-            });
-            findViewById(R.id.show_logined).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
-                }
-            });
-        }
 
         /*
         TODO: enable this

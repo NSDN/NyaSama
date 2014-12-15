@@ -700,4 +700,25 @@ public class Discuz {
         callback.onResponse(new JSONObject());
     }
 
+    static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
+    public static void signin(final Response.Listener<String> callback) {
+        String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
+        Request request = new StringRequest(url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Matcher matcher = signinMessagePattern.matcher(s);
+                if (matcher.find())
+                    callback.onResponse(matcher.group(1));
+                else
+                    callback.onResponse(null);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                callback.onResponse(volleyError.getMessage());
+            }
+        });
+        ThisApp.requestQueue.add(request);
+    }
+
 }
