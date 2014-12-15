@@ -3,6 +3,7 @@ package com.nyasama.activity;
 import android.app.Activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
@@ -31,7 +33,8 @@ import com.nyasama.R;
 import com.nyasama.util.Discuz;
 
 public class MainActivity extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        DiscuzThreadListFragment.OnThreadListInteraction{
 
     public void loadUserInfo() {
         if (Discuz.sHasLogined) {
@@ -172,6 +175,17 @@ public class MainActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onGetThreadData(DiscuzThreadListFragment fragment) {
+        if (fragment.getMessage() != null) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.there_is_something_wrong)
+                    .setMessage(fragment.getMessage())
+                    .setPositiveButton(android.R.string.yes, null)
+                    .show();
+        }
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -209,8 +223,10 @@ public class MainActivity extends FragmentActivity
                     public android.support.v4.app.Fragment getItem(int i) {
                         if (i == 0)
                             return new ForumIndexFragment();
+                        else if (i == 1)
+                            // Note: it returns 50 hot threads by default
+                            return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
                         else
-                            // TODO: remove this
                             return new SimpleLayoutFragment();
                     }
                     @Override
@@ -219,10 +235,11 @@ public class MainActivity extends FragmentActivity
                     }
                     @Override
                     public CharSequence getPageTitle(int position) {
-                        return position == 0 ?
-                                mActivity.getString(R.string.title_main_home) :
-                                // TODO: rename this
-                                "Blank "+position;
+                        int[] titles = {
+                                R.string.title_main_home,
+                                R.string.title_main_hot_threads,
+                        };
+                        return position < titles.length ? getString(titles[position]) : "Blank "+position;
                     }
                 });
                 return rootView;

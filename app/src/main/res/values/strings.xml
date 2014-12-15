@@ -72,5 +72,6 @@
     <string name="action_mark_fav">收藏</string>
     <string name="title_activity_fav_list">我的收藏</string>
     <string name="thread_list_toplist_title">置顶</string>
+    <string name="title_main_hot_threads">热门</string>
 
 </resources>
