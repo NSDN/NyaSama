@@ -139,6 +139,9 @@ public class ThreadListActivity extends FragmentActivity
             }
         });
 
+        if (mPageAdapter.getCount() == 1)
+            Helper.updateVisibility(findViewById(R.id.view_strip), false);
+
     }
 
     @Override
