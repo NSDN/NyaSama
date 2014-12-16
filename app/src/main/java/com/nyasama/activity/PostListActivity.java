@@ -452,7 +452,7 @@ public class PostListActivity extends FragmentActivity
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache), null);
+                        new HtmlImageGetter(messageText, imageCache, 512, 512), null);
 
                 // set the images clickale
                 ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);

@@ -23,10 +23,14 @@ public class HtmlImageGetter implements Html.ImageGetter {
     private TextView container;
     private Map<String, Bitmap> cache;
     private int jobs;
+    private int maxWidth;
+    private int maxHeight;
 
-    public HtmlImageGetter(TextView container, Map<String, Bitmap> cache) {
+    public HtmlImageGetter(TextView container, Map<String, Bitmap> cache, int maxWidth, int maxHeight) {
         this.container = container;
         this.cache = cache;
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
                         container.setText(container.getText());
                     }
                 }
-            }, 0, 0, null, null);
+            }, maxWidth, maxHeight, null, null);
             ThisApp.requestQueue.add(request);
         }
 

@@ -307,9 +307,10 @@ public class AttachmentViewer extends FragmentActivity {
                     ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
                         @Override
                         public void onResponse(Bitmap bitmap) {
-                            // Note: on some old devices like Galaxy Nexus,
-                            // images larger than 2048x2048 will not be rendered,
-                            // thus we should resize it
+                            // Note: On some old devices like Galaxy Nexus,
+                            // images larger than 2048x2048 will not be rendered.
+                            // As volley is facing OOM when resizing images
+                            // we have to resize it here
                             if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
                                     bitmap.getHeight() > MAX_TEXTURE_SIZE) {
                                 try {
