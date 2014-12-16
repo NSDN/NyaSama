@@ -28,7 +28,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.Discuz;
@@ -452,7 +452,7 @@ public class PostListActivity extends FragmentActivity
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache), null);
+                        new HtmlImageGetter(messageText, imageCache, 512, 512), null);
 
                 // set the images clickale
                 ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);
@@ -461,13 +461,21 @@ public class PostListActivity extends FragmentActivity
                             new ClickableSpan() {
                                 @Override
                                 public void onClick(View view) {
-                                    final Attachment attachment = mAttachmentMap.get(image.getSource());
+                                    Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
+                                    intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+                                    intent.putExtra("index", mListFragment.getIndex(item));
+
+                                    String src = image.getSource();
+                                    Attachment attachment = mAttachmentMap.get(src);
+                                    // attachment image
                                     if (attachment != null) {
-                                        startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
-                                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
-                                            putExtra("index", mListFragment.getIndex(item));
-                                            putExtra("aid", attachment.id);
-                                        }});
+                                        intent.putExtra("src", attachment.src);
+                                        startActivity(intent);
+                                    }
+                                    // external images
+                                    else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                                        intent.putExtra("src", src);
+                                        startActivity(intent);
                                     }
                                 }
                             },

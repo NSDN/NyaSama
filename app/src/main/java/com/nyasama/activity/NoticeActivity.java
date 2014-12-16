@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Notice;

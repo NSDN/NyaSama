@@ -3,14 +3,15 @@ package com.nyasama.activity;
 import android.app.Activity;
 
 import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
@@ -22,28 +23,51 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
+import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzForumIndexFragment;
+import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.fragment.SimpleLayoutFragment;
-import com.nyasama.fragment.ForumIndexFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 public class MainActivity extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        DiscuzThreadListFragment.OnThreadListInteraction{
 
     public void loadUserInfo() {
-        if (Discuz.sHasLogined) {
-            String avatar_url = Discuz.DISCUZ_URL +
-                    "uc_server/avatar.php?uid="+Discuz.sUid+"&size=medium";
-            ((NetworkImageView) findViewById(R.id.drawer_avatar))
-                    .setImageUrl(avatar_url, ThisApp.imageLoader);
-            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
-            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
-        }
-        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
-        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+        // TODO: just use forumindex to refresh group name
+        Discuz.execute("forumindex", new HashMap<String, Object>(),
+                null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (Discuz.sHasLogined) {
+                            String avatar_url = Discuz.DISCUZ_URL +
+                                    "uc_server/avatar.php?uid=" + Discuz.sUid + "&size=medium";
+                            ((NetworkImageView) findViewById(R.id.drawer_avatar))
+                                    .setImageUrl(avatar_url, ThisApp.imageLoader);
+                            ((TextView) findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
+                            ((TextView) findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
+                        }
+                        findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
+                        findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+                    }
+                });
+    }
+
+    public void gotoLogin(View view) {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
+    }
+
+    public void gotoProfile(View view) {
+        startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
     }
 
     /**
@@ -69,23 +93,6 @@ public class MainActivity extends FragmentActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        View view = mNavigationDrawerFragment.getView();
-        if (view != null) {
-            findViewById(R.id.drawer_login).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
-                }
-            });
-            findViewById(R.id.show_logined).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
-                }
-            });
-        }
 
         /*
         TODO: enable this
@@ -113,7 +120,7 @@ public class MainActivity extends FragmentActivity
             return true;
         }
         // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
@@ -172,6 +179,17 @@ public class MainActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onGetThreadData(DiscuzThreadListFragment fragment) {
+        if (fragment.getMessage() != null) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.there_is_something_wrong)
+                    .setMessage(fragment.getMessage())
+                    .setPositiveButton(android.R.string.yes, null)
+                    .show();
+        }
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -208,9 +226,14 @@ public class MainActivity extends FragmentActivity
                     @Override
                     public android.support.v4.app.Fragment getItem(int i) {
                         if (i == 0)
-                            return new ForumIndexFragment();
+                            return new DiscuzForumIndexFragment();
+                        else if (i == 1)
+                            // Note: Discuz returns 50 hot threads by default.
+                            // we set the page size to be 60 so that it will not load more
+                            return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
+                        else if (i == 2)
+                            return DiscuzThreadListFragment.getNewFragment(3, 0, 20);
                         else
-                            // TODO: remove this
                             return new SimpleLayoutFragment();
                     }
                     @Override
@@ -219,10 +242,12 @@ public class MainActivity extends FragmentActivity
                     }
                     @Override
                     public CharSequence getPageTitle(int position) {
-                        return position == 0 ?
-                                mActivity.getString(R.string.title_main_home) :
-                                // TODO: rename this
-                                "Blank "+position;
+                        int[] titles = {
+                                R.string.title_main_home,
+                                R.string.title_main_hot_threads,
+                                R.string.title_main_translated,
+                        };
+                        return position < titles.length ? getString(titles[position]) : "Blank "+position;
                     }
                 });
                 return rootView;

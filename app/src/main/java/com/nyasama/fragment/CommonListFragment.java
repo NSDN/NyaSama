@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.nyasama.R;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Helper;
 
 import java.util.ArrayList;

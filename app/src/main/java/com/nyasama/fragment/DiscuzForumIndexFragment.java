@@ -18,7 +18,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.activity.ThreadListActivity;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Forum;
 import com.nyasama.util.Discuz.ForumCatalog;
@@ -36,7 +36,7 @@ import java.util.List;
  * Created by oxyflour on 2014/11/18.
  *
  */
-public class ForumIndexFragment extends android.support.v4.app.Fragment {
+public class DiscuzForumIndexFragment extends android.support.v4.app.Fragment {
 
     private List<Object> mForumListData = new ArrayList<Object>();
 

@@ -21,10 +21,10 @@ import android.widget.AdapterView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
-import com.nyasama.fragment.TopListFragment;
+import com.nyasama.fragment.DiscuzTopListFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.Thread;
@@ -84,7 +84,7 @@ public class ThreadListActivity extends FragmentActivity
                             R.id.list);
                 }
                 else if (i == 1) {
-                    return TopListFragment.getNewFragment(getIntent().getIntExtra("fid", 0));
+                    return DiscuzTopListFragment.getNewFragment(getIntent().getIntExtra("fid", 0));
                 }
                 else {
                     return new Fragment() {
@@ -138,6 +138,9 @@ public class ThreadListActivity extends FragmentActivity
                 return titles[position];
             }
         });
+
+        if (mPageAdapter.getCount() == 1)
+            Helper.updateVisibility(findViewById(R.id.view_strip), false);
 
     }
 
