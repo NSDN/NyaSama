@@ -21,7 +21,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
@@ -54,9 +57,12 @@ public class AttachmentViewer extends FragmentActivity {
     private ViewPager mPager;
     private TextView mTitle;
     private FragmentStatePagerAdapter mPageAdapter;
+
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
     private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
     private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
+
+    private RequestQueue mRequestQueue = new RequestQueue(ThisApp.volleyCache, new BasicNetwork(new HurlStack()));
 
     public void showAttachmentList() {
         List<String> names = new ArrayList<String>();
@@ -248,6 +254,8 @@ public class AttachmentViewer extends FragmentActivity {
             }
         });
 
+        mRequestQueue.start();
+
         loadAttachments();
     }
 
@@ -319,7 +327,7 @@ public class AttachmentViewer extends FragmentActivity {
                             photoView.setImageBitmap(bitmap);
                         }
                     }, 0, 0, null, null);
-                    ThisApp.requestQueue.add(imageRequest);
+                    mActivity.mRequestQueue.add(imageRequest);
                 }
                 return photoView;
             } else {
