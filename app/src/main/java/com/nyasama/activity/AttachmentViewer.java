@@ -101,28 +101,31 @@ public class AttachmentViewer extends FragmentActivity {
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
-    static Pattern msgMatcher = Pattern.compile("<ignore_js_op>(.*?)</ignore_js_op>",
-            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     static List<Attachment> compileAttachments(String message, final List<Attachment> attachments) {
         List<Attachment> list = new ArrayList<Attachment>();
+        Matcher matcher;
 
         Map<String, Attachment> map = new HashMap<String, Attachment>();
         for (Attachment attachment : attachments)
             map.put(attachment.src, attachment);
 
-        Matcher matcher = msgMatcher.matcher(message);
+        message = message.replaceAll(" src=\"(.*?)\"", " file=\"$1\"");
+
+        matcher = msgPathPattern.matcher(message);
         while (matcher.find()) {
-            Matcher pathMatcher = msgPathPattern.matcher(matcher.group(1));
-            if (pathMatcher.find()) {
-                String src = pathMatcher.group(1);
-                Attachment attachment = map.get(src);
-                if (attachment != null) {
-                    list.add(attachment);
-                    map.remove(src);
-                }
+            String src = matcher.group(1);
+            // attachment image
+            if (map.containsKey(src)) {
+                list.add(map.get(src));
+                map.remove(src);
+            }
+            // external images
+            else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                list.add(Attachment.newImageAttachment(src));
             }
         }
 
+        // add the rest attachments
         for (Map.Entry<String, Attachment> entry : map.entrySet())
             list.add(entry.getValue());
 
@@ -172,12 +175,12 @@ public class AttachmentViewer extends FragmentActivity {
                         }
                         mPageAdapter.notifyDataSetChanged();
 
-                        final int aid = getIntent().getIntExtra("aid", 0);
-                        if (aid > 0) mPager.post(new Runnable() {
+                        final String src = getIntent().getStringExtra("src");
+                        if (!src.isEmpty()) mPager.post(new Runnable() {
                             @Override
                             public void run() {
                                 for (int i = 0; i < mAttachmentList.size(); i ++)
-                                    if (mAttachmentList.get(i).id == aid) {
+                                    if (mAttachmentList.get(i).src.equals(src)) {
                                         mPager.setCurrentItem(i, false);
                                         break;
                                     }
@@ -211,7 +214,7 @@ public class AttachmentViewer extends FragmentActivity {
             @Override
             public void onPageSelected(int position) {
                 updatePagerTitle(position);
-                getIntent().putExtra("aid", mAttachmentList.get(position).id);
+                getIntent().putExtra("src", mAttachmentList.get(position).src);
             }
 
             @Override

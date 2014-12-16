@@ -461,13 +461,21 @@ public class PostListActivity extends FragmentActivity
                             new ClickableSpan() {
                                 @Override
                                 public void onClick(View view) {
-                                    final Attachment attachment = mAttachmentMap.get(image.getSource());
+                                    Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
+                                    intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+                                    intent.putExtra("index", mListFragment.getIndex(item));
+
+                                    String src = image.getSource();
+                                    Attachment attachment = mAttachmentMap.get(src);
+                                    // attachment image
                                     if (attachment != null) {
-                                        startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
-                                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
-                                            putExtra("index", mListFragment.getIndex(item));
-                                            putExtra("aid", attachment.id);
-                                        }});
+                                        intent.putExtra("src", attachment.src);
+                                        startActivity(intent);
+                                    }
+                                    // external images
+                                    else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                                        intent.putExtra("src", src);
+                                        startActivity(intent);
                                     }
                                 }
                             },

@@ -152,13 +152,7 @@ public class Discuz {
                 for (Iterator<String> iter = attachlist.keys(); iter.hasNext(); ) {
                     String key = iter.next();
                     JSONObject attachData = attachlist.optJSONObject(key);
-                    Attachment attachment = new Attachment();
-                    attachment.id = Integer.parseInt(attachData.optString("aid", "0"));
-                    attachment.name = attachData.optString("filename");
-                    attachment.src = attachData.optString("url") + attachData.optString("attachment");
-                    attachment.size = attachData.optString("attachsize");
-                    // Note: Discuz may set isimage 1 or -1
-                    attachment.isImage = !"0".equals(attachData.optString("isimage"));
+                    Attachment attachment = new Attachment(attachData);
                     attachments.add(attachment);
                 }
             }
@@ -170,6 +164,27 @@ public class Discuz {
         public String name;
         public String src;
         public String size;
+
+        public static Attachment newImageAttachment(String src) {
+            Attachment attachment = new Attachment();
+            attachment.isImage = true;
+            attachment.name = src;
+            attachment.src = src;
+            attachment.size = "0kb";
+            return attachment;
+        }
+
+        public Attachment() {
+        }
+
+        public Attachment(JSONObject data) {
+            id = Integer.parseInt(data.optString("aid", "0"));
+            name = data.optString("filename");
+            src = data.optString("url") + data.optString("attachment");
+            size = data.optString("attachsize");
+            // Note: Discuz may set isimage 1 or -1
+            isImage = !"0".equals(data.optString("isimage"));
+        }
     }
     public static class Comment {
         public int authorId;
