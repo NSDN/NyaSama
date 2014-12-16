@@ -2,6 +2,7 @@ package com.nyasama.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,6 +22,7 @@ public class AboutCore extends ApplicationAdapter {
     double PI = 3.141592653;
     int Time, Angle;
     float BackA, BackB;
+    Audio Audio_obj;
 
     @Override
     public void create() {
@@ -33,6 +35,8 @@ public class AboutCore extends ApplicationAdapter {
         Angle = 0;
         BackA = 0;
         BackB = 0;
+        Audio_obj.newMusic(Gdx.files.internal("BGM.ogg"));
+
     }
 
     @Override
