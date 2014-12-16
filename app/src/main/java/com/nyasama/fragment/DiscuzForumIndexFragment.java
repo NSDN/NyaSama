@@ -18,7 +18,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.activity.ThreadListActivity;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Forum;
 import com.nyasama.util.Discuz.ForumCatalog;
