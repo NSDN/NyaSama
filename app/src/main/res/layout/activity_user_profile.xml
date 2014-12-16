@@ -49,7 +49,8 @@
         android:id="@+id/hide_for_others"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:weightSum="1">
 
         <Button
             android:layout_width="match_parent"
@@ -57,29 +58,50 @@
             android:text="@string/signin_button_text"
             android:onClick="doSignin" />
 
-        <Button
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/mythread_button_text"
-            android:onClick="doShowThreads" />
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="6.09">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/my_message_button"
-            android:onClick="doShowMessages" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mythread_button_text"
+                android:onClick="doShowThreads"
+                android:layout_weight="6.09" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/my_notice_button"
-            android:onClick="doShowNotice" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_favs_button"
+                android:onClick="doShowFavs"
+                android:layout_weight="6.09" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/show_favs_button"
-            android:onClick="doShowFavs" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/my_message_button"
+                android:onClick="doShowMessages"
+                android:layout_weight="6.09" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/my_notice_button"
+                android:onClick="doShowNotice"
+                android:layout_weight="6.09"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
 
         <Button
             android:layout_width="match_parent"
@@ -89,4 +111,7 @@
 
     </LinearLayout>
 
+
 </LinearLayout>
+
+
