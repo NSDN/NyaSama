@@ -176,7 +176,7 @@ public class AttachmentViewer extends FragmentActivity {
                         mPageAdapter.notifyDataSetChanged();
 
                         final String src = getIntent().getStringExtra("src");
-                        if (!src.isEmpty()) mPager.post(new Runnable() {
+                        if (src != null) mPager.post(new Runnable() {
                             @Override
                             public void run() {
                                 for (int i = 0; i < mAttachmentList.size(); i ++)
