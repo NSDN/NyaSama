@@ -42,11 +42,11 @@ public class Helper {
             return defValue;
         }
     }
-    public static String datelineToString(int time, String format) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "MMM dd HH:mm:ss" : format);
+    public static String datelineToString(long time, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date();
-        date.setTime(time);
+        date.setTime(time * 1000);
         return dateFormat.format(date);
     }
 

@@ -7,6 +7,7 @@
     android:background="#fccc" >
 
     <RelativeLayout
+        android:onClick="gotoProfile"
         android:visibility="gone"
         android:padding="8dp"
         android:background="@android:color/white"
@@ -38,7 +39,9 @@
             android:layout_below="@id/drawer_username"
             android:layout_toRightOf="@+id/drawer_avatar"
             android:layout_toEndOf="@+id/drawer_avatar" />
+
     </RelativeLayout>
+
     <LinearLayout
         android:orientation="vertical"
         android:padding="16dp"
@@ -46,11 +49,13 @@
         android:id="@+id/hide_logined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <Button
-            android:id="@+id/drawer_login"
             android:text="@string/drawer_button_login"
+            android:onClick="gotoLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <ListView

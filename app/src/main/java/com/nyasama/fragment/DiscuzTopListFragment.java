@@ -8,13 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.activity.PostListActivity;
-import com.nyasama.adapter.CommonListAdapter;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.Thread;
@@ -31,12 +32,12 @@ import java.util.List;
  * Created by oxyflour on 2014/11/18.
  *
  */
-public class TopListFragment extends android.support.v4.app.Fragment {
+public class DiscuzTopListFragment extends android.support.v4.app.Fragment {
 
     private List<Thread> mListData = new ArrayList<Thread>();
 
-    public static TopListFragment getNewFragment(int fid) {
-        TopListFragment fragment = new TopListFragment();
+    public static DiscuzTopListFragment getNewFragment(int fid) {
+        DiscuzTopListFragment fragment = new DiscuzTopListFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("fid", fid);
         fragment.setArguments(bundle);
@@ -55,6 +56,7 @@ public class TopListFragment extends android.support.v4.app.Fragment {
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                mListData.clear();
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                     displayError(true);
@@ -62,7 +64,6 @@ public class TopListFragment extends android.support.v4.app.Fragment {
                     try {
                         JSONObject var = data.getJSONObject("Variables");
                         JSONArray threads = var.getJSONArray("forum_threadlist");
-                        mListData.clear();
                         for (int i = 0; i < threads.length(); i++) {
                             mListData.add(new Thread(threads.getJSONObject(i)));
                         }
@@ -78,8 +79,17 @@ public class TopListFragment extends android.support.v4.app.Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_simple_list, container, false);
         mListView = (ListView) rootView.findViewById(R.id.list);
+
+        Button button = (Button) rootView.findViewById(R.id.reload);
+        if (button != null) button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadList();
+            }
+        });
+
         loadList();
         return rootView;
     }

@@ -34,6 +34,15 @@ public class UserProfileActivity extends Activity {
         });
     }
 
+    public void doSignin(View view) {
+        Discuz.signin(new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Helper.toast(s == null ? getString(R.string.there_is_something_wrong) : s);
+            }
+        });
+    }
+
     public void doShowThreads(View view) {
         Intent intent = new Intent(this, ThreadListActivity.class);
         intent.putExtra("uid", getIntent().getIntExtra("uid", Discuz.sUid));

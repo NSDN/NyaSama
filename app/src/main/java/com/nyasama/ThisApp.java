@@ -33,6 +33,7 @@ import java.util.Locale;
  */
 public class ThisApp extends Application {
     public static Context context;
+    public static Cache volleyCache;
     public static RequestQueue requestQueue;
     public static ImageLoader imageLoader;
     public static PersistenceCookieStore cookieStore;
@@ -62,9 +63,10 @@ public class ThisApp extends Application {
         context = getApplicationContext();
 
         File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
-        Cache cache = new DiskBasedCache(cacheFile, 1024*1024*32);
+        volleyCache = new DiskBasedCache(cacheFile, 1024*1024*32);
+
         Network network = new BasicNetwork(new HurlStack());
-        requestQueue = new RequestQueue(cache, network);
+        requestQueue = new RequestQueue(volleyCache, network);
         requestQueue.start();
 
         ImageLoader.ImageCache imgCache = new BitmapLruCache();

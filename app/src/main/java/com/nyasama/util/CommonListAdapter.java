@@ -1,4 +1,4 @@
-package com.nyasama.adapter;
+package com.nyasama.util;
 
 import android.util.SparseArray;
 import android.view.LayoutInflater;
