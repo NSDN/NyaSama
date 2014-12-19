@@ -22,7 +22,8 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
+        //在discuz返回JSON之前，要一直显示splash screen
+        //另一方面，从 Discuz execute 中 541 行抛出的 exception 没有catch 
         Discuz.execute("forumindex",
                 new HashMap<String, Object>(),
                 new HashMap<String, Object>(),
