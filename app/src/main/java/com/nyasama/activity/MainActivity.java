@@ -37,6 +37,23 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+//看起来：这个activity 启动后只做一件事：完成 navigation drawer 的设置 ：onCreate
+//通过navigation drawer 中的选择来创建主 fragment   ：onNavigationDrawerItemSelected
+//这个activity 中装一个 placeholderfragment
+//placeholderfragment 中装着一个 viewpager 以支持左右滑动，viewpager 中装着一个 fragmentstateadapter， 
+//由这个adapter 的 getitem 控制不同 fragment 的创建           ：onCreateView
+//placeholderfragment 中的 PagerTabStrip 未做处理
+//然后调用 loadUserInfo 获取头像，名称，组名    ：loadUserInfo
+//注册了一个local broadcaster 监听 broadcaster_filter_login 事件        ：registerReceiver
+//用户 setting 写到了点击头像打开的 activity 中         ：onNavigationDrawerItemSelected
+//actionbar 设置为standard      ：onCreateOptionsMenu 
+//menu 未添加功能       ：onOptionsItemSelected
+//gotoLogin, gotoprofile 没有调用
+//切换 fragment 时改变标题             ：onAttach
+//onGetThreadData 功能不明
+//
+//
+
 public class MainActivity extends FragmentActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         DiscuzThreadListFragment.OnThreadListInteraction{
