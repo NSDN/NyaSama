@@ -3,16 +3,16 @@
 
     <string name="app_name">喵玉殿</string>
     <string name="title_section1">论坛</string>
-    <string name="title_section2">设置</string>
-    <string name="title_section3">关于</string>
+    <string name="title_section2">THBWiki</string>
+    <string name="title_section3">THBVideo</string>
     <string name="navigation_drawer_open">打开导航栏</string>
     <string name="navigation_drawer_close">关闭导航栏</string>
     <string name="action_example">搜索</string>
     <string name="action_settings">设置</string>
     <string name="title_activity_thread_list">主题列表</string>
-    <string name="hello_world">Hello Gensokyo !</string>
-    <string name="load_failed_toast">读取好像出现问题了。请过会儿再来。</string>
-    <string name="network_error_toast">网络好像有问题。请过会儿再试试。</string>
+    <string name="hello_world">来世愿生幻想乡！</string>
+    <string name="load_failed_toast">读取好像出现问题了，请过会儿再来</string>
+    <string name="network_error_toast">网络好像有问题，请过会儿再试试</string>
     <string name="list_loading_text">载入中……</string>
     <string name="title_activity_post_list">回复列表</string>
     <string name="list_empty">什么也没找到</string>
@@ -30,7 +30,7 @@
     <string name="action_new_post">新主题</string>
     <string name="action_post_now">发表</string>
     <string name="action_reply">回复</string>
-    <string name="title_main_home">主页</string>
+    <string name="title_main_home">板块列表</string>
     <string name="action_add_image">添加图片</string>
     <string name="image_upload_failed_toast">图片上传失败</string>
     <string name="title_activity_user_profile">用户信息</string>
@@ -64,15 +64,17 @@
     <string name="title_activity_setting">设置</string>
     <string name="pref_category_general">通用</string>
     <string name="alert_need_reboot">需要重启才能应用更改</string>
-    <string name="diag_loading_smilies">载入表情</string>
-    <string name="dialog_update_user">更新用户信息</string>
-    <string name="dialog_uploading">正在上传</string>
+    <string name="diag_loading_smilies">载入表情中......</string>
+    <string name="dialog_update_user">更新用户信息中......</string>
+    <string name="dialog_uploading">正在上传......</string>
     <string name="action_more_comments">更多点评</string>
     <string name="show_favs_button">我的收藏</string>
     <string name="action_mark_fav">收藏</string>
     <string name="title_activity_fav_list">我的收藏</string>
     <string name="thread_list_toplist_title">置顶</string>
-    <string name="title_main_hot_threads">热门</string>
-    <string name="title_main_translated">汉化</string>
+    <string name="title_main_hot_threads">热门帖子</string>
+    <string name="title_main_translated">汉化推送</string>
     <string name="signin_button_text">签到</string>
+    <string name="title_section4">设置</string>
+    <string name="title_section5">关于</string>
 </resources>
