@@ -66,14 +66,14 @@
             android:layout_weight="6.09">
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/mythread_button_text"
                 android:onClick="doShowThreads"
                 android:layout_weight="6.09" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/show_favs_button"
                 android:onClick="doShowFavs"
@@ -87,14 +87,14 @@
             android:layout_height="fill_parent">
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/my_message_button"
                 android:onClick="doShowMessages"
                 android:layout_weight="6.09" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/my_notice_button"
                 android:onClick="doShowNotice"
