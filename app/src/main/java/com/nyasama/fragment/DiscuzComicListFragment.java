@@ -18,7 +18,6 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_LIST_LAYOUT, R.layout.fragment_simple_grid);
         bundle.putInt(ARG_ITEM_LAYOUT, R.layout.fragment_thread_grid);
-        bundle.putInt(ARG_LIST_VIEW_ID, R.id.list);
         bundle.putInt("fid", 3);
         fragment.setArguments(bundle);
         return fragment;

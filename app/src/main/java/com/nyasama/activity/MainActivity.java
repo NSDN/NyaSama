@@ -41,9 +41,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        DiscuzThreadListFragment.OnThreadListInteraction{
+public class MainActivity extends FragmentActivity implements
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        DiscuzThreadListFragment.OnThreadListInteraction {
 
     public void loadUserInfo() {
         // TODO: just use forumindex to refresh group name

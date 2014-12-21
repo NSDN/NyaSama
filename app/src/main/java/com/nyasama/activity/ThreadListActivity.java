@@ -23,6 +23,7 @@ import android.widget.ListView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
@@ -44,8 +45,9 @@ import java.util.List;
  * Note: this activity handles both forum threads and user threads
  */
 
-public class ThreadListActivity extends FragmentActivity
-    implements CommonListFragment.OnListFragmentInteraction<Object> {
+public class ThreadListActivity extends FragmentActivity implements
+        CommonListFragment.OnListFragmentInteraction<Object>,
+        DiscuzThreadListFragment.OnThreadListInteraction {
 
     private final String TAG = "ThreadList";
     private final int PAGE_SIZE_COUNT = 20;
@@ -264,6 +266,10 @@ public class ThreadListActivity extends FragmentActivity
                 mListFragment.loadMoreDone(total);
             }
         });
+    }
+
+    @Override
+    public void onGetThreadData(DiscuzThreadListFragment fragment) {
     }
 
     public static class SubForumFragment extends Fragment {
