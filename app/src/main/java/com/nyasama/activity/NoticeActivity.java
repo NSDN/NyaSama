@@ -32,6 +32,8 @@ import com.nyasama.util.Helper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -145,7 +147,20 @@ public class NoticeActivity extends FragmentActivity
                         };
                     }
                     else if ("redirect".equals(mod)) {
-                        newUrl = new ForegroundColorSpan(android.R.color.transparent);
+                        String go = uri.getQueryParameter("goto");
+                        if (go.equals("findpost")) {
+                            newUrl = new URLSpan(urlString) {
+                                @Override
+                                public void onClick(@Nullable View widget) {
+                                    startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
+                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("ptid"), 0));
+                                    }});
+                                }
+                            };
+                        }
+                        else {
+                            newUrl = new ForegroundColorSpan(android.R.color.transparent);
+                        }
                     }
                     if (newUrl != null) text.setSpan(newUrl, note.getSpanStart(url), note.getSpanEnd(url),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -188,6 +203,13 @@ public class NoticeActivity extends FragmentActivity
                                 Notice notice = new Notice(list.getJSONObject(key));
                                 listData.add(notice);
                             }
+                            // sort by id
+                            Collections.sort(listData, new Comparator() {
+                                @Override
+                                public int compare(Object o, Object o2) {
+                                    return ((Notice) o).id - ((Notice) o2).id;
+                                }
+                            });
                         }
 
                         // No pager

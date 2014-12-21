@@ -238,11 +238,13 @@ public class Discuz {
     }
 
     public static class Notice {
+        public int id;
         public String type;
         public String note;
         public String dateline;
 
         public Notice(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("id"), 0);
             type = data.optString("type");
             note = data.optString("note");
             if (data.has("dateline")) dateline = Helper.datelineToString(
