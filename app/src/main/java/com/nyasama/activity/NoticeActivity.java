@@ -32,6 +32,8 @@ import com.nyasama.util.Helper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -201,6 +203,13 @@ public class NoticeActivity extends FragmentActivity
                                 Notice notice = new Notice(list.getJSONObject(key));
                                 listData.add(notice);
                             }
+                            // sort by id
+                            Collections.sort(listData, new Comparator() {
+                                @Override
+                                public int compare(Object o, Object o2) {
+                                    return ((Notice) o).id - ((Notice) o2).id;
+                                }
+                            });
                         }
 
                         // No pager
