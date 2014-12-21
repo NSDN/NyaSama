@@ -1,5 +1,6 @@
 package com.nyasama.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -87,36 +88,7 @@ public class ThreadListActivity extends FragmentActivity
                     return DiscuzTopListFragment.getNewFragment(getIntent().getIntExtra("fid", 0));
                 }
                 else {
-                    return new Fragment() {
-                        @Override
-                        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                                 Bundle savedInstanceState) {
-                            // use forum index again
-                            View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
-                            AbsListView listView = (AbsListView) rootView.findViewById(R.id.list);
-                            listView.setAdapter(new CommonListAdapter<Forum>(mSubList, R.layout.fragment_forum_item) {
-                                @Override
-                                public void convertView(ViewHolder viewHolder, Forum item) {
-                                    viewHolder.setText(R.id.title, item.name);
-                                    viewHolder.setText(R.id.sub,
-                                            "threads:" + item.threads + "  posts:" + item.todayPosts + "/" + item.posts);
-                                    ((NetworkImageView) viewHolder.getView(R.id.icon))
-                                            .setImageUrl(item.icon, ThisApp.imageLoader);
-                                }
-                            });
-                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                    Forum item = mSubList.get(i);
-                                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                                    intent.putExtra("fid", item.id);
-                                    intent.putExtra("title", item.name);
-                                    startActivity(intent);
-                                }
-                            });
-                            return rootView;
-                        }
-                    };
+                    return new SubForumFragment();
                 }
             }
 
@@ -303,6 +275,45 @@ public class ThreadListActivity extends FragmentActivity
                 mListFragment.loadMoreDone(total);
             }
         });
+    }
+
+    public static class SubForumFragment extends Fragment {
+        private List<Forum> mSubList;
+
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+            mSubList = ((ThreadListActivity) activity).mSubList;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            // use forum index again
+            View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
+            AbsListView listView = (AbsListView) rootView.findViewById(R.id.list);
+            listView.setAdapter(new CommonListAdapter<Forum>(mSubList, R.layout.fragment_forum_item) {
+                @Override
+                public void convertView(ViewHolder viewHolder, Forum item) {
+                    viewHolder.setText(R.id.title, item.name);
+                    viewHolder.setText(R.id.sub,
+                            "threads:" + item.threads + "  posts:" + item.todayPosts + "/" + item.posts);
+                    ((NetworkImageView) viewHolder.getView(R.id.icon))
+                            .setImageUrl(item.icon, ThisApp.imageLoader);
+                }
+            });
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Forum item = mSubList.get(i);
+                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+                    intent.putExtra("fid", item.id);
+                    intent.putExtra("title", item.name);
+                    startActivity(intent);
+                }
+            });
+            return rootView;
+        }
     }
 
 }
