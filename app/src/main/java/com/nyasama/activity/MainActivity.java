@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -35,6 +36,7 @@ import com.nyasama.util.Discuz;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends FragmentActivity
@@ -92,7 +94,14 @@ public class MainActivity extends FragmentActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+                (DrawerLayout) findViewById(R.id.drawer_layout),
+                new ArrayList<String>() {{
+                    add(getString(R.string.title_section1));
+                    add(getString(R.string.title_section4));
+                    add(getString(R.string.title_section5));
+                    add(getString(R.string.title_section2));
+                    add(getString(R.string.title_section3));
+                }});
 
         /*
         TODO: enable this
@@ -121,6 +130,14 @@ public class MainActivity extends FragmentActivity
         }
         else if (position == 2) {
             startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        }
+        else if (position == 3) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thwiki.cc")));
+            return true;
+        }
+        else if (position == 4) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thvideo.tv")));
             return true;
         }
         // update the main content by replacing fragments
