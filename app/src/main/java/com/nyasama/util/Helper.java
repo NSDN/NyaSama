@@ -1,11 +1,17 @@
 package com.nyasama.util;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.Toast;
 
+import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.activity.LoginActivity;
+import com.nyasama.activity.SettingActivity;
+import com.nyasama.activity.UserProfileActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,6 +58,25 @@ public class Helper {
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    public static boolean handleOption(Activity activity, int id) {
+        if (id == android.R.id.home) {
+            activity.finish();
+            return true;
+        }
+        else if (id == R.id.action_settings) {
+            activity.startActivity(new Intent(activity, SettingActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_my_profile) {
+            if (Discuz.sHasLogined)
+                activity.startActivity(new Intent(activity, UserProfileActivity.class));
+            else activity.startActivityForResult(new Intent(activity, LoginActivity.class),
+                    Discuz.REQUEST_CODE_LOGIN);
+            return true;
+        }
+        return false;
     }
 
     public static class Size {
