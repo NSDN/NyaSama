@@ -29,7 +29,6 @@ import java.util.Locale;
 
 /**
  * Created by oxyflour on 2014/11/15.
- *
  */
 public class ThisApp extends Application {
     public static Context context;
@@ -42,8 +41,9 @@ public class ThisApp extends Application {
     private static Locale getLocale(SharedPreferences preferences) {
         String[] values = context.getResources().getStringArray(R.array.language_preference);
         String language = preferences.getString("language", values[0]);
-        if (language.equals(values[1]))
-            return Locale.ENGLISH;
+        if (language.equals(values[0])) return Locale.getDefault();
+        if (language.equals(values[1])) return Locale.SIMPLIFIED_CHINESE;
+        if (language.equals(values[2])) return Locale.ENGLISH;
         return Locale.getDefault();
     }
 
@@ -63,7 +63,7 @@ public class ThisApp extends Application {
         context = getApplicationContext();
 
         File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
-        volleyCache = new DiskBasedCache(cacheFile, 1024*1024*32);
+        volleyCache = new DiskBasedCache(cacheFile, 1024 * 1024 * 32);
 
         Network network = new BasicNetwork(new HurlStack());
         requestQueue = new RequestQueue(volleyCache, network);
