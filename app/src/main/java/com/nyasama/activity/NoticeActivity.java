@@ -145,7 +145,20 @@ public class NoticeActivity extends FragmentActivity
                         };
                     }
                     else if ("redirect".equals(mod)) {
-                        newUrl = new ForegroundColorSpan(android.R.color.transparent);
+                        String go = uri.getQueryParameter("goto");
+                        if (go.equals("findpost")) {
+                            newUrl = new URLSpan(urlString) {
+                                @Override
+                                public void onClick(@Nullable View widget) {
+                                    startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
+                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("ptid"), 0));
+                                    }});
+                                }
+                            };
+                        }
+                        else {
+                            newUrl = new ForegroundColorSpan(android.R.color.transparent);
+                        }
                     }
                     if (newUrl != null) text.setSpan(newUrl, note.getSpanStart(url), note.getSpanEnd(url),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
