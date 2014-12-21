@@ -28,6 +28,10 @@ public class Helper {
         if (view != null)
             view.setVisibility(show ? View.VISIBLE : View.GONE);
     }
+    public static void updateVisibility(View view, int id, boolean show) {
+        if (view != null)
+            updateVisibility(view.findViewById(id), show);
+    }
     public static void disableDialog(AlertDialog dialog) {
         dialog.setCancelable(false);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);

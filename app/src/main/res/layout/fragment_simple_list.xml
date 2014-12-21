@@ -2,15 +2,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    <ListView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:footerDividersEnabled="false"
-        android:id="@+id/list" />
+        android:layout_height="match_parent">
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:footerDividersEnabled="false"
+            android:id="@+id/list" />
+    </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
+        android:id="@+id/empty"
         android:padding="16dp"
         android:visibility="gone"
-        android:id="@+id/empty"
         android:gravity="center"
         android:text="@string/list_empty"
         android:layout_width="match_parent"

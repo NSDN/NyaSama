@@ -3,6 +3,7 @@ package com.nyasama.fragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,12 +37,10 @@ public class CommonListFragment<T> extends Fragment
     private boolean mHasError = false;
 
     private CommonListAdapter<T> mListAdapter;
-    private View mListLayoutView;
-    private OnListFragmentInteraction<T> mInteractionInterface;
+    private OnListFragmentInteraction<T> mInterface;
 
-    protected int mListLayout;
-    protected int mItemLayout;
-    protected int mListViewId = R.id.list;
+    private View mListLayoutView;
+    private SwipeRefreshLayout mRefreshLayoutView;
 
     @SuppressWarnings("unchecked unused")
     public static <T> CommonListFragment<T> getNewFragment(Class<T> c, int listLayout, int itemLayout, int listViewId) {
@@ -51,22 +50,19 @@ public class CommonListFragment<T> extends Fragment
         bundle.putInt(CommonListFragment.ARG_LIST_VIEW_ID, listViewId);
         CommonListFragment<T> fragment = new CommonListFragment<T>();
         fragment.setArguments(bundle);
-        // init mListLayout etc
-        fragment.loadArguments(bundle);
         return fragment;
     }
 
     public boolean loadMore() {
         final int currentSize = mListData.size();
-
         if (mListLayoutView != null &&
                 currentSize < mListItemCount && !mIsLoading) {
-            Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
-                    mIsLoading = true);
-            Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
-                    mHasError = false);
-            if (mInteractionInterface != null)
-                mInteractionInterface.onLoadingMore(this, mListData);
+            Helper.updateVisibility(mListLayoutView, R.id.loading, mIsLoading = true);
+            Helper.updateVisibility(mListLayoutView, R.id.error, mHasError = false);
+            if (mInterface != null)
+                mInterface.onLoadingMore(this, mListData);
+            if (mRefreshLayoutView != null && mRefreshLayoutView.isRefreshing())
+                Helper.updateVisibility(mListLayoutView, R.id.loading, false);
         }
         return mIsLoading;
     }
@@ -74,27 +70,27 @@ public class CommonListFragment<T> extends Fragment
     public void loadMoreDone(int total) {
         mListItemCount = total;
         if (mHasError = total < 0) {
-            mListItemCount = 0;
             mListData.clear();
+            mListItemCount = 0;
             Log.e("ListFragment", "load failed");
         }
 
         mIsLoading = false;
         mListAdapter.notifyDataSetChanged();
         if (mListLayoutView != null) {
-            Helper.updateVisibility(mListLayoutView.findViewById(R.id.empty),
-                    mListItemCount == 0 && !mHasError);
-            Helper.updateVisibility(mListLayoutView.findViewById(R.id.error),
-                    mHasError);
-            Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading),
-                    mListItemCount > mListData.size());
+            Helper.updateVisibility(mListLayoutView, R.id.empty, mListItemCount == 0 && !mHasError);
+            Helper.updateVisibility(mListLayoutView, R.id.error, mHasError);
+            Helper.updateVisibility(mListLayoutView, R.id.loading, mListItemCount > mListData.size());
+        }
+        if (mRefreshLayoutView != null) {
+            mRefreshLayoutView.setRefreshing(false);
         }
     }
 
     public boolean reloadAll() {
         mListData.clear();
-        mListItemCount = Integer.MAX_VALUE;
         mListAdapter.notifyDataSetChanged();
+        mListItemCount = Integer.MAX_VALUE;
         return loadMore();
     }
 
@@ -115,62 +111,59 @@ public class CommonListFragment<T> extends Fragment
         return mListAdapter;
     }
 
-    public void loadArguments(Bundle bundle) {
-        mListLayout = bundle.getInt(ARG_LIST_LAYOUT);
-        mItemLayout = bundle.getInt(ARG_ITEM_LAYOUT);
-        mListViewId = bundle.getInt(ARG_LIST_VIEW_ID);
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (this instanceof OnListFragmentInteraction)
-            mInteractionInterface = (OnListFragmentInteraction) this;
+            mInterface = (OnListFragmentInteraction) this;
         else if (activity instanceof OnListFragmentInteraction)
-            mInteractionInterface = (OnListFragmentInteraction) activity;
+            mInterface = (OnListFragmentInteraction) activity;
         else
             throw new RuntimeException("you should implement OnListFragmentInteraction on activity or subclass");
         loadMore();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
-        if (bundle != null)
-            loadArguments(bundle);
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mListLayoutView = inflater.inflate(mListLayout, container, false);
+        Bundle bundle = getArguments() != null ? getArguments() : new Bundle();
+        mListLayoutView = inflater.inflate(bundle.getInt(ARG_LIST_LAYOUT, R.layout.fragment_simple_list), container, false);
 
-        AbsListView listView = (AbsListView) mListLayoutView.findViewById(mListViewId);
+        AbsListView listView = (AbsListView) mListLayoutView.findViewById(bundle.getInt(ARG_LIST_VIEW_ID, R.id.list));
         if (listView instanceof ListView) {
-            View loading = inflater.inflate(R.layout.fragment_list_loading, listView, false);
+            View loading = inflater.inflate(R.layout.fragment_simple_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);
         }
-        // the loading view should initial hidden
-        Helper.updateVisibility(mListLayoutView.findViewById(R.id.loading), false);
 
-        mListAdapter = mInteractionInterface.getListViewAdaptor(this);
-        mListAdapter.setup(mListData, mItemLayout);
+        // setup list view
+        mListAdapter = mInterface.getListViewAdaptor(this);
+        mListAdapter.setup(mListData, bundle.getInt(ARG_ITEM_LAYOUT, android.R.layout.simple_list_item_1));
         listView.setAdapter(mListAdapter);
         listView.setOnScrollListener(this);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mInteractionInterface.onItemClick(CommonListFragment.this, view, i, l);
+                mInterface.onItemClick(CommonListFragment.this, view, i, l);
             }
         });
 
+        // setup reload button
         Button reloadButton = (Button) mListLayoutView.findViewById(R.id.reload);
         if (reloadButton != null) reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 reloadAll();
+            }
+        });
+
+        // setup refresh layout
+        mRefreshLayoutView = (SwipeRefreshLayout) mListLayoutView.findViewById(R.id.swipe_refresh);
+        mRefreshLayoutView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (!mIsLoading)
+                    reloadAll();
             }
         });
 
@@ -185,6 +178,8 @@ public class CommonListFragment<T> extends Fragment
     public void onScroll(AbsListView absListView, int i, int i2, int i3) {
         if (i + i2 >= i3)
             loadMore();
+        if (mRefreshLayoutView != null)
+            mRefreshLayoutView.setEnabled(i == 0);
     }
 
     @SuppressWarnings("unused")

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,8 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
@@ -289,9 +290,9 @@ public class ThreadListActivity extends FragmentActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            // use forum index again
-            View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
-            AbsListView listView = (AbsListView) rootView.findViewById(R.id.list);
+            View rootView = inflater.inflate(R.layout.fragment_simple_list, container, false);
+            ListView listView = (ListView) rootView.findViewById(R.id.list);
+            listView.setDividerHeight(0);
             listView.setAdapter(new CommonListAdapter<Forum>(mSubList, R.layout.fragment_forum_item) {
                 @Override
                 public void convertView(ViewHolder viewHolder, Forum item) {
@@ -312,6 +313,8 @@ public class ThreadListActivity extends FragmentActivity
                     startActivity(intent);
                 }
             });
+            SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh);
+            refreshLayout.setEnabled(false);
             return rootView;
         }
     }
