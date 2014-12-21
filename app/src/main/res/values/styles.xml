@@ -5,6 +5,8 @@
         <!-- Customize your theme here. -->
         <item name="android:colorBackground">@android:color/white</item>
         <item name="android:textSize">16sp</item>
+        <!-- TODO: use animation for specific layouts or add a global setting for it -->
+        <!--item name="android:animateLayoutChanges">true</item-->
     </style>
 
 </resources>

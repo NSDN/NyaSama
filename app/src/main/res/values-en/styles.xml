@@ -5,9 +5,6 @@
         <!-- Customize your theme here. -->
         <item name="android:colorBackground">@android:color/white</item>
         <item name="android:textSize">16sp</item>
-        <!--android:animateLayoutChanges="true"
-        android:layoutAnimation="@android:anim/cycle_interpolator"-->
-        <item name="android:animateLayoutChanges">true</item>
     </style>
 
 </resources>
