@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.fragment.SimpleLayoutFragment;
@@ -259,7 +260,7 @@ public class MainActivity extends FragmentActivity
                             // we set the page size to be 60 so that it will not load more
                             return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
                         else if (i == 2)
-                            return DiscuzThreadListFragment.getNewFragment(3, 0, 20);
+                            return DiscuzComicListFragment.getNewFragment();
                         else
                             return new SimpleLayoutFragment();
                     }

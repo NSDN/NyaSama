@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.etsy.android.grid.StaggeredGridView;
 import com.nyasama.R;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Helper;
@@ -134,6 +135,10 @@ public class CommonListFragment<T> extends Fragment
         if (listView instanceof ListView) {
             View loading = inflater.inflate(R.layout.fragment_simple_list_loading, listView, false);
             ((ListView) listView).addFooterView(loading, null, false);
+        }
+        else if (listView instanceof StaggeredGridView) {
+            View loading = inflater.inflate(R.layout.fragment_simple_list_loading, listView, false);
+            ((StaggeredGridView) listView).addFooterView(loading, null, false);
         }
 
         // setup list view

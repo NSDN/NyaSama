@@ -125,8 +125,7 @@ public class Discuz {
             dateline = data.optString("dateline");
             replies = Integer.parseInt(data.optString("replies"));
             views = Integer.parseInt(data.optString("views"));
-            if (!data.isNull("attachments"))
-                attachments = Integer.parseInt(data.optString("attachments"));
+            attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
     public static class Post {
@@ -287,7 +286,7 @@ public class Discuz {
     }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getImageThumbUrl(int attachmentId) {
+    public static String getImageThumbUrl(int attachmentId, boolean isThreadId) {
         String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
         String key;
         try {
@@ -304,6 +303,8 @@ public class Discuz {
         params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
         params.put("key", key);
         params.put("type", "fixnone");
+        if (isThreadId)
+            params.put("istid", "true");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
     }
 
