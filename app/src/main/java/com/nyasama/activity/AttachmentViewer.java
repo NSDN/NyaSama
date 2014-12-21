@@ -55,14 +55,25 @@ public class AttachmentViewer extends FragmentActivity {
     private static int MAX_MEMORY_BYTES = 16*1024*1024;
 
     private ViewPager mPager;
-    private TextView mTitle;
     private FragmentStatePagerAdapter mPageAdapter;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
     private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
     private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
+    private boolean mHasAttachmentsPrev;
+    private boolean mHasAttachmentsNext;
 
     private RequestQueue mRequestQueue = new RequestQueue(ThisApp.volleyCache, new BasicNetwork(new HurlStack()));
+
+    static int getPageSize(int b, int e) {
+        int p = e - b;
+        for (; p < e; p ++) {
+            int c = b / p;
+            if (c * p <= b & c * p + p >= e)
+                return p;
+        }
+        return p;
+    }
 
     public void showAttachmentList() {
         List<String> names = new ArrayList<String>();
@@ -91,13 +102,18 @@ public class AttachmentViewer extends FragmentActivity {
     }
 
     public void updatePagerTitle(int position) {
+        TextView title = (TextView) findViewById(R.id.view_title);
         if (position >= 0 && position < mAttachmentList.size()) {
-            mTitle.setVisibility(View.VISIBLE);
-            mTitle.setText((position+1) + "/" + mAttachmentList.size());
+            title.setVisibility(View.VISIBLE);
+            title.setText((position+1) + "/" + mAttachmentList.size());
         }
         else {
-            mTitle.setVisibility(View.GONE);
+            title.setVisibility(View.GONE);
         }
+        Helper.updateVisibility(findViewById(R.id.prev_post),
+                position == 0 && mHasAttachmentsPrev);
+        Helper.updateVisibility(findViewById(R.id.next_post),
+                position == mAttachmentList.size() - 1 && mHasAttachmentsNext);
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -133,13 +149,18 @@ public class AttachmentViewer extends FragmentActivity {
     }
 
     public void loadAttachments() {
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        final int index = getIntent().getIntExtra("index", 0);
+        final int pageSize = getPageSize(index > 0 ? index - 1 : 0, index + 2);
+        final int pageIndex = index / pageSize;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
-            put("ppp", 1);
+            put("ppp", pageSize);
+            put("page", pageIndex + 1);
             put("tid", getIntent().getIntExtra("tid", 0));
-            put("page", getIntent().getIntExtra("index", 0) + 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
                 int position = -1;
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
@@ -169,9 +190,18 @@ public class AttachmentViewer extends FragmentActivity {
                         JSONObject var = data.getJSONObject("Variables");
                         JSONArray postlist = var.getJSONArray("postlist");
                         mAttachmentList.clear();
-                        if (postlist.length() >= 1) {
-                            Post post = new Post(postlist.getJSONObject(0));
+                        int i = index - pageIndex * pageSize;
+                        if (postlist.length() > i) {
+                            Post post = new Post(postlist.getJSONObject(i));
                             mAttachmentList = compileAttachments(post.message, post.attachments);
+                            if (i - 1 >= 0) {
+                                post = new Post(postlist.getJSONObject(i - 1));
+                                mHasAttachmentsPrev = compileAttachments(post.message, post.attachments).size() > 0;
+                            }
+                            if (i + 1 < postlist.length()) {
+                                post = new Post(postlist.getJSONObject(i + 1));
+                                mHasAttachmentsNext = compileAttachments(post.message, post.attachments).size() > 0;
+                            }
                         }
                         mPageAdapter.notifyDataSetChanged();
 
@@ -249,11 +279,33 @@ public class AttachmentViewer extends FragmentActivity {
                 return mAttachmentList.size();
             }
         });
-        mTitle = (TextView) findViewById(R.id.view_title);
-        mTitle.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.view_title).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAttachmentList();
+            }
+        });
+
+        findViewById(R.id.prev_post).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mHasAttachmentsPrev) {
+                    Intent intent = AttachmentViewer.this.getIntent();
+                    intent.putExtra("index", intent.getIntExtra("index", 1) - 1);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
+        findViewById(R.id.next_post).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mHasAttachmentsNext) {
+                    Intent intent = AttachmentViewer.this.getIntent();
+                    intent.putExtra("index", intent.getIntExtra("index", -1) + 1);
+                    startActivity(intent);
+                    finish();
+                }
             }
         });
 

@@ -77,4 +77,6 @@
     <string name="signin_button_text">Sign in</string>
     <string name="title_section4">Settings</string>
     <string name="title_section5">About</string>
+    <string name="next_post_button"><![CDATA[Next Post >>]]></string>
+    <string name="prev_post_button"><![CDATA[<< Previous Post]]></string>
 </resources>
