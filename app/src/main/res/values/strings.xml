@@ -80,4 +80,5 @@
     <string name="next_post_button"><![CDATA[下一帖 >>]]></string>
     <string name="prev_post_button"><![CDATA[<< 上一贴]]></string>
     <string name="action_my_profile">个人中心</string>
+    <string name="action_edit">编辑</string>
 </resources>

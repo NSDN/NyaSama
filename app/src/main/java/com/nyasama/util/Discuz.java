@@ -62,8 +62,8 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/";
+    public static String DISCUZ_HOST = "http://192.168.0.154";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/bbs/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
@@ -560,6 +560,43 @@ public class Discuz {
                 return DISCUZ_ENC;
             }
         };
+        ThisApp.requestQueue.add(request);
+        return request;
+    }
+
+    public static Request executeMultipart(String module,
+                                  final Map<String, Object> params,
+                                  final Map<String, ContentBody> body,
+                                  final Response.Listener<String> callback) {
+        if (module.equals("editpost")) {
+            if (params.get("editsubmit") == null)
+                params.put("editsubmit", "yes");
+            try {
+                if (body.get("formhash") == null)
+                    body.put("formhash", new StringBody(sFormHash));
+                if (body.get("editsubmit") == null)
+                    body.put("editsubmit", new StringBody("yes"));
+            }
+            catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        MultipartRequest request = new MultipartRequest(
+                DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                body,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        callback.onResponse(s);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        callback.onResponse(null);
+                    }
+                }
+        );
         ThisApp.requestQueue.add(request);
         return request;
     }

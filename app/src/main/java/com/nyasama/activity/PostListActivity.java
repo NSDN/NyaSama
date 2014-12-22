@@ -55,6 +55,9 @@ import java.util.regex.Pattern;
 public class PostListActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
+    public static final int REQUEST_CODE_EDIT_POST = 1;
+    public static final int REQUEST_CODE_REPLY_THREAD = 2;
+
     private static final int PAGE_SIZE_COUNT = 10;
     private static final int COMMENT_PAGE_SIZE = 10;
     private static final int MAX_TRIMSTR_LENGTH = 30;
@@ -171,13 +174,19 @@ public class PostListActivity extends FragmentActivity
             public void onResponse(JSONObject data) {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else if (data.opt("Message") instanceof JSONObject) {
+                } else if (data.opt("Message") instanceof JSONObject) {
                     JSONObject message = data.optJSONObject("Message");
                     Helper.toast(message.optString("messagestr"));
                 }
             }
         });
+    }
+
+    public void editPost(Post item) {
+        Intent intent = new Intent(this, NewPostActivity.class);
+        intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+        intent.putExtra("pid", item.id);
+        startActivityForResult(intent, REQUEST_CODE_EDIT_POST);
     }
 
     public void quickReply(final Post item) {
@@ -226,16 +235,16 @@ public class PostListActivity extends FragmentActivity
             @Override
             public void onShow(DialogInterface dialogInterface) {
                 mCommentDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            String text = input.getText().toString();
-                            if (!text.isEmpty()) {
-                                Helper.disableDialog(mCommentDialog);
-                                doComment(pid, text);
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                String text = input.getText().toString();
+                                if (!text.isEmpty()) {
+                                    Helper.disableDialog(mCommentDialog);
+                                    doComment(pid, text);
+                                }
                             }
-                        }
-                    });
+                        });
             }
         });
         mCommentDialog.show();
@@ -254,7 +263,7 @@ public class PostListActivity extends FragmentActivity
 
         // set count to negative
         mCommentCount.put(pid, -1);
-        doLoadComment(pid, (int)Math.floor(comments.size()/10));
+        doLoadComment(pid, (int) Math.floor(comments.size() / 10));
     }
 
     public void gotoReply(final Post item) {
@@ -267,7 +276,7 @@ public class PostListActivity extends FragmentActivity
             else {
                 putExtra("thread_title", "Re: " + getTitle());
             }
-        }}, Discuz.REQUEST_CODE_REPLY);
+        }}, REQUEST_CODE_REPLY_THREAD);
     }
 
     public void showMenu(View view, final Post item) {
@@ -279,11 +288,17 @@ public class PostListActivity extends FragmentActivity
                 mComments.get(item.id).size() < mCommentCount.get(item.id);
         menu.getMenu().findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
 
+        boolean showEditPostMenu = item.author == Discuz.sUsername;
+        menu.getMenu().findItem(R.id.action_edit).setVisible(showEditPostMenu);
+
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int action = menuItem.getItemId();
-                if (action == R.id.action_comment) {
+                if (action == R.id.action_edit) {
+                    editPost(item);
+                }
+                else if (action == R.id.action_comment) {
                     addComment(item);
                 }
                 else if (action == R.id.action_more_comment) {
@@ -352,9 +367,11 @@ public class PostListActivity extends FragmentActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == Discuz.REQUEST_CODE_REPLY) {
-            if (resultCode > 0)
-                mListFragment.reloadLast();
+        if (requestCode == REQUEST_CODE_EDIT_POST) {
+            if (resultCode > 0) mListFragment.reloadAll();
+        }
+        else if (requestCode == REQUEST_CODE_REPLY_THREAD) {
+            if (resultCode > 0) mListFragment.reloadLast();
         }
     }
 

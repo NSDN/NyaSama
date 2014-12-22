@@ -37,6 +37,8 @@ import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
 
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,8 +46,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class NewPostActivity extends Activity
@@ -64,6 +68,39 @@ public class NewPostActivity extends Activity
         public String uploadId;
     }
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
+
+    public void doEdit(View view) {
+        final String title = mInputTitle.getText().toString();
+        final String content = mInputContent.getText().toString();
+        if (title.isEmpty() || content.isEmpty()) {
+            Helper.toast(R.string.post_content_empty_message);
+            return;
+        }
+
+        Intent intent = getIntent();
+        final int pid = intent.getIntExtra("pid", 0);
+        final int tid = intent.getIntExtra("tid", 0);
+        if (pid == 0 && tid == 0)
+            throw new RuntimeException("pid or tid is required!");
+
+        Discuz.executeMultipart("editpost", new HashMap<String, Object>() {{
+            put("pid", pid);
+            put("tid", tid);
+        }}, new LinkedHashMap<String, ContentBody>() {{
+            try {
+                put("message", new StringBody(content));
+            }
+            catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }}, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                mButtonPost.setEnabled(true);
+            }
+        });
+        mButtonPost.setEnabled(false);
+    }
 
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
@@ -184,6 +221,8 @@ public class NewPostActivity extends Activity
     private EditText mInputContent;
     private MenuItem mButtonPost;
     private MenuItem mButtonAddImg;
+
+    String mPhotoFilePath;
 
     public void showInsertOptions() {
         View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
@@ -326,8 +365,6 @@ public class NewPostActivity extends Activity
         });
 
     }
-
-    String mPhotoFilePath;
 
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
     // REF: http://developer.android.com/training/camera/photobasics.html#TaskPhotoView

@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -28,11 +29,11 @@ public class MultipartRequest extends Request<String> {
 
     private Response.Listener mListener;
 
-    public MultipartRequest(String url, LinkedHashMap<String, ContentBody> body,
+    public MultipartRequest(String url, Map<String, ContentBody> body,
                             Response.Listener<String> onSuccess, Response.ErrorListener onError) {
         super(Method.POST, url, onError);
         mListener = onSuccess;
-        for (LinkedHashMap.Entry<String, ContentBody> entry : body.entrySet())
+        for (Map.Entry<String, ContentBody> entry : body.entrySet())
             entity.addPart(entry.getKey(), entry.getValue());
     }
 

@@ -80,4 +80,5 @@
     <string name="next_post_button"><![CDATA[Next Post >>]]></string>
     <string name="prev_post_button"><![CDATA[<< Previous Post]]></string>
     <string name="action_my_profile">My Profile</string>
+    <string name="action_edit">Edit</string>
 </resources>
