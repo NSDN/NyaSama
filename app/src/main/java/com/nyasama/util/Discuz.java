@@ -296,6 +296,8 @@ public class Discuz {
         if (isThreadId) {
             params.put("module", "threadimage");
             params.put("tid", attachmentId);
+            // TODO: edit api/2/threadimage.php to remove this line
+            params.put("aid", attachmentId);
         }
         else {
             params.put("module", "forumimage");

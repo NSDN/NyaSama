@@ -3,8 +3,11 @@ package com.nyasama.fragment;
 import android.os.Bundle;
 import android.text.Html;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
+import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Thread;
 
 /**
@@ -27,14 +30,13 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Thread>() {
             @Override
-            public void convertView(ViewHolder viewHolder, Thread item) {
+            public void convertView(ViewHolder viewHolder, final Thread item) {
                 viewHolder.setText(R.id.title, Html.fromHtml(item.title));
-                // TODO: enable this
-                /*
-                ((NetworkImageView) viewHolder.getView(R.id.image_view)).setImageUrl(
+                final NetworkImageView imageView = (NetworkImageView) viewHolder.getView(R.id.image_view);
+                imageView.setDefaultImageResId(R.drawable.ic_launcher);
+                imageView.setImageUrl(
                         item.attachments > 0 ? Discuz.getImageThumbUrl(item.id, true) : null,
                         ThisApp.imageLoader);
-                        */
             }
         };
     }
