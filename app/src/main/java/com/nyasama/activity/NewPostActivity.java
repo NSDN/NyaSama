@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -90,19 +91,36 @@ public class NewPostActivity extends Activity
             try {
                 put("pid", new StringBody(""+pid));
                 put("tid", new StringBody(""+tid));
-                put("message", new StringBody(content));
-                put("subject", new StringBody(title));
+                put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
+                put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
                 put("editsubmit", new StringBody("true"));
             }
             catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-        }}, new Response.Listener<String>() {
+        }}, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(String s) {
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else {
+                    try {
+                        JSONObject message = data.getJSONObject("Message");
+                        String messageval = message.getString("messageval");
+                        if ("post_edit_succeed".equals(messageval)) {
+                            setResult(1);
+                            finish();
+                        }
+                        else {
+                            Helper.toast(message.getString("messagestr"));
+                        }
+                    }
+                    catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    }
+                }
                 mButtonPost.setEnabled(true);
-                setResult(1);
-                finish();
             }
         });
         mButtonPost.setEnabled(false);
@@ -550,7 +568,6 @@ public class NewPostActivity extends Activity
     @Override
     public void afterTextChanged(Editable editable) {
         if (mButtonPost != null)
-            mButtonPost.setEnabled(!(mInputTitle.getText().toString().isEmpty() ||
-                    mInputContent.getText().toString().isEmpty()));
+            mButtonPost.setEnabled(!mInputContent.getText().toString().isEmpty());
     }
 }

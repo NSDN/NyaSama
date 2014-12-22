@@ -11,6 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.webkit.MimeTypeMap;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -293,14 +293,18 @@ public class Discuz {
             throw new RuntimeException(e);
         }
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("module", "forumimage");
+        if (isThreadId) {
+            params.put("module", "threadimage");
+            params.put("tid", attachmentId);
+        }
+        else {
+            params.put("module", "forumimage");
+            params.put("aid", attachmentId);
+        }
         params.put("version", 2);
-        params.put("aid", attachmentId);
         params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
         params.put("key", key);
         params.put("type", "fixnone");
-        if (isThreadId)
-            params.put("istid", "true");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
     }
 
@@ -438,6 +442,77 @@ public class Discuz {
             return DISCUZ_URL + url;
     }
 
+    public static class ResponseListener implements Response.Listener<String> {
+        Response.Listener<JSONObject> callback;
+        public ResponseListener(Response.Listener<JSONObject> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void onResponse(String response) {
+            JSONObject data = new JSONObject();
+            try {
+                data = new JSONObject(response);
+            }
+            catch (JSONException e) {
+                Log.e("JSONError", "Parse JSON failed: "+e.getMessage());
+            }
+            JSONObject var = data.optJSONObject("Variables");
+            if (var != null) {
+                sFormHash = var.optString("formhash", "");
+                sUsername = var.optString("member_username", "");
+                sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                if (!var.isNull("allowperm"))
+                    sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
+                if (!var.isNull("group"))
+                    sGroupName = var.optJSONObject("group").optString("grouptitle", "");
+
+                // check if login ok
+                boolean hasLogined = !var.isNull("auth");
+                if (sHasLogined != hasLogined) {
+                    LocalBroadcastManager.getInstance(ThisApp.context)
+                            .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
+                    sHasLogined = hasLogined;
+                }
+
+                // check messages && prompts
+                int newMessages = var.isNull("member_pm") ? 0 :
+                        Integer.parseInt(var.optString("member_pm"));
+                int newPrompts = var.isNull("member_prompt") ? 0 :
+                        Integer.parseInt(var.optString("member_prompt"));
+                if (newMessages > sNewMessages || newPrompts > sNewPrompts) {
+                    sNewMessages = newMessages;
+                    sNewPrompts = newPrompts;
+                    notifyNewMessage();
+                }
+
+            }
+            callback.onResponse(data);
+            ThisApp.cookieStore.save();
+        }
+    }
+    public static class ResponseErrorListener implements Response.ErrorListener {
+        Response.Listener<JSONObject> callback;
+        public ResponseErrorListener(Response.Listener<JSONObject> callback) {
+            this.callback = callback;
+        }
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+            JSONObject data = new JSONObject();
+            String msg = volleyError.getMessage();
+            // NOTE: getMessage may return null
+            if (msg == null) msg = "Unknown";
+            try {
+                data.put(VOLLEY_ERROR, msg);
+            }
+            catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            Log.e("VolleyError", msg);
+            callback.onResponse(data);
+        }
+    }
+
     public static Request execute(String module,
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
@@ -482,67 +557,8 @@ public class Discuz {
         Request request =  new StringRequest(
             body == null ? Request.Method.GET : Request.Method.POST,
             DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    JSONObject data = new JSONObject();
-                    try {
-                        data = new JSONObject(response);
-                    }
-                    catch (JSONException e) {
-                        Log.e("JSONError", "Parse JSON failed: "+e.getMessage());
-                    }
-                    JSONObject var = data.optJSONObject("Variables");
-                    if (var != null) {
-                        sFormHash = var.optString("formhash", "");
-                        sUsername = var.optString("member_username", "");
-                        sUid = Integer.parseInt(var.optString("member_uid", "0"));
-                        if (!var.isNull("allowperm"))
-                            sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
-                        if (!var.isNull("group"))
-                            sGroupName = var.optJSONObject("group").optString("grouptitle", "");
-
-                        // check if login ok
-                        boolean hasLogined = !var.isNull("auth");
-                        if (sHasLogined != hasLogined) {
-                            LocalBroadcastManager.getInstance(ThisApp.context)
-                                    .sendBroadcast(new Intent(BROADCAST_FILTER_LOGIN));
-                            sHasLogined = hasLogined;
-                        }
-
-                        // check messages && prompts
-                        int newMessages = var.isNull("member_pm") ? 0 :
-                            Integer.parseInt(var.optString("member_pm"));
-                        int newPrompts = var.isNull("member_prompt") ? 0 :
-                                Integer.parseInt(var.optString("member_prompt"));
-                        if (newMessages > sNewMessages || newPrompts > sNewPrompts) {
-                            sNewMessages = newMessages;
-                            sNewPrompts = newPrompts;
-                            notifyNewMessage();
-                        }
-
-                    }
-                    callback.onResponse(data);
-                    ThisApp.cookieStore.save();
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    JSONObject data = new JSONObject();
-                    String msg = volleyError.getMessage();
-                    // NOTE: getMessage may return null
-                    if (msg == null) msg = "Unknown";
-                    try {
-                        data.put(VOLLEY_ERROR, msg);
-                    }
-                    catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                    Log.e("VolleyError", msg);
-                    callback.onResponse(data);
-                }
-            }) {
+            new ResponseListener(callback),
+            new ResponseErrorListener(callback)) {
             @Override
             protected Map<String, String> getParams() {
                 HashMap<String, String> params = new HashMap<String, String>();
@@ -563,7 +579,7 @@ public class Discuz {
     public static Request executeMultipart(String module,
                                   final Map<String, Object> params,
                                   final Map<String, ContentBody> body,
-                                  final Response.Listener<String> callback) {
+                                  final Response.Listener<JSONObject> callback) {
         if (module.equals("editpost")) {
             if (params.get("editsubmit") == null)
                 params.put("editsubmit", "yes");
@@ -578,22 +594,11 @@ public class Discuz {
             }
         }
         params.put("module", module);
-        MultipartRequest request = new MultipartRequest(
-                DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-                body,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        callback.onResponse(s);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        callback.onResponse(null);
-                    }
-                }
-        );
+        Request request = new MultipartRequest(
+            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+            body,
+            new ResponseListener(callback),
+            new ResponseErrorListener(callback));
         ThisApp.requestQueue.add(request);
         return request;
     }
@@ -662,13 +667,21 @@ public class Discuz {
             protected String doInBackground(Object[] objects) {
 
                 final MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE,
-                        "----------" + UUID.randomUUID().toString().replace("-", ""),
-                        Charset.forName(DISCUZ_ENC)) {
+                        "****************" + UUID.randomUUID().toString().replace("-", "").substring(0, 15), null) {
                     {
                         try {
                             addPart("hash", new StringBody(sUploadHash));
                             addPart("uid", new StringBody("" + sUid));
-                            addPart("Filedata", new FileBody(new File(filePath)));
+                            String ext = MimeTypeMap.getFileExtensionFromUrl(filePath);
+                            FileBody fileBody;
+                            if (ext != null) {
+                                String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                                fileBody = new FileBody(new File(filePath), type);
+                            }
+                            else {
+                                fileBody = new FileBody(new File(filePath));
+                            }
+                            addPart("Filedata", fileBody);
                         }
                         catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
