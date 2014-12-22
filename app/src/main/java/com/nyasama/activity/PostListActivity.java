@@ -288,7 +288,7 @@ public class PostListActivity extends FragmentActivity
                 mComments.get(item.id).size() < mCommentCount.get(item.id);
         menu.getMenu().findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
 
-        boolean showEditPostMenu = item.author == Discuz.sUsername;
+        boolean showEditPostMenu = item.author.equals(Discuz.sUsername);
         menu.getMenu().findItem(R.id.action_edit).setVisible(showEditPostMenu);
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

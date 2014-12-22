@@ -49,6 +49,7 @@ public class ThreadListActivity extends FragmentActivity implements
         CommonListFragment.OnListFragmentInteraction<Object>,
         DiscuzThreadListFragment.OnThreadListInteraction {
 
+    public final int REQUEST_CODE_NEW_THREAD = 1;
     private final String TAG = "ThreadList";
     private final int PAGE_SIZE_COUNT = 20;
 
@@ -121,7 +122,7 @@ public class ThreadListActivity extends FragmentActivity implements
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == Discuz.REQUEST_CODE_NEW_THREAD) {
+        if (requestCode == REQUEST_CODE_NEW_THREAD) {
             if (resultCode > 0 && mListFragment != null)
                 mListFragment.reloadAll();
         }
@@ -141,7 +142,7 @@ public class ThreadListActivity extends FragmentActivity implements
         if (id == R.id.action_new_post) {
             startActivityForResult(new Intent(this, NewPostActivity.class) {{
                 putExtra("fid", ThreadListActivity.this.getIntent().getIntExtra("fid", 0));
-            }}, Discuz.REQUEST_CODE_NEW_THREAD);
+            }}, REQUEST_CODE_NEW_THREAD);
             return true;
         }
         return Helper.handleOption(this, item.getItemId()) ||

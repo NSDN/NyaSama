@@ -62,8 +62,8 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://192.168.0.154";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/bbs/";
+    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
@@ -73,10 +73,6 @@ public class Discuz {
     public static String VOLLEY_ERROR = "volleyError";
 
     public static int NOTIFICATION_ID = 1;
-
-    public static int REQUEST_CODE_LOGIN = 1;
-    public static int REQUEST_CODE_NEW_THREAD = 2;
-    public static int REQUEST_CODE_REPLY = 3;
 
     public static String BROADCAST_FILTER_LOGIN = "login";
 
@@ -581,6 +577,7 @@ public class Discuz {
                 throw new RuntimeException(e);
             }
         }
+        params.put("module", module);
         MultipartRequest request = new MultipartRequest(
                 DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
                 body,

@@ -73,7 +73,7 @@ public class Helper {
             if (Discuz.sHasLogined)
                 activity.startActivity(new Intent(activity, UserProfileActivity.class));
             else activity.startActivityForResult(new Intent(activity, LoginActivity.class),
-                    Discuz.REQUEST_CODE_LOGIN);
+                    LoginActivity.REQUEST_CODE_LOGIN);
             return true;
         }
         return false;

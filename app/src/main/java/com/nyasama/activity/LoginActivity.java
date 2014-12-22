@@ -25,6 +25,7 @@ import org.json.JSONObject;
 public class LoginActivity extends Activity
     implements AdapterView.OnItemSelectedListener {
 
+    public static final int REQUEST_CODE_LOGIN = 1;
     private static final String TAG = "Login";
 
     public void doLogin(View view) {

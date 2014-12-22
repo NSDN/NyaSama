@@ -67,7 +67,7 @@ public class MainActivity extends FragmentActivity implements
 
     public void gotoLogin(View view) {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
+        startActivityForResult(intent, LoginActivity.REQUEST_CODE_LOGIN);
     }
 
     public void gotoProfile(View view) {

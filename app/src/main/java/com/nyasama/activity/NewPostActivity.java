@@ -72,7 +72,7 @@ public class NewPostActivity extends Activity
     public void doEdit(View view) {
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
-        if (title.isEmpty() || content.isEmpty()) {
+        if (content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
             return;
         }
@@ -88,7 +88,11 @@ public class NewPostActivity extends Activity
             put("tid", tid);
         }}, new LinkedHashMap<String, ContentBody>() {{
             try {
+                put("pid", new StringBody(""+pid));
+                put("tid", new StringBody(""+tid));
                 put("message", new StringBody(content));
+                put("subject", new StringBody(title));
+                put("editsubmit", new StringBody("true"));
             }
             catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
@@ -97,6 +101,8 @@ public class NewPostActivity extends Activity
             @Override
             public void onResponse(String s) {
                 mButtonPost.setEnabled(true);
+                setResult(1);
+                finish();
             }
         });
         mButtonPost.setEnabled(false);
@@ -163,7 +169,7 @@ public class NewPostActivity extends Activity
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
-                                                Discuz.REQUEST_CODE_LOGIN);
+                                                LoginActivity.REQUEST_CODE_LOGIN);
                                     }
                                 });
                             builder.show();
@@ -183,6 +189,36 @@ public class NewPostActivity extends Activity
             }
         });
         mButtonPost.setEnabled(false);
+    }
+
+    void loadMessage() {
+        final Intent intent = getIntent();
+        mInputTitle.setEnabled(false);
+        mInputContent.setEnabled(false);
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        Discuz.execute("editpost", new HashMap<String, Object>() {{
+            put("pid", intent.getIntExtra("pid", 0));
+            put("tid", intent.getIntExtra("tid", 0));
+        }}, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                mInputTitle.setEnabled(true);
+                mInputContent.setEnabled(true);
+                Helper.updateVisibility(findViewById(R.id.loading), false);
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var != null)
+                        var = var.optJSONObject("postinfo");
+                    if (var != null) {
+                        mInputTitle.setText(var.optString("subject"));
+                        mInputContent.setText(var.optString("message"));
+                    }
+                }
+            }
+        });
     }
 
     void insertCodeToContent(String code) {
@@ -364,6 +400,8 @@ public class NewPostActivity extends Activity
             }
         });
 
+        if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+            loadMessage();
     }
 
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
@@ -447,7 +485,7 @@ public class NewPostActivity extends Activity
                 }
             });
         }
-        else if (requestCode == Discuz.REQUEST_CODE_LOGIN && resultCode > 0) {
+        else if (requestCode == LoginActivity.REQUEST_CODE_LOGIN && resultCode > 0) {
             refreshFormHash();
         }
     }
@@ -467,7 +505,11 @@ public class NewPostActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_send) {
-            doPost(null);
+            Intent intent = getIntent();
+            if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+                doEdit(null);
+            else
+                doPost(null);
             return true;
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
