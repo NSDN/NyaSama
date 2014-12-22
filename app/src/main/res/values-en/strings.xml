@@ -81,4 +81,6 @@
     <string name="prev_post_button"><![CDATA[<< Previous Post]]></string>
     <string name="action_my_profile">My Profile</string>
     <string name="action_edit">Edit</string>
+    <string name="forum_index_threads">threads</string>
+    <string name="forum_index_posts">posts</string>
 </resources>

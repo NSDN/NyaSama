@@ -81,4 +81,6 @@
     <string name="prev_post_button"><![CDATA[<< 上一贴]]></string>
     <string name="action_my_profile">个人中心</string>
     <string name="action_edit">编辑</string>
+    <string name="forum_index_threads">主题</string>
+    <string name="forum_index_posts">今日</string>
 </resources>

@@ -76,7 +76,8 @@ public class DiscuzForumIndexFragment extends CommonListFragment
                     Forum item = (Forum) obj;
                     viewHolder.setText(R.id.title, item.name);
                     viewHolder.setText(R.id.sub,
-                            "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                            getString(R.string.forum_index_threads)+":"+item.threads+"  "+
+                            getString(R.string.forum_index_posts)+":"+item.todayPosts);
                     NetworkImageView icon = ((NetworkImageView) viewHolder.getView(R.id.icon));
                     icon.setDefaultImageResId(R.drawable.default_board_icon);
                     icon.setImageUrl(item.icon, ThisApp.imageLoader);
