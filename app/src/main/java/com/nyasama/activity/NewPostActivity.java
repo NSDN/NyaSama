@@ -91,9 +91,12 @@ public class NewPostActivity extends Activity
             try {
                 put("pid", new StringBody(""+pid));
                 put("tid", new StringBody(""+tid));
+                put("editsubmit", new StringBody("true"));
                 put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
                 put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
-                put("editsubmit", new StringBody("true"));
+                // strange, but really works
+                for (ImageAttachment image : mImageAttachments)
+                    put("attachnew["+image.uploadId+"][description]", new StringBody(""));
             }
             catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
