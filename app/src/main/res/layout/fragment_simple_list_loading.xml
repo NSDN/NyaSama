@@ -4,6 +4,7 @@
     android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/loading"
+        android:visibility="gone"
         android:orientation="horizontal"
         android:padding="10dp"
         android:layout_gravity="center"

@@ -36,7 +36,6 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_LIST_LAYOUT, R.layout.fragment_simple_list);
         bundle.putInt(ARG_ITEM_LAYOUT, R.layout.fragment_thread_item);
-        bundle.putInt(ARG_LIST_VIEW_ID, R.id.list);
         bundle.putInt("fid", fid);
         bundle.putInt("uid", uid);
         if (pps > 0)

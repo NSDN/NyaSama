@@ -10,4 +10,6 @@
         android:orderInCategory="100" android:showAsAction="never" />
     <item android:id="@+id/action_mark_fav" android:title="@string/action_mark_fav"
         android:showAsAction="never" />
+    <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
+        android:showAsAction="never" />
 </menu>

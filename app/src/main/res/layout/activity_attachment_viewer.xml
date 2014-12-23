@@ -5,11 +5,38 @@
     android:layout_height="match_parent"
     tools:context="com.nyasama.activity.AttachImageViewer">
 
+    <ProgressBar
+        android:id="@+id/loading"
+        style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:translationY="-6dp"
+        android:scaleY="0.5"
+        android:indeterminate="true" />
+
     <com.nyasama.util.PhotoViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </com.nyasama.util.PhotoViewPager>
+
+    <TextView
+        android:id="@+id/prev_post"
+        android:padding="5dp"
+        android:text="@string/prev_post_button"
+        android:layout_gravity="start"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/next_post"
+        android:padding="5dp"
+        android:text="@string/next_post_button"
+        android:layout_gravity="end"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/view_title"

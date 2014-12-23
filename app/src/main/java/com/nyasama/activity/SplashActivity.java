@@ -23,7 +23,7 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        Discuz.execute("forumindex",
+        Discuz.execute("check",
                 new HashMap<String, Object>(),
                 new HashMap<String, Object>(),
                 new Response.Listener<JSONObject>() {

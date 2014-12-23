@@ -1,16 +1,11 @@
 package com.nyasama.fragment;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.android.volley.Response;
@@ -28,7 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,77 +30,20 @@ import java.util.List;
  * Created by oxyflour on 2014/11/18.
  *
  */
-public class DiscuzForumIndexFragment extends android.support.v4.app.Fragment {
-
-    private List<Object> mForumListData = new ArrayList<Object>();
-
-    public void displayError(boolean show) {
-        View rootView = getView();
-        if (rootView != null)
-            Helper.updateVisibility(rootView.findViewById(R.id.error), show);
-    }
-    public void loadForums() {
-        displayError(false);
-        Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject data) {
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
-                    displayError(true);
-                } else if (!data.isNull("Variables")) {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-                        JSONArray forumlist = var.getJSONArray("forumlist");
-                        final JSONObject forums = new JSONObject();
-                        for (int i = 0; i < forumlist.length(); i++) {
-                            JSONObject forum = forumlist.getJSONObject(i);
-                            forums.put(forum.getString("fid"), forum);
-                        }
-
-                        JSONArray catlist = var.getJSONArray("catlist");
-                        mForumListData.clear();
-                        for (int i = 0; i < catlist.length(); i++) {
-                            JSONObject cat = catlist.getJSONObject(i);
-                            ForumCatalog forumCatalog = new ForumCatalog();
-                            forumCatalog.name = cat.getString("name");
-                            mForumListData.add(forumCatalog);
-
-                            final JSONArray forumIds = cat.getJSONArray("forums");
-                            for (int j = 0; j < forumIds.length(); j++) {
-                                String id = forumIds.getString(j);
-                                JSONObject forum = forums.getJSONObject(id);
-                                mForumListData.add(new Forum(forum));
-                            }
-                        }
-                    } catch (JSONException e) {
-                        Log.d("Discuz", "Load Forum Index Failed (" + e.getMessage() + ")");
-                    }
-                }
-                displayForums();
-            }
-        });
-    }
-
+public class DiscuzForumIndexFragment extends CommonListFragment
+    implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_forum_index, container, false);
-        mListView = (ListView) rootView.findViewById(R.id.list);
-        loadForums();
-        LocalBroadcastManager.getInstance(ThisApp.context)
-                .registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        loadForums();
-                    }
-                }, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
-        return rootView;
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        // hide the divider
+        ((ListView) view.findViewById(R.id.list)).setDividerHeight(0);
+        return view;
     }
 
-    private ListView mListView;
-    public void displayForums() {
-        mListView.setAdapter(new CommonListAdapter<Object>(mForumListData,
-                R.layout.fragment_forum_cat_item) {
+    @Override
+    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+        return new CommonListAdapter() {
 
             @Override
             public int getViewTypeCount() {
@@ -115,12 +52,14 @@ public class DiscuzForumIndexFragment extends android.support.v4.app.Fragment {
 
             @Override
             public int getItemViewType(int position) {
-                return mForumListData.get(position) instanceof ForumCatalog ? 0 : 1;
+                Object obj = DiscuzForumIndexFragment.this.getData(position);
+                return obj instanceof ForumCatalog ? 0 : 1;
             }
 
             @Override
             public View createView(ViewGroup parent, int position) {
-                int layout = mForumListData.get(position) instanceof ForumCatalog ?
+                Object obj = DiscuzForumIndexFragment.this.getData(position);
+                int layout = obj instanceof ForumCatalog ?
                         R.layout.fragment_forum_cat_item :
                         R.layout.fragment_forum_item;
                 return LayoutInflater.from(parent.getContext())
@@ -137,25 +76,70 @@ public class DiscuzForumIndexFragment extends android.support.v4.app.Fragment {
                     Forum item = (Forum) obj;
                     viewHolder.setText(R.id.title, item.name);
                     viewHolder.setText(R.id.sub,
-                            "threads:"+item.threads+"  posts:"+item.todayPosts+"/"+item.posts);
+                            getString(R.string.forum_index_threads)+":"+item.threads+"  "+
+                            getString(R.string.forum_index_posts)+":"+item.todayPosts);
                     NetworkImageView icon = ((NetworkImageView) viewHolder.getView(R.id.icon));
                     icon.setDefaultImageResId(R.drawable.default_board_icon);
                     icon.setImageUrl(item.icon, ThisApp.imageLoader);
                 }
             }
-        });
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        };
+    }
+
+    @Override
+    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        Object obj = getData(position);
+        if (obj instanceof Forum) {
+            Forum item = (Forum) obj;
+            Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
+            intent.putExtra("fid", item.id);
+            intent.putExtra("title", item.name);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        Discuz.execute("forumindex", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Object obj = mForumListData.get(i);
-                if (obj instanceof Forum) {
-                    Forum item = (Forum) obj;
-                    Intent intent = new Intent(view.getContext(), ThreadListActivity.class);
-                    intent.putExtra("fid", item.id);
-                    intent.putExtra("title", item.name);
-                    startActivity(intent);
+            public void onResponse(JSONObject data) {
+                int total = -1;
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                } else if (!data.isNull("Variables")) {
+                    try {
+                        JSONObject var = data.getJSONObject("Variables");
+                        JSONArray forumlist = var.getJSONArray("forumlist");
+                        final JSONObject forums = new JSONObject();
+                        for (int i = 0; i < forumlist.length(); i++) {
+                            JSONObject forum = forumlist.getJSONObject(i);
+                            forums.put(forum.getString("fid"), forum);
+                        }
+
+                        JSONArray catlist = var.getJSONArray("catlist");
+                        listData.clear();
+                        for (int i = 0; i < catlist.length(); i++) {
+                            JSONObject cat = catlist.getJSONObject(i);
+                            ForumCatalog forumCatalog = new ForumCatalog();
+                            forumCatalog.name = cat.getString("name");
+                            listData.add(forumCatalog);
+
+                            final JSONArray forumIds = cat.getJSONArray("forums");
+                            for (int j = 0; j < forumIds.length(); j++) {
+                                String id = forumIds.getString(j);
+                                JSONObject forum = forums.getJSONObject(id);
+                                listData.add(new Forum(forum));
+                            }
+                        }
+                        total = listData.size();
+                    } catch (JSONException e) {
+                        Log.d("Discuz", "Load Forum Index Failed (" + e.getMessage() + ")");
+                    }
                 }
+                loadMoreDone(total);
             }
         });
+
     }
 }

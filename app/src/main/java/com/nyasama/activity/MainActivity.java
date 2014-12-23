@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -26,20 +27,23 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
 import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
+import com.nyasama.util.Helper;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        DiscuzThreadListFragment.OnThreadListInteraction{
+public class MainActivity extends FragmentActivity implements
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        DiscuzThreadListFragment.OnThreadListInteraction {
 
     public void loadUserInfo() {
         // TODO: just use forumindex to refresh group name
@@ -63,7 +67,7 @@ public class MainActivity extends FragmentActivity
 
     public void gotoLogin(View view) {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        startActivityForResult(intent, Discuz.REQUEST_CODE_LOGIN);
+        startActivityForResult(intent, LoginActivity.REQUEST_CODE_LOGIN);
     }
 
     public void gotoProfile(View view) {
@@ -92,7 +96,14 @@ public class MainActivity extends FragmentActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+                (DrawerLayout) findViewById(R.id.drawer_layout),
+                new ArrayList<String>() {{
+                    add(getString(R.string.title_section1));
+                    add(getString(R.string.title_section4));
+                    add(getString(R.string.title_section5));
+                    add(getString(R.string.title_section2));
+                    add(getString(R.string.title_section3));
+                }});
 
         /*
         TODO: enable this
@@ -121,6 +132,14 @@ public class MainActivity extends FragmentActivity
         }
         else if (position == 2) {
             startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        }
+        else if (position == 3) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thwiki.cc")));
+            return true;
+        }
+        else if (position == 4) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thvideo.tv")));
             return true;
         }
         // update the main content by replacing fragments
@@ -176,17 +195,10 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home)
+            return super.onOptionsItemSelected(item);
+        return Helper.handleOption(this, item.getItemId()) ||
+                super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -242,7 +254,7 @@ public class MainActivity extends FragmentActivity
                             // we set the page size to be 60 so that it will not load more
                             return DiscuzThreadListFragment.getNewFragment(0, 0, 60);
                         else if (i == 2)
-                            return DiscuzThreadListFragment.getNewFragment(3, 0, 20);
+                            return DiscuzComicListFragment.getNewFragment();
                         else
                             return new SimpleLayoutFragment();
                     }

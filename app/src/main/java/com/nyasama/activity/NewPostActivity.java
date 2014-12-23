@@ -37,6 +37,8 @@ import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
 
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,8 +46,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class NewPostActivity extends Activity
@@ -64,6 +69,65 @@ public class NewPostActivity extends Activity
         public String uploadId;
     }
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
+
+    public void doEdit(View view) {
+        final String title = mInputTitle.getText().toString();
+        final String content = mInputContent.getText().toString();
+        if (content.isEmpty()) {
+            Helper.toast(R.string.post_content_empty_message);
+            return;
+        }
+
+        Intent intent = getIntent();
+        final int pid = intent.getIntExtra("pid", 0);
+        final int tid = intent.getIntExtra("tid", 0);
+        if (pid == 0 && tid == 0)
+            throw new RuntimeException("pid or tid is required!");
+
+        Discuz.executeMultipart("editpost", new HashMap<String, Object>() {{
+            put("pid", pid);
+            put("tid", tid);
+        }}, new LinkedHashMap<String, ContentBody>() {{
+            try {
+                put("pid", new StringBody(""+pid));
+                put("tid", new StringBody(""+tid));
+                put("editsubmit", new StringBody("true"));
+                put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
+                put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
+                // strange, but really works
+                for (ImageAttachment image : mImageAttachments)
+                    put("attachnew["+image.uploadId+"][description]", new StringBody(""));
+            }
+            catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else {
+                    try {
+                        JSONObject message = data.getJSONObject("Message");
+                        String messageval = message.getString("messageval");
+                        if ("post_edit_succeed".equals(messageval)) {
+                            setResult(1);
+                            finish();
+                        }
+                        else {
+                            Helper.toast(message.getString("messagestr"));
+                        }
+                    }
+                    catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    }
+                }
+                mButtonPost.setEnabled(true);
+            }
+        });
+        mButtonPost.setEnabled(false);
+    }
 
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
@@ -126,7 +190,7 @@ public class NewPostActivity extends Activity
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
-                                                Discuz.REQUEST_CODE_LOGIN);
+                                                LoginActivity.REQUEST_CODE_LOGIN);
                                     }
                                 });
                             builder.show();
@@ -146,6 +210,36 @@ public class NewPostActivity extends Activity
             }
         });
         mButtonPost.setEnabled(false);
+    }
+
+    void loadMessage() {
+        final Intent intent = getIntent();
+        mInputTitle.setEnabled(false);
+        mInputContent.setEnabled(false);
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        Discuz.execute("editpost", new HashMap<String, Object>() {{
+            put("pid", intent.getIntExtra("pid", 0));
+            put("tid", intent.getIntExtra("tid", 0));
+        }}, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                mInputTitle.setEnabled(true);
+                mInputContent.setEnabled(true);
+                Helper.updateVisibility(findViewById(R.id.loading), false);
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                }
+                else {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var != null)
+                        var = var.optJSONObject("postinfo");
+                    if (var != null) {
+                        mInputTitle.setText(var.optString("subject"));
+                        mInputContent.setText(var.optString("message"));
+                    }
+                }
+            }
+        });
     }
 
     void insertCodeToContent(String code) {
@@ -184,6 +278,8 @@ public class NewPostActivity extends Activity
     private EditText mInputContent;
     private MenuItem mButtonPost;
     private MenuItem mButtonAddImg;
+
+    String mPhotoFilePath;
 
     public void showInsertOptions() {
         View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
@@ -325,9 +421,9 @@ public class NewPostActivity extends Activity
             }
         });
 
+        if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+            loadMessage();
     }
-
-    String mPhotoFilePath;
 
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
     // REF: http://developer.android.com/training/camera/photobasics.html#TaskPhotoView
@@ -410,7 +506,7 @@ public class NewPostActivity extends Activity
                 }
             });
         }
-        else if (requestCode == Discuz.REQUEST_CODE_LOGIN && resultCode > 0) {
+        else if (requestCode == LoginActivity.REQUEST_CODE_LOGIN && resultCode > 0) {
             refreshFormHash();
         }
     }
@@ -428,18 +524,13 @@ public class NewPostActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == android.R.id.home) {
-            finish();
-            return true;
-        }
-        else if (id == R.id.action_send) {
-            doPost(null);
+        if (id == R.id.action_send) {
+            Intent intent = getIntent();
+            if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+                doEdit(null);
+            else
+                doPost(null);
             return true;
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
@@ -465,8 +556,8 @@ public class NewPostActivity extends Activity
             }
             return true;
         }
-
-        return super.onOptionsItemSelected(item);
+        return Helper.handleOption(this, item.getItemId()) ||
+                super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -480,7 +571,6 @@ public class NewPostActivity extends Activity
     @Override
     public void afterTextChanged(Editable editable) {
         if (mButtonPost != null)
-            mButtonPost.setEnabled(!(mInputTitle.getText().toString().isEmpty() ||
-                    mInputContent.getText().toString().isEmpty()));
+            mButtonPost.setEnabled(!mInputContent.getText().toString().isEmpty());
     }
 }

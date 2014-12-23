@@ -77,4 +77,10 @@
     <string name="signin_button_text">签到</string>
     <string name="title_section4">设置</string>
     <string name="title_section5">关于</string>
+    <string name="next_post_button"><![CDATA[下一帖 >>]]></string>
+    <string name="prev_post_button"><![CDATA[<< 上一贴]]></string>
+    <string name="action_my_profile">个人中心</string>
+    <string name="action_edit">编辑</string>
+    <string name="forum_index_threads">主题</string>
+    <string name="forum_index_posts">今日</string>
 </resources>
