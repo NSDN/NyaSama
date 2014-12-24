@@ -17,4 +17,9 @@
             android:title="@string/preference_animation" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/preference_version">
+        <Preference
+            android:title="@string/version_value"/>
+    </PreferenceCategory>
+
 </PreferenceScreen>

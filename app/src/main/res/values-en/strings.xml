@@ -87,4 +87,6 @@
     <string name="preference_animation">Fade Animation</string>
     <string name="diag_insert_tip_smiles">Smiles↓</string>
     <string name="diag_insert_tip_images">Images↓</string>
+    <string name="preference_version">Version</string>
+    <string name="version_value">NyaSama-nightly-141224</string>
 </resources>

@@ -87,4 +87,6 @@
     <string name="preference_animation">过渡动画</string>
     <string name="diag_insert_tip_smiles">表情↓</string>
     <string name="diag_insert_tip_images">图片↓</string>
+    <string name="preference_version">版本</string>
+    <string name="version_value">NyaSama-nightly-141224</string>
 </resources>
