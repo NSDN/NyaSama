@@ -3,13 +3,18 @@
 
     <PreferenceCategory android:title="@string/pref_category_general">
         <ListPreference
-            android:key="language"
             android:defaultValue="默认"
-            android:title="语言"
-            android:summary="%s"
+            android:dialogTitle="选择语言"
             android:entries="@array/language_preference"
             android:entryValues="@array/language_preference"
-            android:dialogTitle="选择语言" />
+            android:key="language"
+            android:summary="%s"
+            android:title="@string/preference_language" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="animation"
+            android:title="@string/preference_animation" />
     </PreferenceCategory>
 
 </PreferenceScreen>
