@@ -88,4 +88,6 @@
     <string name="title_editing_post">Editing Post</string>
     <string name="title_editing_reply">Editing Reply</string>
     <string name="action_save">Save</string>
+    <string name="action_add_smiley">Insert Smiley</string>
+    <string name="button_back">Back</string>
 </resources>

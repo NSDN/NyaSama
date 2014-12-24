@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -93,16 +94,15 @@ public class NewPostActivity extends Activity {
             put("tid", tid);
         }}, new LinkedHashMap<String, ContentBody>() {{
             try {
-                put("pid", new StringBody(""+pid));
-                put("tid", new StringBody(""+tid));
+                put("pid", new StringBody("" + pid));
+                put("tid", new StringBody("" + tid));
                 put("editsubmit", new StringBody("true"));
                 put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
                 put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
                 // strange, but really works
                 for (ImageAttachment image : mImageAttachments)
-                    put("attachnew["+image.uploadId+"][description]", new StringBody(""));
-            }
-            catch (UnsupportedEncodingException e) {
+                    put("attachnew[" + image.uploadId + "][description]", new StringBody(""));
+            } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
         }}, new Response.Listener<JSONObject>() {
@@ -111,21 +111,18 @@ public class NewPostActivity extends Activity {
                 Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         String messageval = message.getString("messageval");
                         if ("post_edit_succeed".equals(messageval)) {
                             setResult(1);
                             finish();
-                        }
-                        else {
+                        } else {
                             Helper.toast(message.getString("messagestr"));
                         }
-                    }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
                     }
                 }
             }
@@ -155,8 +152,7 @@ public class NewPostActivity extends Activity {
             if (fid > 0) {
                 put("fid", fid);
                 put("topicsubmit", "yes");
-            }
-            else {
+            } else {
                 put("tid", tid);
                 put("replysubmit", "yes");
             }
@@ -168,30 +164,28 @@ public class NewPostActivity extends Activity {
                 put("noticetrimstr", noticetrimstr);
             // strange, but really works
             for (ImageAttachment image : mImageAttachments)
-                put("attachnew["+image.uploadId+"][description]", "");
+                put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
                 Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         String messageval = message.getString("messageval");
                         if ("post_reply_succeed".equals(messageval) ||
                                 "post_newthread_succeed".equals(messageval)) {
-                                // return tid to parent activity
-                                String tid = data.getJSONObject("Variables").getString("tid");
-                                setResult(Integer.parseInt(tid));
+                            // return tid to parent activity
+                            String tid = data.getJSONObject("Variables").getString("tid");
+                            setResult(Integer.parseInt(tid));
                             finish();
-                        }
-                        else {
+                        } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
-                                .setTitle(R.string.there_is_something_wrong)
-                                .setMessage(message.getString("messagestr"))
-                                .setPositiveButton(android.R.string.ok, null);
+                                    .setTitle(R.string.there_is_something_wrong)
+                                    .setMessage(message.getString("messagestr"))
+                                    .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
                                     "replyperm_login_nopermission//1".equals(messageval))
                                 builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
@@ -203,15 +197,12 @@ public class NewPostActivity extends Activity {
                                 });
                             builder.show();
                         }
-                    }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
-                    }
-                    catch (NullPointerException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
-                    }
-                    catch (NumberFormatException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
                     }
                 }
             }
@@ -285,11 +276,34 @@ public class NewPostActivity extends Activity {
 
     String mPhotoFilePath;
 
-    public void showInsertOptions() {
-        View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
+    public void showInsertSmileyOptions() {
+        GridView smileyList = new GridView(this);
+        smileyList.setNumColumns(3);
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
-                .setView(view)
+                .setView(smileyList)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
+            @Override
+            public void convertView(ViewHolder viewHolder, SmileyGroup item) {
+                ((TextView) viewHolder.getConvertView()).setText(item.name);
+            }
+        });
+        smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                showSmileyOptions(Discuz.sSmilies.get(i));
+                dialog.cancel();
+            }
+        });
+    }
+
+    public void showInsertImageOptions() {
+        ListView attachList = new ListView(this);
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+                .setTitle(R.string.diag_insert_options)
+                .setView(mImageAttachments.size() > 0 ? attachList : null)
                 .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -316,22 +330,6 @@ public class NewPostActivity extends Activity {
                 })
                 .show();
 
-        AbsListView smileyList = (AbsListView) view.findViewById(R.id.smiley_list);
-        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
-            @Override
-            public void convertView(ViewHolder viewHolder, SmileyGroup item) {
-                ((TextView) viewHolder.getConvertView()).setText(item.name);
-            }
-        });
-        smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                showSmileyOptions(Discuz.sSmilies.get(i));
-                dialog.cancel();
-            }
-        });
-
-        AbsListView attachList = (AbsListView) view.findViewById(R.id.attachment_list);
         attachList.setAdapter(new CommonListAdapter<ImageAttachment>(mImageAttachments,
                 R.layout.fragment_select_attachment_item) {
             @Override
@@ -358,10 +356,10 @@ public class NewPostActivity extends Activity {
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
-                .setPositiveButton("Back", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.button_back), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        showInsertOptions();
+                        showInsertSmileyOptions();
                         dialogInterface.cancel();
                     }
                 })
@@ -529,7 +527,7 @@ public class NewPostActivity extends Activity {
         else if (id == R.id.action_save) {
             doEdit(null);
         }
-        else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
+        else if (id == R.id.action_add_smiley) {
             if (Discuz.sSmilies == null) {
                 final AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
@@ -541,16 +539,19 @@ public class NewPostActivity extends Activity {
                         mInputContent.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                showInsertOptions();
+                                showInsertSmileyOptions();
                             }
                         }, 200);
                     }
                 });
             }
             else {
-                showInsertOptions();
+                showInsertSmileyOptions();
             }
             return true;
+        }
+        else if (id == R.id.action_add_image) {
+            showInsertImageOptions();
         }
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);

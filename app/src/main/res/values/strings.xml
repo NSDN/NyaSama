@@ -88,4 +88,6 @@
     <string name="title_editing_post">编辑帖子</string>
     <string name="title_editing_reply">编辑回复</string>
     <string name="action_save">保存</string>
+    <string name="action_add_smiley">插入表情</string>
+    <string name="button_back">返回</string>
 </resources>
