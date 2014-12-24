@@ -329,7 +329,7 @@ public class PostListActivity extends FragmentActivity
                     String src = pathMatcher.group(1);
                     Attachment attachment = attachments.get(src);
                     if (attachment != null) {
-                        String url = Discuz.getImageThumbUrl(attachment.id, false);
+                        String url = Discuz.getAttachmentThumb(attachment.id);
                         attachments.put(url, attachment);
                         return "<img src=\"" + url + "\" />";
                     }

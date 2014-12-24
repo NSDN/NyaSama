@@ -282,7 +282,7 @@ public class Discuz {
     }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getImageThumbUrl(int attachmentId, boolean isThreadId) {
+    public static String getAttachmentThumb(int attachmentId) {
         String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
         String key;
         try {
@@ -293,21 +293,17 @@ public class Discuz {
             throw new RuntimeException(e);
         }
         Map<String, Object> params = new HashMap<String, Object>();
-        if (isThreadId) {
-            params.put("module", "threadimage");
-            params.put("tid", attachmentId);
-            // TODO: edit api/2/threadimage.php to remove this line
-            params.put("aid", attachmentId);
-        }
-        else {
-            params.put("module", "forumimage");
-            params.put("aid", attachmentId);
-        }
+        params.put("module", "forumimage");
+        params.put("aid", attachmentId);
         params.put("version", 2);
         params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
         params.put("key", key);
         params.put("type", "fixnone");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+    }
+
+    public static String getThreadCoverThumb(int threadId) {
+        return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
     }
 
     private static void notifyNewMessage() {
