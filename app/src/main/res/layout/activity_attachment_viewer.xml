@@ -1,5 +1,4 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,41 +9,44 @@
         style="@android:style/Widget.Holo.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:translationY="-6dp"
+        android:indeterminate="true"
         android:scaleY="0.5"
-        android:indeterminate="true" />
+        android:translationY="-6dp" />
 
     <com.nyasama.util.PhotoViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </com.nyasama.util.PhotoViewPager>
+        android:layout_height="match_parent"></com.nyasama.util.PhotoViewPager>
 
     <TextView
         android:id="@+id/prev_post"
-        android:padding="5dp"
-        android:text="@string/prev_post_button"
-        android:layout_gravity="start"
-        android:visibility="gone"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:padding="14dp"
+        android:text="@string/prev_post_button"
+        android:textColor="@android:color/holo_orange_light"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/next_post"
-        android:padding="5dp"
-        android:text="@string/next_post_button"
-        android:layout_gravity="end"
-        android:visibility="gone"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:padding="14dp"
+        android:text="@string/next_post_button"
+        android:textColor="@android:color/holo_orange_light"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/view_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:gravity="center_horizontal"
         android:padding="5dp"
         android:textAppearance="@android:style/TextAppearance.Medium"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:textSize="16sp" />
 
 </FrameLayout>
