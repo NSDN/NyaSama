@@ -87,4 +87,5 @@
     <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
     <string name="title_editing_post">编辑帖子</string>
     <string name="title_editing_reply">编辑回复</string>
+    <string name="action_save">保存</string>
 </resources>

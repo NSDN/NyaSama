@@ -13,8 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -53,8 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class NewPostActivity extends Activity
-    implements TextWatcher {
+public class NewPostActivity extends Activity {
 
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);
@@ -74,6 +71,9 @@ public class NewPostActivity extends Activity
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
     public void doEdit(View view) {
+        if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
+            return;
+
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
         if (content.isEmpty()) {
@@ -87,6 +87,7 @@ public class NewPostActivity extends Activity
         if (pid == 0 && tid == 0)
             throw new RuntimeException("pid or tid is required!");
 
+        Helper.updateVisibility(findViewById(R.id.loading), true);
         Discuz.executeMultipart("editpost", new HashMap<String, Object>() {{
             put("pid", pid);
             put("tid", tid);
@@ -107,6 +108,7 @@ public class NewPostActivity extends Activity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
@@ -126,13 +128,14 @@ public class NewPostActivity extends Activity
                         Log.e(TAG, "Parse Result Failed:"+e.getMessage());
                     }
                 }
-                mButtonPost.setEnabled(true);
             }
         });
-        mButtonPost.setEnabled(false);
     }
 
     public void doPost(View view) {
+        if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
+            return;
+
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
         final String noticetrimstr = getIntent().getStringExtra(ARG_POST_TRIMSTR);
@@ -147,6 +150,7 @@ public class NewPostActivity extends Activity
         if (fid == 0 && tid == 0)
             throw new RuntimeException("fid or tid is required!");
 
+        Helper.updateVisibility(findViewById(R.id.loading), true);
         Discuz.execute(fid > 0 ? "newthread" : "sendreply", new HashMap<String, Object>() {{
             if (fid > 0) {
                 put("fid", fid);
@@ -168,6 +172,7 @@ public class NewPostActivity extends Activity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
@@ -209,10 +214,8 @@ public class NewPostActivity extends Activity
                         Log.e(TAG, "Parse Result Failed:"+e.getMessage());
                     }
                 }
-                mButtonPost.setEnabled(true);
             }
         });
-        mButtonPost.setEnabled(false);
     }
 
     void loadMessage() {
@@ -279,8 +282,6 @@ public class NewPostActivity extends Activity
 
     private EditText mInputTitle;
     private EditText mInputContent;
-    private MenuItem mButtonPost;
-    private MenuItem mButtonAddImg;
 
     String mPhotoFilePath;
 
@@ -407,22 +408,12 @@ public class NewPostActivity extends Activity
 
         mInputTitle = (EditText) findViewById(R.id.input_title);
         mInputContent = (EditText) findViewById(R.id.input_content);
-        mInputTitle.addTextChangedListener(this);
-        mInputContent.addTextChangedListener(this);
 
         Intent intent = getIntent();
         if (intent.hasExtra(ARG_POST_TITLE)) {
             mInputTitle.setText(intent.getStringExtra(ARG_POST_TITLE));
             mInputTitle.setEnabled(false);
         }
-
-        mInputContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (mButtonAddImg != null)
-                    mButtonAddImg.setVisible(b);
-            }
-        });
 
         if (intent.getIntExtra("pid", 0) > 0) {
             setTitle(getString(R.string.title_editing_post));
@@ -523,10 +514,9 @@ public class NewPostActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_new_post, menu);
-        mButtonPost = menu.findItem(R.id.action_send);
-        mButtonPost.setEnabled(false);
-        mButtonAddImg = menu.findItem(R.id.action_add_image);
-        mButtonAddImg.setVisible(false);
+        boolean isEditingPost = getIntent().getIntExtra("pid", 0) > 0;
+        menu.findItem(R.id.action_save).setVisible(isEditingPost);
+        menu.findItem(R.id.action_send).setVisible(!isEditingPost);
         return true;
     }
 
@@ -534,12 +524,10 @@ public class NewPostActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_send) {
-            Intent intent = getIntent();
-            if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
-                doEdit(null);
-            else
-                doPost(null);
-            return true;
+            doPost(null);
+        }
+        else if (id == R.id.action_save) {
+            doEdit(null);
         }
         else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
             if (Discuz.sSmilies == null) {
@@ -568,17 +556,4 @@ public class NewPostActivity extends Activity
                 super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable editable) {
-        if (mButtonPost != null)
-            mButtonPost.setEnabled(!mInputContent.getText().toString().isEmpty());
-    }
 }

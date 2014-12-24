@@ -87,4 +87,5 @@
     <string name="new_version_alert_message">Go and download new version (%s) now?</string>
     <string name="title_editing_post">Editing Post</string>
     <string name="title_editing_reply">Editing Reply</string>
+    <string name="action_save">Save</string>
 </resources>
