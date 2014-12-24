@@ -8,10 +8,9 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -458,36 +457,38 @@ public class PostListActivity extends FragmentActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
                         new HtmlImageGetter(messageText, imageCache, 512, 512), null);
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        URLSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String url) {
+                                return false;
+                            }
+                        });
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        ImageSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String src) {
+                                Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
+                                intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+                                intent.putExtra("index", mListFragment.getIndex(item));
 
-                // set the images clickale
-                ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);
-                for (final ImageSpan image : images) {
-                    messageContent.setSpan(
-                            new ClickableSpan() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
-                                    intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                    intent.putExtra("index", mListFragment.getIndex(item));
-
-                                    String src = image.getSource();
-                                    Attachment attachment = mAttachmentMap.get(src);
-                                    // attachment image
-                                    if (attachment != null) {
-                                        intent.putExtra("src", attachment.src);
-                                        startActivity(intent);
-                                    }
-                                    // external images
-                                    else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
-                                        intent.putExtra("src", src);
-                                        startActivity(intent);
-                                    }
+                                Attachment attachment = mAttachmentMap.get(src);
+                                // attachment image
+                                if (attachment != null) {
+                                    intent.putExtra("src", attachment.src);
+                                    startActivity(intent);
                                 }
-                            },
-                            messageContent.getSpanStart(image),
-                            messageContent.getSpanEnd(image),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                                // external images
+                                else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                                    intent.putExtra("src", src);
+                                    startActivity(intent);
+                                }
+                                return false;
+                            }
+                        });
+
                 messageText.setText(messageContent);
                 messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
