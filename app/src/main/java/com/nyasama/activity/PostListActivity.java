@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
@@ -269,11 +270,11 @@ public class PostListActivity extends FragmentActivity
         startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
             if (item != null) {
-                putExtra("thread_title", "Re: " + item.author + " #" + mListFragment.getIndex(item));
-                putExtra("notice_trimstr", getTrimstr(item));
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + item.author + " #" + mListFragment.getIndex(item));
+                putExtra(NewPostActivity.ARG_POST_TRIMSTR, getTrimstr(item));
             }
             else {
-                putExtra("thread_title", "Re: " + getTitle());
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + getTitle());
             }
         }}, REQUEST_CODE_REPLY_THREAD);
     }
@@ -461,7 +462,22 @@ public class PostListActivity extends FragmentActivity
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
                             @Override
-                            public boolean onClick(View widget, String url) {
+                            public boolean onClick(View widget, String data) {
+                                // TODO: complete these actions
+                                final Uri uri = Uri.parse(data);
+                                String mod = uri.getQueryParameter("mod");
+                                if ("viewthread".equals(mod)) {
+                                    startActivity(new Intent(PostListActivity.this, PostListActivity.class) {{
+                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
+                                    }});
+                                    return true;
+                                }
+                                else if ("post".equals(mod)) {
+                                    if ("reply".equals(uri.getQueryParameter("action"))) {
+                                        gotoReply(null);
+                                        return true;
+                                    }
+                                }
                                 return false;
                             }
                         });

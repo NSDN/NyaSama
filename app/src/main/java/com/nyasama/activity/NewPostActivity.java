@@ -59,6 +59,9 @@ public class NewPostActivity extends Activity
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);
 
+    static final String ARG_POST_TITLE = "thread_title";
+    static final String ARG_POST_TRIMSTR = "notice_trimstr";
+
     static final String TAG = "NewPost";
     static final int REQCODE_PICK_IMAGE = 1;
     static final int REQCODE_PICK_CAPTURE = 2;
@@ -132,7 +135,7 @@ public class NewPostActivity extends Activity
     public void doPost(View view) {
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
-        final String noticetrimstr = getIntent().getStringExtra("notice_trimstr");
+        final String noticetrimstr = getIntent().getStringExtra(ARG_POST_TRIMSTR);
         if (title.isEmpty() || content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
             return;
@@ -408,8 +411,8 @@ public class NewPostActivity extends Activity
         mInputContent.addTextChangedListener(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("thread_title")) {
-            mInputTitle.setText(intent.getStringExtra("thread_title"));
+        if (intent.hasExtra(ARG_POST_TITLE)) {
+            mInputTitle.setText(intent.getStringExtra(ARG_POST_TITLE));
             mInputTitle.setEnabled(false);
         }
 
@@ -421,8 +424,13 @@ public class NewPostActivity extends Activity
             }
         });
 
-        if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+        if (intent.getIntExtra("pid", 0) > 0) {
+            setTitle(getString(R.string.title_editing_post));
             loadMessage();
+        }
+        else if (intent.getIntExtra("tid", 0) > 0) {
+            setTitle(getString(R.string.title_editing_reply));
+        }
     }
 
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
