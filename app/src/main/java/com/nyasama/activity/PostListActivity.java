@@ -221,8 +221,8 @@ public class PostListActivity extends FragmentActivity
         final int pid = item.id;
         final EditText input = new EditText(this);
         mCommentDialog = new AlertDialog.Builder(this)
-                .setTitle("AddComment")
-                .setMessage("Type Something")
+                .setTitle(R.string.action_comment)
+                .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
