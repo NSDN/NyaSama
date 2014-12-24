@@ -83,4 +83,6 @@
     <string name="action_edit">Edit</string>
     <string name="forum_index_threads">threads</string>
     <string name="forum_index_posts">posts</string>
+    <string name="new_version_alert_title">New Version is Ready</string>
+    <string name="new_version_alert_message">Go and download new version (%s) now?</string>
 </resources>

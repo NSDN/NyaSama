@@ -83,4 +83,6 @@
     <string name="action_edit">编辑</string>
     <string name="forum_index_threads">主题</string>
     <string name="forum_index_posts">今日</string>
+    <string name="new_version_alert_title">有新版本啦</string>
+    <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
 </resources>
