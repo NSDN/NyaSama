@@ -18,6 +18,7 @@ import com.nyasama.activity.UserProfileActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -61,6 +62,15 @@ public class Helper {
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean putIfNull(Map map, Object key, Object value) {
+        if (map != null && map.get(key) == null) {
+            map.put(key, value);
+            return true;
+        }
+        return false;
     }
 
     public static boolean handleOption(Activity activity, int id) {

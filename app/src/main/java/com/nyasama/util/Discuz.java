@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -521,82 +522,67 @@ public class Discuz {
                 throw new RuntimeException("fid is required for forumdisplay");
         }
         else if (module.equals("newthread") || module.equals("sendreply")) {
-            if (body.get("allowphoto") == null)
-                body.put("allowphoto", 1);
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("mobiletype") == null)
-                body.put("mobiletype", 2);
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "allowphoto", 1);
+            Helper.putIfNull(body, "mobiletype", 2);
         }
         else if (module.equals("addcomment")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("handlekey") == null)
-                body.put("handlekey", "comment");
-            if (body.get("commentsubmit") == null)
-                body.put("commentsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "commentsubmit", "yes");
+            Helper.putIfNull(body, "handlekey", "comment");
         }
         else if (module.equals("sendpm")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("pmsubmit") == null)
-                body.put("pmsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "pmsubmit", "yes");
         }
         else if (module.equals("favthread")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("favoritesubmit") == null)
-                body.put("favoritesubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "favoritesubmit", "yes");
+        }
+        else if (module.equals("editpost")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "editsubmit", "yes");
         }
         params.put("module", module);
-        if (params.get("submodule") == null)
-            params.put("submodule", "checkpost");
-        //
-        Request request =  new StringRequest(
-            body == null ? Request.Method.GET : Request.Method.POST,
-            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            new ResponseListener(callback),
-            new ResponseErrorListener(callback)) {
-            @Override
-            protected Map<String, String> getParams() {
-                HashMap<String, String> params = new HashMap<String, String>();
-                if (body != null)
-                    for (Map.Entry<String, Object> e : body.entrySet())
-                        if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
-                return params;
-            }
-            @Override
-            protected String getParamsEncoding() {
-                return DISCUZ_ENC;
-            }
-        };
-        ThisApp.requestQueue.add(request);
-        return request;
-    }
+        Helper.putIfNull(params, "submodule", "checkpost");
 
-    public static Request executeMultipart(String module,
-                                  final Map<String, Object> params,
-                                  final Map<String, ContentBody> body,
-                                  final Response.Listener<JSONObject> callback) {
-        if (module.equals("editpost")) {
-            if (params.get("editsubmit") == null)
-                params.put("editsubmit", "yes");
+        Request request;
+        if (module.equals("editpost") && body != null) {
+            Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
-                if (body.get("formhash") == null)
-                    body.put("formhash", new StringBody(sFormHash));
-                if (body.get("editsubmit") == null)
-                    body.put("editsubmit", new StringBody("yes"));
+                for (Map.Entry<String, Object> entry : body.entrySet())
+                    contentBody.put(entry.getKey(),
+                            new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
             }
             catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
+            request = new MultipartRequest(
+                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    contentBody,
+                    new ResponseListener(callback),
+                    new ResponseErrorListener(callback));
         }
-        params.put("module", module);
-        Request request = new MultipartRequest(
-            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            body,
-            new ResponseListener(callback),
-            new ResponseErrorListener(callback));
+        else {
+            request =  new StringRequest(
+                    body == null ? Request.Method.GET : Request.Method.POST,
+                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    new ResponseListener(callback),
+                    new ResponseErrorListener(callback)) {
+                @Override
+                protected Map<String, String> getParams() {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    if (body != null)
+                        for (Map.Entry<String, Object> e : body.entrySet())
+                            if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
+                    return params;
+                }
+                @Override
+                protected String getParamsEncoding() {
+                    return DISCUZ_ENC;
+                }
+            };
+        }
         ThisApp.requestQueue.add(request);
         return request;
     }

@@ -36,8 +36,6 @@ import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
 
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,11 +43,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class NewPostActivity extends Activity {
@@ -89,22 +84,18 @@ public class NewPostActivity extends Activity {
             throw new RuntimeException("pid or tid is required!");
 
         Helper.updateVisibility(findViewById(R.id.loading), true);
-        Discuz.executeMultipart("editpost", new HashMap<String, Object>() {{
+        Discuz.execute("editpost", new HashMap<String, Object>() {{
             put("pid", pid);
             put("tid", tid);
-        }}, new LinkedHashMap<String, ContentBody>() {{
-            try {
-                put("pid", new StringBody("" + pid));
-                put("tid", new StringBody("" + tid));
-                put("editsubmit", new StringBody("true"));
-                put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
-                put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
-                // strange, but really works
-                for (ImageAttachment image : mImageAttachments)
-                    put("attachnew[" + image.uploadId + "][description]", new StringBody(""));
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
+        }}, new HashMap<String, Object>() {{
+            put("pid", pid);
+            put("tid", tid);
+            put("editsubmit", "true");
+            put("message", content);
+            put("subject", title);
+            // strange, but really works
+            for (ImageAttachment image : mImageAttachments)
+                put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
