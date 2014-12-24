@@ -83,4 +83,8 @@
     <string name="action_edit">Edit</string>
     <string name="forum_index_threads">threads</string>
     <string name="forum_index_posts">posts</string>
+    <string name="preference_language">Language</string>
+    <string name="preference_animation">Fade Animation</string>
+    <string name="diag_insert_tip_smiles">Smiles↓</string>
+    <string name="diag_insert_tip_images">Images↓</string>
 </resources>

@@ -83,4 +83,8 @@
     <string name="action_edit">编辑</string>
     <string name="forum_index_threads">主题</string>
     <string name="forum_index_posts">今日</string>
+    <string name="preference_language">语言</string>
+    <string name="preference_animation">过渡动画</string>
+    <string name="diag_insert_tip_smiles">表情↓</string>
+    <string name="diag_insert_tip_images">图片↓</string>
 </resources>
