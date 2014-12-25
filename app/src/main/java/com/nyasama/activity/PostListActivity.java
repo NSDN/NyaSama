@@ -68,6 +68,8 @@ public class PostListActivity extends FragmentActivity
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
     private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
 
+    private int mForumId;
+
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
 
@@ -397,6 +399,13 @@ public class PostListActivity extends FragmentActivity
             doMarkFavourite();
             return true;
         }
+        else if (id == R.id.action_goto_forum) {
+            if (mForumId > 0 && getIntent().getIntExtra("fid", 0) != mForumId)
+                startActivity(new Intent(this, ThreadListActivity.class) {{
+                    putExtra("fid", mForumId);
+                }});
+            finish();
+        }
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);
     }
@@ -558,7 +567,6 @@ public class PostListActivity extends FragmentActivity
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        // TODO:
     }
 
     @Override
@@ -637,6 +645,12 @@ public class PostListActivity extends FragmentActivity
                                 mCommentCount.put(pid, Integer.MAX_VALUE);
                             }
                         }
+
+                        // forum
+                        if (var.has("fid"))
+                            mForumId = Helper.toSafeInteger(var.optString("fid"), 0);
+                        else if (var.opt("forum") instanceof JSONObject)
+                            mForumId = Helper.toSafeInteger(var.optJSONObject("forum").optString("fid"), 0);
 
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");

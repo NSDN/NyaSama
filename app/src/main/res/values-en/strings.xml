@@ -92,4 +92,5 @@
     <string name="button_back">Back</string>
     <string name="string_uncategorized">Uncategorized</string>
     <string name="toast_click_again_to_exit">Click Back again to exit</string>
+    <string name="action_goto_forum">Goto thread list</string>
 </resources>

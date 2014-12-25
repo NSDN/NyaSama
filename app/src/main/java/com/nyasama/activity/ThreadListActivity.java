@@ -168,6 +168,7 @@ public class ThreadListActivity extends FragmentActivity implements
         Thread thread = mListFragment.getData(position);
         intent.putExtra("tid", thread.id);
         intent.putExtra("title", thread.title);
+        intent.putExtra("fid", getIntent().getIntExtra("fid", 0));
         startActivity(intent);
     }
 
