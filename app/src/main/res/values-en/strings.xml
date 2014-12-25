@@ -90,4 +90,5 @@
     <string name="action_save">Save</string>
     <string name="action_add_smiley">Insert Smiley</string>
     <string name="button_back">Back</string>
+    <string name="string_uncategorized">Uncategorized</string>
 </resources>
