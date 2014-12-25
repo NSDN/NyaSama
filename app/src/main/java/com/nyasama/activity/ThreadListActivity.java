@@ -214,7 +214,8 @@ public class ThreadListActivity extends FragmentActivity implements
                 public void convertView(ViewHolder viewHolder, Forum item) {
                     viewHolder.setText(R.id.title, item.name);
                     viewHolder.setText(R.id.sub,
-                            "threads:" + item.threads + "  posts:" + item.todayPosts + "/" + item.posts);
+                            getString(R.string.forum_index_threads)+":"+item.threads+"  "+
+                                    getString(R.string.forum_index_posts)+":"+item.todayPosts);
                     ((NetworkImageView) viewHolder.getView(R.id.icon))
                             .setImageUrl(item.icon, ThisApp.imageLoader);
                 }
