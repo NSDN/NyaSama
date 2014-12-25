@@ -473,7 +473,7 @@ public class Discuz {
                     for (int i = 0; i < forums.length(); i ++) {
                         JSONObject forum = forums.optJSONObject(i);
                         JSONObject threadtypes = forum.optJSONObject("threadtypes");
-                        if (threadtypes != null)
+                        if (threadtypes != null && !threadtypes.isNull("types"))
                             sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
                                     new ThreadTypes(threadtypes.optJSONObject("types")));
                     }
