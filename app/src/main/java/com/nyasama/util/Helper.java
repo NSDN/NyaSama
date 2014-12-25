@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.text.Spannable;
+import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,6 +18,7 @@ import com.nyasama.activity.UserProfileActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -58,6 +62,15 @@ public class Helper {
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean putIfNull(Map map, Object key, Object value) {
+        if (map != null && map.get(key) == null) {
+            map.put(key, value);
+            return true;
+        }
+        return false;
     }
 
     public static boolean handleOption(Activity activity, int id) {
@@ -104,5 +117,47 @@ public class Helper {
                 new Size(width, height),
                 coverTarget);
         return Bitmap.createScaledBitmap(bitmap, newSize.width, newSize.height, true);
+    }
+
+    public static abstract class OnSpanClickListener {
+        public abstract boolean onClick(View widget, String data);
+    }
+    public static CharSequence setSpanClickListener(CharSequence text, Class cls, final OnSpanClickListener onClickListener) {
+        if (!(text instanceof Spannable))
+            return text;
+
+        Spannable spannable = (Spannable) text;
+        Object[] spans = spannable.getSpans(0, spannable.length(), cls);
+        if (spans != null && spans.length > 0) {
+            for (Object span : spans) {
+                int start = spannable.getSpanStart(span);
+                int end = spannable.getSpanEnd(span);
+                int flag = spannable.getSpanFlags(span);
+                if (span instanceof URLSpan) {
+                    URLSpan urlSpan = (URLSpan) span;
+                    spannable.removeSpan(urlSpan);
+                    spannable.setSpan(new URLSpan(urlSpan.getURL()) {
+                        @Override
+                        public void onClick(View widget) {
+                            if (onClickListener.onClick(widget, getURL()))
+                                return;
+                            try { super.onClick(widget); }
+                            catch (Throwable e) { e.printStackTrace(); }
+                        }
+                    }, start, end, flag);
+                }
+                else {
+                    final String data = span instanceof ImageSpan ? ((ImageSpan) span).getSource() : null;
+                    spannable.setSpan(new android.text.style.ClickableSpan() {
+                        @Override
+                        public void onClick(View view) {
+                            onClickListener.onClick(view, data);
+                        }
+                    }, start, end, flag);
+                }
+            }
+        }
+
+        return text;
     }
 }

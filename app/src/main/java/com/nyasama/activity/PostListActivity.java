@@ -4,14 +4,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -221,8 +221,8 @@ public class PostListActivity extends FragmentActivity
         final int pid = item.id;
         final EditText input = new EditText(this);
         mCommentDialog = new AlertDialog.Builder(this)
-                .setTitle("AddComment")
-                .setMessage("Type Something")
+                .setTitle(R.string.action_comment)
+                .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -270,11 +270,11 @@ public class PostListActivity extends FragmentActivity
         startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
             if (item != null) {
-                putExtra("thread_title", "Re: " + item.author + " #" + mListFragment.getIndex(item));
-                putExtra("notice_trimstr", getTrimstr(item));
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + item.author + " #" + mListFragment.getIndex(item));
+                putExtra(NewPostActivity.ARG_POST_TRIMSTR, getTrimstr(item));
             }
             else {
-                putExtra("thread_title", "Re: " + getTitle());
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + getTitle());
             }
         }}, REQUEST_CODE_REPLY_THREAD);
     }
@@ -329,7 +329,7 @@ public class PostListActivity extends FragmentActivity
                     String src = pathMatcher.group(1);
                     Attachment attachment = attachments.get(src);
                     if (attachment != null) {
-                        String url = Discuz.getImageThumbUrl(attachment.id, false);
+                        String url = Discuz.getAttachmentThumb(attachment.id);
                         attachments.put(url, attachment);
                         return "<img src=\"" + url + "\" />";
                     }
@@ -458,36 +458,53 @@ public class PostListActivity extends FragmentActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
                         new HtmlImageGetter(messageText, imageCache, 512, 512), null);
-
-                // set the images clickale
-                ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);
-                for (final ImageSpan image : images) {
-                    messageContent.setSpan(
-                            new ClickableSpan() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
-                                    intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                    intent.putExtra("index", mListFragment.getIndex(item));
-
-                                    String src = image.getSource();
-                                    Attachment attachment = mAttachmentMap.get(src);
-                                    // attachment image
-                                    if (attachment != null) {
-                                        intent.putExtra("src", attachment.src);
-                                        startActivity(intent);
-                                    }
-                                    // external images
-                                    else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
-                                        intent.putExtra("src", src);
-                                        startActivity(intent);
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        URLSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String data) {
+                                // TODO: complete these actions
+                                final Uri uri = Uri.parse(data);
+                                String mod = uri.getQueryParameter("mod");
+                                if ("viewthread".equals(mod)) {
+                                    startActivity(new Intent(PostListActivity.this, PostListActivity.class) {{
+                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
+                                    }});
+                                    return true;
+                                }
+                                else if ("post".equals(mod)) {
+                                    if ("reply".equals(uri.getQueryParameter("action"))) {
+                                        gotoReply(null);
+                                        return true;
                                     }
                                 }
-                            },
-                            messageContent.getSpanStart(image),
-                            messageContent.getSpanEnd(image),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                                return false;
+                            }
+                        });
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        ImageSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String src) {
+                                Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
+                                intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+                                intent.putExtra("index", mListFragment.getIndex(item));
+
+                                Attachment attachment = mAttachmentMap.get(src);
+                                // attachment image
+                                if (attachment != null) {
+                                    intent.putExtra("src", attachment.src);
+                                    startActivity(intent);
+                                }
+                                // external images
+                                else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                                    intent.putExtra("src", src);
+                                    startActivity(intent);
+                                }
+                                return false;
+                            }
+                        });
+
                 messageText.setText(messageContent);
                 messageText.setMovementMethod(LinkMovementMethod.getInstance());
 

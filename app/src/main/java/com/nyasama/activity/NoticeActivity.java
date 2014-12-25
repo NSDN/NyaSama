@@ -4,14 +4,10 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
-import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.Menu;
@@ -105,57 +101,40 @@ public class NoticeActivity extends FragmentActivity
             public void convertView(ViewHolder viewHolder, Notice item) {
                 viewHolder.setText(R.id.date, item.dateline);
                 Spannable note = (Spannable) Html.fromHtml(item.note);
-                URLSpan[] urls = note.getSpans(0, note.length(), URLSpan.class);
-
-                SpannableStringBuilder text = new SpannableStringBuilder(note.toString());
-                for (URLSpan url : urls) {
-                    String urlString = url.getURL();
-                    final Uri uri = Uri.parse(urlString);
-                    String mod = uri.getQueryParameter("mod");
-                    CharacterStyle newUrl = null;
-                    if ("space".equals(mod)) {
-                        newUrl = new URLSpan(urlString) {
-                            @Override
-                            public void onClick(@Nullable View widget) {
-                                startActivity(new Intent(NoticeActivity.this, UserProfileActivity.class) {{
-                                    putExtra("uid", Helper.toSafeInteger(uri.getQueryParameter("uid"), 0));
-                                }});
-                            }
-                        };
-                    }
-                    else if ("viewthread".equals(mod)) {
-                        newUrl = new URLSpan(urlString) {
-                            @Override
-                            public void onClick(@Nullable View widget) {
+                note = (Spannable) Helper.setSpanClickListener(note, URLSpan.class, new Helper.OnSpanClickListener() {
+                    @Override
+                    public boolean onClick(View widget, String data) {
+                        final Uri uri = Uri.parse(data);
+                        String mod = uri.getQueryParameter("mod");
+                        // TODO: complete these actions
+                        if ("space".equals(mod)) {
+                            startActivity(new Intent(NoticeActivity.this, UserProfileActivity.class) {{
+                                putExtra("uid", Helper.toSafeInteger(uri.getQueryParameter("uid"), 0));
+                            }});
+                            return true;
+                        }
+                        else if ("viewthread".equals(mod)) {
+                            startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
+                                putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
+                            }});
+                            return true;
+                        }
+                        else if ("redirect".equals(mod)) {
+                            String go = uri.getQueryParameter("goto");
+                            if (go.equals("findpost")) {
                                 startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
-                                    putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
+                                    putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("ptid"), 0));
                                 }});
+                                return true;
                             }
-                        };
-                    }
-                    else if ("redirect".equals(mod)) {
-                        String go = uri.getQueryParameter("goto");
-                        if (go.equals("findpost")) {
-                            newUrl = new URLSpan(urlString) {
-                                @Override
-                                public void onClick(@Nullable View widget) {
-                                    startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
-                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("ptid"), 0));
-                                    }});
-                                }
-                            };
                         }
-                        else {
-                            newUrl = new ForegroundColorSpan(android.R.color.transparent);
-                        }
+                        return false;
                     }
-                    if (newUrl != null) text.setSpan(newUrl, note.getSpanStart(url), note.getSpanEnd(url),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                });
 
                 TextView noteText = (TextView) viewHolder.getView(R.id.note);
                 noteText.setMovementMethod(LinkMovementMethod.getInstance());
-                noteText.setText(text);
+                noteText.setText(note);
             }
         };
     }

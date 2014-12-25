@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">NyaSama</string>
@@ -93,4 +93,11 @@
     <string name="preference_category_explore">Explore</string>
     <string name="preference_thumbswitch">Show Image</string>
     <string name="preference_thumbsize">Thumb Size</string>
+    <string name="new_version_alert_title">New Version is Ready</string>
+    <string name="new_version_alert_message">Go and download new version (%s) now?</string>
+    <string name="title_editing_post">Editing Post</string>
+    <string name="title_editing_reply">Editing Reply</string>
+    <string name="action_save">Save</string>
+    <string name="action_add_smiley">Insert Smiley</string>
+    <string name="button_back">Back</string>
 </resources>

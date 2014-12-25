@@ -13,8 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -37,8 +36,6 @@ import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
 
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,18 +43,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-public class NewPostActivity extends Activity
-    implements TextWatcher {
+public class NewPostActivity extends Activity {
 
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);
+
+    static final String ARG_POST_TITLE = "thread_title";
+    static final String ARG_POST_TRIMSTR = "notice_trimstr";
 
     static final String TAG = "NewPost";
     static final int REQCODE_PICK_IMAGE = 1;
@@ -71,6 +67,9 @@ public class NewPostActivity extends Activity
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
     public void doEdit(View view) {
+        if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
+            return;
+
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
         if (content.isEmpty()) {
@@ -84,55 +83,50 @@ public class NewPostActivity extends Activity
         if (pid == 0 && tid == 0)
             throw new RuntimeException("pid or tid is required!");
 
-        Discuz.executeMultipart("editpost", new HashMap<String, Object>() {{
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        Discuz.execute("editpost", new HashMap<String, Object>() {{
             put("pid", pid);
             put("tid", tid);
-        }}, new LinkedHashMap<String, ContentBody>() {{
-            try {
-                put("pid", new StringBody(""+pid));
-                put("tid", new StringBody(""+tid));
-                put("editsubmit", new StringBody("true"));
-                put("message", new StringBody(content, Charset.forName(Discuz.DISCUZ_ENC)));
-                put("subject", new StringBody(title, Charset.forName(Discuz.DISCUZ_ENC)));
-                // strange, but really works
-                for (ImageAttachment image : mImageAttachments)
-                    put("attachnew["+image.uploadId+"][description]", new StringBody(""));
-            }
-            catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
+        }}, new HashMap<String, Object>() {{
+            put("pid", pid);
+            put("tid", tid);
+            put("editsubmit", "true");
+            put("message", content);
+            put("subject", title);
+            // strange, but really works
+            for (ImageAttachment image : mImageAttachments)
+                put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         String messageval = message.getString("messageval");
                         if ("post_edit_succeed".equals(messageval)) {
                             setResult(1);
                             finish();
-                        }
-                        else {
+                        } else {
                             Helper.toast(message.getString("messagestr"));
                         }
-                    }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
                     }
                 }
-                mButtonPost.setEnabled(true);
             }
         });
-        mButtonPost.setEnabled(false);
     }
 
     public void doPost(View view) {
+        if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
+            return;
+
         final String title = mInputTitle.getText().toString();
         final String content = mInputContent.getText().toString();
-        final String noticetrimstr = getIntent().getStringExtra("notice_trimstr");
+        final String noticetrimstr = getIntent().getStringExtra(ARG_POST_TRIMSTR);
         if (title.isEmpty() || content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
             return;
@@ -144,12 +138,12 @@ public class NewPostActivity extends Activity
         if (fid == 0 && tid == 0)
             throw new RuntimeException("fid or tid is required!");
 
+        Helper.updateVisibility(findViewById(R.id.loading), true);
         Discuz.execute(fid > 0 ? "newthread" : "sendreply", new HashMap<String, Object>() {{
             if (fid > 0) {
                 put("fid", fid);
                 put("topicsubmit", "yes");
-            }
-            else {
+            } else {
                 put("tid", tid);
                 put("replysubmit", "yes");
             }
@@ -161,29 +155,28 @@ public class NewPostActivity extends Activity
                 put("noticetrimstr", noticetrimstr);
             // strange, but really works
             for (ImageAttachment image : mImageAttachments)
-                put("attachnew["+image.uploadId+"][description]", "");
+                put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         String messageval = message.getString("messageval");
                         if ("post_reply_succeed".equals(messageval) ||
                                 "post_newthread_succeed".equals(messageval)) {
-                                // return tid to parent activity
-                                String tid = data.getJSONObject("Variables").getString("tid");
-                                setResult(Integer.parseInt(tid));
+                            // return tid to parent activity
+                            String tid = data.getJSONObject("Variables").getString("tid");
+                            setResult(Integer.parseInt(tid));
                             finish();
-                        }
-                        else {
+                        } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
-                                .setTitle(R.string.there_is_something_wrong)
-                                .setMessage(message.getString("messagestr"))
-                                .setPositiveButton(android.R.string.ok, null);
+                                    .setTitle(R.string.there_is_something_wrong)
+                                    .setMessage(message.getString("messagestr"))
+                                    .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
                                     "replyperm_login_nopermission//1".equals(messageval))
                                 builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
@@ -195,21 +188,16 @@ public class NewPostActivity extends Activity
                                 });
                             builder.show();
                         }
-                    }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
-                    }
-                    catch (NullPointerException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
-                    }
-                    catch (NumberFormatException e) {
-                        Log.e(TAG, "Parse Result Failed:"+e.getMessage());
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Parse Result Failed:" + e.getMessage());
                     }
                 }
-                mButtonPost.setEnabled(true);
             }
         });
-        mButtonPost.setEnabled(false);
     }
 
     void loadMessage() {
@@ -276,16 +264,37 @@ public class NewPostActivity extends Activity
 
     private EditText mInputTitle;
     private EditText mInputContent;
-    private MenuItem mButtonPost;
-    private MenuItem mButtonAddImg;
 
     String mPhotoFilePath;
 
-    public void showInsertOptions() {
-        View view = getLayoutInflater().inflate(R.layout.fragment_insert_options, null);
+    public void showInsertSmileyOptions() {
+        GridView smileyList = new GridView(this);
+        smileyList.setNumColumns(3);
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
-                .setView(view)
+                .setView(smileyList)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
+            @Override
+            public void convertView(ViewHolder viewHolder, SmileyGroup item) {
+                ((TextView) viewHolder.getConvertView()).setText(item.name);
+            }
+        });
+        smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                showSmileyOptions(Discuz.sSmilies.get(i));
+                dialog.cancel();
+            }
+        });
+    }
+
+    public void showInsertImageOptions() {
+        ListView attachList = new ListView(this);
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+                .setTitle(R.string.diag_insert_options)
+                .setView(mImageAttachments.size() > 0 ? attachList : null)
                 .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -312,22 +321,6 @@ public class NewPostActivity extends Activity
                 })
                 .show();
 
-        AbsListView smileyList = (AbsListView) view.findViewById(R.id.smiley_list);
-        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
-            @Override
-            public void convertView(ViewHolder viewHolder, SmileyGroup item) {
-                ((TextView) viewHolder.getConvertView()).setText(item.name);
-            }
-        });
-        smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                showSmileyOptions(Discuz.sSmilies.get(i));
-                dialog.cancel();
-            }
-        });
-
-        AbsListView attachList = (AbsListView) view.findViewById(R.id.attachment_list);
         attachList.setAdapter(new CommonListAdapter<ImageAttachment>(mImageAttachments,
                 R.layout.fragment_select_attachment_item) {
             @Override
@@ -354,10 +347,10 @@ public class NewPostActivity extends Activity
         final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
-                .setPositiveButton("Back", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.button_back), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        showInsertOptions();
+                        showInsertSmileyOptions();
                         dialogInterface.cancel();
                     }
                 })
@@ -404,25 +397,20 @@ public class NewPostActivity extends Activity
 
         mInputTitle = (EditText) findViewById(R.id.input_title);
         mInputContent = (EditText) findViewById(R.id.input_content);
-        mInputTitle.addTextChangedListener(this);
-        mInputContent.addTextChangedListener(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("thread_title")) {
-            mInputTitle.setText(intent.getStringExtra("thread_title"));
+        if (intent.hasExtra(ARG_POST_TITLE)) {
+            mInputTitle.setText(intent.getStringExtra(ARG_POST_TITLE));
             mInputTitle.setEnabled(false);
         }
 
-        mInputContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (mButtonAddImg != null)
-                    mButtonAddImg.setVisible(b);
-            }
-        });
-
-        if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
+        if (intent.getIntExtra("pid", 0) > 0) {
+            setTitle(getString(R.string.title_editing_post));
             loadMessage();
+        }
+        else if (intent.getIntExtra("tid", 0) > 0) {
+            setTitle(getString(R.string.title_editing_reply));
+        }
     }
 
     // REF: http://stackoverflow.com/questions/2507898/how-to-pick-an-image-from-gallery-sd-card-for-my-app
@@ -515,10 +503,9 @@ public class NewPostActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_new_post, menu);
-        mButtonPost = menu.findItem(R.id.action_send);
-        mButtonPost.setEnabled(false);
-        mButtonAddImg = menu.findItem(R.id.action_add_image);
-        mButtonAddImg.setVisible(false);
+        boolean isEditingPost = getIntent().getIntExtra("pid", 0) > 0;
+        menu.findItem(R.id.action_save).setVisible(isEditingPost);
+        menu.findItem(R.id.action_send).setVisible(!isEditingPost);
         return true;
     }
 
@@ -526,14 +513,12 @@ public class NewPostActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_send) {
-            Intent intent = getIntent();
-            if (intent.getIntExtra("pid", 0) > 0 && intent.getIntExtra("tid", 0) > 0)
-                doEdit(null);
-            else
-                doPost(null);
-            return true;
+            doPost(null);
         }
-        else if (id == R.id.action_add_image && mInputContent.hasFocus()) {
+        else if (id == R.id.action_save) {
+            doEdit(null);
+        }
+        else if (id == R.id.action_add_smiley) {
             if (Discuz.sSmilies == null) {
                 final AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
@@ -545,32 +530,22 @@ public class NewPostActivity extends Activity
                         mInputContent.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                showInsertOptions();
+                                showInsertSmileyOptions();
                             }
                         }, 200);
                     }
                 });
             }
             else {
-                showInsertOptions();
+                showInsertSmileyOptions();
             }
             return true;
+        }
+        else if (id == R.id.action_add_image) {
+            showInsertImageOptions();
         }
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable editable) {
-        if (mButtonPost != null)
-            mButtonPost.setEnabled(!mInputContent.getText().toString().isEmpty());
-    }
 }
