@@ -2,9 +2,21 @@ package com.nyasama.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.text.Spannable;
+import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.nyasama.R;
@@ -15,6 +27,7 @@ import com.nyasama.activity.UserProfileActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -30,6 +43,19 @@ public class Helper {
         if (ThisApp.context != null)
             toast(ThisApp.context.getString(stringId));
     }
+    public static void toast(String text, int gravity, double fx, double fy) {
+        if (ThisApp.context != null) {
+            Toast toast = Toast.makeText(ThisApp.context, text, Toast.LENGTH_SHORT);
+            WindowManager manager =
+                    (WindowManager)ThisApp.context.getSystemService(Context.WINDOW_SERVICE);
+            Display display = manager.getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            toast.setGravity(gravity, (int)(size.x * fx), (int)(size.y * fy));
+            toast.show();
+        }
+    }
+
     public static void updateVisibility(View view, boolean show) {
         if (view != null)
             view.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -38,13 +64,17 @@ public class Helper {
         if (view != null)
             updateVisibility(view.findViewById(id), show);
     }
+
     public static void disableDialog(AlertDialog dialog) {
         dialog.setCancelable(false);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
     }
+
     public static int toSafeInteger(String string, int defValue) {
+        if (string == null)
+            return defValue;
         try {
             return Integer.parseInt(string);
         }
@@ -52,12 +82,32 @@ public class Helper {
             return defValue;
         }
     }
+    public static double toSafeDouble(String string, double defValue) {
+        if (string == null)
+            return defValue;
+        try {
+            return Double.parseDouble(string);
+        }
+        catch (NumberFormatException e) {
+            return defValue;
+        }
+    }
+
     public static String datelineToString(long time, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean putIfNull(Map map, Object key, Object value) {
+        if (map != null && map.get(key) == null) {
+            map.put(key, value);
+            return true;
+        }
+        return false;
     }
 
     public static boolean handleOption(Activity activity, int id) {
@@ -88,7 +138,6 @@ public class Helper {
             this.height = height;
         }
     }
-
     public static Size getFittedSize(Size source, Size target, boolean coverTarget) {
         boolean tooWide = source.width * target.height > source.height * target.width;
         if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
@@ -97,12 +146,77 @@ public class Helper {
             target.width = source.width * target.height / source.height;
         return target;
     }
-
     public static Bitmap getFittedBitmap(Bitmap bitmap, int width, int height, boolean coverTarget) {
         Size newSize = getFittedSize(
                 new Size(bitmap.getWidth(), bitmap.getHeight()),
                 new Size(width, height),
                 coverTarget);
         return Bitmap.createScaledBitmap(bitmap, newSize.width, newSize.height, true);
+    }
+
+    public static abstract class OnSpanClickListener {
+        public abstract boolean onClick(View widget, String data);
+    }
+    public static CharSequence setSpanClickListener(CharSequence text, Class cls, final OnSpanClickListener onClickListener) {
+        if (!(text instanceof Spannable))
+            return text;
+
+        Spannable spannable = (Spannable) text;
+        Object[] spans = spannable.getSpans(0, spannable.length(), cls);
+        if (spans != null && spans.length > 0) {
+            for (Object span : spans) {
+                int start = spannable.getSpanStart(span);
+                int end = spannable.getSpanEnd(span);
+                int flag = spannable.getSpanFlags(span);
+                if (span instanceof URLSpan) {
+                    URLSpan urlSpan = (URLSpan) span;
+                    spannable.removeSpan(urlSpan);
+                    spannable.setSpan(new URLSpan(urlSpan.getURL()) {
+                        @Override
+                        public void onClick(@NonNull View widget) {
+                            if (onClickListener.onClick(widget, getURL()))
+                                return;
+                            try { super.onClick(widget); }
+                            catch (Throwable e) { e.printStackTrace(); }
+                        }
+                    }, start, end, flag);
+                }
+                else {
+                    final String data = span instanceof ImageSpan ? ((ImageSpan) span).getSource() : null;
+                    spannable.setSpan(new android.text.style.ClickableSpan() {
+                        @Override
+                        public void onClick(View view) {
+                            onClickListener.onClick(view, data);
+                        }
+                    }, start, end, flag);
+                }
+            }
+        }
+
+        return text;
+    }
+
+    // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
+    // by bluebrain
+    public static String getPathFromUri(Uri uri) {
+        ContentResolver resolver = ThisApp.context.getContentResolver();
+        Cursor cursor = resolver.query(uri, null, null, null, null);
+        if (cursor == null) {
+            return uri.getPath();
+        }
+        else {
+            cursor.moveToFirst();
+            String document_id = cursor.getString(0);
+            document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+            cursor.close();
+
+            cursor = resolver.query(
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+            cursor.moveToFirst();
+            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
+            return path;
+        }
     }
 }

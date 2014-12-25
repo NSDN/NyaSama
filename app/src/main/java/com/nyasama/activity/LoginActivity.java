@@ -3,7 +3,7 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,28 +12,25 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LoginActivity extends Activity
     implements AdapterView.OnItemSelectedListener {
 
     public static final int REQUEST_CODE_LOGIN = 1;
-    private static final String TAG = "Login";
 
     public void doLogin(View view) {
         final String username = mUsername.getText().toString();
         final String password = mPassword.getText().toString();
         final String answer = mAnswer.getText().toString();
         if (username.isEmpty() || password.isEmpty()) {
-            mMessage.setText(getString(R.string.login_empty_message));
+            Helper.toast(getString(R.string.login_empty_message), Gravity.TOP, 0, 0.2);
             return;
         }
 
@@ -44,28 +41,19 @@ public class LoginActivity extends Activity
                     Helper.toast(R.string.network_error_toast);
                 }
                 else {
-                    try {
-                        JSONObject message = data.getJSONObject("Message");
-                        String messageval = message.getString("messageval");
+                    JSONObject message = data.optJSONObject("Message");
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (message != null) {
+                        String messageval = message.optString("messageval");
                         if ("login_succeed".equals(messageval) ||
                                 "location_login_succeed".equals(messageval)) {
                             // return uid to parent activity
-                            String uid = data.getJSONObject("Variables").getString("member_uid");
-                            setResult(Integer.parseInt(uid));
+                            if (var != null)
+                                setResult(Helper.toSafeInteger(var.optString("member_uid"), 0));
                             finish();
                         }
                         else
-                            mMessage.setText(message.optString("messagestr"));
-                    }
-                    // TODO: remove these
-                    catch (JSONException e) {
-                        Log.e(TAG, "Parse Json Failed: " + e.getMessage());
-                    }
-                    catch (NullPointerException e) {
-                        Log.e(TAG, "Parse Result Failed: " + e.getMessage());
-                    }
-                    catch (NumberFormatException e) {
-                        Log.e(TAG, "Parse Number Failed: " + e.getMessage());
+                            Helper.toast(message.optString("messagestr"), Gravity.TOP, 0, 0.2);
                     }
 
                     SharedPreferences.Editor editor = mPrefs.edit();
@@ -81,7 +69,6 @@ public class LoginActivity extends Activity
     private EditText mUsername;
     private EditText mPassword;
     private Button mButton;
-    private TextView mMessage;
     private Spinner mQuestion;
     private int mQuestionId = 0;
     private EditText mAnswer;
@@ -97,7 +84,6 @@ public class LoginActivity extends Activity
         mUsername = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
         mButton = (Button) findViewById(R.id.login_button);
-        mMessage = (TextView) findViewById(R.id.message);
         mQuestion = (Spinner) findViewById(R.id.question);
         mAnswer = (EditText) findViewById(R.id.answer);
 

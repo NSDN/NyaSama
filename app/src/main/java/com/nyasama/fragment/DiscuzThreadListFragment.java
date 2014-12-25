@@ -90,6 +90,7 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
         Thread thread = (Thread) fragment.getData(position);
         intent.putExtra("tid", thread.id);
         intent.putExtra("title", thread.title);
+        intent.putExtra("fid", getArguments() != null ? getArguments().getInt("fid") : 0);
         startActivity(intent);
     }
 

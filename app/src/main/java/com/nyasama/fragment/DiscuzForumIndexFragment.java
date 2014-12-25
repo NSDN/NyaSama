@@ -121,8 +121,7 @@ public class DiscuzForumIndexFragment extends CommonListFragment
                         listData.clear();
                         for (int i = 0; i < catlist.length(); i++) {
                             JSONObject cat = catlist.getJSONObject(i);
-                            ForumCatalog forumCatalog = new ForumCatalog();
-                            forumCatalog.name = cat.getString("name");
+                            ForumCatalog forumCatalog = new ForumCatalog(cat.getString("name"));
                             listData.add(forumCatalog);
 
                             final JSONArray forumIds = cat.getJSONArray("forums");

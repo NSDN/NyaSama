@@ -4,23 +4,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -35,6 +36,7 @@ import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.Attachment;
+import com.nyasama.util.Discuz.PollOption;
 
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
@@ -67,9 +69,12 @@ public class PostListActivity extends FragmentActivity
     Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
     private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
+    private List<PollOption> mPollOptions = new ArrayList<PollOption>();
+    private int mForumId;
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
+    private AlertDialog mVoteDialog;
 
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
@@ -132,6 +137,11 @@ public class PostListActivity extends FragmentActivity
                 }
             }
         });
+    }
+
+    public void doPollVote(final int vid) {
+        // TODO: finish this
+        mVoteDialog.dismiss();
     }
 
     public void doLoadComment(final int pid, final int page) {
@@ -221,8 +231,8 @@ public class PostListActivity extends FragmentActivity
         final int pid = item.id;
         final EditText input = new EditText(this);
         mCommentDialog = new AlertDialog.Builder(this)
-                .setTitle("AddComment")
-                .setMessage("Type Something")
+                .setTitle(R.string.action_comment)
+                .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -270,11 +280,11 @@ public class PostListActivity extends FragmentActivity
         startActivityForResult(new Intent(PostListActivity.this, NewPostActivity.class) {{
             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
             if (item != null) {
-                putExtra("thread_title", "Re: " + item.author + " #" + mListFragment.getIndex(item));
-                putExtra("notice_trimstr", getTrimstr(item));
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + item.author + " #" + mListFragment.getIndex(item));
+                putExtra(NewPostActivity.ARG_POST_TRIMSTR, getTrimstr(item));
             }
             else {
-                putExtra("thread_title", "Re: " + getTitle());
+                putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + getTitle());
             }
         }}, REQUEST_CODE_REPLY_THREAD);
     }
@@ -316,6 +326,30 @@ public class PostListActivity extends FragmentActivity
         menu.show();
     }
 
+    public void showPollOptions() {
+        ListView listView = new ListView(this);
+        listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions,
+                android.R.layout.simple_list_item_1) {
+            @Override
+            public void convertView(ViewHolder viewHolder, PollOption item) {
+                ((TextView) viewHolder.getConvertView())
+                        .setText(item.option + " " + item.votes + " votes (" + item.percent + "%)");
+            }
+        });
+        mVoteDialog = new AlertDialog.Builder(this)
+                .setTitle("Vote Results")
+                .setView(listView)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                doPollVote(mPollOptions.get(i).id);
+            }
+        });
+        mVoteDialog.show();
+    }
+
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -329,7 +363,7 @@ public class PostListActivity extends FragmentActivity
                     String src = pathMatcher.group(1);
                     Attachment attachment = attachments.get(src);
                     if (attachment != null) {
-                        String url = Discuz.getImageThumbUrl(attachment.id, false);
+                        String url = Discuz.getAttachmentThumb(attachment.id);
                         attachments.put(url, attachment);
                         return "<img src=\"" + url + "\" />";
                     }
@@ -397,6 +431,13 @@ public class PostListActivity extends FragmentActivity
             doMarkFavourite();
             return true;
         }
+        else if (id == R.id.action_goto_forum) {
+            if (mForumId > 0 && getIntent().getIntExtra("fid", 0) != mForumId)
+                startActivity(new Intent(this, ThreadListActivity.class) {{
+                    putExtra("fid", mForumId);
+                }});
+            finish();
+        }
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);
     }
@@ -458,36 +499,53 @@ public class PostListActivity extends FragmentActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
                         new HtmlImageGetter(messageText, imageCache, 512, 512), null);
-
-                // set the images clickale
-                ImageSpan[] images = messageContent.getSpans(0, messageContent.length(), ImageSpan.class);
-                for (final ImageSpan image : images) {
-                    messageContent.setSpan(
-                            new ClickableSpan() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
-                                    intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                    intent.putExtra("index", mListFragment.getIndex(item));
-
-                                    String src = image.getSource();
-                                    Attachment attachment = mAttachmentMap.get(src);
-                                    // attachment image
-                                    if (attachment != null) {
-                                        intent.putExtra("src", attachment.src);
-                                        startActivity(intent);
-                                    }
-                                    // external images
-                                    else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
-                                        intent.putExtra("src", src);
-                                        startActivity(intent);
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        URLSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String data) {
+                                // TODO: complete these actions
+                                final Uri uri = Uri.parse(data);
+                                String mod = uri.getQueryParameter("mod");
+                                if ("viewthread".equals(mod)) {
+                                    startActivity(new Intent(PostListActivity.this, PostListActivity.class) {{
+                                        putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
+                                    }});
+                                    return true;
+                                }
+                                else if ("post".equals(mod)) {
+                                    if ("reply".equals(uri.getQueryParameter("action"))) {
+                                        gotoReply(null);
+                                        return true;
                                     }
                                 }
-                            },
-                            messageContent.getSpanStart(image),
-                            messageContent.getSpanEnd(image),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                                return false;
+                            }
+                        });
+                messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
+                        ImageSpan.class,
+                        new Helper.OnSpanClickListener() {
+                            @Override
+                            public boolean onClick(View widget, String src) {
+                                Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
+                                intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
+                                intent.putExtra("index", mListFragment.getIndex(item));
+
+                                Attachment attachment = mAttachmentMap.get(src);
+                                // attachment image
+                                if (attachment != null) {
+                                    intent.putExtra("src", attachment.src);
+                                    startActivity(intent);
+                                }
+                                // external images
+                                else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
+                                    intent.putExtra("src", src);
+                                    startActivity(intent);
+                                }
+                                return false;
+                            }
+                        });
+
                 messageText.setText(messageContent);
                 messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -501,7 +559,6 @@ public class PostListActivity extends FragmentActivity
                 }
                 List<Comment> comments = mComments.get(item.id);
                 if (comments != null) {
-                    LayoutInflater inflater = getLayoutInflater();
                     for (int i = 0; i < comments.size(); i ++) {
                         Comment comment = comments.get(i);
                         View commentView;
@@ -509,12 +566,12 @@ public class PostListActivity extends FragmentActivity
                             commentView = cachedViews.get(i);
                         }
                         else {
-                            commentView = inflater
-                                .inflate(R.layout.fragment_comment_item, commentList, false);
+                            commentView = new TextView(PostListActivity.this);
+                            commentView.setPadding(32, 0, 0, 0);
                             cachedViews.add(commentView);
                         }
-                        ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
-                        ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        ((TextView) commentView).setText(
+                                Html.fromHtml("<b>" + comment.author + "</b>&nbsp;&nbsp;" + comment.comment));
                         if (commentView.getParent() != null)
                             ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
@@ -535,13 +592,25 @@ public class PostListActivity extends FragmentActivity
                         }});
                     }
                 });
+
+                // show votes
+                TextView votes = (TextView) viewHolder.getView(R.id.votes);
+                Helper.updateVisibility(votes, false);
+                if (item.number == 1 && mPollOptions.size() > 0) {
+                    Helper.updateVisibility(votes, true);
+                    votes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showPollOptions();
+                        }
+                    });
+                }
             }
         };
     }
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        // TODO:
     }
 
     @Override
@@ -618,6 +687,22 @@ public class PostListActivity extends FragmentActivity
                                 }
                                 mComments.put(pid, commentList);
                                 mCommentCount.put(pid, Integer.MAX_VALUE);
+                            }
+                        }
+
+                        // forum
+                        if (var.has("fid"))
+                            mForumId = Helper.toSafeInteger(var.optString("fid"), 0);
+                        else if (var.opt("forum") instanceof JSONObject)
+                            mForumId = Helper.toSafeInteger(var.optJSONObject("forum").optString("fid"), 0);
+
+                        // votes
+                        if (var.has("special_poll")) {
+                            mPollOptions.clear();
+                            JSONObject polloptions = var.getJSONObject("special_poll").getJSONObject("polloptions");
+                            for (Iterator<String> iter = polloptions.keys(); iter.hasNext(); ) {
+                                String key = iter.next();
+                                mPollOptions.add(new PollOption(polloptions.getJSONObject(key)));
                             }
                         }
 

@@ -6,10 +6,12 @@
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_quick_reply" android:title="@string/action_quick_reply"
         android:showAsAction="never" />
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" />
     <item android:id="@+id/action_mark_fav" android:title="@string/action_mark_fav"
         android:showAsAction="never" />
+    <item android:id="@+id/action_goto_forum" android:title="@string/action_goto_forum"
+        android:showAsAction="never" />
     <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
+        android:showAsAction="never" />
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:showAsAction="never" />
 </menu>

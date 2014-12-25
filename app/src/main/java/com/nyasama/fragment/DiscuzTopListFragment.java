@@ -1,14 +1,10 @@
 package com.nyasama.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import com.android.volley.Response;
 import com.nyasama.R;
-import com.nyasama.ThisApp;
-import com.nyasama.activity.PostListActivity;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.Thread;
@@ -34,15 +30,6 @@ public class DiscuzTopListFragment extends DiscuzThreadListFragment {
         bundle.putInt("fid", fid);
         fragment.setArguments(bundle);
         return fragment;
-    }
-
-    @Override
-    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        Intent intent = new Intent(ThisApp.context, PostListActivity.class);
-        Thread thread = getData(position);
-        intent.putExtra("tid", thread.id);
-        intent.putExtra("title", thread.title);
-        startActivity(intent);
     }
 
     @Override

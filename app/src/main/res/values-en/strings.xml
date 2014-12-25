@@ -83,4 +83,15 @@
     <string name="action_edit">Edit</string>
     <string name="forum_index_threads">threads</string>
     <string name="forum_index_posts">posts</string>
+    <string name="new_version_alert_title">New Version is Ready</string>
+    <string name="new_version_alert_message">Go and download new version (%s) now?</string>
+    <string name="title_editing_post">Editing Post</string>
+    <string name="title_editing_reply">Editing Reply</string>
+    <string name="action_save">Save</string>
+    <string name="action_add_smiley">Insert Smiley</string>
+    <string name="button_back">Back</string>
+    <string name="string_uncategorized">Uncategorized</string>
+    <string name="toast_click_again_to_exit">Click Back again to exit</string>
+    <string name="action_goto_forum">Goto thread list</string>
+    <string name="text_view_vote">text_view_votes</string>
 </resources>

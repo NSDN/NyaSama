@@ -83,4 +83,15 @@
     <string name="action_edit">编辑</string>
     <string name="forum_index_threads">主题</string>
     <string name="forum_index_posts">今日</string>
+    <string name="new_version_alert_title">有新版本啦</string>
+    <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
+    <string name="title_editing_post">编辑帖子</string>
+    <string name="title_editing_reply">编辑回复</string>
+    <string name="action_save">保存</string>
+    <string name="action_add_smiley">插入表情</string>
+    <string name="button_back">返回</string>
+    <string name="string_uncategorized">未分类</string>
+    <string name="toast_click_again_to_exit">再按一次后退来退出</string>
+    <string name="action_goto_forum">返回板块</string>
+    <string name="text_view_vote">查看投票</string>
 </resources>

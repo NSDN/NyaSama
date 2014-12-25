@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -102,6 +104,10 @@ public class Discuz {
     }
     public static class ForumCatalog {
         public String name;
+
+        public ForumCatalog(String name) {
+            this.name = name;
+        }
     }
     public static class Thread {
         public int id;
@@ -119,6 +125,10 @@ public class Discuz {
             author = data.optString("author");
             lastpost = data.optString("lastpost");
             dateline = data.optString("dateline");
+            // Discuz may return integer as dateline
+            int dateVal = Helper.toSafeInteger(lastpost, 0);
+            if (dateVal > 0)
+                lastpost = Helper.datelineToString(dateVal, null);
             replies = Integer.parseInt(data.optString("replies"));
             views = Integer.parseInt(data.optString("views"));
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
@@ -231,7 +241,6 @@ public class Discuz {
                 number = Integer.parseInt(data.optString("pmnum"));
         }
     }
-
     public static class Notice {
         public int id;
         public String type;
@@ -246,7 +255,6 @@ public class Discuz {
                 Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
     public static class FavItem {
         public int id;
         public String type;
@@ -261,6 +269,19 @@ public class Discuz {
             title = data.optString("title");
             if (data.has("dateline")) dateline = Helper.datelineToString(
                     Integer.parseInt(data.optString("dateline")), null);
+        }
+    }
+    public static class PollOption {
+        public int id;
+        public String option;
+        public int votes;
+        public double percent;
+
+        public PollOption(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("polloptionid"), 0);
+            option = data.optString("polloption");
+            votes = Helper.toSafeInteger(data.optString("votes"), 0);
+            percent = Helper.toSafeDouble(data.optString("percent"), 0);
         }
     }
 
@@ -282,7 +303,7 @@ public class Discuz {
     }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getImageThumbUrl(int attachmentId, boolean isThreadId) {
+    public static String getAttachmentThumb(int attachmentId) {
         String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
         String key;
         try {
@@ -293,21 +314,29 @@ public class Discuz {
             throw new RuntimeException(e);
         }
         Map<String, Object> params = new HashMap<String, Object>();
-        if (isThreadId) {
-            params.put("module", "threadimage");
-            params.put("tid", attachmentId);
-            // TODO: edit api/2/threadimage.php to remove this line
-            params.put("aid", attachmentId);
-        }
-        else {
-            params.put("module", "forumimage");
-            params.put("aid", attachmentId);
-        }
+        params.put("module", "forumimage");
+        params.put("aid", attachmentId);
         params.put("version", 2);
         params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
         params.put("key", key);
         params.put("type", "fixnone");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+    }
+
+    public static String getThreadCoverThumb(int threadId) {
+        return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
+    }
+
+    public static String getSafeUrl(String url) {
+        if (url == null)
+            return "";
+        url = url.replace(" ", "%20");
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;
+        else if (url.startsWith("/"))
+            return DISCUZ_HOST + url;
+        else
+            return DISCUZ_URL + url;
     }
 
     private static void notifyNewMessage() {
@@ -346,17 +375,36 @@ public class Discuz {
         public String path;
         public List<Smiley> list;
     }
-
-    public static List<SmileyGroup> sSmilies;
-    private static Response.Listener<JSONObject> mSmiliesCallback = null;
+    private static List<SmileyGroup> parseSmilies(JSONArray data) {
+        List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
+        for (int i = 0; i < data.length(); i ++) {
+            final JSONObject jsonData = data.optJSONObject(i);
+            final JSONArray jsonList = jsonData.optJSONArray("list");
+            final List<Smiley> smileyList = new ArrayList<Smiley>();
+            for (int j = 0; j < jsonList.length(); j ++) {
+                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                smileyList.add(new Smiley() {{
+                    code = jsonSmiley.optString(1);
+                    image = jsonSmiley.optString(2);
+                }});
+            }
+            smileyGroups.add(new SmileyGroup() {{
+                name = jsonData.optString("name");
+                path = jsonData.optString("path");
+                list = smileyList;
+            }});
+        }
+        return smileyGroups;
+    }
+    private static List<SmileyGroup> sSmilies;
+    private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void setSmilies(String json) {
             try {
-                parseSmilies(new JSONArray(json));
                 if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(null);
+                    mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
                 Log.d("Discuz", "got smilies!");
             }
             catch (JSONException e) {
@@ -383,30 +431,14 @@ public class Discuz {
         ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
         ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
     }
-    private static void parseSmilies(JSONArray data) {
-        if (sSmilies == null)
-            sSmilies = new ArrayList<SmileyGroup>();
-        else
-            sSmilies.clear();
-        for (int i = 0; i < data.length(); i ++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j ++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
-                }});
-            }
-            sSmilies.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
-        }
+    public static List<SmileyGroup> getSmilies() {
+        return sSmilies;
     }
-    public static void getSmileies(Response.Listener<JSONObject> callback) {
+    public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
+        if (sSmilies != null) {
+            callback.onResponse(sSmilies);
+            return;
+        }
         mSmiliesCallback = callback;
         Request request = new StringRequest(DISCUZ_URL+"data/cache/common_smilies_var.js", new Response.Listener<String>() {
             @Override
@@ -432,16 +464,43 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
     }
-    public static String getSafeUrl(String url) {
-        if (url == null)
-            return "";
-        url = url.replace(" ", "%20");
-        if (url.startsWith("http://") || url.startsWith("https://"))
-            return url;
-        else if (url.startsWith("/"))
-            return DISCUZ_HOST + url;
-        else
-            return DISCUZ_URL + url;
+
+    public static class ThreadTypes extends HashMap<String, Integer> {
+        public ThreadTypes(JSONObject data) {
+            for (Iterator<String> iter = data.keys(); iter.hasNext(); ) {
+                String key = iter.next();
+                put(data.optString(key),
+                        Helper.toSafeInteger(key, 0));
+            }
+        }
+    }
+    private static SparseArray<ThreadTypes> sThreadTypes;
+    public static SparseArray<ThreadTypes> getThreadTypes() {
+        return sThreadTypes;
+    }
+    public static void loadThreadTypes(final Response.Listener<SparseArray<ThreadTypes>> callback) {
+        if (sThreadTypes != null) {
+            callback.onResponse(sThreadTypes);
+            return;
+        }
+        Discuz.execute("forumnav", new HashMap<String, Object>(), null,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject data) {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var == null) return;
+                    sThreadTypes = new SparseArray<ThreadTypes>();
+                    JSONArray forums = var.optJSONArray("forums");
+                    for (int i = 0; i < forums.length(); i ++) {
+                        JSONObject forum = forums.optJSONObject(i);
+                        JSONObject threadtypes = forum.optJSONObject("threadtypes");
+                        if (threadtypes != null && !threadtypes.isNull("types"))
+                            sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
+                                    new ThreadTypes(threadtypes.optJSONObject("types")));
+                    }
+                    callback.onResponse(sThreadTypes);
+                }
+            });
     }
 
     public static class ResponseListener implements Response.Listener<String> {
@@ -525,82 +584,67 @@ public class Discuz {
                 throw new RuntimeException("fid is required for forumdisplay");
         }
         else if (module.equals("newthread") || module.equals("sendreply")) {
-            if (body.get("allowphoto") == null)
-                body.put("allowphoto", 1);
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("mobiletype") == null)
-                body.put("mobiletype", 2);
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "allowphoto", 1);
+            Helper.putIfNull(body, "mobiletype", 2);
         }
         else if (module.equals("addcomment")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("handlekey") == null)
-                body.put("handlekey", "comment");
-            if (body.get("commentsubmit") == null)
-                body.put("commentsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "commentsubmit", "yes");
+            Helper.putIfNull(body, "handlekey", "comment");
         }
         else if (module.equals("sendpm")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("pmsubmit") == null)
-                body.put("pmsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "pmsubmit", "yes");
         }
         else if (module.equals("favthread")) {
-            if (body.get("formhash") == null)
-                body.put("formhash", sFormHash);
-            if (body.get("favoritesubmit") == null)
-                body.put("favoritesubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "favoritesubmit", "yes");
+        }
+        else if (module.equals("editpost")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "editsubmit", "yes");
         }
         params.put("module", module);
-        if (params.get("submodule") == null)
-            params.put("submodule", "checkpost");
-        //
-        Request request =  new StringRequest(
-            body == null ? Request.Method.GET : Request.Method.POST,
-            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            new ResponseListener(callback),
-            new ResponseErrorListener(callback)) {
-            @Override
-            protected Map<String, String> getParams() {
-                HashMap<String, String> params = new HashMap<String, String>();
-                if (body != null)
-                    for (Map.Entry<String, Object> e : body.entrySet())
-                        if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
-                return params;
-            }
-            @Override
-            protected String getParamsEncoding() {
-                return DISCUZ_ENC;
-            }
-        };
-        ThisApp.requestQueue.add(request);
-        return request;
-    }
+        Helper.putIfNull(params, "submodule", "checkpost");
 
-    public static Request executeMultipart(String module,
-                                  final Map<String, Object> params,
-                                  final Map<String, ContentBody> body,
-                                  final Response.Listener<JSONObject> callback) {
-        if (module.equals("editpost")) {
-            if (params.get("editsubmit") == null)
-                params.put("editsubmit", "yes");
+        Request request;
+        if (module.equals("editpost") && body != null) {
+            Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
-                if (body.get("formhash") == null)
-                    body.put("formhash", new StringBody(sFormHash));
-                if (body.get("editsubmit") == null)
-                    body.put("editsubmit", new StringBody("yes"));
+                for (Map.Entry<String, Object> entry : body.entrySet())
+                    if (entry.getValue() != null) contentBody.put(entry.getKey(),
+                            new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
             }
             catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
+            request = new MultipartRequest(
+                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    contentBody,
+                    new ResponseListener(callback),
+                    new ResponseErrorListener(callback));
         }
-        params.put("module", module);
-        Request request = new MultipartRequest(
-            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            body,
-            new ResponseListener(callback),
-            new ResponseErrorListener(callback));
+        else {
+            request =  new StringRequest(
+                    body == null ? Request.Method.GET : Request.Method.POST,
+                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    new ResponseListener(callback),
+                    new ResponseErrorListener(callback)) {
+                @Override
+                protected Map<String, String> getParams() {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    if (body != null)
+                        for (Map.Entry<String, Object> e : body.entrySet())
+                            if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
+                    return params;
+                }
+                @Override
+                protected String getParamsEncoding() {
+                    return DISCUZ_ENC;
+                }
+            };
+        }
         ThisApp.requestQueue.add(request);
         return request;
     }
