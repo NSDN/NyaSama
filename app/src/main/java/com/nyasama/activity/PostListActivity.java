@@ -14,7 +14,6 @@ import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -527,7 +526,6 @@ public class PostListActivity extends FragmentActivity
                 }
                 List<Comment> comments = mComments.get(item.id);
                 if (comments != null) {
-                    LayoutInflater inflater = getLayoutInflater();
                     for (int i = 0; i < comments.size(); i ++) {
                         Comment comment = comments.get(i);
                         View commentView;
@@ -535,12 +533,12 @@ public class PostListActivity extends FragmentActivity
                             commentView = cachedViews.get(i);
                         }
                         else {
-                            commentView = inflater
-                                .inflate(R.layout.fragment_comment_item, commentList, false);
+                            commentView = new TextView(PostListActivity.this);
+                            commentView.setPadding(32, 0, 0, 0);
                             cachedViews.add(commentView);
                         }
-                        ((TextView) commentView.findViewById(R.id.author)).setText(comment.author);
-                        ((TextView) commentView.findViewById(R.id.comment)).setText(comment.comment);
+                        ((TextView) commentView).setText(
+                                Html.fromHtml("<b>" + comment.author + "</b>&nbsp;&nbsp;" + comment.comment));
                         if (commentView.getParent() != null)
                             ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
