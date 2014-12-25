@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -68,6 +67,13 @@ public class NewPostActivity extends Activity {
         public String name;
         public String uploadId;
     }
+
+    private EditText mInputTitle;
+    private EditText mInputContent;
+    private Spinner mSpinnerTypes;
+
+    String mPhotoFilePath;
+    Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
     public void doEdit(View view) {
@@ -210,7 +216,7 @@ public class NewPostActivity extends Activity {
         });
     }
 
-    void loadMessage() {
+    public void loadMessage() {
         final Intent intent = getIntent();
         mInputTitle.setEnabled(false);
         mInputContent.setEnabled(false);
@@ -271,44 +277,14 @@ public class NewPostActivity extends Activity {
         });
     }
 
-    void insertCodeToContent(String code) {
+    public void insertCodeToContent(String code) {
         int start = mInputContent.getSelectionStart();
         mInputContent.getText().insert(start, code);
     }
 
-    void insertImageToContent(ImageAttachment image) {
+    public void insertImageToContent(ImageAttachment image) {
         insertCodeToContent("[attachimg]"+image.uploadId+"[/attachimg]");
     }
-
-    // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
-    // by bluebrain
-    String getPathFromUri(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        if (cursor == null) {
-            return uri.getPath();
-        }
-        else {
-            cursor.moveToFirst();
-            String document_id = cursor.getString(0);
-            document_id = document_id.substring(document_id.lastIndexOf(":")+1);
-            cursor.close();
-
-            cursor = getContentResolver().query(
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
-            cursor.moveToFirst();
-            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            cursor.close();
-            return path;
-        }
-    }
-
-    private EditText mInputTitle;
-    private EditText mInputContent;
-    private Spinner mSpinnerTypes;
-
-    String mPhotoFilePath;
-    Discuz.ThreadTypes mThreadTypes;
 
     public void showInsertSmileyOptions() {
         GridView smileyList = new GridView(this);
@@ -473,7 +449,7 @@ public class NewPostActivity extends Activity {
                 && resultCode == RESULT_OK) {
             //
             String filePath = requestCode == REQCODE_PICK_IMAGE ?
-                    getPathFromUri(data.getData()) : mPhotoFilePath;
+                    Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
 
             // resize the image if too large
             Bitmap bitmap = BitmapFactory.decodeFile(filePath);

@@ -2,8 +2,12 @@ package com.nyasama.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.text.Spannable;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
@@ -34,6 +38,7 @@ public class Helper {
         if (ThisApp.context != null)
             toast(ThisApp.context.getString(stringId));
     }
+
     public static void updateVisibility(View view, boolean show) {
         if (view != null)
             view.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -42,12 +47,14 @@ public class Helper {
         if (view != null)
             updateVisibility(view.findViewById(id), show);
     }
+
     public static void disableDialog(AlertDialog dialog) {
         dialog.setCancelable(false);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
     }
+
     public static int toSafeInteger(String string, int defValue) {
         try {
             return Integer.parseInt(string);
@@ -56,6 +63,7 @@ public class Helper {
             return defValue;
         }
     }
+
     public static String datelineToString(long time, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
         dateFormat.setTimeZone(TimeZone.getDefault());
@@ -101,7 +109,6 @@ public class Helper {
             this.height = height;
         }
     }
-
     public static Size getFittedSize(Size source, Size target, boolean coverTarget) {
         boolean tooWide = source.width * target.height > source.height * target.width;
         if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
@@ -110,7 +117,6 @@ public class Helper {
             target.width = source.width * target.height / source.height;
         return target;
     }
-
     public static Bitmap getFittedBitmap(Bitmap bitmap, int width, int height, boolean coverTarget) {
         Size newSize = getFittedSize(
                 new Size(bitmap.getWidth(), bitmap.getHeight()),
@@ -159,5 +165,29 @@ public class Helper {
         }
 
         return text;
+    }
+
+    // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
+    // by bluebrain
+    public static String getPathFromUri(Uri uri) {
+        ContentResolver resolver = ThisApp.context.getContentResolver();
+        Cursor cursor = resolver.query(uri, null, null, null, null);
+        if (cursor == null) {
+            return uri.getPath();
+        }
+        else {
+            cursor.moveToFirst();
+            String document_id = cursor.getString(0);
+            document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+            cursor.close();
+
+            cursor = resolver.query(
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+            cursor.moveToFirst();
+            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
+            return path;
+        }
     }
 }
