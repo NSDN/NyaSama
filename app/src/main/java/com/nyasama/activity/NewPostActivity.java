@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -232,8 +233,7 @@ public class NewPostActivity extends Activity {
                 Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     JSONObject var = data.optJSONObject("Variables");
                     JSONObject postinfo = null;
                     if (var != null)
@@ -410,6 +410,10 @@ public class NewPostActivity extends Activity {
         setContentView(R.layout.activity_new_post);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // REF: http://stackoverflow.com/questions/7300497/adjust-layout-when-soft-keyboard-is-on
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE |
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         mInputTitle = (EditText) findViewById(R.id.input_title);
         mInputContent = (EditText) findViewById(R.id.input_content);
