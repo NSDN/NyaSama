@@ -104,6 +104,10 @@ public class Discuz {
     }
     public static class ForumCatalog {
         public String name;
+
+        public ForumCatalog(String name) {
+            this.name = name;
+        }
     }
     public static class Thread {
         public int id;
@@ -121,6 +125,10 @@ public class Discuz {
             author = data.optString("author");
             lastpost = data.optString("lastpost");
             dateline = data.optString("dateline");
+            // Discuz may return integer as dateline
+            int dateVal = Helper.toSafeInteger(lastpost, 0);
+            if (dateVal > 0)
+                lastpost = Helper.datelineToString(dateVal, null);
             replies = Integer.parseInt(data.optString("replies"));
             views = Integer.parseInt(data.optString("views"));
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
