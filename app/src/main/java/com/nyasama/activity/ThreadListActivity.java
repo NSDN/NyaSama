@@ -36,6 +36,12 @@ public class ThreadListActivity extends FragmentActivity implements
 
     public final int REQUEST_CODE_NEW_THREAD = 1;
 
+    // These forums has no top list
+    public static List<Integer> FORUMS_NO_TOPLIST = new ArrayList<Integer>() {{
+        add(92);
+        add(113);
+    }};
+
     private DiscuzThreadListFragment mThreadListFragment;
     private SubForumFragment mSubListFragment;
     private List<Forum> mSubList = new ArrayList<Forum>();
@@ -52,7 +58,50 @@ public class ThreadListActivity extends FragmentActivity implements
         if (title != null) setTitle(title);
 
         ViewPager pager = (ViewPager) findViewById(R.id.view_pager);
-        pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+        boolean noTopList = FORUMS_NO_TOPLIST.indexOf(getIntent().getIntExtra("fid", 0)) >= 0;
+        // only return two pages
+        // SubForum & ThreadList
+        if (noTopList) pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+            // REF: http://stackoverflow.com/questions/8785221/retrieve-a-fragment-from-a-viewpager
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object instantiateItem(ViewGroup container, int position) {
+                Object item = super.instantiateItem(container, position);
+                if (item instanceof DiscuzThreadListFragment)
+                    mThreadListFragment = (DiscuzThreadListFragment) item;
+                else if (item instanceof SubForumFragment)
+                    mSubListFragment = (SubForumFragment) item;
+                return item;
+            }
+
+            @Override
+            public Fragment getItem(int position) {
+                if (position == 0)
+                    return new SubForumFragment();
+                else
+                    return DiscuzThreadListFragment.getNewFragment(
+                        getIntent().getIntExtra("fid", 0),
+                        getIntent().getIntExtra("uid", 0),
+                        20);
+            }
+
+            @Override
+            public int getCount() {
+                return 2;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                String[] titles = {
+                        getString(R.string.thread_list_subforum_title),
+                        getString(R.string.thread_list_threads_title)
+                };
+                return titles[position];
+            }
+        });
+        // return two or three pages
+        // ThreadList & TopList [& SubList]
+        else pager.setAdapter(mPageAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             // REF: http://stackoverflow.com/questions/8785221/retrieve-a-fragment-from-a-viewpager
             @Override
             @SuppressWarnings("unchecked")
@@ -67,19 +116,16 @@ public class ThreadListActivity extends FragmentActivity implements
 
             @Override
             public Fragment getItem(int i) {
-                if (i == 0) {
+                if (i == 0)
                     return DiscuzThreadListFragment.getNewFragment(
                             getIntent().getIntExtra("fid", 0),
                             getIntent().getIntExtra("uid", 0),
                             20);
-                }
-                else if (i == 1) {
+                else if (i == 1)
                     return DiscuzTopListFragment.getNewFragment(
                             getIntent().getIntExtra("fid", 0));
-                }
-                else {
+                else
                     return new SubForumFragment();
-                }
             }
 
             @Override
