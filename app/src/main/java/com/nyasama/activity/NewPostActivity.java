@@ -329,13 +329,9 @@ public class NewPostActivity extends Activity {
                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         File dir = Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_PICTURES);
-                        try {
-                            File file = File.createTempFile("nyasama_", ".jpg", dir);
-                            mPhotoFilePath = file.getAbsolutePath();
-                            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-                        } catch (IOException e) {
-                            Log.e(TAG, "create photo cache failed");
-                        }
+                        File file = new File(dir, "nyasama_upload_photo.jpg");
+                        mPhotoFilePath = file.getAbsolutePath();
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
                         startActivityForResult(intent, REQCODE_PICK_CAPTURE);
                     }
                 })
@@ -459,7 +455,7 @@ public class NewPostActivity extends Activity {
                 File dir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES);
                 try {
-                    File file = File.createTempFile("nyasama_resized_", ".jpg", dir);
+                    File file = new File(dir, "nyasama_upload_resized.jpg");
                     FileOutputStream stream = new FileOutputStream(file);
                     bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
