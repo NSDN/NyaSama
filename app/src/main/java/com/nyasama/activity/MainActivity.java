@@ -84,6 +84,26 @@ public class MainActivity extends FragmentActivity implements
      */
     private CharSequence mTitle;
 
+    // REF: http://stackoverflow.com/questions/8430805/android-clicking-twice-the-back-button-to-exit-activity
+    private boolean doubleBackToExitPressedOnce;
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        doubleBackToExitPressedOnce = true;
+        Helper.toast(getString(R.string.toast_click_again_to_exit));
+
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

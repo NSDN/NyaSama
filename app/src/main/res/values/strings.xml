@@ -91,4 +91,5 @@
     <string name="action_add_smiley">插入表情</string>
     <string name="button_back">返回</string>
     <string name="string_uncategorized">未分类</string>
+    <string name="toast_click_again_to_exit">再按一次后退来退出</string>
 </resources>
