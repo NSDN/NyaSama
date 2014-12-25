@@ -93,4 +93,5 @@
     <string name="string_uncategorized">Uncategorized</string>
     <string name="toast_click_again_to_exit">Click Back again to exit</string>
     <string name="action_goto_forum">Goto thread list</string>
+    <string name="text_view_vote">text_view_votes</string>
 </resources>

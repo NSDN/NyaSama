@@ -93,4 +93,5 @@
     <string name="string_uncategorized">未分类</string>
     <string name="toast_click_again_to_exit">再按一次后退来退出</string>
     <string name="action_goto_forum">返回板块</string>
+    <string name="text_view_vote">查看投票</string>
 </resources>

@@ -271,6 +271,19 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
+    public static class PollOption {
+        public int id;
+        public String option;
+        public int votes;
+        public double percent;
+
+        public PollOption(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("polloptionid"), 0);
+            option = data.optString("polloption");
+            votes = Helper.toSafeInteger(data.optString("votes"), 0);
+            percent = Helper.toSafeDouble(data.optString("percent"), 0);
+        }
+    }
 
     public static String sFormHash = "";
     public static String sUploadHash = "";

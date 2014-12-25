@@ -65,14 +65,24 @@
         android:layout_height="wrap_content"/>
 
     <TextView
+        android:id="@+id/attachment_list"
         android:layout_toLeftOf="@+id/menu"
         android:layout_below="@id/comment_list"
-        android:id="@+id/attachment_list"
         android:text="@string/text_view_attachments"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@android:color/holo_green_dark"
         android:textStyle="bold"
         android:textSize="16dp" />
+
+    <TextView
+        android:id="@+id/votes"
+        android:layout_toLeftOf="@+id/menu"
+        android:layout_below="@id/attachment_list"
+        android:text="@string/text_view_vote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_green_dark"
+        android:textStyle="bold" />
 
 </RelativeLayout>

@@ -18,8 +18,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -34,6 +36,7 @@ import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.Attachment;
+import com.nyasama.util.Discuz.PollOption;
 
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
@@ -66,11 +69,12 @@ public class PostListActivity extends FragmentActivity
     Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
     private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
-
+    private List<PollOption> mPollOptions = new ArrayList<PollOption>();
     private int mForumId;
 
     private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
+    private AlertDialog mVoteDialog;
 
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
@@ -133,6 +137,11 @@ public class PostListActivity extends FragmentActivity
                 }
             }
         });
+    }
+
+    public void doPollVote(final int vid) {
+        // TODO: finish this
+        mVoteDialog.dismiss();
     }
 
     public void doLoadComment(final int pid, final int page) {
@@ -315,6 +324,30 @@ public class PostListActivity extends FragmentActivity
             }
         });
         menu.show();
+    }
+
+    public void showPollOptions() {
+        ListView listView = new ListView(this);
+        listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions,
+                android.R.layout.simple_list_item_1) {
+            @Override
+            public void convertView(ViewHolder viewHolder, PollOption item) {
+                ((TextView) viewHolder.getConvertView())
+                        .setText(item.option + " " + item.votes + " votes (" + item.percent + "%)");
+            }
+        });
+        mVoteDialog = new AlertDialog.Builder(this)
+                .setTitle("Vote Results")
+                .setView(listView)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                doPollVote(mPollOptions.get(i).id);
+            }
+        });
+        mVoteDialog.show();
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -559,6 +592,19 @@ public class PostListActivity extends FragmentActivity
                         }});
                     }
                 });
+
+                // show votes
+                TextView votes = (TextView) viewHolder.getView(R.id.votes);
+                Helper.updateVisibility(votes, false);
+                if (item.number == 1 && mPollOptions.size() > 0) {
+                    Helper.updateVisibility(votes, true);
+                    votes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showPollOptions();
+                        }
+                    });
+                }
             }
         };
     }
@@ -649,6 +695,16 @@ public class PostListActivity extends FragmentActivity
                             mForumId = Helper.toSafeInteger(var.optString("fid"), 0);
                         else if (var.opt("forum") instanceof JSONObject)
                             mForumId = Helper.toSafeInteger(var.optJSONObject("forum").optString("fid"), 0);
+
+                        // votes
+                        if (var.has("special_poll")) {
+                            mPollOptions.clear();
+                            JSONObject polloptions = var.getJSONObject("special_poll").getJSONObject("polloptions");
+                            for (Iterator<String> iter = polloptions.keys(); iter.hasNext(); ) {
+                                String key = iter.next();
+                                mPollOptions.add(new PollOption(polloptions.getJSONObject(key)));
+                            }
+                        }
 
                     } catch (JSONException e) {
                         Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");

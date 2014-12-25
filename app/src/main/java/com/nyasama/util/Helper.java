@@ -82,6 +82,16 @@ public class Helper {
             return defValue;
         }
     }
+    public static double toSafeDouble(String string, double defValue) {
+        if (string == null)
+            return defValue;
+        try {
+            return Double.parseDouble(string);
+        }
+        catch (NumberFormatException e) {
+            return defValue;
+        }
+    }
 
     public static String datelineToString(long time, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
