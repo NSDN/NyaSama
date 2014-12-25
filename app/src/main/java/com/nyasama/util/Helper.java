@@ -3,15 +3,20 @@ package com.nyasama.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.nyasama.R;
@@ -38,6 +43,18 @@ public class Helper {
         if (ThisApp.context != null)
             toast(ThisApp.context.getString(stringId));
     }
+    public static void toast(String text, int gravity, double fx, double fy) {
+        if (ThisApp.context != null) {
+            Toast toast = Toast.makeText(ThisApp.context, text, Toast.LENGTH_SHORT);
+            WindowManager manager =
+                    (WindowManager)ThisApp.context.getSystemService(Context.WINDOW_SERVICE);
+            Display display = manager.getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            toast.setGravity(gravity, (int)(size.x * fx), (int)(size.y * fy));
+            toast.show();
+        }
+    }
 
     public static void updateVisibility(View view, boolean show) {
         if (view != null)
@@ -56,6 +73,8 @@ public class Helper {
     }
 
     public static int toSafeInteger(String string, int defValue) {
+        if (string == null)
+            return defValue;
         try {
             return Integer.parseInt(string);
         }
@@ -144,7 +163,7 @@ public class Helper {
                     spannable.removeSpan(urlSpan);
                     spannable.setSpan(new URLSpan(urlSpan.getURL()) {
                         @Override
-                        public void onClick(View widget) {
+                        public void onClick(@NonNull View widget) {
                             if (onClickListener.onClick(widget, getURL()))
                                 return;
                             try { super.onClick(widget); }
