@@ -781,6 +781,14 @@ public class Discuz {
         task.execute();
     }
 
+    public static void search(final String text, final String key,
+                              final Response.Listener<JSONObject> callback) {
+        // TODO: to be implemented
+        // step 1: post query to search.php and fetch search id
+        // step 2: goto search.php again with fetched search id
+        callback.onResponse(new JSONObject());
+    }
+
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {

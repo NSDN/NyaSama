@@ -215,7 +215,12 @@ public class MainActivity extends FragmentActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home)
+        int id = item.getItemId();
+        if (id == R.id.action_search) {
+            startActivity(new Intent(this, SearchActivity.class));
+            return true;
+        }
+        else if (id == android.R.id.home)
             return super.onOptionsItemSelected(item);
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);
