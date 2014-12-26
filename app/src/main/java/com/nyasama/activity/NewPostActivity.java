@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -14,16 +13,20 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -46,6 +49,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NewPostActivity extends Activity {
 
@@ -64,6 +68,13 @@ public class NewPostActivity extends Activity {
         public String name;
         public String uploadId;
     }
+
+    private EditText mInputTitle;
+    private EditText mInputContent;
+    private Spinner mSpinnerTypes;
+
+    String mPhotoFilePath;
+    Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
     public void doEdit(View view) {
@@ -88,12 +99,15 @@ public class NewPostActivity extends Activity {
             put("pid", pid);
             put("tid", tid);
         }}, new HashMap<String, Object>() {{
+            put("editsubmit", "true");
             put("pid", pid);
             put("tid", tid);
-            put("editsubmit", "true");
             put("message", content);
             put("subject", title);
-            // strange, but really works
+
+            if (mSpinnerTypes.getVisibility() == View.VISIBLE && mThreadTypes != null)
+                put("typeid", mThreadTypes.get(mSpinnerTypes.getSelectedItem().toString()));
+
             for (ImageAttachment image : mImageAttachments)
                 put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
@@ -153,7 +167,10 @@ public class NewPostActivity extends Activity {
                 put("subject", title);
             else if (noticetrimstr != null)
                 put("noticetrimstr", noticetrimstr);
-            // strange, but really works
+
+            if (mSpinnerTypes.getVisibility() == View.VISIBLE && mThreadTypes != null)
+                put("typeid", mThreadTypes.get(mSpinnerTypes.getSelectedItem().toString()));
+
             for (ImageAttachment image : mImageAttachments)
                 put("attachnew[" + image.uploadId + "][description]", "");
         }}, new Response.Listener<JSONObject>() {
@@ -200,7 +217,7 @@ public class NewPostActivity extends Activity {
         });
     }
 
-    void loadMessage() {
+    public void loadMessage() {
         final Intent intent = getIntent();
         mInputTitle.setEnabled(false);
         mInputContent.setEnabled(false);
@@ -216,56 +233,58 @@ public class NewPostActivity extends Activity {
                 Helper.updateVisibility(findViewById(R.id.loading), false);
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
-                }
-                else {
+                } else {
                     JSONObject var = data.optJSONObject("Variables");
+                    JSONObject postinfo = null;
                     if (var != null)
-                        var = var.optJSONObject("postinfo");
-                    if (var != null) {
-                        mInputTitle.setText(var.optString("subject"));
-                        mInputContent.setText(var.optString("message"));
+                        postinfo = var.optJSONObject("postinfo");
+                    if (postinfo != null) {
+                        mInputTitle.setText(postinfo.optString("subject"));
+                        mInputContent.setText(postinfo.optString("message"));
+                        if ("1".equals(postinfo.optString("first"))) {
+                            int fid = Helper.toSafeInteger(postinfo.optString("fid"), 0);
+                            if (fid > 0) loadThreadTypes(fid,
+                                    Helper.toSafeInteger(var.optString("typeid"), 0));
+                        }
                     }
                 }
             }
         });
     }
 
-    void insertCodeToContent(String code) {
+    public void loadThreadTypes(final int fid, final int typeid) {
+        Discuz.loadThreadTypes(new Response.Listener<SparseArray<Discuz.ThreadTypes>>() {
+            @Override
+            public void onResponse(SparseArray<Discuz.ThreadTypes> threadTypesSparseArray) {
+                mThreadTypes = threadTypesSparseArray.get(fid);
+                Helper.updateVisibility(mSpinnerTypes, mThreadTypes != null);
+                if (mThreadTypes != null) {
+                    List<String> list = new ArrayList<String>();
+                    list.add(getString(R.string.string_uncategorized));
+                    int position = 0;
+                    for (Map.Entry<String, Integer> e : mThreadTypes.entrySet()) {
+                        list.add(e.getKey());
+                        if (e.getValue() == typeid)
+                            position = list.size() - 1;
+                    }
+                    ArrayAdapter adapter = new ArrayAdapter<String>(NewPostActivity.this,
+                            android.R.layout.simple_spinner_item, list);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    mSpinnerTypes.setAdapter(adapter);
+                    mSpinnerTypes.setSelection(position);
+                }
+            }
+        });
+    }
+
+    public void insertCodeToContent(String code) {
         int start = mInputContent.getSelectionStart();
         mInputContent.getText().insert(start, code);
     }
 
-    void insertImageToContent(ImageAttachment image) {
+    public void insertImageToContent(ImageAttachment image) {
         insertCodeToContent("[attachimg]"+image.uploadId+"[/attachimg]");
     }
-
-    // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
-    // by bluebrain
-    String getPathFromUri(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        if (cursor == null) {
-            return uri.getPath();
-        }
-        else {
-            cursor.moveToFirst();
-            String document_id = cursor.getString(0);
-            document_id = document_id.substring(document_id.lastIndexOf(":")+1);
-            cursor.close();
-
-            cursor = getContentResolver().query(
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
-            cursor.moveToFirst();
-            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            cursor.close();
-            return path;
-        }
-    }
-
-    private EditText mInputTitle;
-    private EditText mInputContent;
-
-    String mPhotoFilePath;
 
     public void showInsertSmileyOptions() {
         GridView smileyList = new GridView(this);
@@ -275,7 +294,8 @@ public class NewPostActivity extends Activity {
                 .setView(smileyList)
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
-        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(Discuz.sSmilies, android.R.layout.simple_list_item_1) {
+        final List<SmileyGroup> smilyGroups = Discuz.getSmilies();
+        smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(smilyGroups, android.R.layout.simple_list_item_1) {
             @Override
             public void convertView(ViewHolder viewHolder, SmileyGroup item) {
                 ((TextView) viewHolder.getConvertView()).setText(item.name);
@@ -284,7 +304,7 @@ public class NewPostActivity extends Activity {
         smileyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                showSmileyOptions(Discuz.sSmilies.get(i));
+                showSmileyOptions(smilyGroups.get(i));
                 dialog.cancel();
             }
         });
@@ -309,13 +329,9 @@ public class NewPostActivity extends Activity {
                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         File dir = Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_PICTURES);
-                        try {
-                            File file = File.createTempFile("nyasama_", ".jpg", dir);
-                            mPhotoFilePath = file.getAbsolutePath();
-                            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-                        } catch (IOException e) {
-                            Log.e(TAG, "create photo cache failed");
-                        }
+                        File file = new File(dir, "nyasama_upload_photo.jpg");
+                        mPhotoFilePath = file.getAbsolutePath();
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
                         startActivityForResult(intent, REQCODE_PICK_CAPTURE);
                     }
                 })
@@ -395,8 +411,13 @@ public class NewPostActivity extends Activity {
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // REF: http://stackoverflow.com/questions/7300497/adjust-layout-when-soft-keyboard-is-on
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE |
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         mInputTitle = (EditText) findViewById(R.id.input_title);
         mInputContent = (EditText) findViewById(R.id.input_content);
+        mSpinnerTypes = (Spinner) findViewById(R.id.thread_type);
 
         Intent intent = getIntent();
         if (intent.hasExtra(ARG_POST_TITLE)) {
@@ -404,12 +425,18 @@ public class NewPostActivity extends Activity {
             mInputTitle.setEnabled(false);
         }
 
+        // editing old post
         if (intent.getIntExtra("pid", 0) > 0) {
             setTitle(getString(R.string.title_editing_post));
             loadMessage();
         }
+        // replying
         else if (intent.getIntExtra("tid", 0) > 0) {
             setTitle(getString(R.string.title_editing_reply));
+        }
+        // creating new post
+        else if (intent.getIntExtra("fid", 0) > 0) {
+            loadThreadTypes(intent.getIntExtra("fid", 0), 0);
         }
     }
 
@@ -422,7 +449,7 @@ public class NewPostActivity extends Activity {
                 && resultCode == RESULT_OK) {
             //
             String filePath = requestCode == REQCODE_PICK_IMAGE ?
-                    getPathFromUri(data.getData()) : mPhotoFilePath;
+                    Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
 
             // resize the image if too large
             Bitmap bitmap = BitmapFactory.decodeFile(filePath);
@@ -432,7 +459,7 @@ public class NewPostActivity extends Activity {
                 File dir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES);
                 try {
-                    File file = File.createTempFile("nyasama_resized_", ".jpg", dir);
+                    File file = new File(dir, "nyasama_upload_resized.jpg");
                     FileOutputStream stream = new FileOutputStream(file);
                     bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
@@ -519,13 +546,13 @@ public class NewPostActivity extends Activity {
             doEdit(null);
         }
         else if (id == R.id.action_add_smiley) {
-            if (Discuz.sSmilies == null) {
+            if (Discuz.getSmilies() == null) {
                 final AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
-                Discuz.getSmileies(new Response.Listener<JSONObject>() {
+                Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
                     @Override
-                    public void onResponse(JSONObject jsonObject) {
+                    public void onResponse(List<SmileyGroup> smileyGroups) {
                         dialog.cancel();
                         mInputContent.postDelayed(new Runnable() {
                             @Override

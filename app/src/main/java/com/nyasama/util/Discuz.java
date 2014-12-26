@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
@@ -103,6 +104,10 @@ public class Discuz {
     }
     public static class ForumCatalog {
         public String name;
+
+        public ForumCatalog(String name) {
+            this.name = name;
+        }
     }
     public static class Thread {
         public int id;
@@ -120,6 +125,10 @@ public class Discuz {
             author = data.optString("author");
             lastpost = data.optString("lastpost");
             dateline = data.optString("dateline");
+            // Discuz may return integer as dateline
+            int dateVal = Helper.toSafeInteger(lastpost, 0);
+            if (dateVal > 0)
+                lastpost = Helper.datelineToString(dateVal, null);
             replies = Integer.parseInt(data.optString("replies"));
             views = Integer.parseInt(data.optString("views"));
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
@@ -232,7 +241,6 @@ public class Discuz {
                 number = Integer.parseInt(data.optString("pmnum"));
         }
     }
-
     public static class Notice {
         public int id;
         public String type;
@@ -247,7 +255,6 @@ public class Discuz {
                 Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
     public static class FavItem {
         public int id;
         public String type;
@@ -262,6 +269,19 @@ public class Discuz {
             title = data.optString("title");
             if (data.has("dateline")) dateline = Helper.datelineToString(
                     Integer.parseInt(data.optString("dateline")), null);
+        }
+    }
+    public static class PollOption {
+        public int id;
+        public String option;
+        public int votes;
+        public double percent;
+
+        public PollOption(JSONObject data) {
+            id = Helper.toSafeInteger(data.optString("polloptionid"), 0);
+            option = data.optString("polloption");
+            votes = Helper.toSafeInteger(data.optString("votes"), 0);
+            percent = Helper.toSafeDouble(data.optString("percent"), 0);
         }
     }
 
@@ -307,6 +327,18 @@ public class Discuz {
         return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
     }
 
+    public static String getSafeUrl(String url) {
+        if (url == null)
+            return "";
+        url = url.replace(" ", "%20");
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;
+        else if (url.startsWith("/"))
+            return DISCUZ_HOST + url;
+        else
+            return DISCUZ_URL + url;
+    }
+
     private static void notifyNewMessage() {
         Class activityClass = UserProfileActivity.class;
         if (sNewMessages > 0 && sNewPrompts == 0)
@@ -343,17 +375,36 @@ public class Discuz {
         public String path;
         public List<Smiley> list;
     }
-
-    public static List<SmileyGroup> sSmilies;
-    private static Response.Listener<JSONObject> mSmiliesCallback = null;
+    private static List<SmileyGroup> parseSmilies(JSONArray data) {
+        List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
+        for (int i = 0; i < data.length(); i ++) {
+            final JSONObject jsonData = data.optJSONObject(i);
+            final JSONArray jsonList = jsonData.optJSONArray("list");
+            final List<Smiley> smileyList = new ArrayList<Smiley>();
+            for (int j = 0; j < jsonList.length(); j ++) {
+                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                smileyList.add(new Smiley() {{
+                    code = jsonSmiley.optString(1);
+                    image = jsonSmiley.optString(2);
+                }});
+            }
+            smileyGroups.add(new SmileyGroup() {{
+                name = jsonData.optString("name");
+                path = jsonData.optString("path");
+                list = smileyList;
+            }});
+        }
+        return smileyGroups;
+    }
+    private static List<SmileyGroup> sSmilies;
+    private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
     private static class JSInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void setSmilies(String json) {
             try {
-                parseSmilies(new JSONArray(json));
                 if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(null);
+                    mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
                 Log.d("Discuz", "got smilies!");
             }
             catch (JSONException e) {
@@ -380,30 +431,14 @@ public class Discuz {
         ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
         ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
     }
-    private static void parseSmilies(JSONArray data) {
-        if (sSmilies == null)
-            sSmilies = new ArrayList<SmileyGroup>();
-        else
-            sSmilies.clear();
-        for (int i = 0; i < data.length(); i ++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j ++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
-                }});
-            }
-            sSmilies.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
-        }
+    public static List<SmileyGroup> getSmilies() {
+        return sSmilies;
     }
-    public static void getSmileies(Response.Listener<JSONObject> callback) {
+    public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
+        if (sSmilies != null) {
+            callback.onResponse(sSmilies);
+            return;
+        }
         mSmiliesCallback = callback;
         Request request = new StringRequest(DISCUZ_URL+"data/cache/common_smilies_var.js", new Response.Listener<String>() {
             @Override
@@ -429,16 +464,43 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
     }
-    public static String getSafeUrl(String url) {
-        if (url == null)
-            return "";
-        url = url.replace(" ", "%20");
-        if (url.startsWith("http://") || url.startsWith("https://"))
-            return url;
-        else if (url.startsWith("/"))
-            return DISCUZ_HOST + url;
-        else
-            return DISCUZ_URL + url;
+
+    public static class ThreadTypes extends HashMap<String, Integer> {
+        public ThreadTypes(JSONObject data) {
+            for (Iterator<String> iter = data.keys(); iter.hasNext(); ) {
+                String key = iter.next();
+                put(data.optString(key),
+                        Helper.toSafeInteger(key, 0));
+            }
+        }
+    }
+    private static SparseArray<ThreadTypes> sThreadTypes;
+    public static SparseArray<ThreadTypes> getThreadTypes() {
+        return sThreadTypes;
+    }
+    public static void loadThreadTypes(final Response.Listener<SparseArray<ThreadTypes>> callback) {
+        if (sThreadTypes != null) {
+            callback.onResponse(sThreadTypes);
+            return;
+        }
+        Discuz.execute("forumnav", new HashMap<String, Object>(), null,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject data) {
+                    JSONObject var = data.optJSONObject("Variables");
+                    if (var == null) return;
+                    sThreadTypes = new SparseArray<ThreadTypes>();
+                    JSONArray forums = var.optJSONArray("forums");
+                    for (int i = 0; i < forums.length(); i ++) {
+                        JSONObject forum = forums.optJSONObject(i);
+                        JSONObject threadtypes = forum.optJSONObject("threadtypes");
+                        if (threadtypes != null && !threadtypes.isNull("types"))
+                            sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
+                                    new ThreadTypes(threadtypes.optJSONObject("types")));
+                    }
+                    callback.onResponse(sThreadTypes);
+                }
+            });
     }
 
     public static class ResponseListener implements Response.Listener<String> {
@@ -551,7 +613,7 @@ public class Discuz {
             Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
                 for (Map.Entry<String, Object> entry : body.entrySet())
-                    contentBody.put(entry.getKey(),
+                    if (entry.getValue() != null) contentBody.put(entry.getKey(),
                             new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
             }
             catch (UnsupportedEncodingException e) {
