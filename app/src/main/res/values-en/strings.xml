@@ -85,10 +85,8 @@
     <string name="forum_index_posts">posts</string>
     <string name="preference_language">Language</string>
     <string name="preference_animation">Fade Animation</string>
-    <string name="diag_insert_tip_smiles">Smiles↓</string>
-    <string name="diag_insert_tip_images">Images↓</string>
     <string name="preference_category_version">Version</string>
-    <string name="version_value">NyaSama-nightly-141224</string>
+    <string name="version_value">NyaSama-nightly-141225</string>
     <string name="preference_cachesize">Cache Size</string>
     <string name="preference_category_explore">Explore</string>
     <string name="preference_thumbswitch">Show Image</string>
