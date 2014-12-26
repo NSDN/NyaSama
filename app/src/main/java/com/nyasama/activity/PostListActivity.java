@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -29,6 +28,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CallbackMatcher;
@@ -63,7 +63,6 @@ public class PostListActivity extends FragmentActivity
     private static final int PAGE_SIZE_COUNT = 10;
     private static final int COMMENT_PAGE_SIZE = 10;
     private static final int MAX_TRIMSTR_LENGTH = 30;
-    private static final String TAG = "PostList";
 
     private CommonListFragment<Post> mListFragment;
     Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
@@ -368,7 +367,8 @@ public class PostListActivity extends FragmentActivity
                         return "<img src=\"" + url + "\" />";
                     }
                 }
-                Log.w(TAG, "attachment image not found (" + matchResult.group(1) + ")");
+                Log.w(PostListActivity.class.toString(),
+                        "attachment image not found (" + matchResult.group(1) + ")");
                 return "";
             }
         });
@@ -465,7 +465,7 @@ public class PostListActivity extends FragmentActivity
         "[/quote]";
     }
 
-    final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
+    final BitmapLruCache imageCache = new BitmapLruCache();
     final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
@@ -646,7 +646,8 @@ public class PostListActivity extends FragmentActivity
                         total = 0;
                     }
                     catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Log.e(PostListActivity.class.toString(),
+                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }
@@ -707,7 +708,8 @@ public class PostListActivity extends FragmentActivity
                         }
 
                     } catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Log.e(PostListActivity.class.toString(),
+                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }

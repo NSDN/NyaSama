@@ -9,10 +9,9 @@ import android.text.Html;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 import com.nyasama.ThisApp;
-
-import java.util.Map;
 
 /**
  * Created by oxyflour on 2014/11/19.
@@ -21,12 +20,12 @@ import java.util.Map;
 public class HtmlImageGetter implements Html.ImageGetter {
 
     private TextView container;
-    private Map<String, Bitmap> cache;
+    private ImageLoader.ImageCache cache;
     private int jobs;
     private int maxWidth;
     private int maxHeight;
 
-    public HtmlImageGetter(TextView container, Map<String, Bitmap> cache, int maxWidth, int maxHeight) {
+    public HtmlImageGetter(TextView container, ImageLoader.ImageCache cache, int maxWidth, int maxHeight) {
         this.container = container;
         this.cache = cache;
         this.maxWidth = maxWidth;
@@ -40,7 +39,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
         final String url = Discuz.getSafeUrl(s);
         final LevelListDrawable drawable = new LevelListDrawable();
 
-        Bitmap cachedImage = cache == null ? null : cache.get(url);
+        Bitmap cachedImage = cache == null ? null : cache.getBitmap(url);
         Resources resources = ThisApp.context.getResources();
         Drawable empty = cachedImage == null ?
                 resources.getDrawable(android.R.drawable.ic_menu_gallery):
@@ -58,7 +57,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
                     drawable.setLevel(1);
                     // save to cache
                     if (cache != null)
-                        cache.put(url, bitmap);
+                        cache.putBitmap(url, bitmap);
                     // refresh layout
                     jobs --;
                     if (jobs == 0) {
