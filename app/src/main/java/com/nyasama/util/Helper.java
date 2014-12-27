@@ -27,6 +27,7 @@ import com.nyasama.activity.UserProfileActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -99,6 +100,11 @@ public class Helper {
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    public static void setListLength(List list, int size) {
+        if (size < list.size())
+            list.subList(size, list.size()).clear();
     }
 
     @SuppressWarnings("unchecked")

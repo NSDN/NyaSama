@@ -139,9 +139,7 @@ public class SearchActivity extends FragmentActivity
                     total = 0;
                 } else if (data.has("Variables")) {
                     JSONObject var = data.optJSONObject("Variables");
-                    // remove possible duplicated items
-                    if (page * PAGE_SIZE_COUNT < listData.size())
-                        listData.subList(page * PAGE_SIZE_COUNT, listData.size()).clear();
+                    Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
                     // TODO: we only parse threads here
                     JSONObject list = var.optJSONObject("threadlist");
                     if (list != null) for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {

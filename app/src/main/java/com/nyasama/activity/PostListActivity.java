@@ -160,9 +160,7 @@ public class PostListActivity extends FragmentActivity
                     if (var.opt("comments") instanceof JSONArray) {
                         JSONArray commentList = var.optJSONArray("comments");
                         List<Comment> comments = mComments.get(pid);
-                        // remove duplicated items
-                        if (page * COMMENT_PAGE_SIZE < comments.size())
-                            comments.subList(page * COMMENT_PAGE_SIZE, comments.size()).clear();
+                        Helper.setListLength(comments, page * COMMENT_PAGE_SIZE);
                         for (int i = 0; i < commentList.length(); i ++) {
                             comments.add(new Comment(commentList.optJSONObject(i)));
                         }
@@ -617,7 +615,6 @@ public class PostListActivity extends FragmentActivity
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
         final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
-        final int position = page * PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);
@@ -652,9 +649,7 @@ public class PostListActivity extends FragmentActivity
                     }
                 }
                 else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
+                    Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
