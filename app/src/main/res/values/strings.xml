@@ -86,7 +86,7 @@
     <string name="preference_language">语言</string>
     <string name="preference_animation">过渡动画</string>
     <string name="preference_category_version">版本</string>
-    <string name="version_value">NyaSama-nightly-141225</string>
+    <string name="version_value">NyaSama-nightly-141226.1</string>
     <string name="preference_cachesize">缓存大小</string>
     <string name="preference_category_explore">浏览</string>
     <string name="preference_thumbswitch">图片显示</string>
@@ -101,5 +101,9 @@
     <string name="string_uncategorized">未分类</string>
     <string name="toast_click_again_to_exit">再按一次后退来退出</string>
     <string name="action_goto_forum">返回板块</string>
-    <string name="text_view_vote">查看投票</string>
+    <string name="text_view_vote">[查看投票]</string>
+    <string name="prompt_1">你收到了</string>
+    <string name="prompt_2">条私信</string>
+    <string name="prompt_3">和</string>
+    <string name="prompt_4">条提醒</string>
 </resources>
