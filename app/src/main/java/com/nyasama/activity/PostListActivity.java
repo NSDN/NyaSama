@@ -372,6 +372,7 @@ public class PostListActivity extends FragmentActivity
         });
 
         message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
+        message = message.replaceAll("<script[^>]*>(.*?)</script>", "");
 
         return message;
     }
