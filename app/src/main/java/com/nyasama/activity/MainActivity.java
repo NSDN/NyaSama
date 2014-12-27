@@ -126,7 +126,7 @@ public class MainActivity extends FragmentActivity implements
                 }});
 
         /*
-        TODO: enable this
+        TODO: enable this to use umeng
         PushAgent mPushAgent = PushAgent.getInstance(this);
         mPushAgent.enable();
         Log.d("DEVICETOKEN", UmengRegistrar.getRegistrationId(this));
