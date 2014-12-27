@@ -41,5 +41,12 @@
         <item>0</item>
     </string-array>
 
+    <string name="pref_key_text_size">text_size</string>
+    <string-array name="text_size">
+        <item>16</item>
+        <item>20</item>
+        <item>24</item>
+    </string-array>
+
     <string name="pref_key_version">version_number</string>
 </resources>

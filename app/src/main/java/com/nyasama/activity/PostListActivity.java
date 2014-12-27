@@ -469,6 +469,8 @@ public class PostListActivity extends FragmentActivity
     final int maxImageSize = Helper.toSafeInteger(
             ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_thumb_size), ""), -1);
     final String maxImageWxH = maxImageSize < 0 ? "" : "268x380";
+    final int textFontSize = Helper.toSafeInteger(
+            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_text_size), ""), 16);
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -499,6 +501,7 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
+                messageText.setTextSize(textFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
                         new HtmlImageGetter(messageText, imageCache, maxImageSize, maxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,

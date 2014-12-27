@@ -26,8 +26,15 @@
             android:title="@string/preference_cachesize" />
     </PreferenceCategory>
 
-    <!-- TODO: use these -->
     <PreferenceCategory android:title="@string/preference_category_explore">
+        <ListPreference
+            android:defaultValue="16"
+            android:dialogTitle="@string/preference_textsize"
+            android:entries="@array/text_size"
+            android:entryValues="@array/text_size"
+            android:key="@string/pref_key_text_size"
+            android:summary="%s"
+            android:title="@string/preference_textsize" />
         <ListPreference
             android:defaultValue="-1"
             android:dialogTitle="@string/preference_thumbsize"
