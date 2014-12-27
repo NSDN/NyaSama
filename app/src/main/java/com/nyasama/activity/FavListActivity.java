@@ -87,7 +87,7 @@ public class FavListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
+        final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("myfavthread", new HashMap<String, Object>() {{
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {

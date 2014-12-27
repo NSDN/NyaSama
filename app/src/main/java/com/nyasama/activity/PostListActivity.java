@@ -614,7 +614,7 @@ public class PostListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
+        final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);

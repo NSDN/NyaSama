@@ -100,7 +100,7 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
         final int fid = bundle.getInt("fid", 0);
         final int uid = bundle.getInt("uid", 0);
         final int pps = bundle.getInt("pps", 20);
-        final int page = (int) Math.round(Math.floor(listData.size() / pps));
+        final int page = listData.size() / pps;
 
         String module = fid > 0 ? "forumdisplay" : (uid > 0 ? "mythread" : "hotthread");
         Discuz.execute(module, new HashMap<String, Object>() {{
