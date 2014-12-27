@@ -65,10 +65,10 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://192.168.0.154";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/bbs/";
+    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
-    public static String DISCUZ_ENC = "utf8";
+    public static String DISCUZ_ENC = "gbk";
 
     public static int IMAGE_THUMB_WIDTH = 268;
     public static int IMAGE_THUMB_HEIGHT = 380;
