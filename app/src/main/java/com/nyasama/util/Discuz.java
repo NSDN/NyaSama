@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -64,8 +65,8 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/";
+    public static String DISCUZ_HOST = "http://192.168.0.154";
+    public static String DISCUZ_URL = DISCUZ_HOST + "/bbs/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
@@ -77,6 +78,21 @@ public class Discuz {
     public static int NOTIFICATION_ID = 1;
 
     public static String BROADCAST_FILTER_LOGIN = "login";
+
+    public static class JSONVolleyError extends JSONObject {
+        public JSONVolleyError(String message) {
+            super();
+            try {
+                put(VOLLEY_ERROR, message);
+            }
+            catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        public JSONVolleyError(VolleyError e) {
+            this(e.getMessage());
+        }
+    }
 
     public static class Forum {
         public int id;
@@ -559,18 +575,11 @@ public class Discuz {
         }
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            JSONObject data = new JSONObject();
             String msg = volleyError.getMessage();
             // NOTE: getMessage may return null
             if (msg == null) msg = "Unknown";
-            try {
-                data.put(VOLLEY_ERROR, msg);
-            }
-            catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
             Log.e("VolleyError", msg);
-            callback.onResponse(data);
+            callback.onResponse(new JSONVolleyError(msg));
         }
     }
 
@@ -609,6 +618,7 @@ public class Discuz {
         Helper.putIfNull(params, "submodule", "checkpost");
 
         Request request;
+        String url = DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
         if (module.equals("editpost") && body != null) {
             Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
@@ -620,15 +630,13 @@ public class Discuz {
                 throw new RuntimeException(e);
             }
             request = new MultipartRequest(
-                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-                    contentBody,
+                    url, contentBody,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback));
         }
         else {
             request =  new StringRequest(
-                    body == null ? Request.Method.GET : Request.Method.POST,
-                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    body == null ? Request.Method.GET : Request.Method.POST, url,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback)) {
                 @Override
@@ -781,12 +789,50 @@ public class Discuz {
         task.execute();
     }
 
-    public static void search(final String text, final String key,
+    public static void search(final String text,
+                              final Map<String, Object> params,
                               final Response.Listener<JSONObject> callback) {
-        // TODO: to be implemented
-        // step 1: post query to search.php and fetch search id
-        // step 2: goto search.php again with fetched search id
-        callback.onResponse(new JSONObject());
+        final Request request = new StringRequest(
+                Request.Method.POST,
+                // set #noredirect# so volley will throw error 302
+                DISCUZ_URL + "search.php?searchsubmit=yes##noredirect#",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        callback.onResponse(new JSONVolleyError("Unexpected Response"));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        String searchUrl = volleyError.networkResponse.headers.get("location");
+                        if (searchUrl == null) {
+                            callback.onResponse(new JSONVolleyError(volleyError));
+                            return;
+                        }
+                        final Uri uri = Uri.parse(searchUrl);
+                        for (String key : uri.getQueryParameterNames())
+                            params.put(key, uri.getQueryParameter(key));
+                        Discuz.execute("search", params, null, callback);
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                return new HashMap<String, String>() {{
+                    put("mod", "forum");
+                    put("forumhash", sFormHash);
+                    put("srhfid", "");
+                    put("srhlocality", "forum:index");
+                    put("srchtxt", text);
+                    put("searchsubmit", "true");
+                }};
+            }
+            @Override
+            protected String getParamsEncoding() {
+                return DISCUZ_ENC;
+            }
+        };
+        ThisApp.requestQueue.add(request);
     }
 
     public static void login(final String username, final String password,

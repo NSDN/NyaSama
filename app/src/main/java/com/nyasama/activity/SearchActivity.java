@@ -3,8 +3,10 @@ package com.nyasama.activity;
 import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,14 +18,20 @@ import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
+import com.nyasama.util.Discuz.Thread;
 
 import org.json.JSONObject;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class SearchActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
+    private static final int PAGE_SIZE_COUNT = 20;
     private CommonListFragment<Object> mListFragment;
 
     @Override
@@ -39,7 +47,7 @@ public class SearchActivity extends FragmentActivity
         mListFragment = CommonListFragment.getNewFragment(
                 Object.class,
                 R.layout.fragment_simple_list,
-                android.R.layout.simple_list_item_1,
+                R.layout.fragment_thread_item,
                 R.id.list);
 
         getSupportFragmentManager().beginTransaction()
@@ -87,18 +95,40 @@ public class SearchActivity extends FragmentActivity
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter() {
             @Override
-            public void convertView(ViewHolder viewHolder, Object item) {
+            public void convertView(ViewHolder viewHolder, Object obj) {
+                Thread item = (Thread) obj;
+                viewHolder.setText(R.id.title, Html.fromHtml(item.title));
+                viewHolder.setText(R.id.sub,
+                        Html.fromHtml(item.author + " " + item.lastpost));
+                viewHolder.setText(R.id.inf, item.replies + "/" + item.views);
             }
         };
     }
 
     @Override
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+        Object obj = fragment.getData(position);
+        if (obj instanceof Thread) {
+            Thread thread = (Thread) obj;
+            Intent intent = new Intent(this, PostListActivity.class);
+            intent.putExtra("tid", thread.id);
+            intent.putExtra("title", thread.title);
+            startActivity(intent);
+        }
     }
 
     @Override
-    public void onLoadingMore(final CommonListFragment fragment, List listData) {
-        Discuz.search(getIntent().getStringExtra(SearchManager.QUERY), "", new Response.Listener<JSONObject>() {
+    @SuppressWarnings("unchecked")
+    public void onLoadingMore(final CommonListFragment fragment, final List listData) {
+        String query = getIntent().getStringExtra(SearchManager.QUERY);
+        if (query == null || query.isEmpty()) {
+            fragment.loadMoreDone(0);
+            return;
+        }
+        final int page = listData.size() / PAGE_SIZE_COUNT;
+        Discuz.search(query, new HashMap<String, Object>() {{
+            put("page", page + 1);
+        }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
                 int total = -1;
@@ -108,8 +138,25 @@ public class SearchActivity extends FragmentActivity
                     Helper.toast(data.optJSONObject("Message").optString("messagestr"));
                     total = 0;
                 } else if (data.has("Variables")) {
-                    // TODO: implement this
-                    ;
+                    JSONObject var = data.optJSONObject("Variables");
+                    // remove possible duplicated items
+                    if (page * PAGE_SIZE_COUNT < listData.size())
+                        listData.subList(page * PAGE_SIZE_COUNT, listData.size()).clear();
+                    // TODO: we only parse threads here
+                    JSONObject list = var.optJSONObject("threadlist");
+                    if (list != null) for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {
+                        String key = iter.next();
+                        listData.add(new Thread(list.optJSONObject(key)));
+                    }
+                    // sort by id
+                    Collections.sort(listData, new Comparator() {
+                        @Override
+                        public int compare(Object o, Object o2) {
+                            return ((Thread) o).id - ((Thread) o2).id;
+                        }
+                    });
+                    // total
+                    total = Helper.toSafeInteger(var.optString("count"), listData.size());
                 }
                 fragment.loadMoreDone(total);
             }
