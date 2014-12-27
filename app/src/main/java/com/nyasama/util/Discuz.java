@@ -867,7 +867,7 @@ public class Discuz {
         }}, callback);
     }
 
-    // TODO: "Logout" is not found in the api source =.=
+    // Note: "Logout" is not found in the api source =.=
     public static void logout(final Response.Listener<JSONObject> callback) {
         sUid = 0;
         sNewMessages = 0;

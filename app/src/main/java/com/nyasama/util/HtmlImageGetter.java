@@ -61,7 +61,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
                     // refresh layout
                     jobs --;
                     if (jobs == 0) {
-                        // TODO: there should be a better way to refresh the layout
+                        // TODO: find a better way to refresh the layout
                         container.setText(container.getText());
                     }
                 }

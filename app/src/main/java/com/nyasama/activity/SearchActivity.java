@@ -138,7 +138,7 @@ public class SearchActivity extends FragmentActivity
                 } else if (data.has("Variables")) {
                     JSONObject var = data.optJSONObject("Variables");
                     Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
-                    // TODO: we only parse threads here
+                    // TODO: update search.php and parse more results here
                     JSONObject list = var.optJSONObject("threadlist");
                     if (list != null) for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {
                         String key = iter.next();

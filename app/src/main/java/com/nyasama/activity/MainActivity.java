@@ -46,7 +46,7 @@ public class MainActivity extends FragmentActivity implements
         DiscuzThreadListFragment.OnThreadListInteraction {
 
     public void loadUserInfo() {
-        // TODO: just use forumindex to refresh group name
+        // TODO: find a better way to refresh group name
         Discuz.execute("forumindex", new HashMap<String, Object>(),
                 null, new Response.Listener<JSONObject>() {
                     @Override
