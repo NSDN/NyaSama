@@ -102,6 +102,7 @@ public class Discuz {
                 icon = DISCUZ_URL + "static/image/common/" + (todayPosts > 0 ? "forum_new.gif" : "forum.gif");
         }
     }
+
     public static class ForumCatalog {
         public String name;
 
@@ -109,6 +110,7 @@ public class Discuz {
             this.name = name;
         }
     }
+
     public static class Thread {
         public int id;
         public String title;
@@ -134,6 +136,7 @@ public class Discuz {
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
+
     public static class Post {
         public int id;
         public int authorId;
@@ -163,6 +166,7 @@ public class Discuz {
             }
         }
     }
+
     public static class Attachment {
         public int id;
         public boolean isImage;
@@ -191,6 +195,7 @@ public class Discuz {
             isImage = !"0".equals(data.optString("isimage"));
         }
     }
+
     public static class Comment {
         public int authorId;
         public String author;
@@ -201,12 +206,14 @@ public class Discuz {
             author = data.optString("author");
             comment = data.optString("comment");
         }
+
         public Comment(int authorId, String author, String comment) {
             this.authorId = authorId;
             this.author = author;
             this.comment = comment;
         }
     }
+
     public static class PMList {
         public boolean isNew;
         public String author;
@@ -236,11 +243,12 @@ public class Discuz {
             else if (data.has("dateline"))
                 dateString = data.optString("dateline");
             if (!dateString.isEmpty()) lastdate = Helper.datelineToString(
-                Integer.parseInt(dateString), null);
+                    Integer.parseInt(dateString), null);
             if (data.has("pmnum"))
                 number = Integer.parseInt(data.optString("pmnum"));
         }
     }
+
     public static class Notice {
         public int id;
         public String type;
@@ -252,9 +260,10 @@ public class Discuz {
             type = data.optString("type");
             note = data.optString("note");
             if (data.has("dateline")) dateline = Helper.datelineToString(
-                Integer.parseInt(data.optString("dateline")), null);
+                    Integer.parseInt(data.optString("dateline")), null);
         }
     }
+
     public static class FavItem {
         public int id;
         public String type;
@@ -271,6 +280,7 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
+
     public static class PollOption {
         public int id;
         public String option;
@@ -309,8 +319,7 @@ public class Discuz {
         try {
             byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
             key = String.format("%032x", new BigInteger(1, buffer));
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
         Map<String, Object> params = new HashMap<String, Object>();
@@ -351,9 +360,9 @@ public class Discuz {
                 0,
                 intents,
                 PendingIntent.FLAG_CANCEL_CURRENT);
-        String text = "you've got " +
-                (sNewMessages > 0 ? sNewMessages+" pms" : "") +
-                (sNewPrompts > 0 ? (sNewMessages>0 ? " and " : "")+sNewPrompts+" prompts" : "");
+        String text = context.getString(R.string.prompt_1) + " " +
+                (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
+                (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
         Notification notification = new NotificationCompat.Builder(ThisApp.context)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setDefaults(Notification.DEFAULT_SOUND)
@@ -370,18 +379,20 @@ public class Discuz {
         public String code;
         public String image;
     }
+
     public static class SmileyGroup {
         public String name;
         public String path;
         public List<Smiley> list;
     }
+
     private static List<SmileyGroup> parseSmilies(JSONArray data) {
         List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
-        for (int i = 0; i < data.length(); i ++) {
+        for (int i = 0; i < data.length(); i++) {
             final JSONObject jsonData = data.optJSONObject(i);
             final JSONArray jsonList = jsonData.optJSONArray("list");
             final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j ++) {
+            for (int j = 0; j < jsonList.length(); j++) {
                 final JSONArray jsonSmiley = jsonList.optJSONArray(j);
                 smileyList.add(new Smiley() {{
                     code = jsonSmiley.optString(1);
@@ -396,8 +407,10 @@ public class Discuz {
         }
         return smileyGroups;
     }
+
     private static List<SmileyGroup> sSmilies;
     private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
+
     private static class JSInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
@@ -406,41 +419,43 @@ public class Discuz {
                 if (mSmiliesCallback != null)
                     mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
                 Log.d("Discuz", "got smilies!");
-            }
-            catch (JSONException e) {
+            } catch (JSONException e) {
                 Log.e("Discuz", "load smilies failed");
             }
         }
     }
+
     private static void parseSmileyString(String content) {
-        content = "<script>" + content + "</script>"+
-                "<script>"+
+        content = "<script>" + content + "</script>" +
+                "<script>" +
                 "var list = [];" +
                 "var type = smilies_type;" +
                 "var array = smilies_array;" +
                 "for (var k in type) {" +
-                "var d = type[k];"+
-                "var i = parseInt(k.substring(1));"+
+                "var d = type[k];" +
+                "var i = parseInt(k.substring(1));" +
                 " if (array[i]) {" +
-                "list.push({ name:d[0], path:d[1], list:array[i][1]})"+
-                "}"+
-                "}"+
-                "JSInterface.setSmilies(JSON.stringify(list))"+
+                "list.push({ name:d[0], path:d[1], list:array[i][1]})" +
+                "}" +
+                "}" +
+                "JSInterface.setSmilies(JSON.stringify(list))" +
                 "</script>";
         ThisApp.webView.getSettings().setJavaScriptEnabled(true);
         ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
         ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
     }
+
     public static List<SmileyGroup> getSmilies() {
         return sSmilies;
     }
+
     public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
         if (sSmilies != null) {
             callback.onResponse(sSmilies);
             return;
         }
         mSmiliesCallback = callback;
-        Request request = new StringRequest(DISCUZ_URL+"data/cache/common_smilies_var.js", new Response.Listener<String>() {
+        Request request = new StringRequest(DISCUZ_URL + "data/cache/common_smilies_var.js", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 parseSmileyString(s);
@@ -456,8 +471,7 @@ public class Discuz {
                 try {
                     // Note: charset not confirmed in other Discuz versions
                     return Response.success(new String(response.data, "gb18030"), getCacheEntry());
-                }
-                catch (UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     return Response.error(new VolleyError("decode failed!"));
                 }
             }
@@ -474,37 +488,41 @@ public class Discuz {
             }
         }
     }
+
     private static SparseArray<ThreadTypes> sThreadTypes;
+
     public static SparseArray<ThreadTypes> getThreadTypes() {
         return sThreadTypes;
     }
+
     public static void loadThreadTypes(final Response.Listener<SparseArray<ThreadTypes>> callback) {
         if (sThreadTypes != null) {
             callback.onResponse(sThreadTypes);
             return;
         }
         Discuz.execute("forumnav", new HashMap<String, Object>(), null,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject data) {
-                    JSONObject var = data.optJSONObject("Variables");
-                    if (var == null) return;
-                    sThreadTypes = new SparseArray<ThreadTypes>();
-                    JSONArray forums = var.optJSONArray("forums");
-                    for (int i = 0; i < forums.length(); i ++) {
-                        JSONObject forum = forums.optJSONObject(i);
-                        JSONObject threadtypes = forum.optJSONObject("threadtypes");
-                        if (threadtypes != null && !threadtypes.isNull("types"))
-                            sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
-                                    new ThreadTypes(threadtypes.optJSONObject("types")));
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject data) {
+                        JSONObject var = data.optJSONObject("Variables");
+                        if (var == null) return;
+                        sThreadTypes = new SparseArray<ThreadTypes>();
+                        JSONArray forums = var.optJSONArray("forums");
+                        for (int i = 0; i < forums.length(); i++) {
+                            JSONObject forum = forums.optJSONObject(i);
+                            JSONObject threadtypes = forum.optJSONObject("threadtypes");
+                            if (threadtypes != null && !threadtypes.isNull("types"))
+                                sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
+                                        new ThreadTypes(threadtypes.optJSONObject("types")));
+                        }
+                        callback.onResponse(sThreadTypes);
                     }
-                    callback.onResponse(sThreadTypes);
-                }
-            });
+                });
     }
 
     public static class ResponseListener implements Response.Listener<String> {
         Response.Listener<JSONObject> callback;
+
         public ResponseListener(Response.Listener<JSONObject> callback) {
             this.callback = callback;
         }
@@ -514,9 +532,8 @@ public class Discuz {
             JSONObject data = new JSONObject();
             try {
                 data = new JSONObject(response);
-            }
-            catch (JSONException e) {
-                Log.e("JSONError", "Parse JSON failed: "+e.getMessage());
+            } catch (JSONException e) {
+                Log.e("JSONError", "Parse JSON failed: " + e.getMessage());
             }
             JSONObject var = data.optJSONObject("Variables");
             if (var != null) {
@@ -552,11 +569,14 @@ public class Discuz {
             ThisApp.cookieStore.save();
         }
     }
+
     public static class ResponseErrorListener implements Response.ErrorListener {
         Response.Listener<JSONObject> callback;
+
         public ResponseErrorListener(Response.Listener<JSONObject> callback) {
             this.callback = callback;
         }
+
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             JSONObject data = new JSONObject();
@@ -565,8 +585,7 @@ public class Discuz {
             if (msg == null) msg = "Unknown";
             try {
                 data.put(VOLLEY_ERROR, msg);
-            }
-            catch (JSONException e) {
+            } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
             Log.e("VolleyError", msg);
@@ -582,26 +601,21 @@ public class Discuz {
         if (module.equals("forumdisplay")) {
             if (params.get("fid") == null)
                 throw new RuntimeException("fid is required for forumdisplay");
-        }
-        else if (module.equals("newthread") || module.equals("sendreply")) {
+        } else if (module.equals("newthread") || module.equals("sendreply")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "allowphoto", 1);
             Helper.putIfNull(body, "mobiletype", 2);
-        }
-        else if (module.equals("addcomment")) {
+        } else if (module.equals("addcomment")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "commentsubmit", "yes");
             Helper.putIfNull(body, "handlekey", "comment");
-        }
-        else if (module.equals("sendpm")) {
+        } else if (module.equals("sendpm")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "pmsubmit", "yes");
-        }
-        else if (module.equals("favthread")) {
+        } else if (module.equals("favthread")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "favoritesubmit", "yes");
-        }
-        else if (module.equals("editpost")) {
+        } else if (module.equals("editpost")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "editsubmit", "yes");
         }
@@ -615,8 +629,7 @@ public class Discuz {
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
                             new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
-            }
-            catch (UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
             request = new MultipartRequest(
@@ -624,9 +637,8 @@ public class Discuz {
                     contentBody,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback));
-        }
-        else {
-            request =  new StringRequest(
+        } else {
+            request = new StringRequest(
                     body == null ? Request.Method.GET : Request.Method.POST,
                     DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
                     new ResponseListener(callback),
@@ -636,9 +648,11 @@ public class Discuz {
                     HashMap<String, String> params = new HashMap<String, String>();
                     if (body != null)
                         for (Map.Entry<String, Object> e : body.entrySet())
-                            if (e.getValue() != null) params.put(e.getKey(), e.getValue().toString());
+                            if (e.getValue() != null)
+                                params.put(e.getKey(), e.getValue().toString());
                     return params;
                 }
+
                 @Override
                 protected String getParamsEncoding() {
                     return DISCUZ_ENC;
@@ -666,28 +680,27 @@ public class Discuz {
         LinkedHashMap<String, ContentBody> body = new LinkedHashMap<String, ContentBody>();
         try {
             body.put("hash", new StringBody(sUploadHash));
-            body.put("uid", new StringBody(""+sUid));
+            body.put("uid", new StringBody("" + sUid));
             body.put("Filedata", new FileBody(new File(filePath)));
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
 
         Request request = new MultipartRequest(
-            DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-            body,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    callback.onResponse(s);
+                DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                body,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        callback.onResponse(s);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        callback.onResponse(null);
+                    }
                 }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    callback.onResponse(null);
-                }
-            }
         );
         ThisApp.requestQueue.add(request);
     }
@@ -723,22 +736,22 @@ public class Discuz {
                             if (ext != null) {
                                 String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
                                 fileBody = new FileBody(new File(filePath), type);
-                            }
-                            else {
+                            } else {
                                 fileBody = new FileBody(new File(filePath));
                             }
                             addPart("Filedata", fileBody);
-                        }
-                        catch (UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
                         }
                     }
+
                     @Override
                     public void writeTo(final OutputStream outstream) throws IOException {
                         final int total = (int) getContentLength();
                         // create a stream to count the transferred size
                         super.writeTo(new FilterOutputStream(outstream) {
                             private int transferred = 0;
+
                             @Override
                             public void write(@Nullable byte[] buffer, int offset, int length) throws IOException {
                                 int sent = 0;
@@ -750,6 +763,7 @@ public class Discuz {
                                     sent += toSend;
                                 }
                             }
+
                             @Override
                             public void write(int oneByte) throws IOException {
                                 out.write(oneByte);
@@ -759,11 +773,12 @@ public class Discuz {
                     }
                 };
 
-                HttpPost post = new HttpPost(url) {{ setEntity(entity); }};
+                HttpPost post = new HttpPost(url) {{
+                    setEntity(entity);
+                }};
                 try {
                     return EntityUtils.toString(new DefaultHttpClient().execute(post).getEntity());
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     return null;
                 }
             }
@@ -812,6 +827,7 @@ public class Discuz {
     }
 
     static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
+
     public static void signin(final Response.Listener<String> callback) {
         String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
         Request request = new StringRequest(url, new Response.Listener<String>() {
