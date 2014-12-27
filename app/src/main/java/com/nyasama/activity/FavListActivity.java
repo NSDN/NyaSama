@@ -34,7 +34,7 @@ public class FavListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fav_list);
+        setContentView(R.layout.activity_simple_framelayout);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 

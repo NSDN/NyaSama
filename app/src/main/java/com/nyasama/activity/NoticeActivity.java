@@ -45,7 +45,7 @@ public class NoticeActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notice);
+        setContentView(R.layout.activity_simple_framelayout);
 
         ActionBar actionBar = getActionBar();
         if (actionBar == null)
