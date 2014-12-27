@@ -21,8 +21,6 @@ import com.nyasama.util.Discuz.Thread;
 
 import org.json.JSONObject;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,7 +28,7 @@ import java.util.List;
 public class SearchActivity extends FragmentActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
-    private static final int PAGE_SIZE_COUNT = 20;
+    private static final int PAGE_SIZE_COUNT = 25;
     private CommonListFragment<Object> mListFragment;
 
     @Override
@@ -123,6 +121,7 @@ public class SearchActivity extends FragmentActivity
         final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.search(query, new HashMap<String, Object>() {{
             put("page", page + 1);
+            put("tpp", PAGE_SIZE_COUNT);
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -144,13 +143,6 @@ public class SearchActivity extends FragmentActivity
                         String key = iter.next();
                         listData.add(new Thread(list.optJSONObject(key)));
                     }
-                    // sort by id
-                    Collections.sort(listData, new Comparator() {
-                        @Override
-                        public int compare(Object o, Object o2) {
-                            return ((Thread) o).id - ((Thread) o2).id;
-                        }
-                    });
                     // update total
                     total = Helper.toSafeInteger(var.optString("count"), listData.size());
                 }
