@@ -86,7 +86,6 @@
     <string name="preference_language">Language</string>
     <string name="preference_animation">Fade Animation</string>
     <string name="preference_category_version">Version</string>
-    <string name="version_value">NyaSama-nightly-141226.1</string>
     <string name="preference_cachesize">Cache Size</string>
     <string name="preference_category_explore">Explore</string>
     <string name="preference_thumbswitch">Show Image</string>
@@ -106,5 +105,7 @@
     <string name="prompt_2">pms</string>
     <string name="prompt_3">and</string>
     <string name="prompt_4">prompts</string>
-    <string name="search_hint">Search...</string>
+    <string name="search_hint">Search Threads</string>
+    <string name="pref_title_version_number">Version Number</string>
+    <string name="pref_diag_title_select_lang">Select Your Language</string>
 </resources>

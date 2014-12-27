@@ -4,48 +4,46 @@
     <PreferenceCategory android:title="@string/pref_category_general">
         <ListPreference
             android:defaultValue="默认"
-            android:dialogTitle="选择语言"
+            android:dialogTitle="@string/pref_diag_title_select_lang"
             android:entries="@array/language_preference"
             android:entryValues="@array/language_preference"
-            android:key="language"
+            android:key="@string/pref_key_language"
             android:summary="%s"
             android:title="@string/preference_language" />
 
         <SwitchPreference
             android:defaultValue="false"
-            android:key="animation"
+            android:key="@string/pref_key_animation"
             android:title="@string/preference_animation" />
 
         <ListPreference
-            android:defaultValue="32MB"
+            android:defaultValue="32"
             android:dialogTitle="@string/preference_cachesize"
             android:entries="@array/cache_size"
-            android:entryValues="@array/cache_size"
-            android:key="cachesize"
+            android:entryValues="@array/cache_size_value"
+            android:key="@string/pref_key_cache_size"
             android:summary="%s"
             android:title="@string/preference_cachesize" />
     </PreferenceCategory>
 
+    <!--
     <PreferenceCategory android:title="@string/preference_category_explore">
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="isshowimage"
-            android:title="@string/preference_thumbswitch"/>
 
         <ListPreference
-            android:defaultValue="原图"
+            android:defaultValue="0x0"
             android:dialogTitle="@string/preference_thumbsize"
             android:entries="@array/thumb_size"
-            android:entryValues="@array/thumb_size"
-            android:key="thumbsize"
+            android:entryValues="@array/thumb_size_value"
+            android:key="@string/pref_key_thumb_size"
             android:summary="%s"
             android:title="@string/preference_thumbsize" />
+
     </PreferenceCategory>
+    -->
 
     <PreferenceCategory android:title="@string/preference_category_version">
-        <!--This is App Version-->
         <Preference
-            android:title="@string/version_value"/>
+            android:title="@string/pref_title_version_number"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

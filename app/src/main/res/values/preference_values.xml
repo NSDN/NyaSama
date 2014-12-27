@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="pref_key_language">language</string>
+
     <string-array name="language_preference">
         <!-- Note: remember to update ThisApp.getLocale if items are modified -->
         <item>默认</item>
@@ -7,18 +9,35 @@
         <item>English</item>
     </string-array>
 
+    <string name="pref_key_animation">animation</string>
+
+    <string name="pref_key_cache_size">cache_size</string>
     <string-array name="cache_size">
         <item>16MB</item>
         <item>32MB</item>
-        <item>48MB</item>
         <item>64MB</item>
         <item>128MB</item>
+        <item>256MB</item>
+    </string-array>
+    <integer-array name="cache_size_value">
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
+        <item>256</item>
+    </integer-array>
+
+    <string name="pref_key_thumb_size">thumb_size</string>
+    <string-array name="thumb_size">
+        <item>不显示图片</item>
+        <item>小缩略图</item>
+        <item>中等缩略图</item>
+    </string-array>
+    <string-array name="thumb_size_value">
+        <item>0x0</item>
+        <item>1x1</item>
+        <item>2x2</item>
     </string-array>
 
-    <string-array name="thumb_size">
-        <item>原图</item>
-        <item>中等缩略图</item>
-        <item>小缩略图</item>
-        <item>不显示图片</item>
-    </string-array>
+    <string name="pref_key_version">version_number</string>
 </resources>

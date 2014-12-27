@@ -18,11 +18,13 @@ public class SettingActivity extends PreferenceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference);
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        //findPreference(getString(R.string.pref_key_version)).setSummary(ThisApp.getVersion());
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("language")) {
+        if (key.equals(getString(R.string.pref_key_language))) {
             new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.alert_need_reboot))
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -34,17 +36,5 @@ public class SettingActivity extends PreferenceActivity
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 }
