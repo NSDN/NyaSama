@@ -351,7 +351,7 @@ public class PostListActivity extends FragmentActivity
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
-    static String compileMessage(String message, final Map<String, Attachment> attachments) {
+    static String compileMessage(String message, final Map<String, Attachment> attachments, final String size) {
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -360,7 +360,7 @@ public class PostListActivity extends FragmentActivity
                     String src = pathMatcher.group(1);
                     Attachment attachment = attachments.get(src);
                     if (attachment != null) {
-                        String url = Discuz.getAttachmentThumb(attachment.id);
+                        String url = Discuz.getAttachmentThumb(attachment.id, size);
                         attachments.put(url, attachment);
                         return "<img src=\"" + url + "\" />";
                     }
@@ -466,6 +466,9 @@ public class PostListActivity extends FragmentActivity
 
     final BitmapLruCache imageCache = new BitmapLruCache();
     final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
+    final int maxImageSize = Helper.toSafeInteger(
+            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_thumb_size), ""), -1);
+    final String maxImageWxH = maxImageSize < 0 ? "" : "268x380";
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -497,7 +500,7 @@ public class PostListActivity extends FragmentActivity
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache, 512, 512), null);
+                        new HtmlImageGetter(messageText, imageCache, maxImageSize, maxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -660,7 +663,7 @@ public class PostListActivity extends FragmentActivity
                             Post post = new Post(postData);
                             for (Attachment attachment : post.attachments)
                                 mAttachmentMap.put(attachment.src, attachment);
-                            post.message = compileMessage(post.message, mAttachmentMap);
+                            post.message = compileMessage(post.message, mAttachmentMap, maxImageWxH);
                             listData.add(post);
                         }
 

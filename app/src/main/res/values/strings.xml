@@ -89,7 +89,7 @@
     <string name="preference_cachesize">缓存大小</string>
     <string name="preference_category_explore">浏览</string>
     <string name="preference_thumbswitch">图片显示</string>
-    <string name="preference_thumbsize">缩略图尺寸</string>
+    <string name="preference_thumbsize">帖子图片尺寸</string>
     <string name="new_version_alert_title">有新版本啦</string>
     <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
     <string name="title_editing_post">编辑帖子</string>

@@ -29,7 +29,7 @@
     <!-- TODO: use these -->
     <PreferenceCategory android:title="@string/preference_category_explore">
         <ListPreference
-            android:defaultValue="0x0"
+            android:defaultValue="-1"
             android:dialogTitle="@string/preference_thumbsize"
             android:entries="@array/thumb_size"
             android:entryValues="@array/thumb_size_value"

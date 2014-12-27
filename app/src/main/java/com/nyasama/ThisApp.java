@@ -37,6 +37,7 @@ import java.util.Locale;
  *
  */
 public class ThisApp extends Application {
+    public static SharedPreferences preferences;
     public static Context context;
     public static Cache volleyCache;
     public static RequestQueue requestQueue;
@@ -91,7 +92,7 @@ public class ThisApp extends Application {
         context = getApplicationContext();
 
         // load preferences
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_animation));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_cache_size));

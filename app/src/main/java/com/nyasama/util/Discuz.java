@@ -70,9 +70,6 @@ public class Discuz {
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
 
-    public static int IMAGE_THUMB_WIDTH = 268;
-    public static int IMAGE_THUMB_HEIGHT = 380;
-
     public static String VOLLEY_ERROR = "volleyError";
 
     public static int NOTIFICATION_ID = 1;
@@ -329,8 +326,11 @@ public class Discuz {
     }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getAttachmentThumb(int attachmentId) {
-        String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
+    public static String getAttachmentThumb(int attachmentId, String size) {
+        if (size.isEmpty())
+            return DISCUZ_URL + "static/image/common/none.gif";
+
+        String str = attachmentId + "|" + size.replace('x', '|');
         String key;
         try {
             byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
@@ -342,7 +342,7 @@ public class Discuz {
         params.put("module", "forumimage");
         params.put("aid", attachmentId);
         params.put("version", 2);
-        params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
+        params.put("size", size);
         params.put("key", key);
         params.put("type", "fixnone");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
