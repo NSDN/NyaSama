@@ -1,8 +1,6 @@
 package com.nyasama.activity;
 
-import android.app.ActionBar;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -38,11 +36,8 @@ public class SearchActivity extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_framelayout);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowHomeEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mListFragment = CommonListFragment.getNewFragment(
                 Object.class,
@@ -63,10 +58,9 @@ public class SearchActivity extends FragmentActivity
 
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setIconified(false);
-        searchView.setIconifiedByDefault(false);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        String query = getIntent().getStringExtra(SearchManager.QUERY);
+        if (query != null) searchView.setQuery(query, false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

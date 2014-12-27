@@ -5,8 +5,4 @@
         android:icon="@android:drawable/ic_menu_search"
         android:actionViewClass="android.widget.SearchView"
         android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
-        android:showAsAction="never" />
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:showAsAction="never" />
 </menu>
