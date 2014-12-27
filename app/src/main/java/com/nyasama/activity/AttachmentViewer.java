@@ -28,6 +28,7 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Attachment;
 import com.nyasama.util.Discuz.Post;
@@ -52,13 +53,12 @@ public class AttachmentViewer extends FragmentActivity {
     private static String TAG = "ImageViewer";
     private static int MAX_TEXTURE_SIZE = 2048;
     private static int IMAGE_THUMB_SIZE = 128;
-    private static int MAX_MEMORY_BYTES = 16*1024*1024;
 
     private ViewPager mPager;
     private FragmentStatePagerAdapter mPageAdapter;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
-    private Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
+    private BitmapLruCache mBitmapCache = new BitmapLruCache();
     private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
     private boolean mHasAttachmentsPrev;
     private boolean mHasAttachmentsNext;
@@ -253,21 +253,6 @@ public class AttachmentViewer extends FragmentActivity {
             }
         });
         mPager.setAdapter(mPageAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public void destroyItem(ViewGroup container, int position, Object object) {
-                super.destroyItem(container, position, object);
-                final Attachment attachment = mAttachmentList.get(position);
-                Bitmap bitmap = mBitmapCache.get(attachment.src);
-                if (bitmap != null) {
-                    int memoryBytes = 0;
-                    for (Map.Entry<String, Bitmap> entry : mBitmapCache.entrySet())
-                        memoryBytes += entry.getValue().getByteCount();
-                    if (memoryBytes > MAX_MEMORY_BYTES) {
-                        bitmap.recycle();
-                        mBitmapCache.remove(attachment.src);
-                    }
-                }
-            }
 
             @Override
             public Fragment getItem(final int i) {
@@ -349,7 +334,7 @@ public class AttachmentViewer extends FragmentActivity {
             final String src = bundle.getString("src");
             if (bundle.getBoolean("isImage")) {
                 final PhotoView photoView = new PhotoView(container.getContext());
-                Bitmap bitmap = mActivity.mBitmapCache.get(src);
+                Bitmap bitmap = mActivity.mBitmapCache.getBitmap(src);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
                     new PhotoViewAttacher(photoView);
@@ -377,7 +362,7 @@ public class AttachmentViewer extends FragmentActivity {
                                             MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
                                 }
                             }
-                            mActivity.mBitmapCache.put(src, bitmap);
+                            mActivity.mBitmapCache.putBitmap(src, bitmap);
                             mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
                                     IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             photoView.setImageBitmap(bitmap);

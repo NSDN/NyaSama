@@ -94,4 +94,7 @@
     <string name="toast_click_again_to_exit">再按一次后退来退出</string>
     <string name="action_goto_forum">返回板块</string>
     <string name="text_view_vote">查看投票</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="search_hint">Search...</string>
+
 </resources>

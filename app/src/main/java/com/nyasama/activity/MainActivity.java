@@ -46,7 +46,7 @@ public class MainActivity extends FragmentActivity implements
         DiscuzThreadListFragment.OnThreadListInteraction {
 
     public void loadUserInfo() {
-        // TODO: just use forumindex to refresh group name
+        // TODO: find a better way to refresh group name
         Discuz.execute("forumindex", new HashMap<String, Object>(),
                 null, new Response.Listener<JSONObject>() {
                     @Override
@@ -126,7 +126,7 @@ public class MainActivity extends FragmentActivity implements
                 }});
 
         /*
-        TODO: enable this
+        TODO: enable this to use umeng
         PushAgent mPushAgent = PushAgent.getInstance(this);
         mPushAgent.enable();
         Log.d("DEVICETOKEN", UmengRegistrar.getRegistrationId(this));
@@ -215,7 +215,12 @@ public class MainActivity extends FragmentActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home)
+        int id = item.getItemId();
+        if (id == R.id.action_search) {
+            startActivity(new Intent(this, SearchActivity.class));
+            return true;
+        }
+        else if (id == android.R.id.home)
             return super.onOptionsItemSelected(item);
         return Helper.handleOption(this, item.getItemId()) ||
                 super.onOptionsItemSelected(item);

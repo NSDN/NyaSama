@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -77,6 +78,21 @@ public class Discuz {
     public static int NOTIFICATION_ID = 1;
 
     public static String BROADCAST_FILTER_LOGIN = "login";
+
+    public static class JSONVolleyError extends JSONObject {
+        public JSONVolleyError(String message) {
+            super();
+            try {
+                put(VOLLEY_ERROR, message);
+            }
+            catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        public JSONVolleyError(VolleyError e) {
+            this(e.getMessage());
+        }
+    }
 
     public static class Forum {
         public int id;
@@ -559,18 +575,11 @@ public class Discuz {
         }
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            JSONObject data = new JSONObject();
             String msg = volleyError.getMessage();
             // NOTE: getMessage may return null
             if (msg == null) msg = "Unknown";
-            try {
-                data.put(VOLLEY_ERROR, msg);
-            }
-            catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
             Log.e("VolleyError", msg);
-            callback.onResponse(data);
+            callback.onResponse(new JSONVolleyError(msg));
         }
     }
 
@@ -609,6 +618,7 @@ public class Discuz {
         Helper.putIfNull(params, "submodule", "checkpost");
 
         Request request;
+        String url = DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
         if (module.equals("editpost") && body != null) {
             Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
@@ -620,15 +630,13 @@ public class Discuz {
                 throw new RuntimeException(e);
             }
             request = new MultipartRequest(
-                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
-                    contentBody,
+                    url, contentBody,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback));
         }
         else {
             request =  new StringRequest(
-                    body == null ? Request.Method.GET : Request.Method.POST,
-                    DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC),
+                    body == null ? Request.Method.GET : Request.Method.POST, url,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback)) {
                 @Override
@@ -781,6 +789,67 @@ public class Discuz {
         task.execute();
     }
 
+    public static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
+            Pattern.DOTALL | Pattern.MULTILINE);
+    public static void search(final String text,
+                              final Map<String, Object> params,
+                              final Response.Listener<JSONObject> callback) {
+        final Request request = new StringRequest(
+                Request.Method.POST,
+                // set #noredirect# so volley will throw error 302
+                DISCUZ_URL + "search.php?searchsubmit=yes##noredirect#",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        Matcher matcher = searchMessagePatt.matcher(s);
+                        String message = "Unexpected Response";
+                        if (matcher.find())
+                            message = matcher.group(1);
+                        JSONObject data = new JSONObject();
+                        try {
+                            JSONObject msgData = new JSONObject();
+                            msgData.put("messagestr", message);
+                            data.put("Message", msgData);
+                        }
+                        catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        callback.onResponse(data);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        String searchUrl = volleyError.networkResponse.headers.get("location");
+                        if (searchUrl == null) {
+                            callback.onResponse(new JSONVolleyError(volleyError));
+                            return;
+                        }
+                        final Uri uri = Uri.parse(searchUrl);
+                        for (String key : uri.getQueryParameterNames())
+                            params.put(key, uri.getQueryParameter(key));
+                        Discuz.execute("search", params, null, callback);
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                return new HashMap<String, String>() {{
+                    put("mod", "forum");
+                    put("forumhash", sFormHash);
+                    put("srhfid", "");
+                    put("srhlocality", "forum:index");
+                    put("srchtxt", text);
+                    put("searchsubmit", "true");
+                }};
+            }
+            @Override
+            protected String getParamsEncoding() {
+                return DISCUZ_ENC;
+            }
+        };
+        ThisApp.requestQueue.add(request);
+    }
+
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
@@ -798,7 +867,7 @@ public class Discuz {
         }}, callback);
     }
 
-    // TODO: "Logout" is not found in the api source =.=
+    // Note: "Logout" is not found in the api source =.=
     public static void logout(final Response.Listener<JSONObject> callback) {
         sUid = 0;
         sNewMessages = 0;

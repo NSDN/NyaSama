@@ -54,7 +54,6 @@ public class MultipartRequest extends Request<String> {
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse networkResponse) {
-        // TODO: see issue 5
         return Response.success(new String(networkResponse.data), getCacheEntry());
     }
 

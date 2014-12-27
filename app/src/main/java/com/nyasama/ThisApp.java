@@ -22,13 +22,17 @@ import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.PersistenceCookieStore;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Locale;
 
 /**
  * Created by oxyflour on 2014/11/15.
+ *
  */
 public class ThisApp extends Application {
     public static Context context;
@@ -65,7 +69,16 @@ public class ThisApp extends Application {
         File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
         volleyCache = new DiskBasedCache(cacheFile, 1024 * 1024 * 32);
 
-        Network network = new BasicNetwork(new HurlStack());
+        // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
+        Network network = new BasicNetwork(new HurlStack() {
+            @Override
+            protected HttpURLConnection createConnection(URL url) throws IOException {
+                HttpURLConnection connection = super.createConnection(url);
+                if (url.getRef() != null && url.getRef().contains("#noredirect#"))
+                    connection.setInstanceFollowRedirects(false);
+                return connection;
+            }
+        });
         requestQueue = new RequestQueue(volleyCache, network);
         requestQueue.start();
 

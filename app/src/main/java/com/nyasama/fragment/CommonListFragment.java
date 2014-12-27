@@ -58,6 +58,7 @@ public class CommonListFragment<T> extends Fragment
         final int currentSize = mListData.size();
         if (mListLayoutView != null &&
                 currentSize < mListItemCount && !mIsLoading) {
+            Helper.updateVisibility(mListLayoutView, R.id.empty, false);
             Helper.updateVisibility(mListLayoutView, R.id.loading, mIsLoading = true);
             Helper.updateVisibility(mListLayoutView, R.id.error, mHasError = false);
             if (mInterface != null)
