@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.webkit.WebView;
 
 import com.android.volley.Cache;
@@ -58,11 +57,9 @@ public class ThisApp extends Application {
     }
 
     // REF: http://aleung.github.io/blog/2012/10/06/change-locale-in-android-application/
-    private static void loadLocaleFromPreference(String language) {
-        Locale locale = getLocale(language);
-        Locale.setDefault(locale);
+    private static void loadLocale(String language) {
         Configuration config = new Configuration();
-        config.locale = locale;
+        config.locale = getLocale(language);
         context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
     }
 
@@ -77,6 +74,17 @@ public class ThisApp extends Application {
         }
     }
 
+    public static void onSharedPreferenceChanged(SharedPreferences pref, String s) {
+        if (s.equals(context.getString(R.string.pref_key_language)))
+            loadLocale(pref.getString(s, ""));
+        else if (s.equals(context.getString(R.string.pref_key_animation)))
+            context.setTheme(pref.getBoolean(s, false) ?
+                    R.style.AppThemeAni : R.style.AppTheme);
+        else if (s.equals(context.getString(R.string.pref_key_cache_size)))
+            volleyCache = new DiskBasedCache(new File(context.getCacheDir(), "NyasamaVolleyCache"),
+                    1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -84,17 +92,9 @@ public class ThisApp extends Application {
 
         // load preferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        String language = preferences.getString(getString(R.string.pref_key_language), "");
-        loadLocaleFromPreference(language);
-
-        Boolean animated = preferences.getBoolean(getString(R.string.pref_key_animation), false);
-        context.setTheme(animated ? R.style.AppThemeAni : R.style.AppTheme);
-
-        Integer cacheSize = Helper.toSafeInteger(preferences.getString(getString(R.string.pref_key_cache_size), ""), 32);
-        File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
-        volleyCache = new DiskBasedCache(cacheFile, 1024 * 1024 * cacheSize);
-        Log.d(ThisApp.class.toString(), "init "+cacheSize+"MB cache ok");
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_animation));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_cache_size));
 
         // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
         Network network = new BasicNetwork(new HurlStack() {
