@@ -106,7 +106,7 @@ public class SearchActivity extends FragmentActivity
             Thread thread = (Thread) obj;
             Intent intent = new Intent(this, PostListActivity.class);
             intent.putExtra("tid", thread.id);
-            intent.putExtra("title", thread.title);
+            intent.putExtra("title", Html.fromHtml(thread.title).toString());
             startActivity(intent);
         }
     }
