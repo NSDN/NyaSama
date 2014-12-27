@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">NyaSama</string>
@@ -83,6 +83,14 @@
     <string name="action_edit">Edit</string>
     <string name="forum_index_threads">threads</string>
     <string name="forum_index_posts">posts</string>
+    <string name="preference_language">Language</string>
+    <string name="preference_animation">Fade Animation</string>
+    <string name="preference_category_version">Version</string>
+    <string name="version_value">NyaSama-nightly-141226.1</string>
+    <string name="preference_cachesize">Cache Size</string>
+    <string name="preference_category_explore">Explore</string>
+    <string name="preference_thumbswitch">Show Image</string>
+    <string name="preference_thumbsize">Thumb Size</string>
     <string name="new_version_alert_title">New Version is Ready</string>
     <string name="new_version_alert_message">Go and download new version (%s) now?</string>
     <string name="title_editing_post">Editing Post</string>
@@ -91,8 +99,12 @@
     <string name="action_add_smiley">Insert Smiley</string>
     <string name="button_back">Back</string>
     <string name="string_uncategorized">Uncategorized</string>
-    <string name="toast_click_again_to_exit">Click Back again to exit</string>
+    <string name="toast_click_again_to_exit">Click Back Again To Exit</string>
     <string name="action_goto_forum">Goto thread list</string>
-    <string name="text_view_vote">text_view_votes</string>
+    <string name="text_view_vote">[View Votes]</string>
+    <string name="prompt_1">You have got</string>
+    <string name="prompt_2">pms</string>
+    <string name="prompt_3">and</string>
+    <string name="prompt_4">prompts</string>
     <string name="search_hint">Search...</string>
 </resources>
