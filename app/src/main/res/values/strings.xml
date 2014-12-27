@@ -88,7 +88,6 @@
     <string name="preference_category_version">版本</string>
     <string name="preference_cachesize">缓存大小</string>
     <string name="preference_category_explore">浏览</string>
-    <string name="preference_thumbswitch">图片显示</string>
     <string name="preference_thumbsize">帖子图片尺寸</string>
     <string name="new_version_alert_title">有新版本啦</string>
     <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
@@ -110,4 +109,10 @@
     <string name="pref_title_version_number">版本号</string>
     <string name="pref_diag_title_select_lang">选择语言</string>
     <string name="preference_textsize">文本大小</string>
+    <string-array name="thumb_size">
+        <item>不显示图片</item>
+        <item>较小</item>
+        <item>中等</item>
+        <item>原图</item>
+    </string-array>
 </resources>

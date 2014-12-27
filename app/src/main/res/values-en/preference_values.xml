@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="thumb_size">
-        <item>No Images</item>
-        <item>Small thumbs</item>
-        <item>Large tubmbs</item>
-        <item>Original Image</item>
-    </string-array>
-</resources>
