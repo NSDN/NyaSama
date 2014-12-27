@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -29,6 +28,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CallbackMatcher;
@@ -63,7 +63,6 @@ public class PostListActivity extends FragmentActivity
     private static final int PAGE_SIZE_COUNT = 10;
     private static final int COMMENT_PAGE_SIZE = 10;
     private static final int MAX_TRIMSTR_LENGTH = 30;
-    private static final String TAG = "PostList";
 
     private CommonListFragment<Post> mListFragment;
     Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
@@ -161,9 +160,7 @@ public class PostListActivity extends FragmentActivity
                     if (var.opt("comments") instanceof JSONArray) {
                         JSONArray commentList = var.optJSONArray("comments");
                         List<Comment> comments = mComments.get(pid);
-                        // remove duplicated items
-                        if (page * COMMENT_PAGE_SIZE < comments.size())
-                            comments.subList(page * COMMENT_PAGE_SIZE, comments.size()).clear();
+                        Helper.setListLength(comments, page * COMMENT_PAGE_SIZE);
                         for (int i = 0; i < commentList.length(); i ++) {
                             comments.add(new Comment(commentList.optJSONObject(i)));
                         }
@@ -368,12 +365,14 @@ public class PostListActivity extends FragmentActivity
                         return "<img src=\"" + url + "\" />";
                     }
                 }
-                Log.w(TAG, "attachment image not found (" + matchResult.group(1) + ")");
+                Log.w(PostListActivity.class.toString(),
+                        "attachment image not found (" + matchResult.group(1) + ")");
                 return "";
             }
         });
 
         message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
+        message = message.replaceAll("<script[^>]*>(.*?)</script>", "");
 
         return message;
     }
@@ -381,7 +380,7 @@ public class PostListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post_list);
+        setContentView(R.layout.activity_simple_framelayout);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -465,7 +464,7 @@ public class PostListActivity extends FragmentActivity
         "[/quote]";
     }
 
-    final Map<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
+    final BitmapLruCache imageCache = new BitmapLruCache();
     final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
@@ -616,8 +615,7 @@ public class PostListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
-        final int position = page * PAGE_SIZE_COUNT;
+        final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);
@@ -646,14 +644,13 @@ public class PostListActivity extends FragmentActivity
                         total = 0;
                     }
                     catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Log.e(PostListActivity.class.toString(),
+                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }
                 else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
+                    Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 
@@ -707,7 +704,8 @@ public class PostListActivity extends FragmentActivity
                         }
 
                     } catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Log.e(PostListActivity.class.toString(),
+                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }

@@ -100,10 +100,7 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
         final int fid = bundle.getInt("fid", 0);
         final int uid = bundle.getInt("uid", 0);
         final int pps = bundle.getInt("pps", 20);
-
-        final int page = (int) Math.round(Math.floor(listData.size() / pps));
-        final int position = page * pps;
-
+        final int page = listData.size() / pps;
 
         String module = fid > 0 ? "forumdisplay" : (uid > 0 ? "mythread" : "hotthread");
         Discuz.execute(module, new HashMap<String, Object>() {{
@@ -135,9 +132,7 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
                         Helper.toast(R.string.load_failed_toast);
                     }
                 } else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
+                    Helper.setListLength(listData, page * pps);
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 

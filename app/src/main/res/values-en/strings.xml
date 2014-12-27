@@ -106,4 +106,5 @@
     <string name="prompt_2">pms</string>
     <string name="prompt_3">and</string>
     <string name="prompt_4">prompts</string>
+    <string name="search_hint">Search...</string>
 </resources>

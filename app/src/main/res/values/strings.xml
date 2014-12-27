@@ -106,4 +106,6 @@
     <string name="prompt_2">条私信</string>
     <string name="prompt_3">和</string>
     <string name="prompt_4">条提醒</string>
+    <string name="title_activity_search">搜索</string>
+    <string name="search_hint">搜索帖子</string>
 </resources>

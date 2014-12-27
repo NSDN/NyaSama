@@ -34,7 +34,7 @@ public class FavListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fav_list);
+        setContentView(R.layout.activity_simple_framelayout);
         if (getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -87,8 +87,7 @@ public class FavListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        final int page = (int) Math.round(Math.floor(listData.size() / PAGE_SIZE_COUNT));
-        final int position = page * PAGE_SIZE_COUNT;
+        final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("myfavthread", new HashMap<String, Object>() {{
             put("page", page + 1);
         }}, null, new Response.Listener<JSONObject>() {
@@ -98,9 +97,7 @@ public class FavListActivity extends FragmentActivity
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 } else {
-                    // remove possible duplicated items
-                    if (position < listData.size())
-                        listData.subList(position, listData.size()).clear();
+                    Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
                     try {
                         JSONObject var = data.getJSONObject("Variables");
 

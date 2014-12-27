@@ -3,55 +3,57 @@
     package="com.nyasama" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--
+    TODO: enable this to use umeng
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    -->
 
     <application
-        android:name="com.nyasama.ThisApp"
+        android:name=".ThisApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppThemeAni" >
         <activity
-            android:name="com.nyasama.activity.SplashActivity"
+            android:name=".activity.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nyasama.activity.MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.ThreadListActivity"
+            android:name=".activity.ThreadListActivity"
             android:label="@string/title_activity_thread_list" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.PostListActivity"
+            android:name=".activity.PostListActivity"
             android:label="@string/title_activity_post_list" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.LoginActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.NewPostActivity"
+            android:name=".activity.NewPostActivity"
             android:label="@string/title_activity_new_post" >
         </activity>
 
         <!--
-        TODO: enable this
+        TODO: enable this to use umeng
         <receiver
             android:name="com.umeng.message.NotificationProxyBroadcastReceiver"
             android:exported="false" >
@@ -117,38 +119,48 @@
         -->
 
         <activity
-            android:name="com.nyasama.activity.UserProfileActivity"
+            android:name=".activity.UserProfileActivity"
             android:label="@string/title_activity_user_profile" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.PMListActivity"
+            android:name=".activity.PMListActivity"
             android:label="@string/title_activity_personal_messages" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.MessagesActivity"
+            android:name=".activity.MessagesActivity"
             android:label="@string/title_activity_messages" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.NoticeActivity"
+            android:name=".activity.NoticeActivity"
             android:label="@string/title_activity_notice" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.AttachmentViewer"
+            android:name=".activity.AttachmentViewer"
             android:label="@string/title_activity_attachment_viewer"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.SettingActivity"
+            android:name=".activity.SettingActivity"
             android:label="@string/title_activity_setting" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.FavListActivity"
+            android:name=".activity.FavListActivity"
             android:label="@string/title_activity_fav_list" >
         </activity>
         <activity
-            android:name="com.nyasama.activity.AboutActivity"
+            android:name=".activity.AboutActivity"
             android:label="About"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
+        </activity>
+        <activity
+            android:launchMode="singleTop"
+            android:name=".activity.SearchActivity"
+            android:label="@string/title_activity_search" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
         </activity>
     </application>
 
