@@ -68,7 +68,7 @@ public class Discuz {
     public static String DISCUZ_HOST = "http://192.168.0.154";
     public static String DISCUZ_URL = DISCUZ_HOST + "/bbs/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
-    public static String DISCUZ_ENC = "gbk";
+    public static String DISCUZ_ENC = "utf8";
 
     public static int IMAGE_THUMB_WIDTH = 268;
     public static int IMAGE_THUMB_HEIGHT = 380;
@@ -789,6 +789,8 @@ public class Discuz {
         task.execute();
     }
 
+    public static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
+            Pattern.DOTALL | Pattern.MULTILINE);
     public static void search(final String text,
                               final Map<String, Object> params,
                               final Response.Listener<JSONObject> callback) {
@@ -799,7 +801,20 @@ public class Discuz {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        callback.onResponse(new JSONVolleyError("Unexpected Response"));
+                        Matcher matcher = searchMessagePatt.matcher(s);
+                        String message = "Unexpected Response";
+                        if (matcher.find())
+                            message = matcher.group(1);
+                        JSONObject data = new JSONObject();
+                        try {
+                            JSONObject msgData = new JSONObject();
+                            msgData.put("messagestr", message);
+                            data.put("Message", msgData);
+                        }
+                        catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        callback.onResponse(data);
                     }
                 },
                 new Response.ErrorListener() {

@@ -1,5 +1,6 @@
 package com.nyasama.activity;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -129,8 +130,11 @@ public class SearchActivity extends FragmentActivity
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.there_is_something_wrong);
                 } else if (data.has("Message")) {
-                    Helper.toast(data.optJSONObject("Message").optString("messagestr"));
-                    total = 0;
+                    new AlertDialog.Builder(SearchActivity.this)
+                            .setTitle(R.string.there_is_something_wrong)
+                            .setMessage(data.optJSONObject("Message").optString("messagestr"))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
                 } else if (data.has("Variables")) {
                     JSONObject var = data.optJSONObject("Variables");
                     Helper.setListLength(listData, page * PAGE_SIZE_COUNT);
@@ -147,7 +151,7 @@ public class SearchActivity extends FragmentActivity
                             return ((Thread) o).id - ((Thread) o2).id;
                         }
                     });
-                    // total
+                    // update total
                     total = Helper.toSafeInteger(var.optString("count"), listData.size());
                 }
                 fragment.loadMoreDone(total);
