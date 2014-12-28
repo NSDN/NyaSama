@@ -1,29 +1,147 @@
-<LinearLayout
-
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:background="#ececec"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.nyasama.activity.UserProfileActivity"
-    android:weightSum="1">
+    tools:context="com.nyasama.activity.UserProfileActivity">
 
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/avatar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/username"
-        android:layout_gravity="center_horizontal" />
+    <RelativeLayout
+        android:background="@android:color/white"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/avatar"
+            android:paddingRight="8dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal" />
+        <TextView
+            android:id="@+id/username"
+            android:paddingTop="6dp"
+            android:paddingBottom="2dp"
+            android:layout_toRightOf="@id/avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/groupname"
+            android:layout_toRightOf="@id/avatar"
+            android:layout_below="@id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/credit"
+            android:layout_toRightOf="@id/avatar"
+            android:layout_below="@id/groupname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#999999" />
+        <Button
+            android:id="@+id/signin_button"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="doSignin"
+            android:text="@string/signin_button_text" />
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/hide_when_loading"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:background="@android:color/white"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <include layout="@layout/include_sep_horizontal" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/user_points2"
+                    android:padding="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <include layout="@layout/include_sep_vertical" />
+                <TextView
+                    android:id="@+id/user_points3"
+                    android:padding="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <include layout="@layout/include_sep_vertical" />
+                <TextView
+                    android:id="@+id/user_points4"
+                    android:padding="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <include layout="@layout/include_sep_vertical" />
+                <TextView
+                    android:id="@+id/user_points5"
+                    android:padding="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <TextView
+            android:id="@+id/last_activity"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <include layout="@layout/include_sep_horizontal" />
+        <TextView
+            android:id="@+id/last_post"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <include layout="@layout/include_sep_horizontal" />
+        <TextView
+            android:id="@+id/last_visit"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
 
     <LinearLayout
         android:id="@+id/show_for_others"
@@ -31,17 +149,23 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/send_message_button"
-            android:onClick="doSendMessage" />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <TextView
             android:text="@string/mythread_button_text"
-            android:onClick="doShowThreads" />
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doShowThreads"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <include layout="@layout/include_sep_horizontal" />
+        <TextView
+            android:text="@string/send_message_button"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doSendMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
@@ -49,59 +173,52 @@
         android:id="@+id/hide_for_others"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="1">
+        android:layout_height="wrap_content">
 
-        <Button
+        <TextView
+            android:id="@+id/my_threads"
+            android:text="@string/mythread_button_text"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doShowThreads"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/signin_button_text"
-            android:onClick="doSignin" />
-
-        <LinearLayout
-            android:orientation="horizontal"
+            android:layout_height="wrap_content" />
+        <include layout="@layout/include_sep_horizontal" />
+        <TextView
+            android:text="@string/show_favs_button"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doShowFavs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="6.09">
+            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
 
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/mythread_button_text"
-                android:onClick="doShowThreads"
-                android:layout_weight="6.09" />
-
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/show_favs_button"
-                android:onClick="doShowFavs"
-                android:layout_weight="6.09" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/my_message_button"
-                android:onClick="doShowMessages"
-                android:layout_weight="6.09" />
-
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/my_notice_button"
-                android:onClick="doShowNotice"
-                android:layout_weight="6.09"
-                android:layout_gravity="center_horizontal" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/my_messages"
+            android:text="@string/my_message_button"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doShowMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <include layout="@layout/include_sep_horizontal" />
+        <TextView
+            android:id="@+id/my_notice"
+            android:text="@string/my_notice_button"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:clickable="true"
+            android:onClick="doShowNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
 
         <Button
             android:layout_width="match_parent"
@@ -114,4 +231,5 @@
 
 </LinearLayout>
 
+</ScrollView>
 

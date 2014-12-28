@@ -109,6 +109,9 @@
     <string name="pref_title_version_number">版本号</string>
     <string name="pref_diag_title_select_lang">选择语言</string>
     <string name="preference_textsize">文本大小</string>
+    <string name="last_activity">最后活动</string>
+    <string name="last_post">最后发帖</string>
+    <string name="last_visit">最后访问</string>
     <string-array name="thumb_size">
         <item>不显示图片</item>
         <item>较小</item>

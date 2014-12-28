@@ -108,6 +108,9 @@
     <string name="pref_title_version_number">Version Number</string>
     <string name="pref_diag_title_select_lang">Select Your Language</string>
     <string name="preference_textsize">Text Font Size</string>
+    <string name="last_activity">Last Activity</string>
+    <string name="last_post">Last Post</string>
+    <string name="last_visit">Last Visit</string>
     <string-array name="thumb_size">
         <item>No Images</item>
         <item>Small thumbs</item>

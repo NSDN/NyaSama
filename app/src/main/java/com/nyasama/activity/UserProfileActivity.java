@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,14 +15,11 @@ import com.nyasama.ThisApp;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 
 public class UserProfileActivity extends Activity {
-
-    final static String TAG = "UserProfile";
 
     public void doLogout(View view) {
         Discuz.logout(new Response.Listener<JSONObject>() {
@@ -82,7 +78,9 @@ public class UserProfileActivity extends Activity {
         ((NetworkImageView) findViewById(R.id.avatar))
                 .setImageUrl(avatar_url, ThisApp.imageLoader);
         Helper.updateVisibility(findViewById(R.id.hide_for_others), uid == Discuz.sUid);
+        Helper.updateVisibility(findViewById(R.id.signin_button), uid == Discuz.sUid);
         Helper.updateVisibility(findViewById(R.id.show_for_others), uid != Discuz.sUid);
+        Helper.updateVisibility(findViewById(R.id.hide_when_loading), false);
         Discuz.execute("profile", new HashMap<String, Object>() {{
             put("uid", uid);
         }}, null, new Response.Listener<JSONObject>() {
@@ -91,14 +89,62 @@ public class UserProfileActivity extends Activity {
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
-                else {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
+                else if (data.has("Variables")) {
+                    Helper.updateVisibility(findViewById(R.id.hide_when_loading), true);
+
+                    JSONObject var = data.optJSONObject("Variables");
+                    JSONObject space = var.optJSONObject("space");
+                    if (space != null) {
                         ((TextView) findViewById(R.id.username))
-                                .setText(var.optJSONObject("space").optString("username"));
+                                .setText(space.optString("username"));
+                        JSONObject group = space.optJSONObject("group");
+                        ((TextView) findViewById(R.id.groupname))
+                                .setText(group.optString("grouptitle"));
+
+                        ((TextView) findViewById(R.id.my_threads))
+                                .setText(getString(R.string.mythread_button_text) + " " + space.optString("threads"));
+
+                        ((TextView) findViewById(R.id.last_activity))
+                                .setText(getString(R.string.last_activity) + "  " + space.optString("lastactivity"));
+                        ((TextView) findViewById(R.id.last_post))
+                                .setText(getString(R.string.last_post) + "  " + space.optString("lastpost"));
+                        ((TextView) findViewById(R.id.last_visit))
+                                .setText(getString(R.string.last_visit) + "  " + space.optString("lastvisit"));
+
+                        String value;
+                        value = space.optString("newpm");
+                        ((TextView) findViewById(R.id.my_messages))
+                                .setText(getString(R.string.my_message_button) + " " +
+                                        ("0".equals(value) ? "" : value));
+                        value = space.optString("newprompt");
+                        ((TextView) findViewById(R.id.my_notice))
+                                .setText(getString(R.string.my_notice_button) + " " +
+                                        ("0".equals(value) ? "" : value));
                     }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Load User profile Failed: " + e.getMessage());
+
+                    JSONObject extcredits = var.optJSONObject("extcredits");
+                    if (extcredits != null) {
+                        JSONObject credit = extcredits.optJSONObject("1");
+                        String value = space != null ? space.optString("extcredits1") : "";
+                        ((TextView) findViewById(R.id.credit))
+                                .setText(credit.optString("title") + ": " +
+                                        Helper.toSafeInteger(value, 0) + credit.optString("unit"));
+
+                        int[] creditsView = {
+                                2, R.id.user_points2, R.id.user_points2,
+                                3, R.id.user_points3, R.id.user_points3,
+                                4, R.id.user_points4, R.id.user_points4,
+                                6, R.id.user_points5, R.id.user_points5,
+                        };
+                        for (int i = 0; i < creditsView.length; i += 3) {
+                            TextView text = (TextView) findViewById(creditsView[i+1]);
+                            credit = extcredits.optJSONObject("" + creditsView[i]);
+                            if (text != null && credit != null) {
+                                value = space != null ? space.optString("extcredits" + creditsView[i]) : "";
+                                text.setText(credit.optString("title") + "\n" +
+                                        Helper.toSafeInteger(value, 0) + credit.optString("unit"));
+                            }
+                        }
                     }
                 }
             }
