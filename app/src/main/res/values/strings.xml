@@ -112,6 +112,13 @@
     <string name="last_activity">最后活动</string>
     <string name="last_post">最后发帖</string>
     <string name="last_visit">最后访问</string>
+    <string name="gender">性别</string>
+    <string name="gender_male">男</string>
+    <string name="gender_femal">女</string>
+    <string name="reside">居住地</string>
+    <string name="like">喜欢的东西</string>
+    <string name="site">个人网站</string>
+    <string name="unknown">未知</string>
     <string-array name="thumb_size">
         <item>不显示图片</item>
         <item>较小</item>

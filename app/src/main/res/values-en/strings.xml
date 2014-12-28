@@ -111,6 +111,12 @@
     <string name="last_activity">Last Activity</string>
     <string name="last_post">Last Post</string>
     <string name="last_visit">Last Visit</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_femal">Female</string>
+    <string name="like">Like</string>
+    <string name="site">Site</string>
+    <string name="unknown">Unknown</string>
     <string-array name="thumb_size">
         <item>No Images</item>
         <item>Small thumbs</item>

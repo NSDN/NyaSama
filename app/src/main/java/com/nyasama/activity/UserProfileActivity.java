@@ -3,9 +3,12 @@ package com.nyasama.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -105,6 +108,24 @@ public class UserProfileActivity extends Activity {
 
                         ((TextView) findViewById(R.id.my_threads))
                                 .setText(getString(R.string.mythread_button_text) + " " + space.optString("threads"));
+
+                        String gender = space.optString("gender");
+                        ((TextView) findViewById(R.id.user_gender))
+                                .setText(getString(R.string.gender) + "  " +
+                                        getString("1".equals(gender) ? R.string.gender_male :
+                                                ("2".equals(gender) ? R.string.gender_femal : R.string.unknown)));
+                        ((TextView) findViewById(R.id.user_reside))
+                                .setText(getString(R.string.reside) + "  " +
+                                        space.optString("resideprovince") + " " + space.optString("residecity") + " " +
+                                        space.optString("residedist"));
+                        ((TextView) findViewById(R.id.user_likes))
+                                .setText(getString(R.string.like) + "  " + space.optString("company") + " " +
+                                        space.optString("occupation") + " " + space.optString("position"));
+                        TextView userSite = (TextView) findViewById(R.id.user_site);
+                        String siteUrl = space.optString("site");
+                        userSite.setText(Html.fromHtml(getString(R.string.site) + "  " +
+                                (URLUtil.isValidUrl(siteUrl) ? "<a href=\"" + siteUrl + "\">" + siteUrl + "</a>" : siteUrl)));
+                        userSite.setMovementMethod(LinkMovementMethod.getInstance());
 
                         ((TextView) findViewById(R.id.last_activity))
                                 .setText(getString(R.string.last_activity) + "  " + space.optString("lastactivity"));
