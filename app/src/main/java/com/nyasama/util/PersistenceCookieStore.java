@@ -12,6 +12,11 @@ import java.util.Set;
 /**
  * Created by oxyflour on 2014/11/15.
  *
+ * 把cookiestore中的数据存入sharedpreference
+ * 把sharedpreference中的数据取出放入cookiestore
+ * 
+ * 在Discuz中见到其调用，具体目的，用法还不明确
+ * InMemoryCookieStore 文档：http://www.docjar.com/docs/api/sun/net/www/protocol/http/InMemoryCookieStore.html
  */
 public class PersistenceCookieStore extends InMemoryCookieStore {
 
