@@ -31,9 +31,11 @@ public class UserProfileActivity extends Activity {
     }
 
     public void doSignin(View view) {
+        findViewById(R.id.signin_button).setEnabled(false);
         Discuz.signin(new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
+                findViewById(R.id.signin_button).setEnabled(true);
                 Helper.toast(s == null ? getString(R.string.there_is_something_wrong) : s);
             }
         });
