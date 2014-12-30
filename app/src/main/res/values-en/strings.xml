@@ -123,4 +123,6 @@
         <item>Large thumbs</item>
         <item>Original Image</item>
     </string-array>
+    <string name="reside">residence</string>
+    <string name="title_activity_search">Search</string>
 </resources>
