@@ -127,4 +127,7 @@
     <string name="title_activity_search">Search</string>
     <string name="action_setup_poll">Setup Poll</string>
     <string name="diag_title_setup_poll">Each line stands for one option</string>
+    <string name="diag_title_vote_result">Vote Results</string>
+    <string name="you_have_voted">You have voted for this</string>
+    <string name="toast_too_many_votes">You can select max %d items</string>
 </resources>

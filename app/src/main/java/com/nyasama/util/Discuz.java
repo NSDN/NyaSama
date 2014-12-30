@@ -630,6 +630,11 @@ public class Discuz {
         } else if (module.equals("editpost")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "editsubmit", "yes");
+        } else if (module.equals("pollvote")) {
+            Helper.putIfNull(params, "pollsubmit", "yes");
+            Helper.putIfNull(params, "version", "2");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "pollsubmit", "true");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
