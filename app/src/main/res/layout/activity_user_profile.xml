@@ -1,7 +1,7 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#ececec"
+    android:background="@color/background_light_gray"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.nyasama.activity.UserProfileActivity">
@@ -181,23 +181,33 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:text="@string/mythread_button_text"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doShowThreads"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@string/mythread_button_text"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doShowThreads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
         <include layout="@layout/include_sep_horizontal" />
-        <TextView
-            android:text="@string/send_message_button"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doSendMessage"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@string/send_message_button"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doSendMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
 
     </LinearLayout>
 
@@ -207,47 +217,67 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/my_threads"
-            android:text="@string/mythread_button_text"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doShowThreads"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/my_threads"
+                android:text="@string/mythread_button_text"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doShowThreads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
         <include layout="@layout/include_sep_horizontal" />
-        <TextView
-            android:text="@string/show_favs_button"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doShowFavs"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@string/show_favs_button"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doShowFavs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="20dp" />
 
-        <TextView
-            android:id="@+id/my_messages"
-            android:text="@string/my_message_button"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doShowMessages"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/my_messages"
+                android:text="@string/my_message_button"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doShowMessages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+                <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
         <include layout="@layout/include_sep_horizontal" />
-        <TextView
-            android:id="@+id/my_notice"
-            android:text="@string/my_notice_button"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:clickable="true"
-            android:onClick="doShowNotice"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/my_notice"
+                android:text="@string/my_notice_button"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:clickable="true"
+                android:onClick="doShowNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/include_indicator_right" />
+        </FrameLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="20dp" />

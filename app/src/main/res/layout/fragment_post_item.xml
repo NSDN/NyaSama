@@ -1,6 +1,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:padding="5dp"
+    android:background="@android:color/background_light"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,12 +32,11 @@
         android:id="@+id/menu"
         android:text="..."
         android:padding="5dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:textColor="@android:color/holo_orange_dark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@color/text_color_secondary"
         android:textSize="30dp"
         android:textStyle="bold" />
 
@@ -65,26 +65,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <TextView
+    <Button
         android:id="@+id/attachment_list"
+        style="?android:attr/buttonStyleSmall"
         android:layout_toLeftOf="@+id/menu"
         android:layout_below="@id/comment_list"
         android:text="@string/text_view_attachments"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/holo_green_dark"
-        android:textStyle="bold"
-        android:textSize="16dp" />
+        android:textStyle="bold" />
 
-    <TextView
+    <Button
         android:id="@+id/votes"
+        style="?android:attr/buttonStyleSmall"
         android:layout_toLeftOf="@+id/menu"
         android:layout_below="@id/attachment_list"
         android:text="@string/text_view_vote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/holo_green_dark"
-        android:textStyle="bold"
-        android:textSize="16dp" />
+        android:textStyle="bold" />
 
 </RelativeLayout>

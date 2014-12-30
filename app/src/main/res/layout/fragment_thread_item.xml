@@ -1,7 +1,8 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:padding="5dp"
+    android:padding="10dp"
+    android:background="@android:color/background_light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
@@ -14,16 +15,16 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            style="@android:style/TextAppearance.Holo.Medium" />
+            style="?android:textAppearanceMedium" />
         <TextView
             android:id="@+id/inf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@android:style/TextAppearance.Holo.Small" />
+            style="?android:textAppearanceSmall" />
     </LinearLayout>
     <TextView
         android:id="@+id/sub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Holo.Small" />
+        style="?android:textAppearanceSmall" />
 </LinearLayout>

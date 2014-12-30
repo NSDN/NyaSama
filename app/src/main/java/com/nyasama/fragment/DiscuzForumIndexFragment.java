@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
@@ -70,7 +71,7 @@ public class DiscuzForumIndexFragment extends CommonListFragment
             public void convertView(ViewHolder viewHolder, Object obj) {
                 if (obj instanceof ForumCatalog) {
                     ForumCatalog item = (ForumCatalog) obj;
-                    viewHolder.setText(R.id.forum_cat_title, item.name);
+                    ((TextView) viewHolder.getConvertView()).setText(item.name);
                 }
                 else {
                     Forum item = (Forum) obj;

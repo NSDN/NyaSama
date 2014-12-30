@@ -2,14 +2,16 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:windowBackground">@android:color/background_light</item>
         <item name="android:colorBackground">@android:color/white</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="AppThemeAni" parent="android:Theme.Holo.Light">
-        <item name="android:colorBackground">@android:color/white</item>
-        <item name="android:textSize">16sp</item>
+    <style name="AppThemeAni" parent="AppTheme">
         <item name="android:animateLayoutChanges">true</item>
     </style>
+
+    <color name="background_light_gray">#ececec</color>
+    <color name="text_color_secondary">#999999</color>
 
 </resources>
