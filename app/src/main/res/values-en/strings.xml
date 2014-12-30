@@ -125,4 +125,6 @@
     </string-array>
     <string name="reside">residence</string>
     <string name="title_activity_search">Search</string>
+    <string name="action_setup_poll">Setup Poll</string>
+    <string name="diag_title_setup_poll">Each line stands for one option</string>
 </resources>
