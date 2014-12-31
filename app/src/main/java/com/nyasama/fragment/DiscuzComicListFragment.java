@@ -2,6 +2,9 @@ package com.nyasama.fragment;
 
 import android.os.Bundle;
 import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.R;
@@ -24,6 +27,14 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
         bundle.putInt("fid", 3);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        // set background color
+        view.setBackgroundColor(getResources().getColor(R.color.background_light_gray));
+        return view;
     }
 
     @Override
