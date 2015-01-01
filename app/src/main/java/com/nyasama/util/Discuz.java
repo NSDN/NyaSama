@@ -329,9 +329,6 @@ public class Discuz {
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
     public static String getAttachmentThumb(int attachmentId, String size) {
-        if (size.isEmpty())
-            return DISCUZ_URL + "static/image/common/none.gif";
-
         String str = attachmentId + "|" + size.replace('x', '|');
         String key;
         try {
