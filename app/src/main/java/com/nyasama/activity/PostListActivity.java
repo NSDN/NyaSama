@@ -81,6 +81,18 @@ public class PostListActivity extends FragmentActivity
 
     private int mForumId;
 
+    private int mPrefMaxImageSize = -1;
+    private int mPrefFontSize = 16;
+
+    public void loadDisplayPreference() {
+        boolean shallDisplayImage =
+                ThisApp.preferences.getBoolean(getString(R.string.pref_key_show_image), false);
+        mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
+                ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
+        mPrefFontSize = Helper.toSafeInteger(
+                ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 16);
+    }
+
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -521,11 +533,6 @@ public class PostListActivity extends FragmentActivity
 
     final BitmapLruCache imageCache = new BitmapLruCache();
     final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
-    final int maxImageSize = Helper.toSafeInteger(
-            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_thumb_size), ""), -1);
-    final String maxImageWxH = maxImageSize < 0 ? "" : "268x380";
-    final int textFontSize = Helper.toSafeInteger(
-            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_text_size), ""), 16);
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -556,9 +563,9 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
-                messageText.setTextSize(textFontSize);
+                messageText.setTextSize(mPrefFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache, maxImageSize, maxImageSize), null);
+                        new HtmlImageGetter(messageText, imageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -676,6 +683,8 @@ public class PostListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        loadDisplayPreference();
+
         final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -721,7 +730,9 @@ public class PostListActivity extends FragmentActivity
                             Post post = new Post(postData);
                             for (Attachment attachment : post.attachments)
                                 mAttachmentMap.put(attachment.src, attachment);
-                            post.message = compileMessage(post.message, mAttachmentMap, maxImageWxH);
+                            post.message = compileMessage(post.message, mAttachmentMap,
+                                    // TODO: add more image size here (see forumimage.php
+                                    mPrefMaxImageSize < 0 ? "" : "268x380");
                             listData.add(post);
                         }
 

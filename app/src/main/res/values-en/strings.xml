@@ -118,7 +118,6 @@
     <string name="site">Site</string>
     <string name="unknown">Unknown</string>
     <string-array name="thumb_size">
-        <item>No Images</item>
         <item>Small thumbs</item>
         <item>Large thumbs</item>
         <item>Original Image</item>
@@ -130,4 +129,5 @@
     <string name="diag_title_vote_result">Vote Results</string>
     <string name="you_have_voted">You have voted for this</string>
     <string name="toast_too_many_votes">You can select max %d items</string>
+    <string name="preference_showimg">Display Images</string>
 </resources>

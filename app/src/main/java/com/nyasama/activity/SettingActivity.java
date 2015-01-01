@@ -18,8 +18,13 @@ public class SettingActivity extends PreferenceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference);
+
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        // update version string
         findPreference(getString(R.string.pref_key_version)).setSummary(ThisApp.getVersion());
+        // update setting
+        onSharedPreferenceChanged(getPreferenceScreen().getSharedPreferences(),
+                getString(R.string.pref_key_show_image));
     }
 
     @Override
@@ -36,6 +41,10 @@ public class SettingActivity extends PreferenceActivity
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
+        }
+        else if (key.equals(getString(R.string.pref_key_show_image))) {
+            findPreference(getString(R.string.pref_key_thumb_size))
+                    .setEnabled(sharedPreferences.getBoolean(key, false));
         }
     }
 }
