@@ -354,6 +354,15 @@ public class Discuz {
         return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
     }
 
+    public static boolean isSmileyUrl(String url) {
+        return url.startsWith(DISCUZ_URL + "static/image/smiley/");
+    }
+
+    private static BitmapLruCache smileyCache = new BitmapLruCache();
+    public static BitmapLruCache getSmileyCache() {
+        return smileyCache;
+    }
+
     public static String getSafeUrl(String url) {
         if (url == null)
             return "";

@@ -39,25 +39,33 @@ public class HtmlImageGetter implements Html.ImageGetter {
         final String url = Discuz.getSafeUrl(s);
         final LevelListDrawable drawable = new LevelListDrawable();
 
-        Bitmap cachedImage = cache == null ? null : cache.getBitmap(url);
-        Resources resources = ThisApp.context.getResources();
-        Drawable empty = cachedImage == null ?
-                resources.getDrawable(android.R.drawable.ic_menu_gallery):
-                new BitmapDrawable(resources, cachedImage);
+        // for smilies, we will cache it in Discuz
+        boolean isSmileyUrl = Discuz.isSmileyUrl(url);
+        final ImageLoader.ImageCache imageCache = isSmileyUrl ? Discuz.getSmileyCache() : this.cache;
+        final int imageWidth = isSmileyUrl ? 0 : maxWidth;
+        final int imageHeight = isSmileyUrl ? 0 : maxHeight;
+
+        final Resources resources = ThisApp.context.getResources();
+        Bitmap cachedImage = imageCache != null ?
+                imageCache.getBitmap(url) :
+                null;
+        Drawable empty = cachedImage != null ?
+                new BitmapDrawable(resources, cachedImage) :
+                resources.getDrawable(android.R.drawable.ic_menu_gallery);
         drawable.addLevel(0, 0, empty);
         drawable.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
 
-        if (cachedImage == null && maxWidth >= 0 && maxHeight >= 0) {
+        if (cachedImage == null && imageWidth >= 0 && imageHeight >= 0) {
             jobs ++;
             ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
                 @Override
                 public void onResponse(final Bitmap bitmap) {
-                    drawable.addLevel(1, 1, new BitmapDrawable(ThisApp.context.getResources(), bitmap));
+                    drawable.addLevel(1, 1, new BitmapDrawable(resources, bitmap));
                     drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
                     drawable.setLevel(1);
                     // save to cache
-                    if (cache != null)
-                        cache.putBitmap(url, bitmap);
+                    if (imageCache != null)
+                        imageCache.putBitmap(url, bitmap);
                     // refresh layout
                     jobs --;
                     if (jobs == 0) {
@@ -65,7 +73,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
                         container.setText(container.getText());
                     }
                 }
-            }, maxWidth, maxHeight, null, null);
+            }, imageWidth, imageHeight, null, null);
             ThisApp.requestQueue.add(request);
         }
 
