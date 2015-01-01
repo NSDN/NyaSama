@@ -13,11 +13,12 @@ import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -65,15 +66,20 @@ public class PostListActivity extends FragmentActivity
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
     private CommonListFragment<Post> mListFragment;
+
     Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
+    private AlertDialog mReplyDialog;
+
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
     private SparseArray<Integer> mCommentCount = new SparseArray<Integer>();
-    private List<PollOption> mPollOptions = new ArrayList<PollOption>();
-    private int mForumId;
-
-    private AlertDialog mReplyDialog;
     private AlertDialog mCommentDialog;
+
+    private List<PollOption> mPollOptions = new ArrayList<PollOption>();
+    private boolean mAllowVote;
+    private int mMaxVotes;
     private AlertDialog mVoteDialog;
+
+    private int mForumId;
 
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
@@ -138,9 +144,27 @@ public class PostListActivity extends FragmentActivity
         });
     }
 
-    public void doPollVote(final int vid) {
-        // TODO: finish this
-        mVoteDialog.dismiss();
+    public void doPollVote(final List<Integer> selected) {
+        Discuz.execute("pollvote", new HashMap<String, Object>() {{
+            put("fid", getIntent().getIntExtra("fid", 0));
+            put("tid", getIntent().getIntExtra("tid", 0));
+        }}, new HashMap<String, Object>() {{
+            put("pollanswers[]", selected);
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR))
+                    Helper.toast(R.string.there_is_something_wrong);
+                else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    String messageval = message.optString("messageval");
+                    if ("thread_poll_succeed".equals(messageval))
+                        mListFragment.reloadAll();
+                    Helper.toast(message.optString("messagestr"));
+                }
+                mVoteDialog.dismiss();
+            }
+        });
     }
 
     public void doLoadComment(final int pid, final int page) {
@@ -324,24 +348,55 @@ public class PostListActivity extends FragmentActivity
     }
 
     public void showPollOptions() {
-        ListView listView = new ListView(this);
-        listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions,
-                android.R.layout.simple_list_item_1) {
+        final ListView listView = new ListView(this);
+        listView.setChoiceMode(mMaxVotes > 1 ?
+                AbsListView.CHOICE_MODE_MULTIPLE : AbsListView.CHOICE_MODE_SINGLE);
+        int itemLayout = android.R.layout.simple_list_item_1;
+        if (mAllowVote) itemLayout = mMaxVotes > 1 ?
+                android.R.layout.simple_list_item_multiple_choice :
+                android.R.layout.simple_list_item_single_choice;
+        listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions, itemLayout) {
             @Override
             public void convertView(ViewHolder viewHolder, PollOption item) {
                 ((TextView) viewHolder.getConvertView())
-                        .setText(item.option + " " + item.votes + " votes (" + item.percent + "%)");
+                        .setText(item.option + " * " + item.votes + " (" + item.percent + "%)");
             }
         });
-        mVoteDialog = new AlertDialog.Builder(this)
-                .setTitle("Vote Results")
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.diag_title_vote_result) +
+                        (mAllowVote ? "" : " (" + getString(R.string.you_have_voted) + ")"))
                 .setView(listView)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                .setNegativeButton(android.R.string.cancel, null);
+        if (mAllowVote)
+            builder.setPositiveButton(android.R.string.ok, null);
+
+        mVoteDialog = builder.create();
+        if (mAllowVote) mVoteDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                doPollVote(mPollOptions.get(i).id);
+            public void onShow(DialogInterface dialogInterface) {
+                mVoteDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                List<Integer> selected = new ArrayList<Integer>();
+                                SparseBooleanArray checked = listView.getCheckedItemPositions();
+                                for (int i = 0; i < checked.size(); i ++)
+                                    if (checked.valueAt(i)) {
+                                        int pos = checked.keyAt(i);
+                                        if (pos < mPollOptions.size()) {
+                                            int id = mPollOptions.get(pos).id;
+                                            selected.add(id);
+                                        }
+                                    }
+                                if (selected.size() <= mMaxVotes) {
+                                    Helper.disableDialog(mVoteDialog);
+                                    doPollVote(selected);
+                                }
+                                else
+                                    Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxVotes));
+                            }
+                        });
             }
         });
         mVoteDialog.show();
@@ -351,7 +406,7 @@ public class PostListActivity extends FragmentActivity
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
-    static String compileMessage(String message, final Map<String, Attachment> attachments) {
+    static String compileMessage(String message, final Map<String, Attachment> attachments, final String size) {
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -360,7 +415,7 @@ public class PostListActivity extends FragmentActivity
                     String src = pathMatcher.group(1);
                     Attachment attachment = attachments.get(src);
                     if (attachment != null) {
-                        String url = Discuz.getAttachmentThumb(attachment.id);
+                        String url = Discuz.getAttachmentThumb(attachment.id, size);
                         attachments.put(url, attachment);
                         return "<img src=\"" + url + "\" />";
                     }
@@ -466,6 +521,11 @@ public class PostListActivity extends FragmentActivity
 
     final BitmapLruCache imageCache = new BitmapLruCache();
     final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
+    final int maxImageSize = Helper.toSafeInteger(
+            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_thumb_size), ""), -1);
+    final String maxImageWxH = maxImageSize < 0 ? "" : "268x380";
+    final int textFontSize = Helper.toSafeInteger(
+            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_text_size), ""), 16);
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -496,8 +556,9 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
+                messageText.setTextSize(textFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache, 512, 512), null);
+                        new HtmlImageGetter(messageText, imageCache, maxImageSize, maxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -660,7 +721,7 @@ public class PostListActivity extends FragmentActivity
                             Post post = new Post(postData);
                             for (Attachment attachment : post.attachments)
                                 mAttachmentMap.put(attachment.src, attachment);
-                            post.message = compileMessage(post.message, mAttachmentMap);
+                            post.message = compileMessage(post.message, mAttachmentMap, maxImageWxH);
                             listData.add(post);
                         }
 
@@ -695,12 +756,15 @@ public class PostListActivity extends FragmentActivity
 
                         // votes
                         if (var.has("special_poll")) {
+                            JSONObject poll = var.getJSONObject("special_poll");
                             mPollOptions.clear();
-                            JSONObject polloptions = var.getJSONObject("special_poll").getJSONObject("polloptions");
+                            JSONObject polloptions = poll.getJSONObject("polloptions");
                             for (Iterator<String> iter = polloptions.keys(); iter.hasNext(); ) {
                                 String key = iter.next();
                                 mPollOptions.add(new PollOption(polloptions.getJSONObject(key)));
                             }
+                            mAllowVote = poll.getBoolean("allowvote");
+                            mMaxVotes = Math.max(Helper.toSafeInteger(poll.getString("maxchoices"), 1), 1);
                         }
 
                     } catch (JSONException e) {

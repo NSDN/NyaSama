@@ -62,7 +62,7 @@
     <string name="title_notice_read">Read Notice</string>
     <string name="title_notice_unread">Unread Notice</string>
     <string name="pref_category_general">General</string>
-    <string name="alert_need_reboot">A restart ss required to apply this change</string>
+    <string name="alert_need_reboot">Restart to apply these changes now</string>
     <string name="diag_loading_smilies">Loading Smileies...</string>
     <string name="dialog_update_user">Updating User Info...</string>
     <string name="dialog_uploading">Uploading...</string>
@@ -86,11 +86,9 @@
     <string name="preference_language">Language</string>
     <string name="preference_animation">Fade Animation</string>
     <string name="preference_category_version">Version</string>
-    <string name="version_value">NyaSama-nightly-141226.1</string>
     <string name="preference_cachesize">Cache Size</string>
     <string name="preference_category_explore">Explore</string>
-    <string name="preference_thumbswitch">Show Image</string>
-    <string name="preference_thumbsize">Thumb Size</string>
+    <string name="preference_thumbsize">Image Size</string>
     <string name="new_version_alert_title">New Version is Ready</string>
     <string name="new_version_alert_message">Go and download new version (%s) now?</string>
     <string name="title_editing_post">Editing Post</string>
@@ -106,5 +104,30 @@
     <string name="prompt_2">pms</string>
     <string name="prompt_3">and</string>
     <string name="prompt_4">prompts</string>
-    <string name="search_hint">Search...</string>
+    <string name="search_hint">Search Threads</string>
+    <string name="pref_title_version_number">Version Number</string>
+    <string name="pref_diag_title_select_lang">Select Your Language</string>
+    <string name="preference_textsize">Text Font Size</string>
+    <string name="last_activity">Last Activity</string>
+    <string name="last_post">Last Post</string>
+    <string name="last_visit">Last Visit</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_femal">Female</string>
+    <string name="like">Like</string>
+    <string name="site">Site</string>
+    <string name="unknown">Unknown</string>
+    <string-array name="thumb_size">
+        <item>No Images</item>
+        <item>Small thumbs</item>
+        <item>Large thumbs</item>
+        <item>Original Image</item>
+    </string-array>
+    <string name="reside">residence</string>
+    <string name="title_activity_search">Search</string>
+    <string name="action_setup_poll">Setup Poll</string>
+    <string name="diag_title_setup_poll">Each line stands for one option</string>
+    <string name="diag_title_vote_result">Vote Results</string>
+    <string name="you_have_voted">You have voted for this</string>
+    <string name="toast_too_many_votes">You can select max %d items</string>
 </resources>

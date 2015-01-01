@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 import android.webkit.WebView;
@@ -19,6 +20,7 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.nyasama.activity.SplashActivity;
 import com.nyasama.util.BitmapLruCache;
+import com.nyasama.util.Helper;
 import com.nyasama.util.PersistenceCookieStore;
 
 import java.io.File;
@@ -35,6 +37,7 @@ import java.util.Locale;
  *
  */
 public class ThisApp extends Application {
+    public static SharedPreferences preferences;
     public static Context context;
     public static Cache volleyCache;
     public static RequestQueue requestQueue;
@@ -42,32 +45,57 @@ public class ThisApp extends Application {
     public static PersistenceCookieStore cookieStore;
     public static WebView webView;
 
-    private static Locale getLocale(SharedPreferences preferences) {
+    private static Locale getLocale(String language) {
         String[] values = context.getResources().getStringArray(R.array.language_preference);
-        String language = preferences.getString("language", values[0]);
-        if (language.equals(values[0])) return Locale.getDefault();
-        if (language.equals(values[1])) return Locale.SIMPLIFIED_CHINESE;
-        if (language.equals(values[2])) return Locale.ENGLISH;
+        Locale[] locales = {
+                Locale.getDefault(),
+                Locale.SIMPLIFIED_CHINESE,
+                Locale.ENGLISH
+        };
+        for (int i = 0; i < locales.length && i < values.length; i ++)
+            if (values[i].equals(language)) return locales[i];
         return Locale.getDefault();
     }
 
     // REF: http://aleung.github.io/blog/2012/10/06/change-locale-in-android-application/
-    private static void loadLocaleFromPreference(SharedPreferences preferences) {
-        Locale locale = getLocale(preferences);
-        Locale.setDefault(locale);
+    private static void loadLocale(String language) {
         Configuration config = new Configuration();
-        config.locale = locale;
+        config.locale = getLocale(language);
         context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
+    }
+
+    public static String getVersion() {
+        try {
+            return context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).versionName;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static void onSharedPreferenceChanged(SharedPreferences pref, String s) {
+        if (s.equals(context.getString(R.string.pref_key_language)))
+            loadLocale(pref.getString(s, ""));
+        else if (s.equals(context.getString(R.string.pref_key_animation)))
+            context.setTheme(pref.getBoolean(s, false) ?
+                    R.style.AppThemeAni : R.style.AppTheme);
+        else if (s.equals(context.getString(R.string.pref_key_cache_size)))
+            volleyCache = new DiskBasedCache(new File(context.getCacheDir(), "NyasamaVolleyCache"),
+                    1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-
         context = getApplicationContext();
 
-        File cacheFile = new File(getCacheDir(), "NyasamaVolleyCache");
-        volleyCache = new DiskBasedCache(cacheFile, 1024 * 1024 * 32);
+        // load preferences
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_animation));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_cache_size));
 
         // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
         Network network = new BasicNetwork(new HurlStack() {
@@ -90,8 +118,6 @@ public class ThisApp extends Application {
 
         webView = new WebView(context);
         webView.getSettings().setJavaScriptEnabled(true);
-
-        loadLocaleFromPreference(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
     public static void restart() {

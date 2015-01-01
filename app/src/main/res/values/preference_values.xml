@@ -1,24 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Note: add translatable="false" to void errors when building release
+    REF: http://stackoverflow.com/questions/11443996/lint-how-to-ignore-key-is-not-translated-in-language-errors
+-->
 <resources>
-    <string-array name="language_preference">
+    <string name="pref_key_language" translatable="false">language</string>
+
+    <string-array name="language_preference" translatable="false">
         <!-- Note: remember to update ThisApp.getLocale if items are modified -->
         <item>默认</item>
         <item>简体中文</item>
         <item>English</item>
     </string-array>
 
-    <string-array name="cache_size">
+    <string name="pref_key_animation" translatable="false">animation</string>
+
+    <string name="pref_key_cache_size" translatable="false">cache_size</string>
+    <string-array name="cache_size" translatable="false">
         <item>16MB</item>
         <item>32MB</item>
-        <item>48MB</item>
         <item>64MB</item>
         <item>128MB</item>
     </string-array>
-
-    <string-array name="thumb_size">
-        <item>原图</item>
-        <item>中等缩略图</item>
-        <item>小缩略图</item>
-        <item>不显示图片</item>
+    <string-array name="cache_size_value" translatable="false">
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
     </string-array>
+
+    <string name="pref_key_thumb_size" translatable="false">thumb_size</string>
+    <string-array name="thumb_size_value" translatable="false">
+        <item>-1</item>
+        <item>512</item>
+        <item>1024</item>
+        <item>0</item>
+    </string-array>
+
+    <string name="pref_key_text_size" translatable="false">text_size</string>
+    <string-array name="text_size" translatable="false">
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+    </string-array>
+
+    <string name="pref_key_version" translatable="false">version_number</string>
 </resources>

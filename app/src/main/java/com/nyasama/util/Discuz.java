@@ -15,6 +15,7 @@ import android.util.SparseArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -69,9 +71,6 @@ public class Discuz {
     public static String DISCUZ_URL = DISCUZ_HOST + "/";
     public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static String DISCUZ_ENC = "gbk";
-
-    public static int IMAGE_THUMB_WIDTH = 268;
-    public static int IMAGE_THUMB_HEIGHT = 380;
 
     public static String VOLLEY_ERROR = "volleyError";
 
@@ -329,8 +328,11 @@ public class Discuz {
     }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getAttachmentThumb(int attachmentId) {
-        String str = attachmentId + "|" + IMAGE_THUMB_WIDTH + "|" + IMAGE_THUMB_HEIGHT;
+    public static String getAttachmentThumb(int attachmentId, String size) {
+        if (size.isEmpty())
+            return DISCUZ_URL + "static/image/common/none.gif";
+
+        String str = attachmentId + "|" + size.replace('x', '|');
         String key;
         try {
             byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
@@ -342,7 +344,7 @@ public class Discuz {
         params.put("module", "forumimage");
         params.put("aid", attachmentId);
         params.put("version", 2);
-        params.put("size", IMAGE_THUMB_WIDTH + "x" + IMAGE_THUMB_HEIGHT);
+        params.put("size", size);
         params.put("key", key);
         params.put("type", "fixnone");
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
@@ -628,6 +630,11 @@ public class Discuz {
         } else if (module.equals("editpost")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "editsubmit", "yes");
+        } else if (module.equals("pollvote")) {
+            Helper.putIfNull(params, "pollsubmit", "yes");
+            Helper.putIfNull(params, "version", "2");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "pollsubmit", "true");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
@@ -653,6 +660,41 @@ public class Discuz {
                     body == null ? Request.Method.GET : Request.Method.POST, url,
                     new ResponseListener(callback),
                     new ResponseErrorListener(callback)) {
+                public void addToPostBody(StringBuilder encodedParams, String key, String value) {
+                    String paramsEncoding = getParamsEncoding();
+                    try {
+                        encodedParams.append(URLEncoder.encode(key, paramsEncoding));
+                        encodedParams.append('=');
+                        encodedParams.append(URLEncoder.encode(value, paramsEncoding));
+                        encodedParams.append('&');
+                    }
+                    catch (UnsupportedEncodingException uee) {
+                        throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+                    }
+                }
+                // REF: https://android.googlesource.com/platform/frameworks/volley/+/master/src/main/java/com/android/volley/Request.java
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    String paramsEncoding = getParamsEncoding();
+                    StringBuilder encodedParams = new StringBuilder();
+                    if (body != null) for (Map.Entry<String, Object> entry : body.entrySet()) {
+                        Object value = entry.getValue();
+                        if (value instanceof List) {
+                            for (Object item : (List) entry.getValue())
+                                if (item != null)
+                                    addToPostBody(encodedParams, entry.getKey(), item.toString());
+                        }
+                        else if (value != null) {
+                            addToPostBody(encodedParams, entry.getKey(), value.toString());
+                        }
+                    }
+                    try {
+                        return encodedParams.toString().getBytes(paramsEncoding);
+                    } catch (UnsupportedEncodingException uee) {
+                        throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+                    }
+                }
+
                 @Override
                 protected Map<String, String> getParams() {
                     HashMap<String, String> params = new HashMap<String, String>();

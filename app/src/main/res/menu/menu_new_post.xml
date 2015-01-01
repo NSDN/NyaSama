@@ -5,6 +5,8 @@
         android:showAsAction="ifRoom" android:icon="@drawable/ic_menu_emoticons" />
     <item android:id="@+id/action_add_image" android:title="@string/action_add_image"
         android:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_gallery" />
+    <item android:id="@+id/action_setup_poll" android:title="@string/action_setup_poll"
+        android:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_share" />
     <item android:id="@+id/action_send" android:title="@string/action_post_now"
         android:showAsAction="always" android:icon="@android:drawable/ic_menu_send" />
     <item android:id="@+id/action_save" android:title="@string/action_save"

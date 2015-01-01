@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,7 @@ public class NewPostActivity extends Activity {
     private Spinner mSpinnerTypes;
 
     String mPhotoFilePath;
+    String mPollOptions = "";
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
@@ -167,6 +169,15 @@ public class NewPostActivity extends Activity {
                 put("subject", title);
             else if (noticetrimstr != null)
                 put("noticetrimstr", noticetrimstr);
+
+            if (!mPollOptions.isEmpty()) {
+                List<String> options = new ArrayList<String>();
+                Collections.addAll(options, mPollOptions.split("\\n"));
+                put("polloption[]", options);
+                put("tpolloption", "1");
+                put("polls", "yes");
+                put("special", "1");
+            }
 
             if (mSpinnerTypes.getVisibility() == View.VISIBLE && mThreadTypes != null)
                 put("typeid", mThreadTypes.get(mSpinnerTypes.getSelectedItem().toString()));
@@ -275,6 +286,22 @@ public class NewPostActivity extends Activity {
                 }
             }
         });
+    }
+
+    public void editPollOptions() {
+        final EditText content = new EditText(this);
+        content.setText(mPollOptions);
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.diag_title_setup_poll))
+                .setView(content)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mPollOptions = content.getText().toString();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void insertCodeToContent(String code) {
@@ -533,6 +560,8 @@ public class NewPostActivity extends Activity {
         boolean isEditingPost = getIntent().getIntExtra("pid", 0) > 0;
         menu.findItem(R.id.action_save).setVisible(isEditingPost);
         menu.findItem(R.id.action_send).setVisible(!isEditingPost);
+        boolean isNewPost = !isEditingPost && getIntent().getIntExtra("tid", 0) == 0;
+        menu.findItem(R.id.action_setup_poll).setVisible(isNewPost);
         return true;
     }
 
@@ -544,6 +573,9 @@ public class NewPostActivity extends Activity {
         }
         else if (id == R.id.action_save) {
             doEdit(null);
+        }
+        else if (id == R.id.action_setup_poll) {
+            editPollOptions();
         }
         else if (id == R.id.action_add_smiley) {
             if (Discuz.getSmilies() == null) {

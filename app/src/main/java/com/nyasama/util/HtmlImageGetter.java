@@ -47,7 +47,7 @@ public class HtmlImageGetter implements Html.ImageGetter {
         drawable.addLevel(0, 0, empty);
         drawable.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
 
-        if (cachedImage == null) {
+        if (cachedImage == null && maxWidth >= 0 && maxHeight >= 0) {
             jobs ++;
             ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
                 @Override

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="login_question">
+    <string-array name="login_question" translatable="false">
         <item>没有登录问题</item>
         <item>母亲的名字</item>
         <item>爷爷的名字</item>

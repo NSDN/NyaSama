@@ -131,7 +131,7 @@ public class ThreadListActivity extends FragmentActivity implements
             @Override
             public int getCount() {
                 if (getIntent().getIntExtra("fid", 0) > 0)
-                    return mSubList.size() > 0 ? 3 : 2;
+                    return mSubList != null && mSubList.size() > 0 ? 3 : 2;
                 else
                     return 1;
             }
@@ -237,6 +237,7 @@ public class ThreadListActivity extends FragmentActivity implements
             if (getActivity() != null)
                 updateSubList(((ThreadListActivity) getActivity()).mSubList);
 
+            rootView.setBackgroundColor(getResources().getColor(R.color.background_light_gray));
             return rootView;
         }
     }

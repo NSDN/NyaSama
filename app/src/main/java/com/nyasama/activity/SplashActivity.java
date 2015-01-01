@@ -28,15 +28,7 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        String version = "";
-        try {
-            version = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionName;
-        }
-        catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        final String versionName = version;
+        final String versionName = ThisApp.getVersion();
         ThisApp.requestQueue.add(new StringRequest(releaseUrl + "/version.txt", new Response.Listener<String>() {
             @Override
             public void onResponse(final String s) {
