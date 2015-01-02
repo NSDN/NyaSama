@@ -41,6 +41,8 @@ public class SettingActivity extends BaseThemedActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (getActivity() == null) return;
+
             ThisApp.onSharedPreferenceChanged(sharedPreferences, key);
             if (key.equals(getString(R.string.pref_key_language))) {
                 if (!getActivity().isFinishing()) new AlertDialog.Builder(getActivity())
