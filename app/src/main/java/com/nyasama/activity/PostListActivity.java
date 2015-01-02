@@ -530,8 +530,8 @@ public class PostListActivity extends BaseThemedActivity
         "[/quote]";
     }
 
-    final BitmapLruCache imageCache = new BitmapLruCache();
-    final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
+    final BitmapLruCache mImageCache = new BitmapLruCache();
+    final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -564,7 +564,7 @@ public class PostListActivity extends BaseThemedActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 messageText.setTextSize(mPrefFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
+                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -618,10 +618,10 @@ public class PostListActivity extends BaseThemedActivity
                 // load comments
                 LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
                 commentList.removeAllViews();
-                List<View> cachedViews = commentsCache.get(item.id);
+                List<View> cachedViews = mCommentCache.get(item.id);
                 if (cachedViews == null) {
                     cachedViews = new ArrayList<View>();
-                    commentsCache.put(item.id, cachedViews);
+                    mCommentCache.put(item.id, cachedViews);
                 }
                 List<Comment> comments = mComments.get(item.id);
                 if (comments != null) {
