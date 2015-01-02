@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class SearchActivity extends FragmentActivity
+public class SearchActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     private static final int PAGE_SIZE_COUNT = 25;

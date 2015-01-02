@@ -1,6 +1,5 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -22,7 +21,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class UserProfileActivity extends Activity {
+public class UserProfileActivity extends BaseThemedActivity {
 
     public void doLogout(View view) {
         Discuz.logout(new Response.Listener<JSONObject>() {

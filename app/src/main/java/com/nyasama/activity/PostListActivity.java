@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
@@ -55,7 +54,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PostListActivity extends FragmentActivity
+public class PostListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
     public static final int REQUEST_CODE_EDIT_POST = 1;

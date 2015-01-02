@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -31,7 +30,7 @@ import java.util.List;
  * Note: this activity handles both forum threads and user threads
  */
 
-public class ThreadListActivity extends FragmentActivity implements
+public class ThreadListActivity extends BaseThemedActivity implements
         DiscuzThreadListFragment.OnThreadListInteraction {
 
     public final int REQUEST_CODE_NEW_THREAD = 1;

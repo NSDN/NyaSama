@@ -1,6 +1,5 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NewPostActivity extends Activity {
+public class NewPostActivity extends BaseThemedActivity {
 
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);

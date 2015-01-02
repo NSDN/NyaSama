@@ -1,6 +1,5 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -20,7 +19,7 @@ import com.nyasama.util.Helper;
 
 import org.json.JSONObject;
 
-public class LoginActivity extends Activity
+public class LoginActivity extends BaseThemedActivity
     implements AdapterView.OnItemSelectedListener {
 
     public static final int REQUEST_CODE_LOGIN = 1;

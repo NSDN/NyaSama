@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -48,7 +47,7 @@ import java.util.regex.Pattern;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class AttachmentViewer extends FragmentActivity {
+public class AttachmentViewer extends BaseThemedActivity {
 
     private static String TAG = "ImageViewer";
     private static int MAX_TEXTURE_SIZE = 2048;

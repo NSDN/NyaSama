@@ -2,7 +2,6 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +24,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class PMListActivity extends FragmentActivity
+public class PMListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
     public static int PAGE_SIZE_COUNT = 20;

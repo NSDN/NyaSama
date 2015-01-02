@@ -2,7 +2,6 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +22,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class FavListActivity extends FragmentActivity
+public class FavListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<FavItem> {
 
     final static int PAGE_SIZE_COUNT = 20;

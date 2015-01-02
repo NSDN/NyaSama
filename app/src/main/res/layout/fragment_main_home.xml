@@ -6,6 +6,7 @@
     android:id="@+id/view_pager">
 
     <android.support.v4.view.PagerTabStrip
+        style="@style/PagerTabStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
