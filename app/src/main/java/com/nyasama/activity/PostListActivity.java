@@ -615,6 +615,13 @@ public class PostListActivity extends BaseThemedActivity
                 messageText.setText(messageContent);
                 messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
+                // see #67
+                // REF: http://blog.csdn.net/jaycee110905/article/details/8762274
+                messageText.setFocusableInTouchMode(true);
+                messageText.setFocusable(true);
+                messageText.setClickable(true);
+                messageText.setLongClickable(true);
+
                 // load comments
                 LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
                 commentList.removeAllViews();
