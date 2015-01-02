@@ -104,6 +104,8 @@ public class ThisApp extends Application {
                 HttpURLConnection connection = super.createConnection(url);
                 if (url.getRef() != null && url.getRef().contains("#noredirect#"))
                     connection.setInstanceFollowRedirects(false);
+                // see #60
+                connection.setChunkedStreamingMode(0);
                 return connection;
             }
         });
