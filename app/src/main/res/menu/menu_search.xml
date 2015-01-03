@@ -3,6 +3,6 @@
     tools:context="com.nyasama.activity.SearchActivity">
     <item android:id="@+id/action_search" android:title="@string/action_example"
         android:icon="@drawable/ic_action_search"
-        android:actionViewClass="android.widget.SearchView"
+        android:actionViewClass="com.negusoft.holoaccent.widget.AccentSearchView"
         android:showAsAction="ifRoom" />
 </menu>
