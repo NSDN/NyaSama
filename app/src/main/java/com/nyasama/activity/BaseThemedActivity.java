@@ -2,6 +2,7 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
@@ -75,6 +76,14 @@ public class BaseThemedActivity extends FragmentActivity {
         public void onInitResources(AccentResources resources) {
             onInitAccentResources(resources);
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setTheme(ThisApp.preferences.getBoolean(getString(R.string.pref_key_animation), false) ?
+                R.style.AppThemeAni : R.style.AppTheme);
     }
 
     @Override
