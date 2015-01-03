@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.BitmapLruCache;
@@ -233,7 +234,7 @@ public class PostListActivity extends BaseThemedActivity
 
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
-        mReplyDialog = new AlertDialog.Builder(this)
+        mReplyDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -262,7 +263,7 @@ public class PostListActivity extends BaseThemedActivity
     public void addComment(Post item) {
         final int pid = item.id;
         final EditText input = new EditText(this);
-        mCommentDialog = new AlertDialog.Builder(this)
+        mCommentDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -707,7 +708,7 @@ public class PostListActivity extends BaseThemedActivity
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
-                        new AlertDialog.Builder(PostListActivity.this)
+                        new AccentAlertDialog.Builder(PostListActivity.this)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

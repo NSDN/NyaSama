@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.Activity;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +24,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
@@ -229,7 +229,7 @@ public class MainActivity extends BaseThemedActivity implements
     @Override
     public void onGetThreadData(DiscuzThreadListFragment fragment) {
         if (fragment.getMessage() != null) {
-            new AlertDialog.Builder(this)
+            new AccentAlertDialog.Builder(this)
                     .setTitle(R.string.there_is_something_wrong)
                     .setMessage(fragment.getMessage())
                     .setPositiveButton(android.R.string.yes, null)
