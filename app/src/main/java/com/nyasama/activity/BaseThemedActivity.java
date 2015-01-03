@@ -84,6 +84,9 @@ public class BaseThemedActivity extends FragmentActivity {
 
         setTheme(ThisApp.preferences.getBoolean(getString(R.string.pref_key_animation), false) ?
                 R.style.AppThemeAni : R.style.AppTheme);
+
+        if (getActionBar() != null)
+            getActionBar().setIcon(getResources().getDrawable(R.drawable.icon));
     }
 
     @Override
