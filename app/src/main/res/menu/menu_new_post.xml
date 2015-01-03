@@ -3,14 +3,14 @@
     tools:context="com.nyasama.activity.NewPostActivity">
     <item android:id="@+id/action_add_smiley" android:title="@string/action_add_smiley"
         android:showAsAction="ifRoom" android:icon="@drawable/ic_menu_emoticons" />
-    <item android:id="@+id/action_add_image" android:title="@string/action_add_image"
-        android:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_gallery" />
-    <item android:id="@+id/action_setup_poll" android:title="@string/action_setup_poll"
-        android:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_share" />
     <item android:id="@+id/action_send" android:title="@string/action_post_now"
-        android:showAsAction="always" android:icon="@android:drawable/ic_menu_send" />
+        android:showAsAction="always" android:icon="@drawable/ic_action_send_now" />
     <item android:id="@+id/action_save" android:title="@string/action_save"
-        android:showAsAction="always" android:icon="@android:drawable/ic_menu_save" />
+        android:showAsAction="always" android:icon="@drawable/ic_action_save" />
+    <item android:id="@+id/action_add_image" android:title="@string/action_add_image"
+        android:showAsAction="never" />
+    <item android:id="@+id/action_setup_poll" android:title="@string/action_setup_poll"
+        android:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:showAsAction="never" />
     <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
