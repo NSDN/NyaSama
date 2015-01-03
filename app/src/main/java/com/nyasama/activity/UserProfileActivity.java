@@ -162,8 +162,8 @@ public class UserProfileActivity extends BaseThemedActivity {
                             credit = extcredits.optJSONObject("" + creditsView[i]);
                             if (text != null && credit != null) {
                                 value = space != null ? space.optString("extcredits" + creditsView[i]) : "";
-                                text.setText(credit.optString("title") + "\n" +
-                                        Helper.toSafeInteger(value, 0) + credit.optString("unit"));
+                                text.setText(Html.fromHtml(credit.optString("title") + "<br /><big>" +
+                                        Helper.toSafeInteger(value, 0) + credit.optString("unit") + "</big>"));
                             }
                         }
                     }

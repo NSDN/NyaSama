@@ -1,4 +1,5 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_light_gray"
     android:layout_width="match_parent"
@@ -32,7 +33,6 @@
                 android:layout_toRightOf="@id/avatar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
@@ -48,13 +48,15 @@
                 android:layout_below="@id/groupname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#999999" />
+                android:textColor="@color/text_color_secondary" />
 
             <Button
                 android:id="@+id/signin_button"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="6dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="doSignin"

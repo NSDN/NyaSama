@@ -73,6 +73,10 @@ public class MainActivity extends BaseThemedActivity implements
         startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
     }
 
+    public void gotoDonate(View view) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thwiki.cc/THBWiki:%E6%8D%90%E6%AC%BE")));
+    }
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
