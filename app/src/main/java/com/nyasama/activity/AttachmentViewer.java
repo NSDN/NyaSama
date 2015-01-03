@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +26,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.BitmapLruCache;
@@ -87,7 +89,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                 names));
         listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         listView.setItemChecked(mPager.getCurrentItem(), true);
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                 .setTitle("Attachments")
                 .setView(listView)
                 .show();
@@ -168,7 +170,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         mAttachmentList.clear();
-                        new AlertDialog.Builder(ThisApp.context)
+                        new AccentAlertDialog.Builder(ThisApp.context)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -231,6 +233,7 @@ public class AttachmentViewer extends BaseThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_attachment_viewer);
 
         mPager = (ViewPager) findViewById(R.id.view_pager);

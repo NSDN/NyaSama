@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -75,7 +76,7 @@ public class MessagesActivity extends BaseThemedActivity
 
     public void sendMessage() {
         final EditText input = new EditText(this);
-        mReplyDialog = new AlertDialog.Builder(this)
+        mReplyDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -134,8 +135,7 @@ public class MessagesActivity extends BaseThemedActivity
             sendMessage();
             return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -200,7 +201,7 @@ public class NewPostActivity extends BaseThemedActivity {
                             setResult(Integer.parseInt(tid));
                             finish();
                         } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
+                            AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
                                     .setTitle(R.string.there_is_something_wrong)
                                     .setMessage(message.getString("messagestr"))
                                     .setPositiveButton(android.R.string.ok, null);
@@ -290,7 +291,7 @@ public class NewPostActivity extends BaseThemedActivity {
     public void editPollOptions() {
         final EditText content = new EditText(this);
         content.setText(mPollOptions);
-        new AlertDialog.Builder(this)
+        new AccentAlertDialog.Builder(this)
                 .setTitle(getString(R.string.diag_title_setup_poll))
                 .setView(content)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -315,7 +316,7 @@ public class NewPostActivity extends BaseThemedActivity {
     public void showInsertSmileyOptions() {
         GridView smileyList = new GridView(this);
         smileyList.setNumColumns(3);
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(smileyList)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -338,7 +339,7 @@ public class NewPostActivity extends BaseThemedActivity {
 
     public void showInsertImageOptions() {
         ListView attachList = new ListView(this);
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(mImageAttachments.size() > 0 ? attachList : null)
                 .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
@@ -386,7 +387,7 @@ public class NewPostActivity extends BaseThemedActivity {
         view.setLayoutParams(new AbsListView.LayoutParams(
                 AbsListView.LayoutParams.WRAP_CONTENT,
                 AbsListView.LayoutParams.WRAP_CONTENT));
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
                 .setPositiveButton(getString(R.string.button_back), new DialogInterface.OnClickListener() {
@@ -417,7 +418,7 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void refreshFormHash() {
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.dialog_update_user).setCancelable(false)
                 .show();
         // refresh the form hash, or posting will fail
@@ -511,7 +512,7 @@ public class NewPostActivity extends BaseThemedActivity {
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             View loadingView = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_upload_process, null, false);
-            final AlertDialog dialog = new AlertDialog.Builder(this)
+            final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                     .setTitle(R.string.dialog_uploading).setCancelable(false)
                     .setView(loadingView)
                     .show();
@@ -578,7 +579,7 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_add_smiley) {
             if (Discuz.getSmilies() == null) {
-                final AlertDialog dialog = new AlertDialog.Builder(this)
+                final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
                 Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
@@ -601,9 +602,9 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_add_image) {
             showInsertImageOptions();
+            return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }

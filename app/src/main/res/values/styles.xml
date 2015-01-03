@@ -2,14 +2,10 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.HoloAccent.Light.ColoredActionBar.Inverse">
-        <item name="android:windowActionBarOverlay">@null</item>
         <!-- Note: remove shadow under actionbar
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:actionBarSize">57dp</item>
-        <item name="android:actionDropDownStyle">@style/DropDown</item>
-        <item name="android:icon">@drawable/ic_launcher</item>
-        <item name="android:animateLayoutChanges">true</item>
     </style>
 
     <!-- animated theme. -->
@@ -23,12 +19,11 @@
         <item name="android:background">@drawable/ha__ab_background</item>
     </style>
 
-    <style name="DropDown" parent="HoloAccent.Spinner.Light.ActionBar">
-        <item name="android:popupBackground">@drawable/ha__ab_background</item>
+    <style name="NavigationDrawer">
+        <item name="android:background">#bbbbbb</item>
     </style>
 
     <color name="background_light_gray">#ececec</color>
     <color name="text_color_secondary">#999999</color>
-    <color name="color_secondary">#868ea0</color>
 
 </resources>

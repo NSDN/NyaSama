@@ -3,7 +3,6 @@ package com.nyasama.activity;
 import android.app.Activity;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +24,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
@@ -71,6 +71,10 @@ public class MainActivity extends BaseThemedActivity implements
 
     public void gotoProfile(View view) {
         startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
+    }
+
+    public void gotoDonate(View view) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thwiki.cc/THBWiki:%E6%8D%90%E6%AC%BE")));
     }
 
     /**
@@ -219,16 +223,17 @@ public class MainActivity extends BaseThemedActivity implements
             startActivity(new Intent(this, SearchActivity.class));
             return true;
         }
-        else if (id == android.R.id.home)
-            return super.onOptionsItemSelected(item);
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        else if (id == android.R.id.home) {
+            mNavigationDrawerFragment.onOptionsItemSelected(item);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onGetThreadData(DiscuzThreadListFragment fragment) {
         if (fragment.getMessage() != null) {
-            new AlertDialog.Builder(this)
+            new AccentAlertDialog.Builder(this)
                     .setTitle(R.string.there_is_something_wrong)
                     .setMessage(fragment.getMessage())
                     .setPositiveButton(android.R.string.yes, null)

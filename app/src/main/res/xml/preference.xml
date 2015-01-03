@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/pref_category_general">
-        <ListPreference
+        <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="默认"
             android:dialogTitle="@string/pref_diag_title_select_lang"
             android:entries="@array/language_preference"
@@ -11,13 +11,12 @@
             android:summary="%s"
             android:title="@string/preference_language" />
 
-        <SwitchPreference
+        <com.negusoft.holoaccent.preference.SwitchPreference
             android:defaultValue="false"
             android:key="@string/pref_key_animation"
-            android:title="@string/preference_animation"
-            android:enabled="false"/>
+            android:title="@string/preference_animation" />
 
-        <ListPreference
+        <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="32"
             android:dialogTitle="@string/preference_cachesize"
             android:entries="@array/cache_size"
@@ -28,7 +27,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_category_explore">
-        <ListPreference
+        <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="16"
             android:dialogTitle="@string/preference_textsize"
             android:entries="@array/text_size"
@@ -36,11 +35,13 @@
             android:key="@string/pref_key_text_size"
             android:summary="%s"
             android:title="@string/preference_textsize" />
-        <SwitchPreference
+
+        <com.negusoft.holoaccent.preference.SwitchPreference
             android:defaultValue="false"
             android:key="@string/pref_key_show_image"
             android:title="@string/preference_showimg" />
-        <ListPreference
+
+        <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="512"
             android:dialogTitle="@string/preference_thumbsize"
             android:entries="@array/thumb_size"

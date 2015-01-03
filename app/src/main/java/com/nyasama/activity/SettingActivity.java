@@ -1,11 +1,11 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 
@@ -45,7 +45,7 @@ public class SettingActivity extends BaseThemedActivity {
 
             ThisApp.onSharedPreferenceChanged(sharedPreferences, key);
             if (key.equals(getString(R.string.pref_key_language))) {
-                if (!getActivity().isFinishing()) new AlertDialog.Builder(getActivity())
+                if (!getActivity().isFinishing()) new AccentAlertDialog.Builder(getActivity())
                         .setTitle(getString(R.string.alert_need_reboot))
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
