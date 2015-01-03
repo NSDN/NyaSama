@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#fccc" >
+    android:background="@drawable/ha__ab_background">
 
     <RelativeLayout
         android:onClick="gotoProfile"
@@ -54,7 +54,8 @@
             android:text="@string/drawer_button_login"
             android:onClick="gotoLogin"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="@style/HoloAccent.Button.Colored.Bright" />
 
     </LinearLayout>
 
@@ -66,5 +67,13 @@
         android:dividerHeight="0dp"
         android:id="@+id/drawer_list"
         tools:context=".NavigationDrawerFragment" />
+
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageButton"
+        android:src="@drawable/joessr"
+        android:scaleType="fitCenter"
+        android:background="@android:color/transparent" />
 
 </LinearLayout>
