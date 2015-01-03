@@ -136,8 +136,7 @@
         </activity>
         <activity
             android:name=".activity.AttachmentViewer"
-            android:label="@string/title_activity_attachment_viewer"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
+            android:label="@string/title_activity_attachment_viewer" >
         </activity>
         <activity
             android:name=".activity.SettingActivity"
