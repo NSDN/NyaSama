@@ -176,8 +176,7 @@ public class ThreadListActivity extends BaseThemedActivity implements
             }}, REQUEST_CODE_NEW_THREAD);
             return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

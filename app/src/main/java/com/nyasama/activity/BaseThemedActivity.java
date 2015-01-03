@@ -1,12 +1,15 @@
 package com.nyasama.activity;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.support.v4.app.FragmentActivity;
+import android.view.MenuItem;
 
 import com.negusoft.holoaccent.AccentHelper;
 import com.negusoft.holoaccent.AccentResources;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.util.Discuz;
 
 /**
  * Created by oxyflour on 2015/1/2.
@@ -53,6 +56,7 @@ public class BaseThemedActivity extends FragmentActivity {
     }
 
     /** Getter for the AccentHelper instance. */
+    @SuppressWarnings("unused")
     public AccentHelper getAccentHelper() {
         return mAccentHelper;
     }
@@ -61,6 +65,7 @@ public class BaseThemedActivity extends FragmentActivity {
      * Override this function to modify the AccentResources instance. You can add your own logic
      * to the default HoloAccent behaviour.
      */
+    @SuppressWarnings("unused")
     public void onInitAccentResources(AccentResources resources) {
         // To be overriden in child classes.
     }
@@ -70,5 +75,26 @@ public class BaseThemedActivity extends FragmentActivity {
         public void onInitResources(AccentResources resources) {
             onInitAccentResources(resources);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+        else if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_my_profile) {
+            if (Discuz.sHasLogined)
+                startActivity(new Intent(this, UserProfileActivity.class));
+            else startActivityForResult(new Intent(this, LoginActivity.class),
+                    LoginActivity.REQUEST_CODE_LOGIN);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

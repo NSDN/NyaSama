@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
@@ -75,12 +74,6 @@ public class SearchActivity extends BaseThemedActivity
         });
 
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

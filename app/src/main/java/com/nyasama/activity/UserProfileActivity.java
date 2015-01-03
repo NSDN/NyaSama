@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.TextView;
@@ -178,11 +177,5 @@ public class UserProfileActivity extends BaseThemedActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_user_profile, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 }

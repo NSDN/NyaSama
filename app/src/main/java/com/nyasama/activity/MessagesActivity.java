@@ -134,8 +134,7 @@ public class MessagesActivity extends BaseThemedActivity
             sendMessage();
             return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

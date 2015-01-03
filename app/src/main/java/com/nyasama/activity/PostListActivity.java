@@ -502,9 +502,9 @@ public class PostListActivity extends BaseThemedActivity
                     putExtra("fid", mForumId);
                 }});
             finish();
+            return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     private Pattern patt1 = Pattern.compile("<span style=\"display:none\">.*?</span>", Pattern.DOTALL);

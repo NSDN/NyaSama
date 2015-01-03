@@ -10,7 +10,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
@@ -85,12 +84,6 @@ public class NoticeActivity extends BaseThemedActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_notice, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -601,9 +601,9 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_add_image) {
             showInsertImageOptions();
+            return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }

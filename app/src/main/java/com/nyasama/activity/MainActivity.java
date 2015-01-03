@@ -219,10 +219,11 @@ public class MainActivity extends BaseThemedActivity implements
             startActivity(new Intent(this, SearchActivity.class));
             return true;
         }
-        else if (id == android.R.id.home)
-            return super.onOptionsItemSelected(item);
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        else if (id == android.R.id.home) {
+            mNavigationDrawerFragment.onOptionsItemSelected(item);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
