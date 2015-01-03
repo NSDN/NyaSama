@@ -14,7 +14,8 @@
         <com.negusoft.holoaccent.preference.SwitchPreference
             android:defaultValue="false"
             android:key="@string/pref_key_animation"
-            android:title="@string/preference_animation" />
+            android:title="@string/preference_animation"
+            android:enabled="false"/>
 
         <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="32"
