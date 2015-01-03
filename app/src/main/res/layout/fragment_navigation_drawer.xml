@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/ha__ab_background">
+    android:background="@drawable/ha__ab_background_stacked">
 
     <RelativeLayout
         android:onClick="gotoProfile"
@@ -69,11 +69,11 @@
         tools:context=".NavigationDrawerFragment" />
 
     <ImageButton
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageButton"
         android:src="@drawable/joessr"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:background="@android:color/transparent" />
 
 </LinearLayout>
