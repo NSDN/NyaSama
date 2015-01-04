@@ -74,7 +74,7 @@
         android:layout_height="0dp"
         android:onClick="gotoDonate"
         android:src="@drawable/joessr"
-        android:scaleType="fitCenter">
+        android:scaleType="centerCrop">
     </ImageView>
 
 </LinearLayout>

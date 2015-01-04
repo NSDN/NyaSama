@@ -20,7 +20,7 @@
     </style>
 
     <style name="NavigationDrawer">
-        <item name="android:background">#bbbbbb</item>
+        <item name="android:background">@drawable/ha__ab_background_stacked</item>
     </style>
 
     <color name="background_light_gray">#ececec</color>
