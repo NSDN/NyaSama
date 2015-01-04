@@ -232,8 +232,8 @@ public class AttachmentViewer extends BaseThemedActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attachment_viewer);
 
         mPager = (ViewPager) findViewById(R.id.view_pager);
