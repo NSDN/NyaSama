@@ -86,7 +86,7 @@ public class BaseThemedActivity extends FragmentActivity {
                 R.style.AppThemeAni : R.style.AppTheme);
 
         if (getActionBar() != null)
-            getActionBar().setIcon(getResources().getDrawable(R.drawable.icon));
+            getActionBar().setIcon(getResources().getDrawable(R.drawable.ab_icon));
     }
 
     @Override
