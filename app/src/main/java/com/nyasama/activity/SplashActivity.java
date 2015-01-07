@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,19 +28,32 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         final String versionName = ThisApp.getVersion();
-        ThisApp.requestQueue.add(new StringRequest(releaseUrl + "/version.txt", new Response.Listener<String>() {
+        ThisApp.requestQueue.add(new StringRequest(releaseUrl + "/version_and_feature.txt", new Response.Listener<String>() {
             @Override
-            public void onResponse(final String s) {
-                if (s != null && s.length() > 0 && !s.equals(versionName)) {
+            public void onResponse(String s) {
+                String version = s == null ? "" : s;
+                String message = "";
+                if (s != null) {
+                    int i = s.replace("\r\n", "\n").indexOf('\n');
+                    if (i >= 0) {
+                        version = s.substring(0, i);
+                        message = s.substring(i + 2);
+                    }
+                }
+                if (!version.isEmpty() && !version.equals(versionName)) {
+                    final String versionString = version;
+                    String messageString = String.format(getString(R.string.new_version_alert_message), version);
+                    if (!message.isEmpty())
+                        messageString = messageString + "\n" + getString(R.string.new_feature) + "\n" + message;
                     new AlertDialog.Builder(SplashActivity.this)
                             .setTitle(getString(R.string.new_version_alert_title))
-                            .setMessage(String.format(getString(R.string.new_version_alert_message), s))
+                            .setMessage(messageString)
                             .setCancelable(false)
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     startActivity(new Intent(Intent.ACTION_VIEW,
-                                            Uri.parse(releaseUrl + "/NyaSama-" + s + ".apk")));
+                                            Uri.parse(releaseUrl + "/NyaSama-" + versionString + ".apk")));
                                 }
                             }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
