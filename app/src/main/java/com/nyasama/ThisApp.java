@@ -101,7 +101,7 @@ public class ThisApp extends Application {
                 if (url.getRef() != null && url.getRef().contains("#noredirect#"))
                     connection.setInstanceFollowRedirects(false);
                 // see #60
-                connection.setChunkedStreamingMode(0);
+                //connection.setChunkedStreamingMode(0);
                 return connection;
             }
         });
