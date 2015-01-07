@@ -125,6 +125,7 @@
     <string name="you_have_voted">你已经投过票了</string>
     <string name="toast_too_many_votes">你最多只能投 %d 项</string>
     <string name="preference_showimg">显示帖子图片</string>
+    <string name="new_feature">更新内容:</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
