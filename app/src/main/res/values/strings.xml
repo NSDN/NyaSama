@@ -36,7 +36,7 @@
     <string name="title_activity_user_profile">用户信息</string>
     <string name="logout_button_text">退出登录</string>
     <string name="action_quick_reply">快速回复</string>
-    <string name="action_comment">评论</string>
+    <string name="action_comment">点评</string>
     <string name="notify_title_text">来自喵玉殿的消息</string>
     <string name="thread_list_threads_title">主题</string>
     <string name="thread_list_subforum_title">子版块</string>
