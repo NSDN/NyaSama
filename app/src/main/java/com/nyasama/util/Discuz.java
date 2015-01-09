@@ -16,6 +16,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -716,6 +717,11 @@ public class Discuz {
                     return DISCUZ_ENC;
                 }
             };
+            // tell volley NOT TO RETRY POST request (solve #60)
+            // REF: http://stackoverflow.com/questions/26264942/android-volley-makes-2-requests-to-the-server-when-retry-policy-is-set-to-0
+            if (body != null)
+                request.setRetryPolicy(new DefaultRetryPolicy(30000, 0,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         }
         ThisApp.requestQueue.add(request);
         return request;
