@@ -81,8 +81,8 @@
     <string name="prev_post_button"><![CDATA[<< Previous Post]]></string>
     <string name="action_my_profile">My Profile</string>
     <string name="action_edit">Edit</string>
-    <string name="forum_index_threads">threads</string>
-    <string name="forum_index_posts">posts</string>
+    <string name="forum_index_threads">Threads</string>
+    <string name="forum_index_posts">Posts</string>
     <string name="preference_language">Language</string>
     <string name="preference_animation">Fade Animation</string>
     <string name="preference_category_version">Version</string>
@@ -122,13 +122,13 @@
         <item>Large thumbs</item>
         <item>Original Image</item>
     </string-array>
-    <string name="reside">residence</string>
+    <string name="reside">Residence</string>
     <string name="title_activity_search">Search</string>
     <string name="action_setup_poll">Setup Poll</string>
     <string name="diag_title_setup_poll">Each line stands for one option</string>
     <string name="diag_title_vote_result">Vote Results</string>
-    <string name="you_can_not_voted">You can not voted now</string>
-    <string name="toast_too_many_votes">You can select max %d items</string>
+    <string name="you_can_not_voted">You Can Not Voted Now</string>
+    <string name="toast_too_many_votes">You Can Select Max %d Items</string>
     <string name="preference_showimg">Display Images</string>
     <string name="new_feature">New Features:</string>
     <string name="goto_prev_post_attachments"><![CDATA[<< Goto Previous Post (%d attachments)]]></string>
