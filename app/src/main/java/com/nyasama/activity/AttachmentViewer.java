@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
@@ -49,7 +50,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class AttachmentViewer extends BaseThemedActivity {
 
@@ -377,17 +377,18 @@ public class AttachmentViewer extends BaseThemedActivity {
                 return textView;
             }
             else if (bundle.getBoolean("isImage")) {
-                final PhotoView photoView = new PhotoView(container.getContext());
+                final View view = inflater.inflate(R.layout.fragment_attachment_image, container, false);
+                final PhotoView photoView = (PhotoView) view.findViewById(R.id.image_view);
                 Bitmap bitmap = mActivity.mBitmapCache.getBitmap(src);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
-                    new PhotoViewAttacher(photoView);
                 } else {
                     Bitmap thumb = mActivity.mThumbCache.get(src);
                     if (thumb != null)
                         photoView.setImageBitmap(thumb);
                     else
                         photoView.setImageResource(android.R.drawable.ic_menu_gallery);
+                    Helper.updateVisibility(view, R.id.loading, true);
                     ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
                         @Override
                         public void onResponse(Bitmap bitmap) {
@@ -410,11 +411,17 @@ public class AttachmentViewer extends BaseThemedActivity {
                             mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
                                     IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             photoView.setImageBitmap(bitmap);
+                            Helper.updateVisibility(view, R.id.loading, false);
                         }
-                    }, 0, 0, null, null);
+                    }, 0, 0, null, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError volleyError) {
+                            Helper.updateVisibility(view, R.id.loading, false);
+                        }
+                    });
                     mActivity.mRequestQueue.add(imageRequest);
                 }
-                return photoView;
+                return view;
             } else {
                 View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
                 TextView textView = (TextView) view.findViewById(R.id.name);
