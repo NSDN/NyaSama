@@ -190,15 +190,6 @@ public class Discuz {
         public String src;
         public String size;
 
-        public static Attachment newImageAttachment(String src) {
-            Attachment attachment = new Attachment();
-            attachment.isImage = true;
-            attachment.name = src;
-            attachment.src = src;
-            attachment.size = "0kb";
-            return attachment;
-        }
-
         public Attachment() {
         }
 
@@ -516,6 +507,7 @@ public class Discuz {
 
     private static SparseArray<ThreadTypes> sThreadTypes;
 
+    @SuppressWarnings("unused")
     public static SparseArray<ThreadTypes> getThreadTypes() {
         return sThreadTypes;
     }

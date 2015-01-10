@@ -126,6 +126,8 @@
     <string name="toast_too_many_votes">你最多只能投 %d 项</string>
     <string name="preference_showimg">显示帖子图片</string>
     <string name="new_feature">更新内容:</string>
+    <string name="goto_prev_post_attachments"><![CDATA[<< 上一楼 (%d 附件)]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[下一楼 (%d 附件) >>]]></string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>

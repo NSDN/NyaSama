@@ -131,4 +131,6 @@
     <string name="toast_too_many_votes">You can select max %d items</string>
     <string name="preference_showimg">Display Images</string>
     <string name="new_feature">New Features:</string>
+    <string name="goto_prev_post_attachments"><![CDATA[<< Goto Previous Post (%d attachments)]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[Goto Next Post (%d attachments) >>]]></string>
 </resources>
