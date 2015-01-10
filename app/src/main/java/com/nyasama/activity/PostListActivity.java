@@ -76,7 +76,7 @@ public class PostListActivity extends BaseThemedActivity
 
     private List<PollOption> mPollOptions = new ArrayList<PollOption>();
     private boolean mAllowVote;
-    private int mMaxVotes;
+    private int mMaxChoices;
     private AlertDialog mVoteDialog;
 
     private int mForumId;
@@ -361,23 +361,23 @@ public class PostListActivity extends BaseThemedActivity
 
     public void showPollOptions() {
         final ListView listView = new ListView(this);
-        listView.setChoiceMode(mMaxVotes > 1 ?
+        listView.setChoiceMode(mMaxChoices > 1 ?
                 AbsListView.CHOICE_MODE_MULTIPLE : AbsListView.CHOICE_MODE_SINGLE);
         int itemLayout = android.R.layout.simple_list_item_1;
-        if (mAllowVote) itemLayout = mMaxVotes > 1 ?
+        if (mAllowVote) itemLayout = mMaxChoices > 1 ?
                 android.R.layout.simple_list_item_multiple_choice :
                 android.R.layout.simple_list_item_single_choice;
         listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions, itemLayout) {
             @Override
             public void convertView(ViewHolder viewHolder, PollOption item) {
                 ((TextView) viewHolder.getConvertView())
-                        .setText(item.option + " * " + item.votes + " (" + item.percent + "%)");
+                        .setText(item.option + " (" + item.votes + "/" + item.percent + "%)");
             }
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.diag_title_vote_result) +
-                        (mAllowVote ? "" : " (" + getString(R.string.you_have_voted) + ")"))
+                        " (" + String.format(getString(R.string.diag_title_max_choices), mMaxChoices) + ")")
                 .setView(listView)
                 .setNegativeButton(android.R.string.cancel, null);
         if (mAllowVote)
@@ -401,12 +401,12 @@ public class PostListActivity extends BaseThemedActivity
                                             selected.add(id);
                                         }
                                     }
-                                if (selected.size() <= mMaxVotes) {
+                                if (selected.size() <= mMaxChoices) {
                                     Helper.disableDialog(mVoteDialog);
                                     doPollVote(selected);
                                 }
                                 else
-                                    Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxVotes));
+                                    Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxChoices));
                             }
                         });
             }
@@ -782,7 +782,7 @@ public class PostListActivity extends BaseThemedActivity
                                 mPollOptions.add(new PollOption(polloptions.getJSONObject(key)));
                             }
                             mAllowVote = poll.getBoolean("allowvote");
-                            mMaxVotes = Math.max(Helper.toSafeInteger(poll.getString("maxchoices"), 1), 1);
+                            mMaxChoices = Math.max(Helper.toSafeInteger(poll.getString("maxchoices"), 1), 1);
                         }
 
                     } catch (JSONException e) {

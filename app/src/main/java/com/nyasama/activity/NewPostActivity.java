@@ -1,6 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -74,8 +75,11 @@ public class NewPostActivity extends BaseThemedActivity {
     private EditText mInputContent;
     private Spinner mSpinnerTypes;
 
-    String mPhotoFilePath;
     String mPollOptions = "";
+    int mPollChoices = 1;
+    int mPollExpiration = 0;
+
+    String mPhotoFilePath;
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
@@ -171,6 +175,8 @@ public class NewPostActivity extends BaseThemedActivity {
                 put("noticetrimstr", noticetrimstr);
 
             if (!mPollOptions.isEmpty()) {
+                put("maxchoices", mPollChoices);
+                put("expiration", mPollExpiration);
                 List<String> options = new ArrayList<String>();
                 Collections.addAll(options, mPollOptions.split("\\n"));
                 put("polloption[]", options);
@@ -289,19 +295,33 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void editPollOptions() {
-        final EditText content = new EditText(this);
-        content.setText(mPollOptions);
-        new AccentAlertDialog.Builder(this)
-                .setTitle(getString(R.string.diag_title_setup_poll))
-                .setView(content)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        mPollOptions = content.getText().toString();
-                    }
-                })
+        final View view = getLayoutInflater().inflate(R.layout.fragment_new_poll, null);
+        final EditText contentText = (EditText) view.findViewById(R.id.pollcontent);
+        contentText.setText(mPollOptions);
+        final EditText choicesText = (EditText) view.findViewById(R.id.maxchoices);
+        choicesText.setText("" + mPollChoices);
+        final EditText expirationText = (EditText) view.findViewById(R.id.expiration);
+        expirationText.setText("" + mPollExpiration);
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+                .setTitle(getString(R.string.action_setup_poll))
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mPollOptions = contentText.getText().toString();
+                        mPollChoices = Helper.toSafeInteger(choicesText.getText().toString(), 0);
+                        mPollExpiration = Helper.toSafeInteger(expirationText.getText().toString(), 0);
+                    }
+                });
+            }
+        });
+        dialog.show();
     }
 
     public void insertCodeToContent(String code) {
