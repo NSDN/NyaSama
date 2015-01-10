@@ -127,8 +127,13 @@
     <string name="action_setup_poll">Setup Poll</string>
     <string name="diag_title_setup_poll">Each line stands for one option</string>
     <string name="diag_title_vote_result">Vote Results</string>
-    <string name="you_have_voted">You have voted for this</string>
+    <string name="you_can_not_voted">You can not voted now</string>
     <string name="toast_too_many_votes">You can select max %d items</string>
     <string name="preference_showimg">Display Images</string>
     <string name="new_feature">New Features:</string>
+    <string name="goto_prev_post_attachments"><![CDATA[<< Goto Previous Post (%d attachments)]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[Goto Next Post (%d attachments) >>]]></string>
+    <string name="poll_max_choices">Max Choices</string>
+    <string name="poll_expiration_days">Expiration</string>
+    <string name="diag_title_max_choices">Max Choices: %d</string>
 </resources>
