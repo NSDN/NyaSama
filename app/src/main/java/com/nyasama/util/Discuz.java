@@ -16,6 +16,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -189,15 +190,6 @@ public class Discuz {
         public String src;
         public String size;
 
-        public static Attachment newImageAttachment(String src) {
-            Attachment attachment = new Attachment();
-            attachment.isImage = true;
-            attachment.name = src;
-            attachment.src = src;
-            attachment.size = "0kb";
-            return attachment;
-        }
-
         public Attachment() {
         }
 
@@ -329,9 +321,6 @@ public class Discuz {
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
     public static String getAttachmentThumb(int attachmentId, String size) {
-        if (size.isEmpty())
-            return DISCUZ_URL + "static/image/common/none.gif";
-
         String str = attachmentId + "|" + size.replace('x', '|');
         String key;
         try {
@@ -352,6 +341,15 @@ public class Discuz {
 
     public static String getThreadCoverThumb(int threadId) {
         return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
+    }
+
+    public static boolean isSmileyUrl(String url) {
+        return url.startsWith(DISCUZ_URL + "static/image/smiley/");
+    }
+
+    private static BitmapLruCache smileyCache = new BitmapLruCache();
+    public static BitmapLruCache getSmileyCache() {
+        return smileyCache;
     }
 
     public static String getSafeUrl(String url) {
@@ -509,6 +507,7 @@ public class Discuz {
 
     private static SparseArray<ThreadTypes> sThreadTypes;
 
+    @SuppressWarnings("unused")
     public static SparseArray<ThreadTypes> getThreadTypes() {
         return sThreadTypes;
     }
@@ -710,6 +709,11 @@ public class Discuz {
                     return DISCUZ_ENC;
                 }
             };
+            // tell volley NOT TO RETRY POST request (solve #60)
+            // REF: http://stackoverflow.com/questions/26264942/android-volley-makes-2-requests-to-the-server-when-retry-policy-is-set-to-0
+            if (body != null)
+                request.setRetryPolicy(new DefaultRetryPolicy(30000, 0,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         }
         ThisApp.requestQueue.add(request);
         return request;

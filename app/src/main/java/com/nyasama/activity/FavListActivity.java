@@ -2,10 +2,8 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.android.volley.Response;
@@ -23,7 +21,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class FavListActivity extends FragmentActivity
+public class FavListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<FavItem> {
 
     final static int PAGE_SIZE_COUNT = 20;
@@ -54,12 +52,6 @@ public class FavListActivity extends FragmentActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_fav_list, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

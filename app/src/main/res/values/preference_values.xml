@@ -5,6 +5,7 @@
 -->
 <resources>
     <string name="pref_key_language" translatable="false">language</string>
+    <string name="pref_key_theme_color" translatable="false">theme_color</string>
 
     <string-array name="language_preference" translatable="false">
         <!-- Note: remember to update ThisApp.getLocale if items are modified -->
@@ -29,9 +30,9 @@
         <item>128</item>
     </string-array>
 
+    <string name="pref_key_show_image" translatable="false">show_image</string>
     <string name="pref_key_thumb_size" translatable="false">thumb_size</string>
     <string-array name="thumb_size_value" translatable="false">
-        <item>-1</item>
         <item>512</item>
         <item>1024</item>
         <item>0</item>

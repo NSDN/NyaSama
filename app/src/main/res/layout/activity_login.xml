@@ -65,6 +65,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        style="@style/HoloAccent.Button.Small.Colored.Bright" />
 
 </LinearLayout>

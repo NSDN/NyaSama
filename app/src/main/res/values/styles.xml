@@ -1,14 +1,26 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light">
-        <item name="android:windowBackground">@android:color/background_light</item>
-        <item name="android:colorBackground">@android:color/white</item>
-        <item name="android:textSize">16sp</item>
+    <style name="AppTheme" parent="Theme.HoloAccent.Light.ColoredActionBar.Inverse">
+        <!-- Note: remove shadow under actionbar
+            REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:actionBarSize">57dp</item>
     </style>
 
+    <!-- animated theme. -->
     <style name="AppThemeAni" parent="AppTheme">
         <item name="android:animateLayoutChanges">true</item>
+    </style>
+
+    <style name="PagerTabStrip" parent="HoloAccent.PagerTabStrip.Light">
+        <!-- Note: remember to use color as color & drawable as background -->
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/ha__ab_background</item>
+    </style>
+
+    <style name="NavigationDrawer">
+        <item name="android:background">#bbbbbb</item>
     </style>
 
     <color name="background_light_gray">#ececec</color>

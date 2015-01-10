@@ -1,12 +1,10 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.TextView;
@@ -22,7 +20,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class UserProfileActivity extends Activity {
+public class UserProfileActivity extends BaseThemedActivity {
 
     public void doLogout(View view) {
         Discuz.logout(new Response.Listener<JSONObject>() {
@@ -164,8 +162,8 @@ public class UserProfileActivity extends Activity {
                             credit = extcredits.optJSONObject("" + creditsView[i]);
                             if (text != null && credit != null) {
                                 value = space != null ? space.optString("extcredits" + creditsView[i]) : "";
-                                text.setText(credit.optString("title") + "\n" +
-                                        Helper.toSafeInteger(value, 0) + credit.optString("unit"));
+                                text.setText(Html.fromHtml(credit.optString("title") + "<br /><big>" +
+                                        Helper.toSafeInteger(value, 0) + credit.optString("unit") + "</big>"));
                             }
                         }
                     }
@@ -179,11 +177,5 @@ public class UserProfileActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_user_profile, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 }

@@ -1,11 +1,9 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,7 +18,7 @@ import com.nyasama.util.Helper;
 
 import org.json.JSONObject;
 
-public class LoginActivity extends Activity
+public class LoginActivity extends BaseThemedActivity
     implements AdapterView.OnItemSelectedListener {
 
     public static final int REQUEST_CODE_LOGIN = 1;
@@ -103,12 +101,6 @@ public class LoginActivity extends Activity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_login, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

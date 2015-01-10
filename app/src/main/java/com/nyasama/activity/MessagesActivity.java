@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -33,7 +33,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class MessagesActivity extends FragmentActivity
+public class MessagesActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
     public static String TAG = "PMList";
@@ -76,7 +76,7 @@ public class MessagesActivity extends FragmentActivity
 
     public void sendMessage() {
         final EditText input = new EditText(this);
-        mReplyDialog = new AlertDialog.Builder(this)
+        mReplyDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -135,8 +135,7 @@ public class MessagesActivity extends FragmentActivity
             sendMessage();
             return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

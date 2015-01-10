@@ -1,7 +1,7 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -52,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NewPostActivity extends Activity {
+public class NewPostActivity extends BaseThemedActivity {
 
     static final Size uploadSize = new Size(800, 800);
     static final Size thumbSize = new Size(100, 100);
@@ -74,8 +75,11 @@ public class NewPostActivity extends Activity {
     private EditText mInputContent;
     private Spinner mSpinnerTypes;
 
-    String mPhotoFilePath;
     String mPollOptions = "";
+    int mPollChoices = 1;
+    int mPollExpiration = 0;
+
+    String mPhotoFilePath;
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
@@ -171,6 +175,8 @@ public class NewPostActivity extends Activity {
                 put("noticetrimstr", noticetrimstr);
 
             if (!mPollOptions.isEmpty()) {
+                put("maxchoices", mPollChoices);
+                put("expiration", mPollExpiration);
                 List<String> options = new ArrayList<String>();
                 Collections.addAll(options, mPollOptions.split("\\n"));
                 put("polloption[]", options);
@@ -201,7 +207,7 @@ public class NewPostActivity extends Activity {
                             setResult(Integer.parseInt(tid));
                             finish();
                         } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
+                            AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
                                     .setTitle(R.string.there_is_something_wrong)
                                     .setMessage(message.getString("messagestr"))
                                     .setPositiveButton(android.R.string.ok, null);
@@ -289,19 +295,33 @@ public class NewPostActivity extends Activity {
     }
 
     public void editPollOptions() {
-        final EditText content = new EditText(this);
-        content.setText(mPollOptions);
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.diag_title_setup_poll))
-                .setView(content)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        mPollOptions = content.getText().toString();
-                    }
-                })
+        final View view = getLayoutInflater().inflate(R.layout.fragment_new_poll, null);
+        final EditText contentText = (EditText) view.findViewById(R.id.pollcontent);
+        contentText.setText(mPollOptions);
+        final EditText choicesText = (EditText) view.findViewById(R.id.maxchoices);
+        choicesText.setText("" + mPollChoices);
+        final EditText expirationText = (EditText) view.findViewById(R.id.expiration);
+        expirationText.setText("" + mPollExpiration);
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+                .setTitle(getString(R.string.action_setup_poll))
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mPollOptions = contentText.getText().toString();
+                        mPollChoices = Helper.toSafeInteger(choicesText.getText().toString(), 0);
+                        mPollExpiration = Helper.toSafeInteger(expirationText.getText().toString(), 0);
+                    }
+                });
+            }
+        });
+        dialog.show();
     }
 
     public void insertCodeToContent(String code) {
@@ -316,7 +336,7 @@ public class NewPostActivity extends Activity {
     public void showInsertSmileyOptions() {
         GridView smileyList = new GridView(this);
         smileyList.setNumColumns(3);
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(smileyList)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -339,7 +359,7 @@ public class NewPostActivity extends Activity {
 
     public void showInsertImageOptions() {
         ListView attachList = new ListView(this);
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(mImageAttachments.size() > 0 ? attachList : null)
                 .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
@@ -387,7 +407,7 @@ public class NewPostActivity extends Activity {
         view.setLayoutParams(new AbsListView.LayoutParams(
                 AbsListView.LayoutParams.WRAP_CONTENT,
                 AbsListView.LayoutParams.WRAP_CONTENT));
-        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
                 .setPositiveButton(getString(R.string.button_back), new DialogInterface.OnClickListener() {
@@ -418,7 +438,7 @@ public class NewPostActivity extends Activity {
     }
 
     public void refreshFormHash() {
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.dialog_update_user).setCancelable(false)
                 .show();
         // refresh the form hash, or posting will fail
@@ -512,7 +532,7 @@ public class NewPostActivity extends Activity {
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             View loadingView = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_upload_process, null, false);
-            final AlertDialog dialog = new AlertDialog.Builder(this)
+            final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                     .setTitle(R.string.dialog_uploading).setCancelable(false)
                     .setView(loadingView)
                     .show();
@@ -579,7 +599,7 @@ public class NewPostActivity extends Activity {
         }
         else if (id == R.id.action_add_smiley) {
             if (Discuz.getSmilies() == null) {
-                final AlertDialog dialog = new AlertDialog.Builder(this)
+                final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
                 Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
@@ -602,9 +622,9 @@ public class NewPostActivity extends Activity {
         }
         else if (id == R.id.action_add_image) {
             showInsertImageOptions();
+            return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }

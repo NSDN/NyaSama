@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
@@ -27,6 +26,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.BitmapLruCache;
@@ -55,7 +55,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PostListActivity extends FragmentActivity
+public class PostListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
     public static final int REQUEST_CODE_EDIT_POST = 1;
@@ -76,10 +76,22 @@ public class PostListActivity extends FragmentActivity
 
     private List<PollOption> mPollOptions = new ArrayList<PollOption>();
     private boolean mAllowVote;
-    private int mMaxVotes;
+    private int mMaxChoices;
     private AlertDialog mVoteDialog;
 
     private int mForumId;
+
+    private int mPrefMaxImageSize = -1;
+    private int mPrefFontSize = 16;
+
+    public void loadDisplayPreference() {
+        boolean shallDisplayImage =
+                ThisApp.preferences.getBoolean(getString(R.string.pref_key_show_image), false);
+        mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
+                ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
+        mPrefFontSize = Helper.toSafeInteger(
+                ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 16);
+    }
 
     public void doReply(final String text, final String trimstr) {
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
@@ -222,7 +234,7 @@ public class PostListActivity extends FragmentActivity
 
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
-        mReplyDialog = new AlertDialog.Builder(this)
+        mReplyDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -251,7 +263,7 @@ public class PostListActivity extends FragmentActivity
     public void addComment(Post item) {
         final int pid = item.id;
         final EditText input = new EditText(this);
-        mCommentDialog = new AlertDialog.Builder(this)
+        mCommentDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -349,23 +361,23 @@ public class PostListActivity extends FragmentActivity
 
     public void showPollOptions() {
         final ListView listView = new ListView(this);
-        listView.setChoiceMode(mMaxVotes > 1 ?
+        listView.setChoiceMode(mMaxChoices > 1 ?
                 AbsListView.CHOICE_MODE_MULTIPLE : AbsListView.CHOICE_MODE_SINGLE);
         int itemLayout = android.R.layout.simple_list_item_1;
-        if (mAllowVote) itemLayout = mMaxVotes > 1 ?
+        if (mAllowVote) itemLayout = mMaxChoices > 1 ?
                 android.R.layout.simple_list_item_multiple_choice :
                 android.R.layout.simple_list_item_single_choice;
         listView.setAdapter(new CommonListAdapter<PollOption>(mPollOptions, itemLayout) {
             @Override
             public void convertView(ViewHolder viewHolder, PollOption item) {
                 ((TextView) viewHolder.getConvertView())
-                        .setText(item.option + " * " + item.votes + " (" + item.percent + "%)");
+                        .setText(item.option + " (" + item.votes + "/" + item.percent + "%)");
             }
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.diag_title_vote_result) +
-                        (mAllowVote ? "" : " (" + getString(R.string.you_have_voted) + ")"))
+                        " (" + String.format(getString(R.string.diag_title_max_choices), mMaxChoices) + ")")
                 .setView(listView)
                 .setNegativeButton(android.R.string.cancel, null);
         if (mAllowVote)
@@ -389,12 +401,12 @@ public class PostListActivity extends FragmentActivity
                                             selected.add(id);
                                         }
                                     }
-                                if (selected.size() <= mMaxVotes) {
+                                if (selected.size() <= mMaxChoices) {
                                     Helper.disableDialog(mVoteDialog);
                                     doPollVote(selected);
                                 }
                                 else
-                                    Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxVotes));
+                                    Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxChoices));
                             }
                         });
             }
@@ -491,9 +503,9 @@ public class PostListActivity extends FragmentActivity
                     putExtra("fid", mForumId);
                 }});
             finish();
+            return true;
         }
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     private Pattern patt1 = Pattern.compile("<span style=\"display:none\">.*?</span>", Pattern.DOTALL);
@@ -519,13 +531,8 @@ public class PostListActivity extends FragmentActivity
         "[/quote]";
     }
 
-    final BitmapLruCache imageCache = new BitmapLruCache();
-    final SparseArray<List<View>> commentsCache = new SparseArray<List<View>>();
-    final int maxImageSize = Helper.toSafeInteger(
-            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_thumb_size), ""), -1);
-    final String maxImageWxH = maxImageSize < 0 ? "" : "268x380";
-    final int textFontSize = Helper.toSafeInteger(
-            ThisApp.preferences.getString(ThisApp.context.getString(R.string.pref_key_text_size), ""), 16);
+    final BitmapLruCache mImageCache = new BitmapLruCache();
+    final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
@@ -556,9 +563,9 @@ public class PostListActivity extends FragmentActivity
                 });
 
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
-                messageText.setTextSize(textFontSize);
+                messageText.setTextSize(mPrefFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, imageCache, maxImageSize, maxImageSize), null);
+                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -609,13 +616,20 @@ public class PostListActivity extends FragmentActivity
                 messageText.setText(messageContent);
                 messageText.setMovementMethod(LinkMovementMethod.getInstance());
 
+                // see #67
+                // REF: http://blog.csdn.net/jaycee110905/article/details/8762274
+                messageText.setFocusableInTouchMode(true);
+                messageText.setFocusable(true);
+                messageText.setClickable(true);
+                messageText.setLongClickable(true);
+
                 // load comments
                 LinearLayout commentList = (LinearLayout) viewHolder.getView(R.id.comment_list);
                 commentList.removeAllViews();
-                List<View> cachedViews = commentsCache.get(item.id);
+                List<View> cachedViews = mCommentCache.get(item.id);
                 if (cachedViews == null) {
                     cachedViews = new ArrayList<View>();
-                    commentsCache.put(item.id, cachedViews);
+                    mCommentCache.put(item.id, cachedViews);
                 }
                 List<Comment> comments = mComments.get(item.id);
                 if (comments != null) {
@@ -676,6 +690,8 @@ public class PostListActivity extends FragmentActivity
     @Override
     @SuppressWarnings("unchecked")
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
+        loadDisplayPreference();
+
         final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -692,7 +708,7 @@ public class PostListActivity extends FragmentActivity
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
-                        new AlertDialog.Builder(PostListActivity.this)
+                        new AccentAlertDialog.Builder(PostListActivity.this)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -721,7 +737,9 @@ public class PostListActivity extends FragmentActivity
                             Post post = new Post(postData);
                             for (Attachment attachment : post.attachments)
                                 mAttachmentMap.put(attachment.src, attachment);
-                            post.message = compileMessage(post.message, mAttachmentMap, maxImageWxH);
+                            post.message = compileMessage(post.message, mAttachmentMap,
+                                    // TODO: add more image size here (see forumimage.php
+                                    mPrefMaxImageSize < 0 ? "" : "268x380");
                             listData.add(post);
                         }
 
@@ -764,7 +782,7 @@ public class PostListActivity extends FragmentActivity
                                 mPollOptions.add(new PollOption(polloptions.getJSONObject(key)));
                             }
                             mAllowVote = poll.getBoolean("allowvote");
-                            mMaxVotes = Math.max(Helper.toSafeInteger(poll.getString("maxchoices"), 1), 1);
+                            mMaxChoices = Math.max(Helper.toSafeInteger(poll.getString("maxchoices"), 1), 1);
                         }
 
                     } catch (JSONException e) {

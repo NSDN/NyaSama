@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.nyasama.activity.MessagesActivity">
     <item android:id="@+id/action_reply" android:title="@string/action_reply"
-        android:icon="@android:drawable/ic_menu_revert" android:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_action_reply" android:showAsAction="ifRoom" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" android:showAsAction="never" />
 </menu>

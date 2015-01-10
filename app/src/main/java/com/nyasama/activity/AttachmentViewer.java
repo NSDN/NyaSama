@@ -8,24 +8,28 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.BitmapLruCache;
@@ -46,11 +50,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class AttachmentViewer extends FragmentActivity {
+public class AttachmentViewer extends BaseThemedActivity {
 
-    private static String TAG = "ImageViewer";
+    private static class ExternalImageAttachment extends Attachment {
+        public ExternalImageAttachment(String src) {
+            this.isImage = true;
+            this.name = src;
+            this.src = src;
+            this.size = "0kb";
+        }
+    }
+
+    private static class RedirectPostAttachment extends Attachment {
+        public RedirectPostAttachment(String name) {
+            this.name = name;
+        }
+    }
+
+    private static float REDIRECT_PAGER_WIDTH = 0.3f;
     private static int MAX_TEXTURE_SIZE = 2048;
     private static int IMAGE_THUMB_SIZE = 128;
 
@@ -88,7 +106,7 @@ public class AttachmentViewer extends FragmentActivity {
                 names));
         listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         listView.setItemChecked(mPager.getCurrentItem(), true);
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
                 .setTitle("Attachments")
                 .setView(listView)
                 .show();
@@ -103,17 +121,19 @@ public class AttachmentViewer extends FragmentActivity {
 
     public void updatePagerTitle(int position) {
         TextView title = (TextView) findViewById(R.id.view_title);
-        if (position >= 0 && position < mAttachmentList.size()) {
+        if (position >= 0 && position < mAttachmentList.size() &&
+                !(mAttachmentList.get(position) instanceof RedirectPostAttachment)) {
             title.setVisibility(View.VISIBLE);
-            title.setText((position+1) + "/" + mAttachmentList.size());
+            int index = position +
+                    (mHasAttachmentsPrev ? 0 : 1 );
+            int total = mAttachmentList.size() -
+                    (mHasAttachmentsPrev ? 1 : 0) -
+                    (mHasAttachmentsNext ? 1 : 0);
+            title.setText(index + "/" + total);
         }
         else {
             title.setVisibility(View.GONE);
         }
-        Helper.updateVisibility(findViewById(R.id.prev_post),
-                position == 0 && mHasAttachmentsPrev);
-        Helper.updateVisibility(findViewById(R.id.next_post),
-                position == mAttachmentList.size() - 1 && mHasAttachmentsNext);
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -137,7 +157,7 @@ public class AttachmentViewer extends FragmentActivity {
             }
             // external images
             else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
-                list.add(Attachment.newImageAttachment(src));
+                list.add(new ExternalImageAttachment(src));
             }
         }
 
@@ -169,7 +189,7 @@ public class AttachmentViewer extends FragmentActivity {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         mAttachmentList.clear();
-                        new AlertDialog.Builder(ThisApp.context)
+                        new AccentAlertDialog.Builder(ThisApp.context)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -181,7 +201,8 @@ public class AttachmentViewer extends FragmentActivity {
                                 .show();
                     }
                     catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post Failed (" + e.getMessage() + ")");
+                        Log.e(AttachmentViewer.class.toString(),
+                                "JsonError: Load Post Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }
@@ -196,31 +217,40 @@ public class AttachmentViewer extends FragmentActivity {
                             mAttachmentList = compileAttachments(post.message, post.attachments);
                             if (i - 1 >= 0) {
                                 post = new Post(postlist.getJSONObject(i - 1));
-                                mHasAttachmentsPrev = compileAttachments(post.message, post.attachments).size() > 0;
+                                int attachments = compileAttachments(post.message, post.attachments).size();
+                                if (mHasAttachmentsPrev = attachments > 0)
+                                    mAttachmentList.add(0, new RedirectPostAttachment(String.format(
+                                            getString(R.string.goto_prev_post_attachments), attachments)));
                             }
                             if (i + 1 < postlist.length()) {
                                 post = new Post(postlist.getJSONObject(i + 1));
-                                mHasAttachmentsNext = compileAttachments(post.message, post.attachments).size() > 0;
+                                int attachments = compileAttachments(post.message, post.attachments).size();
+                                if (mHasAttachmentsNext = attachments > 0)
+                                    mAttachmentList.add(new RedirectPostAttachment(String.format(
+                                            getString(R.string.goto_next_post_attachments), attachments)));
                             }
                         }
                         mPageAdapter.notifyDataSetChanged();
 
                         final String src = getIntent().getStringExtra("src");
-                        if (src != null) mPager.post(new Runnable() {
+                        mPager.post(new Runnable() {
                             @Override
                             public void run() {
-                                for (int i = 0; i < mAttachmentList.size(); i ++)
-                                    if (mAttachmentList.get(i).src.equals(src)) {
+                                if (src != null) for (int i = 0; i < mAttachmentList.size(); i ++)
+                                    if (src.equals(mAttachmentList.get(i).src)) {
                                         mPager.setCurrentItem(i, false);
-                                        break;
+                                        return;
                                     }
+                                if (mHasAttachmentsPrev)
+                                    mPager.setCurrentItem(1, false);
                             }
                         });
 
                         position = 0;
                     }
                     catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                        Log.e(AttachmentViewer.class.toString(),
+                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
                         Helper.toast(R.string.load_failed_toast);
                     }
                 }
@@ -229,8 +259,23 @@ public class AttachmentViewer extends FragmentActivity {
         });
     }
 
+    public void gotoPrevPost() {
+        Intent intent = getIntent();
+        intent.putExtra("index", intent.getIntExtra("index", 1) - 1);
+        startActivity(intent);
+        finish();
+    }
+
+    public void gotoNextPost() {
+        Intent intent = getIntent();
+        intent.putExtra("index", intent.getIntExtra("index", -1) + 1);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attachment_viewer);
 
@@ -248,8 +293,14 @@ public class AttachmentViewer extends FragmentActivity {
             }
 
             @Override
-            public void onPageScrollStateChanged(int i) {
-
+            public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager.SCROLL_STATE_IDLE) {
+                    int current = mPager.getCurrentItem();
+                    if (current == 0 && mHasAttachmentsPrev)
+                        gotoPrevPost();
+                    else if (current == mAttachmentList.size() - 1 && mHasAttachmentsNext)
+                        gotoNextPost();
+                }
             }
         });
         mPager.setAdapter(mPageAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
@@ -263,34 +314,18 @@ public class AttachmentViewer extends FragmentActivity {
             public int getCount() {
                 return mAttachmentList.size();
             }
+
+            @Override
+            public float getPageWidth(int position) {
+                if (mAttachmentList.get(position) instanceof RedirectPostAttachment)
+                    return REDIRECT_PAGER_WIDTH;
+                return super.getPageWidth(position);
+            }
         });
         findViewById(R.id.view_title).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAttachmentList();
-            }
-        });
-
-        findViewById(R.id.prev_post).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mHasAttachmentsPrev) {
-                    Intent intent = AttachmentViewer.this.getIntent();
-                    intent.putExtra("index", intent.getIntExtra("index", 1) - 1);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        });
-        findViewById(R.id.next_post).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mHasAttachmentsNext) {
-                    Intent intent = AttachmentViewer.this.getIntent();
-                    intent.putExtra("index", intent.getIntExtra("index", -1) + 1);
-                    startActivity(intent);
-                    finish();
-                }
             }
         });
 
@@ -320,11 +355,12 @@ public class AttachmentViewer extends FragmentActivity {
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
 
-            Bundle bundle = getArguments();
-            int position = getArguments().getInt("position");
+            final Bundle bundle = getArguments();
+            final int position = bundle.getInt("position");
             if (position < mActivity.mAttachmentList.size()) {
                 // save EVERYTHING in Bundle
                 Attachment attachment = mActivity.mAttachmentList.get(position);
+                bundle.putBoolean("isBlank", attachment instanceof RedirectPostAttachment);
                 bundle.putBoolean("isImage", attachment.isImage);
                 bundle.putString("src", attachment.src);
                 bundle.putString("name", attachment.name);
@@ -332,18 +368,27 @@ public class AttachmentViewer extends FragmentActivity {
             }
 
             final String src = bundle.getString("src");
-            if (bundle.getBoolean("isImage")) {
-                final PhotoView photoView = new PhotoView(container.getContext());
+            if (bundle.getBoolean("isBlank")) {
+                TextView textView = new TextView(container.getContext());
+                textView.setText(bundle.getString("name"));
+                textView.setPadding(16, 16, 16, 16);
+                textView.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT));
+                textView.setGravity(Gravity.CENTER);
+                return textView;
+            }
+            else if (bundle.getBoolean("isImage")) {
+                final View view = inflater.inflate(R.layout.fragment_attachment_image, container, false);
+                final PhotoView photoView = (PhotoView) view.findViewById(R.id.image_view);
                 Bitmap bitmap = mActivity.mBitmapCache.getBitmap(src);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
-                    new PhotoViewAttacher(photoView);
                 } else {
                     Bitmap thumb = mActivity.mThumbCache.get(src);
                     if (thumb != null)
                         photoView.setImageBitmap(thumb);
                     else
                         photoView.setImageResource(android.R.drawable.ic_menu_gallery);
+                    Helper.updateVisibility(view, R.id.loading, true);
                     ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
                         @Override
                         public void onResponse(Bitmap bitmap) {
@@ -366,11 +411,17 @@ public class AttachmentViewer extends FragmentActivity {
                             mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
                                     IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             photoView.setImageBitmap(bitmap);
+                            Helper.updateVisibility(view, R.id.loading, false);
                         }
-                    }, 0, 0, null, null);
+                    }, 0, 0, null, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError volleyError) {
+                            Helper.updateVisibility(view, R.id.loading, false);
+                        }
+                    });
                     mActivity.mRequestQueue.add(imageRequest);
                 }
-                return photoView;
+                return view;
             } else {
                 View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
                 TextView textView = (TextView) view.findViewById(R.id.name);

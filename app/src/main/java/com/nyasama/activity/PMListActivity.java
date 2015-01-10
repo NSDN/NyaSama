@@ -2,10 +2,8 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.android.volley.Response;
@@ -25,7 +23,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class PMListActivity extends FragmentActivity
+public class PMListActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
     public static int PAGE_SIZE_COUNT = 20;
@@ -57,12 +55,6 @@ public class PMListActivity extends FragmentActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_pm_list, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

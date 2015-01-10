@@ -1,17 +1,15 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
 import com.android.volley.Response;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CommonListAdapter;
@@ -25,7 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class SearchActivity extends FragmentActivity
+public class SearchActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     private static final int PAGE_SIZE_COUNT = 25;
@@ -79,12 +77,6 @@ public class SearchActivity extends FragmentActivity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter() {
             @Override
@@ -129,7 +121,7 @@ public class SearchActivity extends FragmentActivity
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.there_is_something_wrong);
                 } else if (data.has("Message")) {
-                    new AlertDialog.Builder(SearchActivity.this)
+                    new AccentAlertDialog.Builder(SearchActivity.this)
                             .setTitle(R.string.there_is_something_wrong)
                             .setMessage(data.optJSONObject("Message").optString("messagestr"))
                             .setPositiveButton(android.R.string.ok, null)

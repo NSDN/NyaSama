@@ -4,14 +4,12 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
@@ -34,7 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class NoticeActivity extends FragmentActivity
+public class NoticeActivity extends BaseThemedActivity
     implements CommonListFragment.OnListFragmentInteraction<Notice> {
 
     public static String TAG = "Notice";
@@ -86,12 +84,6 @@ public class NoticeActivity extends FragmentActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_notice, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return Helper.handleOption(this, item.getItemId()) ||
-                super.onOptionsItemSelected(item);
     }
 
     @Override

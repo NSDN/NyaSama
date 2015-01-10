@@ -78,9 +78,6 @@ public class ThisApp extends Application {
     public static void onSharedPreferenceChanged(SharedPreferences pref, String s) {
         if (s.equals(context.getString(R.string.pref_key_language)))
             loadLocale(pref.getString(s, ""));
-        else if (s.equals(context.getString(R.string.pref_key_animation)))
-            context.setTheme(pref.getBoolean(s, false) ?
-                    R.style.AppThemeAni : R.style.AppTheme);
         else if (s.equals(context.getString(R.string.pref_key_cache_size)))
             volleyCache = new DiskBasedCache(new File(context.getCacheDir(), "NyasamaVolleyCache"),
                     1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
@@ -94,7 +91,6 @@ public class ThisApp extends Application {
         // load preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
-        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_animation));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_cache_size));
 
         // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
