@@ -131,6 +131,7 @@
     <string name="poll_max_choices">Max Choices</string>
     <string name="poll_expiration_days">Expiration</string>
     <string name="diag_title_max_choices">Max Choices: %d</string>
+    <string name="page_index">page %d</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

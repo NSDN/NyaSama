@@ -1,5 +1,6 @@
 package com.nyasama.activity;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -69,8 +71,10 @@ public class PostListActivity extends BaseThemedActivity
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
     private CommonListFragment<Post> mListFragment;
+    private ArrayAdapter mActionBarSpinner;
+    private int mListItemCount;
 
-    Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
+    private Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private AlertDialog mReplyDialog;
 
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
@@ -86,6 +90,44 @@ public class PostListActivity extends BaseThemedActivity
 
     private int mPrefMaxImageSize = -1;
     private int mPrefFontSize = 16;
+
+    public void setupActionBarPages(int total) {
+        ActionBar actionBar = getActionBar();
+        if (actionBar == null) return;
+
+        if (total == mListItemCount) return;
+        mListItemCount = total;
+
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+        final List<String> pages = new ArrayList<String>();
+        for (int i = 0; i < mListItemCount / PAGE_SIZE_COUNT + 1; i ++)
+            pages.add(String.format(getString(R.string.page_index), i + 1));
+
+        final CharSequence title = actionBar.getTitle();
+        mActionBarSpinner = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                R.layout.fragment_spinner_item_2, android.R.id.text1, pages) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(title);
+                return view;
+            }
+        };
+        mActionBarSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        actionBar.setListNavigationCallbacks(mActionBarSpinner, new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int i, long l) {
+                if (getIntent().getIntExtra("page", 0) != i) {
+                    getIntent().putExtra("page", i);
+                    mListFragment.reloadAll();
+                }
+                return false;
+            }
+        });
+    }
 
     public void loadDisplayPreference() {
         String displayImageSetting =
@@ -703,11 +745,12 @@ public class PostListActivity extends BaseThemedActivity
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
         loadDisplayPreference();
 
+        final int pageOffset = getIntent().getIntExtra("page", 0);
         final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);
-            put("page", page + 1);
+            put("page", page + pageOffset + 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -756,9 +799,12 @@ public class PostListActivity extends BaseThemedActivity
 
                         // Note: in x2 there is only "replies"
                         JSONObject thread = var.getJSONObject("thread");
-                        total = Integer.parseInt(thread.has("replies") ?
+                        int posts = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies")) + 1;
                         setTitle(thread.getString("subject"));
+                        if (posts > PAGE_SIZE_COUNT)
+                            setupActionBarPages(posts);
+                        total = posts - pageOffset * PAGE_SIZE_COUNT;
 
                         // comments
                         if (var.opt("comments") instanceof JSONObject) {

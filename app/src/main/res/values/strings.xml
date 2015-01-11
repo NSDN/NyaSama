@@ -131,6 +131,7 @@
     <string name="poll_max_choices">最多可选</string>
     <string name="poll_expiration_days">有效天数</string>
     <string name="diag_title_max_choices">最多投 %d 项</string>
+    <string name="page_index">第 %d 页</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
