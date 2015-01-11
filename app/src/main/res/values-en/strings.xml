@@ -59,8 +59,8 @@
     <string name="text_view_attachments">[View Attachments]</string>
     <string name="title_activity_attachment_viewer">View Attachments</string>
     <string name="title_activity_notice">My Notice</string>
-    <string name="title_notice_read">Read Notice</string>
-    <string name="title_notice_unread">Unread Notice</string>
+    <string name="title_notice_read">Read</string>
+    <string name="title_notice_unread">Unread</string>
     <string name="pref_category_general">General</string>
     <string name="alert_need_reboot">Restart to apply these changes now</string>
     <string name="diag_loading_smilies">Loading Smileies...</string>

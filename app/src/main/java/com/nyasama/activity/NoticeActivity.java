@@ -11,8 +11,8 @@ import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -57,8 +57,16 @@ public class NoticeActivity extends BaseThemedActivity
                 getString(R.string.title_notice_unread),
                 getString(R.string.title_notice_read),
         };
-        SpinnerAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
-                android.R.layout.simple_spinner_dropdown_item, spinnerText);
+        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                R.layout.fragment_spinner_item_2, android.R.id.text1, spinnerText) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(getTitle());
+                return view;
+            }
+        };
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         actionBar.setListNavigationCallbacks(spinnerAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int i, long l) {
