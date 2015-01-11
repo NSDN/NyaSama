@@ -117,11 +117,6 @@
     <string name="like">Like</string>
     <string name="site">Site</string>
     <string name="unknown">Unknown</string>
-    <string-array name="thumb_size">
-        <item>Small thumbs</item>
-        <item>Large thumbs</item>
-        <item>Original Image</item>
-    </string-array>
     <string name="reside">residence</string>
     <string name="title_activity_search">Search</string>
     <string name="action_setup_poll">Setup Poll</string>
@@ -136,4 +131,14 @@
     <string name="poll_max_choices">Max Choices</string>
     <string name="poll_expiration_days">Expiration</string>
     <string name="diag_title_max_choices">Max Choices: %d</string>
+    <string-array name="thumb_size">
+        <item>Small thumbs</item>
+        <item>Large thumbs</item>
+        <item>Original Image</item>
+    </string-array>
+    <string-array name="show_image">
+        <item>Only When Using Wifi</item>
+        <item>Always</item>
+        <item>Never</item>
+    </string-array>
 </resources>

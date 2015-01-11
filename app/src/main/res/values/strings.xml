@@ -136,4 +136,9 @@
         <item>中等</item>
         <item>原图</item>
     </string-array>
+    <string-array name="show_image">
+        <item>仅使用 Wifi 时</item>
+        <item>始终显示</item>
+        <item>始终不显示</item>
+    </string-array>
 </resources>

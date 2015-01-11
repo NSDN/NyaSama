@@ -36,9 +36,12 @@
             android:summary="%s"
             android:title="@string/preference_textsize" />
 
-        <com.negusoft.holoaccent.preference.SwitchPreference
+        <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="false"
             android:key="@string/pref_key_show_image"
+            android:entries="@array/show_image"
+            android:entryValues="@array/show_image_value"
+            android:summary="%s"
             android:title="@string/preference_showimg" />
 
         <com.negusoft.holoaccent.preference.ListPreference

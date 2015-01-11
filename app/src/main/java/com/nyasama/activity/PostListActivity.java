@@ -1,8 +1,11 @@
 package com.nyasama.activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -85,8 +88,16 @@ public class PostListActivity extends BaseThemedActivity
     private int mPrefFontSize = 16;
 
     public void loadDisplayPreference() {
-        boolean shallDisplayImage =
-                ThisApp.preferences.getBoolean(getString(R.string.pref_key_show_image), false);
+        String displayImageSetting =
+                ThisApp.preferences.getString(getString(R.string.pref_key_show_image), "");
+        boolean shallDisplayImage = !"false".equals(displayImageSetting);
+        if ("auto".equals(displayImageSetting)) {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo =
+                    connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            shallDisplayImage = networkInfo.isConnected();
+        }
         mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
         mPrefFontSize = Helper.toSafeInteger(
