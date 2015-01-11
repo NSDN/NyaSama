@@ -126,8 +126,8 @@
     <string name="toast_too_many_votes">你最多只能投 %d 项</string>
     <string name="preference_showimg">显示帖子图片</string>
     <string name="new_feature">更新内容:</string>
-    <string name="goto_prev_post_attachments"><![CDATA[<< 上一楼 (%d 附件)]]></string>
-    <string name="goto_next_post_attachments"><![CDATA[下一楼 (%d 附件) >>]]></string>
+    <string name="goto_prev_post_attachments"><![CDATA[上一楼\n(%d 附件)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[下一楼\n(%d 附件)\n>>]]></string>
     <string name="poll_max_choices">最多可选</string>
     <string name="poll_expiration_days">有效天数</string>
     <string name="diag_title_max_choices">最多投 %d 项</string>
