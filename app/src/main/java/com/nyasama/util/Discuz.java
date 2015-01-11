@@ -860,7 +860,7 @@ public class Discuz {
         final Request request = new StringRequest(
                 Request.Method.POST,
                 // set #noredirect# so volley will throw error 302
-                DISCUZ_URL + "search.php?searchsubmit=yes##noredirect#",
+                DISCUZ_URL + "search.php?searchsubmit=yes##hurlstack:noredirect#",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
