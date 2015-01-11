@@ -71,8 +71,7 @@ public class PostListActivity extends BaseThemedActivity
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
     private CommonListFragment<Post> mListFragment;
-    private ArrayAdapter mActionBarSpinner;
-    private int mListItemCount;
+    private int mListPages;
 
     private Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private AlertDialog mReplyDialog;
@@ -91,23 +90,23 @@ public class PostListActivity extends BaseThemedActivity
     private int mPrefMaxImageSize = -1;
     private int mPrefFontSize = 16;
 
-    public void setupActionBarPages(int total) {
+    public void setupActionBarPages(int pages) {
         ActionBar actionBar = getActionBar();
         if (actionBar == null) return;
 
-        if (total == mListItemCount) return;
-        mListItemCount = total;
+        if (pages == mListPages) return;
+        mListPages = pages;
 
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-        final List<String> pages = new ArrayList<String>();
-        for (int i = 0; i < mListItemCount / PAGE_SIZE_COUNT + 1; i ++)
-            pages.add(String.format(getString(R.string.page_index), i + 1));
+        final List<String> pageNames = new ArrayList<String>();
+        for (int i = 0; i < mListPages; i ++)
+            pageNames.add(String.format(getString(R.string.page_index), i + 1));
 
         final CharSequence title = actionBar.getTitle();
-        mActionBarSpinner = new ArrayAdapter<String>(actionBar.getThemedContext(),
-                R.layout.fragment_spinner_item_2, android.R.id.text1, pages) {
+        ArrayAdapter adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                R.layout.fragment_spinner_item_2, android.R.id.text1, pageNames) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -115,13 +114,17 @@ public class PostListActivity extends BaseThemedActivity
                 return view;
             }
         };
-        mActionBarSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        actionBar.setListNavigationCallbacks(mActionBarSpinner, new ActionBar.OnNavigationListener() {
+        actionBar.setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int i, long l) {
-                if (getIntent().getIntExtra("page", 0) != i) {
-                    getIntent().putExtra("page", i);
+                Intent intent = getIntent();
+                if (intent.getBooleanExtra("update-page", false)) {
+                    intent.putExtra("update-page", false);
+                }
+                else if (intent.getIntExtra("page", 0) != i) {
+                    intent.putExtra("page", i);
                     mListFragment.reloadAll();
                 }
                 return false;
@@ -513,6 +516,29 @@ public class PostListActivity extends BaseThemedActivity
                 R.layout.fragment_post_item,
                 R.id.list);
 
+        mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private int currentItem = 0;
+
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+                if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
+                    ActionBar actionBar = getActionBar();
+                    Intent intent = getIntent();
+                    int pageOffset = intent.getIntExtra("page", 0);
+                    int page = currentItem / PAGE_SIZE_COUNT + pageOffset;
+                    if (actionBar.getSelectedNavigationIndex() != page) {
+                        intent.putExtra("update-page", true);
+                        actionBar.setSelectedNavigationItem(page);
+                    }
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                currentItem = i;
+            }
+        });
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
                 .commit();
@@ -803,7 +829,7 @@ public class PostListActivity extends BaseThemedActivity
                                 thread.getString("replies") : thread.getString("allreplies")) + 1;
                         setTitle(thread.getString("subject"));
                         if (posts > PAGE_SIZE_COUNT)
-                            setupActionBarPages(posts);
+                            setupActionBarPages(posts / PAGE_SIZE_COUNT + 1);
                         total = posts - pageOffset * PAGE_SIZE_COUNT;
 
                         // comments
