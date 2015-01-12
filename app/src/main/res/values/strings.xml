@@ -57,8 +57,8 @@
     <string name="login_message">登了个录</string>
     <string name="title_activity_notice">我的提醒</string>
     <string name="my_notice_button">我的提醒</string>
-    <string name="title_notice_read">已读提醒</string>
-    <string name="title_notice_unread">未读提醒</string>
+    <string name="title_notice_read">已读</string>
+    <string name="title_notice_unread">未读</string>
     <string name="title_activity_attachment_viewer">查看附件</string>
     <string name="text_view_attachments">[查看附件]</string>
     <string name="title_activity_setting">设置</string>
@@ -126,14 +126,22 @@
     <string name="toast_too_many_votes">你最多只能投 %d 项</string>
     <string name="preference_showimg">显示帖子图片</string>
     <string name="new_feature">更新内容:</string>
-    <string name="goto_prev_post_attachments"><![CDATA[<< 上一楼 (%d 附件)]]></string>
-    <string name="goto_next_post_attachments"><![CDATA[下一楼 (%d 附件) >>]]></string>
+    <string name="goto_prev_post_attachments"><![CDATA[上一楼\n(%d 附件)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[下一楼\n(%d 附件)\n>>]]></string>
     <string name="poll_max_choices">最多可选</string>
     <string name="poll_expiration_days">有效天数</string>
     <string name="diag_title_max_choices">最多投 %d 项</string>
+    <string name="page_index">第 %d 页</string>
+    <string name="action_see_author">只看楼主</string>
+    <string name="action_reverse_order">倒序查看</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
         <item>原图</item>
+    </string-array>
+    <string-array name="show_image">
+        <item>仅使用 Wifi 时</item>
+        <item>始终显示</item>
+        <item>始终不显示</item>
     </string-array>
 </resources>

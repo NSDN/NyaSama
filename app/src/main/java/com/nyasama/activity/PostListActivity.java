@@ -1,8 +1,12 @@
 package com.nyasama.activity;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -18,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -29,16 +34,15 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.util.BitmapLruCache;
-import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.CallbackMatcher;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Discuz.Post;
-import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.Attachment;
+import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.PollOption;
-
+import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
 
@@ -66,8 +70,9 @@ public class PostListActivity extends BaseThemedActivity
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
     private CommonListFragment<Post> mListFragment;
+    private int mListPages;
 
-    Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
+    private Map<String, Attachment> mAttachmentMap = new HashMap<String, Attachment>();
     private AlertDialog mReplyDialog;
 
     private SparseArray<List<Comment>> mComments = new SparseArray<List<Comment>>();
@@ -80,13 +85,75 @@ public class PostListActivity extends BaseThemedActivity
     private AlertDialog mVoteDialog;
 
     private int mForumId;
+    private int mAuthorId;
 
     private int mPrefMaxImageSize = -1;
     private int mPrefFontSize = 16;
 
+    public void setupActionBarPages(int pages) {
+        final ActionBar actionBar = getActionBar();
+        if (actionBar == null) return;
+
+        final Intent intent = getIntent();
+        int authorId = intent.getIntExtra("authorid", 0);
+        boolean reversed = intent.getBooleanExtra("reverse", false);
+        final String title = actionBar.getTitle().toString();
+        final String sub =
+                (authorId == mAuthorId ? getString(R.string.action_see_author) : "") + " " +
+                (reversed ? getString(R.string.action_reverse_order) : "");
+
+        if (pages <= 1 && authorId == 0 && !reversed) {
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            return;
+        }
+
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+        final List<String> pageNames = new ArrayList<String>();
+        for (int i = 0; i < (mListPages = pages); i ++)
+            pageNames.add(String.format(getString(R.string.page_index), i + 1));
+        ArrayAdapter adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                R.layout.fragment_spinner_item_2, android.R.id.text1, pageNames) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                ((TextView) view.findViewById(android.R.id.text1)).setText(
+                        pageNames.get(position) + " " + sub);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(title);
+                return view;
+            }
+        };
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        actionBar.setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int i, long l) {
+                if (intent.getBooleanExtra("update-nav-spinner", false)) {
+                    intent.putExtra("update-nav-spinner", false);
+                }
+                else if (intent.getIntExtra("page", 0) != i) {
+                    intent.putExtra("page", i);
+                    mListFragment.reloadAll();
+                }
+                return false;
+            }
+        });
+        actionBar.setSelectedNavigationItem(intent.getIntExtra("page", 0));
+    }
+
     public void loadDisplayPreference() {
-        boolean shallDisplayImage =
-                ThisApp.preferences.getBoolean(getString(R.string.pref_key_show_image), false);
+        String displayImageSetting =
+                ThisApp.preferences.getString(getString(R.string.pref_key_show_image), "");
+        boolean shallDisplayImage = !"false".equals(displayImageSetting);
+        if ("auto".equals(displayImageSetting)) {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo =
+                    connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            shallDisplayImage = networkInfo.isConnected();
+        }
         mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
         mPrefFontSize = Helper.toSafeInteger(
@@ -460,6 +527,28 @@ public class PostListActivity extends BaseThemedActivity
                 R.layout.fragment_post_item,
                 R.id.list);
 
+        mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private int mCurrentItem;
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+                if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
+                    ActionBar actionBar = getActionBar();
+                    Intent intent = getIntent();
+                    int pageOffset = intent.getIntExtra("page", 0);
+                    int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
+                    if (actionBar.getSelectedNavigationIndex() != pageScroll) {
+                        intent.putExtra("update-nav-spinner", true);
+                        actionBar.setSelectedNavigationItem(pageScroll);
+                    }
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                mCurrentItem = i;
+            }
+        });
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
                 .commit();
@@ -495,6 +584,21 @@ public class PostListActivity extends BaseThemedActivity
         }
         else if (id == R.id.action_mark_fav) {
             doMarkFavourite();
+            return true;
+        }
+        else if (id == R.id.action_reverse_order) {
+            Intent intent = getIntent();
+            intent.putExtra("page", 0);
+            intent.putExtra("reverse", !intent.getBooleanExtra("reverse", false));
+            mListFragment.reloadAll();
+            return true;
+        }
+        else if (id == R.id.action_see_author) {
+            Intent intent = getIntent();
+            int authorId = intent.getIntExtra("authorid", 0);
+            intent.putExtra("page", 0);
+            intent.putExtra("authorid", authorId > 0 ? 0 : mAuthorId);
+            mListFragment.reloadAll();
             return true;
         }
         else if (id == R.id.action_goto_forum) {
@@ -692,11 +796,19 @@ public class PostListActivity extends BaseThemedActivity
     public void onLoadingMore(CommonListFragment fragment, final List listData) {
         loadDisplayPreference();
 
+        final int pageOffset = getIntent().getIntExtra("page", 0);
         final int page = listData.size() / PAGE_SIZE_COUNT;
         Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("ppp", PAGE_SIZE_COUNT);
-            put("page", page + 1);
+            put("page", page + pageOffset + 1);
+
+            Intent intent = getIntent();
+            int authorId = intent.getIntExtra("authorid", 0);
+            if (authorId > 0)
+                put("authorid", authorId);
+            if (intent.getBooleanExtra("reverse", false))
+                put("ordertype", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -745,9 +857,15 @@ public class PostListActivity extends BaseThemedActivity
 
                         // Note: in x2 there is only "replies"
                         JSONObject thread = var.getJSONObject("thread");
-                        total = Integer.parseInt(thread.has("replies") ?
-                                thread.getString("replies") : thread.getString("allreplies")) + 1;
                         setTitle(thread.getString("subject"));
+                        mAuthorId = Helper.toSafeInteger(thread.optString("authorid"), 0);
+                        int replies = Integer.parseInt(thread.has("replies") ?
+                                thread.getString("replies") : thread.getString("allreplies"));
+                        // setup action bar only once when loading items
+                        if (page == 0)
+                            setupActionBarPages(replies / PAGE_SIZE_COUNT + 1);
+                        // must subtract items by the page offset
+                        total = replies + 1 - pageOffset * PAGE_SIZE_COUNT;
 
                         // comments
                         if (var.opt("comments") instanceof JSONObject) {

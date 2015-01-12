@@ -88,7 +88,7 @@ public class SplashActivity extends Activity {
                     }).show();
         }
         else {
-            Log.e(SplashActivity.class.toString(), "check update failed: empty response");
+            Log.e(SplashActivity.class.toString(), "check update failed: no new version found");
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }
@@ -100,7 +100,15 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         mInitJobs ++;
-        ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/version_and_feature.txt", new Response.Listener<String>() {
+        if (ThisApp.getVersion().contains("debug-no-update")) new android.os.Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(SplashActivity.class.toString(),
+                        "This version is for debug only and will not check for updates automatically!");
+                checkInitJobs();
+            }
+        });
+        else ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/version_and_feature.txt", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 if (s != null) {

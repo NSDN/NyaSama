@@ -39,6 +39,7 @@ public class CommonListFragment<T> extends Fragment
 
     private CommonListAdapter<T> mListAdapter;
     private OnListFragmentInteraction<T> mInterface;
+    private AbsListView.OnScrollListener mScrollListener;
 
     private View mListLayoutView;
     private SwipeRefreshLayout mRefreshLayoutView;
@@ -99,6 +100,10 @@ public class CommonListFragment<T> extends Fragment
     public boolean reloadLast() {
         mListItemCount = Integer.MAX_VALUE;
         return loadMore();
+    }
+
+    public void setOnScrollListener(AbsListView.OnScrollListener onScrollListener) {
+        mScrollListener = onScrollListener;
     }
 
     public T getData(int position) {
@@ -178,6 +183,8 @@ public class CommonListFragment<T> extends Fragment
 
     @Override
     public void onScrollStateChanged(AbsListView absListView, int i) {
+        if (mScrollListener != null)
+            mScrollListener.onScrollStateChanged(absListView, i);
     }
 
     @Override
@@ -186,6 +193,8 @@ public class CommonListFragment<T> extends Fragment
             loadMore();
         if (mRefreshLayoutView != null)
             mRefreshLayoutView.setEnabled(i == 0);
+        if (mScrollListener != null)
+            mScrollListener.onScroll(absListView, i, i2, i3);
     }
 
     @SuppressWarnings("unused")
