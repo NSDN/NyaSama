@@ -132,6 +132,8 @@
     <string name="poll_expiration_days">Expiration</string>
     <string name="diag_title_max_choices">Max Choices: %d</string>
     <string name="page_index">page %d</string>
+    <string name="action_see_author">Thread Author Only</string>
+    <string name="action_reverse_order">Reverse Order</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

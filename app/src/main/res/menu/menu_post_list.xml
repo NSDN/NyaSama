@@ -6,6 +6,10 @@
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_quick_reply" android:title="@string/action_quick_reply"
         android:showAsAction="never" />
+    <item android:id="@+id/action_reverse_order" android:title="@string/action_reverse_order"
+        android:showAsAction="never" />
+    <item android:id="@+id/action_see_author" android:title="@string/action_see_author"
+        android:showAsAction="never" />
     <item android:id="@+id/action_mark_fav" android:title="@string/action_mark_fav"
         android:showAsAction="never" />
     <item android:id="@+id/action_goto_forum" android:title="@string/action_goto_forum"
