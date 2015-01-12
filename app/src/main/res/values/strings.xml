@@ -134,6 +134,7 @@
     <string name="page_index">第 %d 页</string>
     <string name="action_see_author">只看楼主</string>
     <string name="action_reverse_order">倒序查看</string>
+    <string name="toast_open_image_fail">打开图片失败</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>

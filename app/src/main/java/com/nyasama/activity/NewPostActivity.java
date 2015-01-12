@@ -494,12 +494,26 @@ public class NewPostActivity extends BaseThemedActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == REQCODE_PICK_IMAGE || requestCode == REQCODE_PICK_CAPTURE)
                 && resultCode == RESULT_OK) {
-            //
-            String filePath = requestCode == REQCODE_PICK_IMAGE ?
-                    Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
+
+            // TODO: make me pretty
+            Bitmap bitmap;
+            String filePath;
+            try {
+                filePath = requestCode == REQCODE_PICK_IMAGE ?
+                        Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
+                bitmap = BitmapFactory.decodeFile(filePath);
+                if (bitmap == null) {
+                    Helper.toast(getString(R.string.toast_open_image_fail));
+                    return;
+                }
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+                Helper.toast(R.string.there_is_something_wrong);
+                return;
+            }
 
             // resize the image if too large
-            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
             Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
             if (bitmap.getWidth() > uploadSize.width || bitmap.getHeight() > uploadSize.height) {
                 bitmapSize = Helper.getFittedSize(bitmapSize, uploadSize, false);
