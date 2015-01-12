@@ -34,16 +34,15 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.util.BitmapLruCache;
-import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
+import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.CallbackMatcher;
+import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Discuz.Post;
-import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.Attachment;
+import com.nyasama.util.Discuz.Comment;
 import com.nyasama.util.Discuz.PollOption;
-
+import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Helper;
 import com.nyasama.util.HtmlImageGetter;
 
@@ -128,7 +127,6 @@ public class PostListActivity extends BaseThemedActivity
         };
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        intent.putExtra("update-nav-spinner", true);
         actionBar.setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int i, long l) {
@@ -142,6 +140,7 @@ public class PostListActivity extends BaseThemedActivity
                 return false;
             }
         });
+        actionBar.setSelectedNavigationItem(intent.getIntExtra("page", 0));
     }
 
     public void loadDisplayPreference() {
@@ -862,8 +861,10 @@ public class PostListActivity extends BaseThemedActivity
                         mAuthorId = Helper.toSafeInteger(thread.optString("authorid"), 0);
                         int replies = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies"));
+                        // setup action bar only once when loading items
                         if (page == 0)
                             setupActionBarPages(replies / PAGE_SIZE_COUNT + 1);
+                        // must subtract items by the page offset
                         total = replies + 1 - pageOffset * PAGE_SIZE_COUNT;
 
                         // comments
