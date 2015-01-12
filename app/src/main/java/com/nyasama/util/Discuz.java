@@ -163,10 +163,10 @@ public class Discuz {
         public List<Attachment> attachments;
 
         public Post(JSONObject data) {
-            id = Integer.parseInt(data.optString("pid"));
+            id = Integer.parseInt(data.optString("pid", "0"));
             author = data.optString("author");
-            authorId = Integer.parseInt(data.optString("authorid"));
-            number = Integer.parseInt(data.optString("number"));
+            authorId = Integer.parseInt(data.optString("authorid", "0"));
+            number = Integer.parseInt(data.optString("number", "0"));
             message = data.optString("message");
             dateline = data.optString("dateline");
 
@@ -177,7 +177,9 @@ public class Discuz {
                     String key = iter.next();
                     JSONObject attachData = attachlist.optJSONObject(key);
                     Attachment attachment = new Attachment(attachData);
-                    attachments.add(attachment);
+                    // Note: have to check this because Discuz may return invalid attachment data =.=
+                    if (attachment.id > 0)
+                        attachments.add(attachment);
                 }
             }
         }
