@@ -26,7 +26,7 @@
     <string name="post_title_hint">Title Here</string>
     <string name="post_content_hint">Content Here</string>
     <string name="post_thread_button">Post</string>
-    <string name="post_content_empty_message">Did you forget anything?</string>
+    <string name="post_content_empty_message">Did You Forget Anything?</string>
     <string name="action_new_post">New Post</string>
     <string name="action_post_now">Post Now</string>
     <string name="action_reply">Reply</string>
@@ -37,7 +37,7 @@
     <string name="logout_button_text">Log Out</string>
     <string name="action_quick_reply">Quick Reply</string>
     <string name="action_comment">Comment</string>
-    <string name="notify_title_text">Messages from NyaSama!</string>
+    <string name="notify_title_text">Messages From NyaSama!</string>
     <string name="send_message_button">Send Message</string>
     <string name="fragment_blank_msg">Nyaaa...</string>
     <string name="action_reload">Reload</string>
@@ -48,7 +48,7 @@
     <string name="diag_insert_smiley_title">Insert An Smiley</string>
     <string name="diag_quick_reply_title">Quick Reply</string>
     <string name="mythread_button_text">My Threads</string>
-    <string name="there_is_something_wrong">There is something wrong...</string>
+    <string name="there_is_something_wrong">There Is Something Wrong...</string>
     <string name="thread_list_subforum_title">Sub Forum</string>
     <string name="thread_list_threads_title">Threads</string>
     <string name="title_activity_messages">Messages</string>
@@ -62,7 +62,7 @@
     <string name="title_notice_read">Read Notice</string>
     <string name="title_notice_unread">Unread Notice</string>
     <string name="pref_category_general">General</string>
-    <string name="alert_need_reboot">Restart to apply these changes now</string>
+    <string name="alert_need_reboot">Restart To Apply These Changes Now</string>
     <string name="diag_loading_smilies">Loading Smileies...</string>
     <string name="dialog_update_user">Updating User Info...</string>
     <string name="dialog_uploading">Uploading...</string>
@@ -90,7 +90,7 @@
     <string name="preference_category_explore">Explore</string>
     <string name="preference_thumbsize">Image Size</string>
     <string name="new_version_alert_title">New Version is Ready</string>
-    <string name="new_version_alert_message">Go and download new version (%s) now?</string>
+    <string name="new_version_alert_message">Go And Download New Version (%s) Now?</string>
     <string name="title_editing_post">Editing Post</string>
     <string name="title_editing_reply">Editing Reply</string>
     <string name="action_save">Save</string>
@@ -98,12 +98,12 @@
     <string name="button_back">Back</string>
     <string name="string_uncategorized">Uncategorized</string>
     <string name="toast_click_again_to_exit">Click Back Again To Exit</string>
-    <string name="action_goto_forum">Goto thread list</string>
+    <string name="action_goto_forum">Goto Thread List</string>
     <string name="text_view_vote">[View Votes]</string>
-    <string name="prompt_1">You have got</string>
-    <string name="prompt_2">pms</string>
-    <string name="prompt_3">and</string>
-    <string name="prompt_4">prompts</string>
+    <string name="prompt_1">You Have Got</string>
+    <string name="prompt_2">PMs</string>
+    <string name="prompt_3">And</string>
+    <string name="prompt_4">Prompts</string>
     <string name="search_hint">Search Threads</string>
     <string name="pref_title_version_number">Version Number</string>
     <string name="pref_diag_title_select_lang">Select Your Language</string>
@@ -125,7 +125,7 @@
     <string name="reside">Residence</string>
     <string name="title_activity_search">Search</string>
     <string name="action_setup_poll">Setup Poll</string>
-    <string name="diag_title_setup_poll">Each line stands for one option</string>
+    <string name="diag_title_setup_poll">Each Line Stands For One Option</string>
     <string name="diag_title_vote_result">Vote Results</string>
     <string name="you_can_not_voted">You Can Not Voted Now</string>
     <string name="toast_too_many_votes">You Can Select Max %d Items</string>
