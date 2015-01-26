@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
+import com.nyasama.BuildConfig;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 
@@ -100,7 +101,7 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         mInitJobs ++;
-        if (ThisApp.getVersion().contains("debug-no-update")) new android.os.Handler().post(new Runnable() {
+        if (BuildConfig.DEBUG) new android.os.Handler().post(new Runnable() {
             @Override
             public void run() {
                 Log.e(SplashActivity.class.toString(),
