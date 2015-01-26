@@ -481,7 +481,8 @@ public class Discuz {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                parseSmileyString("smilies_type = []; smilies_array = []");
+                if (mSmiliesCallback != null)
+                    mSmiliesCallback.onResponse(null);
             }
         }) {
             @Override

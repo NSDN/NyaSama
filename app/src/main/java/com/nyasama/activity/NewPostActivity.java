@@ -334,6 +334,12 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void showInsertSmileyOptions() {
+        final List<SmileyGroup> smilyGroups = Discuz.getSmilies();
+        if (smilyGroups == null) {
+            Helper.toast(R.string.there_is_something_wrong);
+            return;
+        }
+
         GridView smileyList = new GridView(this);
         smileyList.setNumColumns(3);
         final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
@@ -341,7 +347,6 @@ public class NewPostActivity extends BaseThemedActivity {
                 .setView(smileyList)
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
-        final List<SmileyGroup> smilyGroups = Discuz.getSmilies();
         smileyList.setAdapter(new CommonListAdapter<SmileyGroup>(smilyGroups, android.R.layout.simple_list_item_1) {
             @Override
             public void convertView(ViewHolder viewHolder, SmileyGroup item) {
