@@ -58,7 +58,7 @@ public class SettingActivity extends BaseThemedActivity {
             }
             else if (key.equals(getString(R.string.pref_key_show_image))) {
                 findPreference(getString(R.string.pref_key_thumb_size))
-                        .setEnabled(sharedPreferences.getBoolean(key, false));
+                        .setEnabled(!"false".equals(sharedPreferences.getString(key, "")));
             }
         }
     }

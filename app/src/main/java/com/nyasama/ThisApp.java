@@ -98,7 +98,7 @@ public class ThisApp extends Application {
             @Override
             protected HttpURLConnection createConnection(URL url) throws IOException {
                 HttpURLConnection connection = super.createConnection(url);
-                if (url.getRef() != null && url.getRef().contains("#noredirect#"))
+                if (url.getRef() != null && url.getRef().contains("#hurlstack:noredirect#"))
                     connection.setInstanceFollowRedirects(false);
                 return connection;
             }

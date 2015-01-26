@@ -59,8 +59,8 @@
     <string name="text_view_attachments">[View Attachments]</string>
     <string name="title_activity_attachment_viewer">View Attachments</string>
     <string name="title_activity_notice">My Notice</string>
-    <string name="title_notice_read">Read Notice</string>
-    <string name="title_notice_unread">Unread Notice</string>
+    <string name="title_notice_read">Read</string>
+    <string name="title_notice_unread">Unread</string>
     <string name="pref_category_general">General</string>
     <string name="alert_need_reboot">Restart to apply these changes now</string>
     <string name="diag_loading_smilies">Loading Smileies...</string>
@@ -117,11 +117,6 @@
     <string name="like">Like</string>
     <string name="site">Site</string>
     <string name="unknown">Unknown</string>
-    <string-array name="thumb_size">
-        <item>Small thumbs</item>
-        <item>Large thumbs</item>
-        <item>Original Image</item>
-    </string-array>
     <string name="reside">residence</string>
     <string name="title_activity_search">Search</string>
     <string name="action_setup_poll">Setup Poll</string>
@@ -131,9 +126,23 @@
     <string name="toast_too_many_votes">You can select max %d items</string>
     <string name="preference_showimg">Display Images</string>
     <string name="new_feature">New Features:</string>
-    <string name="goto_prev_post_attachments"><![CDATA[<< Goto Previous Post (%d attachments)]]></string>
-    <string name="goto_next_post_attachments"><![CDATA[Goto Next Post (%d attachments) >>]]></string>
+    <string name="goto_prev_post_attachments"><![CDATA[Previous Post\n(%d items)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[Next Post\n(%d items)\n>>]]></string>
     <string name="poll_max_choices">Max Choices</string>
     <string name="poll_expiration_days">Expiration</string>
     <string name="diag_title_max_choices">Max Choices: %d</string>
+    <string name="page_index">page %d</string>
+    <string name="action_see_author">Thread Author Only</string>
+    <string name="action_reverse_order">Reverse Order</string>
+    <string name="toast_open_image_fail">Open Image Failed</string>
+    <string-array name="thumb_size">
+        <item>Small thumbs</item>
+        <item>Large thumbs</item>
+        <item>Original Image</item>
+    </string-array>
+    <string-array name="show_image">
+        <item>Only When Using Wifi</item>
+        <item>Always</item>
+        <item>Never</item>
+    </string-array>
 </resources>
