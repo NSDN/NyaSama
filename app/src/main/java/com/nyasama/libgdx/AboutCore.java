@@ -2,9 +2,13 @@ package com.nyasama.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 ;
@@ -15,17 +19,19 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class AboutCore extends ApplicationAdapter {
 
     DrawCore DrawCoreObj;
-    Texture TexBullet, TexBack[] = new Texture[2];
+    Texture TexBullet, TexPlayer, TexBack[] = new Texture[2];
     Texture Scene[] = new Texture[10];
     BulletObject[][] Bullets = new BulletObject[101][1001];
     public float DeviceWidth, DeviceHeight;
     int CtrlValueA = 10;
     int CtrlValueB = 50;
-    double PI = 3.141592653;
-    int Time, Angle;
-    float BackA, BackB;
+    double PI = Math.PI;
+    int Time, Angle, Miss, Graze;
+    long Score, ScoreBase;
+    float BackA, BackB, BackAlpha, PlayerX, PlayerY;
     boolean Flag = false;
     Music Music_obj;
+    Sound BIU, GRA;
 
     @Override
     public void create() {
@@ -36,9 +42,18 @@ public class AboutCore extends ApplicationAdapter {
         DeviceHeight = Gdx.graphics.getHeight();
         Time = 0;
         Angle = 0;
+        Miss = 0;
+        Graze = 0;
+        Score = 0;
+        ScoreBase = 0;
         BackA = 0;
         BackB = 0;
+        BackAlpha = 0;
+        PlayerX = DeviceWidth / 2;
+        PlayerY = DeviceHeight / 10;
         Music_obj = Gdx.audio.newMusic(Gdx.files.internal("BGM.ogg"));
+        BIU = Gdx.audio.newSound(Gdx.files.internal("BIU.ogg"));
+        GRA = Gdx.audio.newSound(Gdx.files.internal("Graze.ogg"));
     }
 
     @Override
@@ -54,9 +69,16 @@ public class AboutCore extends ApplicationAdapter {
         MainShow();
         DrawCoreObj.DrawEnd();
 
-        JudgeBullet();
+        /*DrawCoreObj.DrawBegin();
+        DrawCoreObj.DrawString(50f, 50f, 1f, Color.WHITE, "Time: " + Integer.toString(Time));
+        DrawCoreObj.DrawEnd();*/
+
+        JudgeBorder();
 
         Time++;
+        if (Time > 65533) Time = 500;
+
+        Score = ScoreBase + Graze * 10 - Miss * 50;
 
         if (Angle >= 360) Angle = 0;
         if (BackA <= -256) BackA = 0;
@@ -64,16 +86,17 @@ public class AboutCore extends ApplicationAdapter {
         Angle++;
         BackA = BackA - 0.5f;
         BackB = BackB + 0.5f;
+
     }
 
     private void LoadTexture() {
         TexBullet = new Texture("Bullet.png");
+        TexPlayer = new Texture("Player.png");
         TexBack[0] = new Texture("Back01.png");
         TexBack[1] = new Texture("Back02.png");
         Scene[0] = new Texture("Nyasama.png");
         for (int i = 1; i <= 5; i++) {
             Scene[i] = new Texture(Integer.toString(i) + ".png");
-
         }
     }
 
@@ -92,8 +115,10 @@ public class AboutCore extends ApplicationAdapter {
                     Music_obj.setVolume(0f);
                 }
                 Music_obj.setVolume(Time / 100f);
+                BackAlpha = Time / 100f;
             } else {
                 Music_obj.setVolume(1f);
+                BackAlpha = 1.0f;
                 if (Time >= 100 & Time < 200) {
                     DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, (Time - 100) / 100f);
                 } else {
@@ -147,9 +172,13 @@ public class AboutCore extends ApplicationAdapter {
                                                                                 } else {
                                                                                     if (Time >= 1800 & Time < 1900) {
                                                                                         DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, (1900 - Time) / 100f);
+                                                                                        BackAlpha = (1900 - Time) / 100f;
+                                                                                        Music_obj.setVolume(BackAlpha);
                                                                                     } else {
                                                                                         if (Time >= 1900) {
                                                                                             Time = 0;
+                                                                                            BackAlpha = 0f;
+                                                                                            Music_obj.stop();
                                                                                             Flag = true;
                                                                                         }
                                                                                     }
@@ -172,25 +201,40 @@ public class AboutCore extends ApplicationAdapter {
                 }
             }
         } else {
-            if (Time < 500) ClearEffect();
-            else {
+            if (Time < 500) {
+                if (Time >= 200 & Time < 300) BackAlpha = (Time - 200) / 100f;
+                if (Time == 300) BackAlpha = 1.0f;
+                ClearEffect();
+                DrawEffect();
+            } else {
                 if (Time == 500) LoadBullet();
                 GenBullet();
                 DrawBullet();
+                JudgeBullet();
+                DrawCoreObj.DrawPic(TexPlayer, PlayerX, PlayerY, 0);
+
+                DrawCoreObj.DrawString(50f, DeviceHeight - 50f, 1.0f, Color.WHITE, "Graze: " + Integer.toString(Graze));
+                DrawCoreObj.DrawString(50f, DeviceHeight - 70f, 1.0f, Color.WHITE, "Miss:  " + Integer.toString(Miss));
+                DrawCoreObj.DrawString(50f, DeviceHeight - 90f, 1.0f, Color.WHITE, "Score: " + Score);
+
+                if (Time % 10 == 0)
+                    ScoreBase++;
             }
         }
     }
 
     private void DrawBack() {
-        /*for (int i = 0; i <= 10; i++) {
-         *   for (int j = 0; j <= 10; j++) {
-         *       DrawCoreObj.DrawPic(TexBack[0], BackA + 128f + 256f * i, BackA + 128f + 256f * j, 0);
-         *   }
-        }*/
-
-        for (int i = -1; i <= 10; i++) {
-            for (int j = -1; j <= 10; j++) {
-                DrawCoreObj.DrawPic(TexBack[1], BackB + 128f + 256f * i, BackB + 128f + 256f * j, 0);
+        if (Flag) {
+            for (int i = 0; i <= 10; i++) {
+                for (int j = 0; j <= 10; j++) {
+                    DrawCoreObj.DrawPic(TexBack[0], BackA + 128f + 256f * i, BackA + 128f + 256f * j, BackAlpha);
+                }
+            }
+        } else {
+            for (int i = -1; i <= 10; i++) {
+                for (int j = -1; j <= 10; j++) {
+                    DrawCoreObj.DrawPic(TexBack[1], BackB + 128f + 256f * i, BackB + 128f + 256f * j, BackAlpha);
+                }
             }
         }
     }
@@ -212,20 +256,6 @@ public class AboutCore extends ApplicationAdapter {
                     Bullets[i][j].x = DoubleTmp.floatValue();
                     DoubleTmp = Math.random() * DeviceHeight;
                     Bullets[i][j].y = DoubleTmp.floatValue();
-                    //DoubleTmp = Math.random();
-                    //Bullets[i][j].r = DoubleTmp.floatValue();
-                    //DoubleTmp = Math.random();
-                    //Bullets[i][j].g = DoubleTmp.floatValue();
-                    //DoubleTmp = Math.random();
-                    //Bullets[i][j].b = DoubleTmp.floatValue();
-                    //DoubleTmp = Math.random();
-                    //Bullets[i][j].a = 0.6f * DoubleTmp.floatValue();
-                    //DoubleTmp = 360d * Math.random();
-                    //Bullets[i][j].Rotate = DoubleTmp.intValue();
-                    //DoubleTmp = Math.random();
-                    //Bullets[i][j].ScaleXY = 1.5f * DoubleTmp.floatValue();
-                    //if (Math.random() > 0.5d) Bullets[i][j].Direction = true;
-                    //else Bullets[i][j].Direction = false;
                     Bullets[i][j].IsEnabled = true;
                 }
                 Bullets[i][j].dx = (Bullets[i][j].x - (DeviceWidth / 2)) / 50;
@@ -240,7 +270,7 @@ public class AboutCore extends ApplicationAdapter {
         Double DoubleTmp;
         for (int i = 0; i <= CtrlValueA; i++) {
             for (int j = 0; j <= CtrlValueB; j++) {
-                if (!Bullets[i][j].IsEnabled) {
+                if ((!Bullets[i][j].IsEnabled) && (Time % 2 == 0)) {
                     DoubleTmp = 5 * Math.cos(j) * Math.cos(0.2 * PI * i + j);
                     Bullets[i][j].x = DoubleTmp.floatValue() + (DeviceWidth / 2);
                     DoubleTmp = 5 * Math.cos(j) * Math.sin(0.2 * PI * i + j);
@@ -253,19 +283,21 @@ public class AboutCore extends ApplicationAdapter {
                     DoubleTmp = Math.random();
                     Bullets[i][j].b = DoubleTmp.floatValue();
                     DoubleTmp = Math.random();
-                    Bullets[i][j].a = 0.6f * DoubleTmp.floatValue();
+                    //Bullets[i][j].a = 0.6f * DoubleTmp.floatValue();
+                    Bullets[i][j].a = 1.0f;
                     DoubleTmp = 360d * Math.random();
                     Bullets[i][j].Rotate = DoubleTmp.intValue();
                     DoubleTmp = Math.random();
-                    Bullets[i][j].ScaleXY = 1.5f * DoubleTmp.floatValue();
+                    //Bullets[i][j].ScaleXY = 0.5f + DoubleTmp.floatValue();
+                    Bullets[i][j].ScaleXY = 1.0f;
 
                     if (Math.random() > 0.5d) Bullets[i][j].Direction = true;
                     else Bullets[i][j].Direction = false;
 
                     Bullets[i][j].IsEnabled = true;
                 }
-                Bullets[i][j].dx = (Bullets[i][j].x - (DeviceWidth / 2)) / 40;
-                Bullets[i][j].dy = (Bullets[i][j].y - (DeviceHeight / 2)) / 40;
+                Bullets[i][j].dx = (Bullets[i][j].x - (DeviceWidth / 2)) / 20;
+                Bullets[i][j].dy = (Bullets[i][j].y - (DeviceHeight / 2)) / 20;
                 Bullets[i][j].x = Bullets[i][j].x + Bullets[i][j].dx / 2;
                 Bullets[i][j].y = Bullets[i][j].y + Bullets[i][j].dy / 2;
             }
@@ -276,9 +308,12 @@ public class AboutCore extends ApplicationAdapter {
         Double DoubleTmp;
         for (int i = 0; i <= CtrlValueA; i++) {
             for (int j = 0; j <= CtrlValueB; j++) {
-                if ((!Bullets[i][j].IsEnabled) && (Time % 80 == 0)) {
-                    Bullets[i][j].x = DeviceWidth / 2;
-                    Bullets[i][j].y = DeviceHeight + 50f;
+                if ((!Bullets[i][j].IsEnabled) && (Time % 82 == 0)) {
+                    DoubleTmp = Time / 100 * Math.cos(Time / 100) + DeviceWidth / 2;
+                    Bullets[i][j].x = DoubleTmp.floatValue();
+                    DoubleTmp = Time / 100 * Math.sin(Time / 100) + DeviceHeight + 50f;
+                    Bullets[i][j].y = DoubleTmp.floatValue();
+
                     DoubleTmp = Math.random();
                     Bullets[i][j].dx = DoubleTmp.floatValue() - 0.5f;
                     DoubleTmp = Math.random();
@@ -295,7 +330,7 @@ public class AboutCore extends ApplicationAdapter {
                     DoubleTmp = 360d * Math.random();
                     Bullets[i][j].Rotate = DoubleTmp.intValue();
                     DoubleTmp = Math.random();
-                    Bullets[i][j].ScaleXY = 1.5f * DoubleTmp.floatValue();
+                    Bullets[i][j].ScaleXY = 0.5f + DoubleTmp.floatValue();
                     if (Math.random() > 0.5d) Bullets[i][j].Direction = true;
                     else Bullets[i][j].Direction = false;
                     Bullets[i][j].IsEnabled = true;
@@ -333,7 +368,6 @@ public class AboutCore extends ApplicationAdapter {
             for (int j = 0; j <= CtrlValueB; j++) {
                 if (Bullets[i][j].IsEnabled)
                     if (Bullets[i][j].Direction) {
-                        //DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, 0);
                         if (Bullets[i][j].Direction) {
                             DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, Bullets[i][j].Rotate + Angle, Bullets[i][j].ScaleXY, Bullets[i][j].ScaleXY, Bullets[i][j].r, Bullets[i][j].g, Bullets[i][j].b, Bullets[i][j].a);
                         } else {
@@ -344,105 +378,165 @@ public class AboutCore extends ApplicationAdapter {
         }
     }
 
-    private void JudgeBullet() {
+    private void JudgeBorder() {
         for (int i = 0; i <= CtrlValueA; i++) {
             for (int j = 0; j <= CtrlValueB; j++) {
-                if (Bullets[i][j].x < -300 || Bullets[i][j].x > DeviceWidth + 300 || Bullets[i][j].y < -100 || Bullets[i][j].y > DeviceHeight + 100)
-                    Bullets[i][j].Init();
+                if (Bullets[i][j].IsEnabled) {
+                    if (!Flag) {
+                        if (Bullets[i][j].x < -300 || Bullets[i][j].x > DeviceWidth + 300 || Bullets[i][j].y < -100 || Bullets[i][j].y > DeviceHeight + 100)
+                            Bullets[i][j].Init();
+                    } else {
+                        if (Distance(Bullets[i][j].x, Bullets[i][j].y, DeviceWidth / 2, DeviceHeight / 2) > 0.75d * Math.max(DeviceWidth, DeviceHeight))
+                            Bullets[i][j].Init();
+                    }
+                }
             }
         }
-    }
-}
 
-class DrawCore {
-    private SpriteBatch Batch;
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) PlayerY = PlayerY + 3;
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) PlayerY = PlayerY - 3;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) PlayerX = PlayerX - 3;
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) PlayerX = PlayerX + 3;
+        if (Gdx.input.isTouched()) {
+            PlayerX = PlayerX + Gdx.input.getDeltaX();
+            PlayerY = PlayerY - Gdx.input.getDeltaY();
+        }
 
-    public void DrawBegin() {
-        Batch.begin();
-    }
-
-    public void DrawEnd() {
-        Batch.end();
-    }
-
-    public void DrawBack(Texture Tex) {
-        Batch.draw(Tex, 0, 0, Tex.getWidth(), Tex.getHeight());
+        if (PlayerX > DeviceWidth) PlayerX = DeviceWidth;
+        if (PlayerY > DeviceHeight) PlayerY = DeviceHeight;
+        if (PlayerX < 0) PlayerX = 0;
+        if (PlayerY < 0) PlayerY = 0;
     }
 
-    public void DrawPic(Texture Tex, float x, float y, int Rotate) {
-        int Width = Tex.getWidth(), Height = Tex.getHeight();
-        Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, Rotate, 0, 0, Width, Height, false, false);
+    public void JudgeBullet() {
+        for (int i = 0; i <= CtrlValueA; i++)
+            for (int j = 0; j <= CtrlValueB; j++) {
+                if (Bullets[i][j].IsEnabled) {
+                    if (Distance(Bullets[i][j].x, Bullets[i][j].y, PlayerX, PlayerY) > 12d) {
+                        Bullets[i][j].IsGrazed = true;
+                    } else if (Distance(Bullets[i][j].x, Bullets[i][j].y, PlayerX, PlayerY) > 3d) {
+                        if (Bullets[i][j].IsGrazed) {
+                            Bullets[i][j].IsGrazed = false;
+                            Graze++;
+                            GRA.play();
+                        }
+                    } else {
+                        Bullets[i][j].Init();
+                        Miss++;
+                        BIU.play();
+                        PlayerX = DeviceWidth / 2;
+                        PlayerY = DeviceHeight / 10;
+                    }
+                }
+            }
     }
 
-    public void DrawPic(Texture Tex, float x, float y, float alpha) {
-        int Width = Tex.getWidth(), Height = Tex.getHeight();
-        Batch.setColor(1, 1, 1, alpha);
-        Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, 0, 0, 0, Width, Height, false, false);
-        Batch.setColor(1, 1, 1, 1);
+    public double Distance(float x1, float y1, float x2, float y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY) {
-        int Width = Tex.getWidth(), Height = Tex.getHeight();
-        Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
+
+    class DrawCore {
+        private SpriteBatch Batch;
+        private BitmapFont Font;
+
+        public void DrawBegin() {
+            Batch.begin();
+        }
+
+        public void DrawEnd() {
+            Batch.end();
+        }
+
+        public void DrawString(float x, float y, float Scale, Color color, String Str) {
+            Font.setScale(Scale);
+            Font.setColor(color);
+            Font.draw(Batch, Str, x, y);
+        }
+
+        public void DrawBack(Texture Tex) {
+            Batch.draw(Tex, 0, 0, Tex.getWidth(), Tex.getHeight());
+        }
+
+        public void DrawPic(Texture Tex, float x, float y, int Rotate) {
+            int Width = Tex.getWidth(), Height = Tex.getHeight();
+            Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, Rotate, 0, 0, Width, Height, false, false);
+        }
+
+        public void DrawPic(Texture Tex, float x, float y, float alpha) {
+            int Width = Tex.getWidth(), Height = Tex.getHeight();
+            Batch.setColor(1, 1, 1, alpha);
+            Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, 0, 0, 0, Width, Height, false, false);
+            Batch.setColor(1, 1, 1, 1);
+        }
+
+        public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY) {
+            int Width = Tex.getWidth(), Height = Tex.getHeight();
+            Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
+        }
+
+        public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY, float r, float g, float b, float a) {
+            int Width = Tex.getWidth(), Height = Tex.getHeight();
+            Batch.setColor(r, g, b, a);
+            Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
+            Batch.setColor(1, 1, 1, 1);
+        }
+
+        public DrawCore() {
+            Batch = new SpriteBatch();
+            Font = new BitmapFont();
+        }
     }
 
-    public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY, float r, float g, float b, float a) {
-        int Width = Tex.getWidth(), Height = Tex.getHeight();
-        Batch.setColor(r, g, b, a);
-        Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
-        Batch.setColor(1, 1, 1, 1);
-    }
+    class BulletObject {
+        public float x;
+        public float y;
+        public float dx;
+        public float dy;
+        public int Rotate;
+        public boolean Direction;
+        public boolean IsEnabled;
+        public boolean IsGrazed;
+        public Texture Tex;
+        public float ScaleXY;
+        public float r;
+        public float g;
+        public float b;
+        public float a;
 
-    public DrawCore() {
-        Batch = new SpriteBatch();
-    }
-}
+        public BulletObject() {
+            x = 0;
+            y = 0;
+            dx = 0;
+            dy = 0;
+            Rotate = 0;
+            Direction = true;
+            IsEnabled = false;
+            IsGrazed = true;
+            Tex = null;
+            ScaleXY = 0;
+            r = 0;
+            g = 0;
+            b = 0;
+            a = 0;
+        }
 
-class BulletObject {
-    public float x;
-    public float y;
-    public float dx;
-    public float dy;
-    public int Rotate;
-    public boolean Direction;
-    public boolean IsEnabled;
-    public Texture Tex;
-    public float ScaleXY;
-    public float r;
-    public float g;
-    public float b;
-    public float a;
-
-    public BulletObject() {
-        x = 0;
-        y = 0;
-        dx = 0;
-        dy = 0;
-        Rotate = 0;
-        Direction = true;
-        IsEnabled = false;
-        Tex = null;
-        ScaleXY = 0;
-        r = 0;
-        g = 0;
-        b = 0;
-        a = 0;
-    }
-
-    public void Init() {
-        x = 0;
-        y = 0;
-        dx = 0;
-        dy = 0;
-        Rotate = 0;
-        Direction = true;
-        IsEnabled = false;
-        Tex = null;
-        ScaleXY = 0;
-        r = 0;
-        g = 0;
-        b = 0;
-        a = 0;
+        public void Init() {
+            x = 0;
+            y = 0;
+            dx = 0;
+            dy = 0;
+            Rotate = 0;
+            Direction = true;
+            IsEnabled = false;
+            IsGrazed = true;
+            Tex = null;
+            ScaleXY = 0;
+            r = 0;
+            g = 0;
+            b = 0;
+            a = 0;
+        }
     }
 }
 
