@@ -18,12 +18,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  */
 public class AboutCore extends ApplicationAdapter {
 
-    DrawCore DrawCoreObj;
+	DrawCore DrawCoreObj;
     Texture TexBullet, TexPlayer, TexBack[] = new Texture[2];
     Texture Scene[] = new Texture[10];
     BulletObject[][] Bullets = new BulletObject[101][1001];
     public float DeviceWidth, DeviceHeight;
-    int CtrlValueA = 10;
+    int CtrlValueA = 20;
     int CtrlValueB = 50;
     double PI = Math.PI;
     int Time, Angle, Miss, Graze;
@@ -69,16 +69,16 @@ public class AboutCore extends ApplicationAdapter {
         MainShow();
         DrawCoreObj.DrawEnd();
 
-        /*DrawCoreObj.DrawBegin();
+        DrawCoreObj.DrawBegin();
         DrawCoreObj.DrawString(50f, 50f, 1f, Color.WHITE, "Time: " + Integer.toString(Time));
-        DrawCoreObj.DrawEnd();*/
+        DrawCoreObj.DrawEnd();
 
         JudgeBorder();
 
         Time++;
         if (Time > 65533) Time = 500;
 
-        Score = ScoreBase + Graze * 10 - Miss * 50;
+        Score = ScoreBase + Graze * 10 - Miss * 20;
 
         if (Angle >= 360) Angle = 0;
         if (BackA <= -256) BackA = 0;
@@ -208,14 +208,18 @@ public class AboutCore extends ApplicationAdapter {
                 DrawEffect();
             } else {
                 if (Time == 500) LoadBullet();
-                GenBullet();
                 DrawBullet();
+                Control();
+                GenBullet();
                 JudgeBullet();
+                
                 DrawCoreObj.DrawPic(TexPlayer, PlayerX, PlayerY, 0);
-
-                DrawCoreObj.DrawString(50f, DeviceHeight - 50f, 1.0f, Color.WHITE, "Graze: " + Integer.toString(Graze));
-                DrawCoreObj.DrawString(50f, DeviceHeight - 70f, 1.0f, Color.WHITE, "Miss:  " + Integer.toString(Miss));
-                DrawCoreObj.DrawString(50f, DeviceHeight - 90f, 1.0f, Color.WHITE, "Score: " + Score);
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                	DrawCoreObj.DrawPic(TexBullet, PlayerX, PlayerY, Angle);
+                
+                DrawCoreObj.DrawString(50f, DeviceHeight - 50f, 1.8f, Color.WHITE, "Graze: " + Integer.toString(Graze));
+                DrawCoreObj.DrawString(50f, DeviceHeight - 70f, 1.8f, Color.WHITE, "Miss:  " + Integer.toString(Miss));
+                DrawCoreObj.DrawString(50f, DeviceHeight - 90f, 1.8f, Color.WHITE, "Score: " + Score);
 
                 if (Time % 10 == 0)
                     ScoreBase++;
@@ -271,10 +275,10 @@ public class AboutCore extends ApplicationAdapter {
         for (int i = 0; i <= CtrlValueA; i++) {
             for (int j = 0; j <= CtrlValueB; j++) {
                 if ((!Bullets[i][j].IsEnabled) && (Time % 2 == 0)) {
-                    DoubleTmp = 5 * Math.cos(j) * Math.cos(0.2 * PI * i + j);
+                    DoubleTmp = Math.cos(i) + i * Math.cos(2 * j);
                     Bullets[i][j].x = DoubleTmp.floatValue() + (DeviceWidth / 2);
-                    DoubleTmp = 5 * Math.cos(j) * Math.sin(0.2 * PI * i + j);
-                    Bullets[i][j].y = DoubleTmp.floatValue() + (DeviceHeight / 2);
+                    DoubleTmp = Math.sin(i) - i * Math.sin(2 * j);
+                    Bullets[i][j].y = DoubleTmp.floatValue() + (DeviceHeight * 0.75f);
 
                     DoubleTmp = Math.random();
                     Bullets[i][j].r = DoubleTmp.floatValue();
@@ -297,7 +301,7 @@ public class AboutCore extends ApplicationAdapter {
                     Bullets[i][j].IsEnabled = true;
                 }
                 Bullets[i][j].dx = (Bullets[i][j].x - (DeviceWidth / 2)) / 20;
-                Bullets[i][j].dy = (Bullets[i][j].y - (DeviceHeight / 2)) / 20;
+                Bullets[i][j].dy = (Bullets[i][j].y - (DeviceHeight * 0.75f)) / 20;
                 Bullets[i][j].x = Bullets[i][j].x + Bullets[i][j].dx / 2;
                 Bullets[i][j].y = Bullets[i][j].y + Bullets[i][j].dy / 2;
             }
@@ -366,14 +370,13 @@ public class AboutCore extends ApplicationAdapter {
     private void DrawBullet() {
         for (int i = 0; i <= CtrlValueA; i++) {
             for (int j = 0; j <= CtrlValueB; j++) {
-                if (Bullets[i][j].IsEnabled)
+                if (Bullets[i][j].IsEnabled) {
                     if (Bullets[i][j].Direction) {
-                        if (Bullets[i][j].Direction) {
-                            DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, Bullets[i][j].Rotate + Angle, Bullets[i][j].ScaleXY, Bullets[i][j].ScaleXY, Bullets[i][j].r, Bullets[i][j].g, Bullets[i][j].b, Bullets[i][j].a);
-                        } else {
-                            DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, Bullets[i][j].Rotate - Angle, Bullets[i][j].ScaleXY, Bullets[i][j].ScaleXY, Bullets[i][j].r, Bullets[i][j].g, Bullets[i][j].b, Bullets[i][j].a);
-                        }
+                        DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, Bullets[i][j].Rotate + Angle, Bullets[i][j].ScaleXY, Bullets[i][j].ScaleXY, Bullets[i][j].r, Bullets[i][j].g, Bullets[i][j].b, Bullets[i][j].a);
+                    } else {
+                        DrawCoreObj.DrawPic(TexBullet, Bullets[i][j].x, Bullets[i][j].y, Bullets[i][j].Rotate - Angle, Bullets[i][j].ScaleXY, Bullets[i][j].ScaleXY, Bullets[i][j].r, Bullets[i][j].g, Bullets[i][j].b, Bullets[i][j].a);
                     }
+                }
             }
         }
     }
@@ -386,20 +389,11 @@ public class AboutCore extends ApplicationAdapter {
                         if (Bullets[i][j].x < -300 || Bullets[i][j].x > DeviceWidth + 300 || Bullets[i][j].y < -100 || Bullets[i][j].y > DeviceHeight + 100)
                             Bullets[i][j].Init();
                     } else {
-                        if (Distance(Bullets[i][j].x, Bullets[i][j].y, DeviceWidth / 2, DeviceHeight / 2) > 0.75d * Math.max(DeviceWidth, DeviceHeight))
+                        if (Distance(Bullets[i][j].x, Bullets[i][j].y, DeviceWidth / 2, DeviceHeight / 2) > Math.max(DeviceWidth, DeviceHeight))
                             Bullets[i][j].Init();
                     }
                 }
             }
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) PlayerY = PlayerY + 3;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) PlayerY = PlayerY - 3;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) PlayerX = PlayerX - 3;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) PlayerX = PlayerX + 3;
-        if (Gdx.input.isTouched()) {
-            PlayerX = PlayerX + Gdx.input.getDeltaX();
-            PlayerY = PlayerY - Gdx.input.getDeltaY();
         }
 
         if (PlayerX > DeviceWidth) PlayerX = DeviceWidth;
@@ -409,30 +403,51 @@ public class AboutCore extends ApplicationAdapter {
     }
 
     public void JudgeBullet() {
+    	final float Min = 8.0f;
+    	final float Max = 22.0f;
         for (int i = 0; i <= CtrlValueA; i++)
             for (int j = 0; j <= CtrlValueB; j++) {
-                if (Bullets[i][j].IsEnabled) {
-                    if (Distance(Bullets[i][j].x, Bullets[i][j].y, PlayerX, PlayerY) > 12d) {
-                        Bullets[i][j].IsGrazed = true;
-                    } else if (Distance(Bullets[i][j].x, Bullets[i][j].y, PlayerX, PlayerY) > 3d) {
-                        if (Bullets[i][j].IsGrazed) {
-                            Bullets[i][j].IsGrazed = false;
-                            Graze++;
-                            GRA.play();
-                        }
-                    } else {
-                        Bullets[i][j].Init();
+                if (Bullets[i][j].IsEnabled && Bullets[i][j].PreJudge(PlayerX, PlayerY, 500)) {
+                	if (Bullets[i][j].Judge(PlayerX, PlayerY, Min, Max) == BulletObject.JUDGE_AWAY && !Bullets[i][j].IsGrazed) {
+                		Bullets[i][j].IsGrazed = true;
+                	}
+                	if (Bullets[i][j].Judge(PlayerX, PlayerY, Min, Max) == BulletObject.JUDGE_GRAZE && Bullets[i][j].IsGrazed) {
+                		Bullets[i][j].IsGrazed = false;
+                        Graze++;
+                        GRA.play();
+                	}
+                	if (Bullets[i][j].Judge(PlayerX, PlayerY, Min, Max) == BulletObject.JUDGE_MISS) {
+                		Bullets[i][j].IsEnabled = false;
                         Miss++;
                         BIU.play();
                         PlayerX = DeviceWidth / 2;
                         PlayerY = DeviceHeight / 10;
-                    }
+                	}   
                 }
             }
     }
+    
+    public void Control() {
+    	if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+        	if (Gdx.input.isKeyPressed(Input.Keys.UP)) PlayerY = PlayerY + 2;
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) PlayerY = PlayerY - 2;
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) PlayerX = PlayerX - 2;
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) PlayerX = PlayerX + 2;
+        } else {
+        	if (Gdx.input.isKeyPressed(Input.Keys.UP)) PlayerY = PlayerY + 5;
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) PlayerY = PlayerY - 5;
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) PlayerX = PlayerX - 5;
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) PlayerX = PlayerX + 5;
+        }
+        
+        if (Gdx.input.isTouched()) {
+            PlayerX = PlayerX + Gdx.input.getDeltaX();
+            PlayerY = PlayerY - Gdx.input.getDeltaY();
+        }
+    }
 
-    public double Distance(float x1, float y1, float x2, float y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    public float Distance(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt(Math.pow((double) x2 - (double) x1, (double) 2) + Math.pow((double) y2 - (double) y1, (double) 2));
     }
 
 
@@ -489,6 +504,10 @@ public class AboutCore extends ApplicationAdapter {
     }
 
     class BulletObject {
+    	public final static int JUDGE_GRAZE = 1;
+    	public final static int JUDGE_MISS = 2;
+    	public final static int JUDGE_AWAY = 3;
+    	
         public float x;
         public float y;
         public float dx;
@@ -536,6 +555,17 @@ public class AboutCore extends ApplicationAdapter {
             g = 0;
             b = 0;
             a = 0;
+        }
+        
+        public boolean PreJudge(float pX, float pY, float Range) {
+        	if (Math.abs((double) pX - (double) x) < (double) Range && Math.abs((double) pY - (double) y) < (double) Range) return true;
+        	else return false;
+        }
+        
+        public int Judge(float pX, float pY, float Min, float Max) {
+        	if (Distance(x, y, pX, pY) > Max) return JUDGE_AWAY;
+        	else if (Distance(x, y, pX, pY) > Min) return JUDGE_GRAZE;
+        	else return JUDGE_MISS;
         }
     }
 }
