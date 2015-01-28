@@ -134,6 +134,7 @@
     <string name="page_index">Page %d</string>
     <string name="action_see_author">Thread Author Only</string>
     <string name="action_reverse_order">Reverse Order</string>
+    <string name="toast_open_image_fail">Open Image Failed</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

@@ -700,7 +700,8 @@ public class PostListActivity extends BaseThemedActivity
                             public boolean onClick(View widget, String src) {
                                 Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
                                 intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                intent.putExtra("index", mListFragment.getIndex(item));
+                                int offset = getIntent().getIntExtra("page", 0) * PAGE_SIZE_COUNT;
+                                intent.putExtra("index", offset + mListFragment.getIndex(item));
 
                                 Attachment attachment = mAttachmentMap.get(src);
                                 // attachment image
@@ -761,12 +762,13 @@ public class PostListActivity extends BaseThemedActivity
                 Helper.updateVisibility(attachments, item.attachments.size() > 0);
                 attachments.setText(getString(R.string.text_view_attachments) +
                         " (" + item.attachments.size() + ")");
+                final int offset = getIntent().getIntExtra("page", 0) * PAGE_SIZE_COUNT;
                 attachments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
                             putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
-                            putExtra("index", mListFragment.getIndex(item));
+                            putExtra("index", offset + mListFragment.getIndex(item));
                         }});
                     }
                 });

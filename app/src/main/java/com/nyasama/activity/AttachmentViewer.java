@@ -96,7 +96,7 @@ public class AttachmentViewer extends BaseThemedActivity {
     public void showAttachmentList() {
         List<String> names = new ArrayList<String>();
         for (Attachment attachment : mAttachmentList)
-            names.add(attachment.name);
+            names.add(attachment.name.replace('\n', ' '));
 
         final ListView listView = new ListView(this);
         listView.setAdapter(new ArrayAdapter<String>(
@@ -215,6 +215,11 @@ public class AttachmentViewer extends BaseThemedActivity {
                         if (postlist.length() > i) {
                             Post post = new Post(postlist.getJSONObject(i));
                             mAttachmentList = compileAttachments(post.message, post.attachments);
+                            if ("-1".equals(getIntent().getStringExtra("src"))) {
+                                int size = mAttachmentList.size();
+                                if (size > 0)
+                                    getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
+                            }
                             if (i - 1 >= 0) {
                                 post = new Post(postlist.getJSONObject(i - 1));
                                 int attachments = compileAttachments(post.message, post.attachments).size();
@@ -261,6 +266,7 @@ public class AttachmentViewer extends BaseThemedActivity {
 
     public void gotoPrevPost() {
         Intent intent = getIntent();
+        intent.putExtra("src", "-1");
         intent.putExtra("index", intent.getIntExtra("index", 1) - 1);
         startActivity(intent);
         finish();
