@@ -76,7 +76,7 @@ public class AboutCore extends ApplicationAdapter {
         Time++;
         if (Time > 65533) Time = 500;
 
-        Score = ScoreBase + Graze * 10 - Miss * 20;
+        Score = ScoreBase + Graze * 5 - Miss * 20;
 
         if (Angle >= 360) Angle = 0;
         if (BackA <= -256) BackA = 0;
@@ -334,7 +334,7 @@ public class AboutCore extends ApplicationAdapter {
             CtrlValueB = 40;
             for (int i = 0; i <= CtrlValueA; i++) {
                 for (int j = 0; j <= CtrlValueB; j++) {
-                    if ((!Bullets[i][j].IsEnabled) && (Time % 100 == 0)) {
+                    if ((!Bullets[i][j].IsEnabled) && (Time % 10 == 0)) {
                         DoubleTmp = Math.cos(i) + j * Math.cos(0.15d * j);
                         Bullets[i][j].x = DoubleTmp.floatValue() + (DeviceWidth / 2);
                         DoubleTmp = Math.sin(i) - j * Math.sin(0.15d * j);
