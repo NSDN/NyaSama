@@ -690,6 +690,12 @@ public class PostListActivity extends BaseThemedActivity
                                         return true;
                                     }
                                 }
+                                else if ("forumdisplay".equals(mod)) {
+                                    startActivity(new Intent(PostListActivity.this, ThreadListActivity.class) {{
+                                        putExtra("fid", Helper.toSafeInteger(uri.getQueryParameter("fid"), 0));
+                                    }});
+                                    return true;
+                                }
                                 return false;
                             }
                         });
