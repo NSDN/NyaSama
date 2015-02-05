@@ -39,6 +39,7 @@ public class ThreadListActivity extends BaseThemedActivity implements
     public static List<Integer> FORUMS_NO_TOPLIST = new ArrayList<Integer>() {{
         add(92);
         add(113);
+        add(132);
     }};
 
     private DiscuzThreadListFragment mThreadListFragment;
