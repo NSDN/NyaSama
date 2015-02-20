@@ -101,6 +101,7 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         mInitJobs ++;
+        //Default is BuildConfig.DEBUG, ThisApp.getVersion().contains("debug-no-update")
         if (BuildConfig.DEBUG) new android.os.Handler().post(new Runnable() {
             @Override
             public void run() {
