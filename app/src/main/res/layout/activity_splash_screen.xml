@@ -5,6 +5,14 @@
     android:layout_height="match_parent"
     android:background="@drawable/splash_back">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/imageView"
+        android:layout_gravity="left|center_vertical"
+        android:src="@drawable/splash_back"
+        android:scaleType="fitXY" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_gravity="center"
