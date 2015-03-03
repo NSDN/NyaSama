@@ -138,7 +138,7 @@ public class Discuz {
         public int attachments;
 
         public Thread(JSONObject data) {
-            id = Integer.parseInt(data.optString("tid"));
+            id = Helper.toSafeInteger(data.optString("tid"), 0);
             title = data.optString("subject");
             author = data.optString("author");
             lastpost = data.optString("lastpost");
@@ -147,8 +147,8 @@ public class Discuz {
             int dateVal = Helper.toSafeInteger(lastpost, 0);
             if (dateVal > 0)
                 lastpost = Helper.datelineToString(dateVal, null);
-            replies = Integer.parseInt(data.optString("replies"));
-            views = Integer.parseInt(data.optString("views"));
+            replies = Helper.toSafeInteger(data.optString("replies"), 0);
+            views = Helper.toSafeInteger(data.optString("views"), 0);
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
@@ -637,6 +637,9 @@ public class Discuz {
             Helper.putIfNull(params, "version", "2");
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "pollsubmit", "true");
+        } else if (module.equals("friendcp")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "add2submit", "yes");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
