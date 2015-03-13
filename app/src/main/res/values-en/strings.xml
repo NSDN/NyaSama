@@ -144,6 +144,8 @@
     <string name="action_delete">Delete</string>
     <string name="action_warn">Warn</string>
     <string name="action_ban">Ban</string>
+    <string name="check_new_versions">Check New Versions When Starting up</string>
+    <string name="do_not_remind">Never</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
