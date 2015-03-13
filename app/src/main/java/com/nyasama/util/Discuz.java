@@ -68,16 +68,16 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/";
-    public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
-    public static String DISCUZ_ENC = "gbk";
+    public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static final String DISCUZ_URL = DISCUZ_HOST + "/";
+    public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
+    public static final String DISCUZ_ENC = "gbk";
 
-    public static String VOLLEY_ERROR = "volleyError";
+    public static final String VOLLEY_ERROR = "volleyError";
 
-    public static int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
-    public static String BROADCAST_FILTER_LOGIN = "login";
+    public static final String BROADCAST_FILTER_LOGIN = "login";
 
     public static class JSONVolleyError extends JSONObject {
         public JSONVolleyError(String message) {
@@ -312,6 +312,7 @@ public class Discuz {
     public static int sNewMessages = 0;
     public static int sNewPrompts = 0;
     public static boolean sHasLogined;
+    public static boolean sIsModerator;
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
@@ -560,6 +561,7 @@ public class Discuz {
                 sFormHash = var.optString("formhash", "");
                 sUsername = var.optString("member_username", "");
                 sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                sIsModerator = !"0".equals(var.optString("ismoderator"));
                 if (!var.isNull("allowperm"))
                     sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
                 if (!var.isNull("group"))
@@ -637,6 +639,10 @@ public class Discuz {
             Helper.putIfNull(params, "version", "2");
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "pollsubmit", "true");
+        } else if (module.equals("topicadmin")) {
+            Helper.putIfNull(params, "modsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "modsubmit", "true");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");

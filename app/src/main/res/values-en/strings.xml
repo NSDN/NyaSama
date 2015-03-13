@@ -135,6 +135,12 @@
     <string name="action_see_author">Thread Author Only</string>
     <string name="action_reverse_order">Reverse Order</string>
     <string name="toast_open_image_fail">Open Image Failed</string>
+    <string name="operate_reason">Operate Reason</string>
+    <string name="thread_operation">Operation</string>
+    <string name="thread_stick">Stick</string>
+    <string name="thread_moderate_expiration">Expiration</string>
+    <string name="thread_digest">Digest</string>
+    <string name="thread_delete_confirm">Are You Sure to Delete This Thread?</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
@@ -144,5 +150,29 @@
         <item>Only When Using Wifi</item>
         <item>Always</item>
         <item>Never</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>Bump or Down</item>
+        <item>Stick</item>
+        <item>Highlight</item>
+        <item>Digest</item>
+        <item>Open or Close</item>
+        <item>Delete</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>Bump</item>
+        <item>Down</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>None</item>
+        <item>This Board</item>
+        <item>This Catalog</item>
+        <item>Global</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>None</item>
+        <item>Digest1</item>
+        <item>Digest2</item>
+        <item>Digest3</item>
     </string-array>
 </resources>

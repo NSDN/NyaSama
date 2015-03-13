@@ -4,6 +4,8 @@
     <item android:id="@+id/action_reply" android:title="@string/action_reply"
         android:icon="@drawable/ic_action_reply"
         android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_moderate_thread" android:title="@string/action_moderate_thread"
+        android:showAsAction="never" />
     <item android:id="@+id/action_quick_reply" android:title="@string/action_quick_reply"
         android:showAsAction="never" />
     <item android:id="@+id/action_reverse_order" android:title="@string/action_reverse_order"

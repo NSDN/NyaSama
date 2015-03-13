@@ -135,6 +135,13 @@
     <string name="action_see_author">只看楼主</string>
     <string name="action_reverse_order">倒序查看</string>
     <string name="toast_open_image_fail">打开图片失败</string>
+    <string name="operate_reason">Operate Reason</string>
+    <string name="thread_operation">Operation</string>
+    <string name="action_moderate_thread">Moderate</string>
+    <string name="thread_stick">Stick</string>
+    <string name="thread_moderate_expiration">Expiration</string>
+    <string name="thread_digest">Digest</string>
+    <string name="thread_delete_confirm">Are You Sure to Delete This Thread?</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
@@ -144,5 +151,44 @@
         <item>仅使用 Wifi 时</item>
         <item>始终显示</item>
         <item>始终不显示</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>Bump or Down</item>
+        <item>Stick</item>
+        <item>Highlight</item>
+        <item>Digest</item>
+        <item>Open or Close</item>
+        <item>Delete</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>Bump</item>
+        <item>Down</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>None</item>
+        <item>This Board</item>
+        <item>This Catalog</item>
+        <item>Global</item>
+    </string-array>
+    <string-array name="highlight_color">
+        <item>Black</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Cyan</item>
+        <item>Blue</item>
+        <item>Purple</item>
+        <item>Pink</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>None</item>
+        <item>Digest1</item>
+        <item>Digest2</item>
+        <item>Digest3</item>
+    </string-array>
+    <string-array name="open_or_close_thread">
+        <item>Open</item>
+        <item>Close</item>
     </string-array>
 </resources>
