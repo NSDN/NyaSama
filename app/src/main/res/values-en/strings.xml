@@ -141,6 +141,9 @@
     <string name="thread_moderate_expiration">Expiration</string>
     <string name="thread_digest">Digest</string>
     <string name="thread_delete_confirm">Are You Sure to Delete This Thread?</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_warn">Warn</string>
+    <string name="action_ban">Ban</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

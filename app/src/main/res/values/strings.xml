@@ -142,6 +142,9 @@
     <string name="thread_moderate_expiration">Expiration</string>
     <string name="thread_digest">Digest</string>
     <string name="thread_delete_confirm">Are You Sure to Delete This Thread?</string>
+    <string name="action_delete">删除</string>
+    <string name="action_warn">Warn</string>
+    <string name="action_ban">Ban</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
@@ -190,5 +193,13 @@
     <string-array name="open_or_close_thread">
         <item>Open</item>
         <item>Close</item>
+    </string-array>
+    <string-array name="warn_or_not">
+        <item>Warn</item>
+        <item>Cancel</item>
+    </string-array>
+    <string-array name="ban_or_not">
+        <item>Ban</item>
+        <item>Cancel</item>
     </string-array>
 </resources>
