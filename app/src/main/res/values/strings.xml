@@ -148,6 +148,7 @@
     <string name="check_updates">更新</string>
     <string name="check_new_versions">启动时检查新版本</string>
     <string name="do_not_remind">不再提示</string>
+    <string name="thread_title_hidden">此贴已隐藏</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
