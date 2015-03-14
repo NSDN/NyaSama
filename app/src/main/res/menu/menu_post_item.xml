@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_edit" android:title="@string/action_edit" />
+    <item android:id="@+id/action_delete" android:title="@string/action_delete" />
+    <item android:id="@+id/action_warn" android:title="@string/action_warn" />
+    <item android:id="@+id/action_ban" android:title="@string/action_ban" />
     <item android:id="@+id/action_comment" android:title="@string/action_comment" />
     <item android:id="@+id/action_more_comment" android:title="@string/action_more_comments" />
     <item android:id="@+id/action_quick_reply" android:title="@string/action_quick_reply" />

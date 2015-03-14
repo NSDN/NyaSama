@@ -22,11 +22,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -50,11 +56,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,6 +99,9 @@ public class PostListActivity extends BaseThemedActivity
 
     private int mPrefMaxImageSize = -1;
     private int mPrefFontSize = 16;
+
+    private int mSelectedPost;
+    private AlertDialog mThreadModerateDialog;
 
     public void setupActionBarPages(int pages) {
         final ActionBar actionBar = getActionBar();
@@ -161,6 +174,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doReply(final String text, final String trimstr) {
+        Helper.disableDialog(mReplyDialog);
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("replysubmit", "yes");
@@ -193,6 +207,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doComment(final int pid, final String comment) {
+        Helper.disableDialog(mCommentDialog);
         Discuz.execute("addcomment", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("pid", pid);
@@ -224,6 +239,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doPollVote(final List<Integer> selected) {
+        Helper.disableDialog(mVoteDialog);
         Discuz.execute("pollvote", new HashMap<String, Object>() {{
             put("fid", getIntent().getIntExtra("fid", 0));
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -316,10 +332,8 @@ public class PostListActivity extends BaseThemedActivity
                         @Override
                         public void onClick(View view) {
                             String text = input.getText().toString();
-                            if (!text.isEmpty()) {
-                                Helper.disableDialog(mReplyDialog);
+                            if (!text.isEmpty())
                                 doReply(text, item == null ? null : getTrimstr(item));
-                            }
                         }
                     });
             }
@@ -334,11 +348,7 @@ public class PostListActivity extends BaseThemedActivity
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
         mCommentDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -349,10 +359,8 @@ public class PostListActivity extends BaseThemedActivity
                             @Override
                             public void onClick(View view) {
                                 String text = input.getText().toString();
-                                if (!text.isEmpty()) {
-                                    Helper.disableDialog(mCommentDialog);
+                                if (!text.isEmpty())
                                     doComment(pid, text);
-                                }
                             }
                         });
             }
@@ -382,30 +390,49 @@ public class PostListActivity extends BaseThemedActivity
             if (item != null) {
                 putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + item.author + " #" + mListFragment.getIndex(item));
                 putExtra(NewPostActivity.ARG_POST_TRIMSTR, getTrimstr(item));
-            }
-            else {
+            } else {
                 putExtra(NewPostActivity.ARG_POST_TITLE, "Re: " + getTitle());
             }
         }}, REQUEST_CODE_REPLY_THREAD);
     }
 
     public void showMenu(View view, final Post item) {
-        PopupMenu menu = new PopupMenu(PostListActivity.this, view);
-        menu.getMenuInflater().inflate(R.menu.menu_post_item, menu.getMenu());
+        PopupMenu popup = new PopupMenu(PostListActivity.this, view);
+        Menu menu = popup.getMenu();
+        popup.getMenuInflater().inflate(R.menu.menu_post_item, menu);
 
         boolean showLoadCommentMenu = mComments.get(item.id) != null &&
                 mComments.get(item.id).size() >= COMMENT_PAGE_SIZE &&
                 mComments.get(item.id).size() < mCommentCount.get(item.id);
-        menu.getMenu().findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
+        menu.findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
 
         boolean showEditPostMenu = item.author.equals(Discuz.sUsername);
-        menu.getMenu().findItem(R.id.action_edit).setVisible(showEditPostMenu);
+        menu.findItem(R.id.action_edit).setVisible(showEditPostMenu);
+        menu.findItem(R.id.action_delete).setVisible(Discuz.sIsModerator);
+        menu.findItem(R.id.action_warn).setVisible(Discuz.sIsModerator);
+        menu.findItem(R.id.action_ban).setVisible(Discuz.sIsModerator);
 
-        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int action = menuItem.getItemId();
-                if (action == R.id.action_edit) {
+                if (action == R.id.action_delete) {
+                    if (item.number > 1) {
+                        mSelectedPost = item.id;
+                        moderateThread(R.layout.dialog_delete_post);
+                    }
+                    else
+                        moderateThread(R.layout.dialog_delete_thread);
+                }
+                else if (action == R.id.action_warn) {
+                    mSelectedPost = item.id;
+                    moderateThread(R.layout.dialog_warn_post);
+                }
+                else if (action == R.id.action_ban) {
+                    mSelectedPost = item.id;
+                    moderateThread(R.layout.dialog_ban_post);
+                }
+                else if (action == R.id.action_edit) {
                     editPost(item);
                 }
                 else if (action == R.id.action_comment) {
@@ -423,7 +450,7 @@ public class PostListActivity extends BaseThemedActivity
                 return true;
             }
         });
-        menu.show();
+        popup.show();
     }
 
     public void showPollOptions() {
@@ -442,7 +469,7 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(this)
                 .setTitle(getString(R.string.diag_title_vote_result) +
                         " (" + String.format(getString(R.string.diag_title_max_choices), mMaxChoices) + ")")
                 .setView(listView)
@@ -468,10 +495,8 @@ public class PostListActivity extends BaseThemedActivity
                                             selected.add(id);
                                         }
                                     }
-                                if (selected.size() <= mMaxChoices) {
-                                    Helper.disableDialog(mVoteDialog);
+                                if (selected.size() <= mMaxChoices)
                                     doPollVote(selected);
-                                }
                                 else
                                     Helper.toast(String.format(getString(R.string.toast_too_many_votes), mMaxChoices));
                             }
@@ -479,6 +504,200 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
         mVoteDialog.show();
+    }
+
+    public void doModerateThread(final String operation, final String reason, final Object... args) {
+        Helper.disableDialog(mThreadModerateDialog);
+        Discuz.execute("topicadmin", new HashMap<String, Object>(){{
+            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation))
+                put("action", operation);
+
+            else
+                put("action", "moderate");
+
+            if ("bump".equals(operation) || "down".equals(operation) || "delete".equals(operation))
+                put("optgroup", 3);
+
+            else if ("open".equals(operation) || "close".equals(operation))
+                put("optgroup", 4);
+
+            else if ("stick".equals(operation))
+                put("optgroup", 1);
+
+        }}, new HashMap<String, Object>(){{
+            put("fid", mForumId);
+            put("reason", reason);
+
+            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation)) {
+                put("topiclist[]", args[0]);
+                put("tid", getIntent().getIntExtra("tid", 0));
+
+                if ("warn".equals(operation))
+                    put("warned", args[1]);
+                else if ("banpost".equals(operation))
+                    put("banned", args[1]);
+            }
+            else {
+                put("moderate[]", getIntent().getIntExtra("tid", 0));
+                put("operations[]", operation);
+            }
+
+            if ("stick".equals(operation)) {
+                put("sticklevel", args[0]);
+                put("expirationstick", args[1]);
+            }
+            else if ("highlight".equals(operation)) {
+                put("highlight_color", args[0]);
+                put("expirationhighlight", args[1]);
+                put("highlight_style[1]", args[2]);
+                put("highlight_style[2]", args[3]);
+                put("highlight_style[3]", args[4]);
+            }
+            else if ("digest".equals(operation)) {
+                put("digestlevel", args[0]);
+                put("expirationdigest", args[1]);
+            }
+
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                JSONObject message = Helper.optJSONObject(jsonObject, "Message");
+                if (message != null)
+                    Helper.toast(message.optString("messagestr", getString(R.string.there_is_something_wrong)));
+                mThreadModerateDialog.dismiss();
+
+                // reload
+                if ("delpost".equals(operation))
+                    mListFragment.reloadAll();
+                // close this thread if deleted
+                else if ("delete".equals(operation))
+                    PostListActivity.this.finish();
+
+            }
+        });
+    }
+
+    public void moderateThread(final int layout) {
+        final View dialogView = View.inflate(this, layout, null);
+
+        final DatePicker datePicker = ((DatePicker) dialogView.findViewById(R.id.date_expiration));
+        if (datePicker != null)
+            datePicker.setMinDate(System.currentTimeMillis() - 1000);
+
+        final Switch displayDatepicker = ((Switch) dialogView.findViewById(R.id.display_datepicker));
+        if (displayDatepicker != null) {
+            datePicker.setVisibility(View.GONE);
+            displayDatepicker.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    datePicker.setVisibility(displayDatepicker.isChecked() ? View.VISIBLE : View.GONE);
+                }
+            });
+        }
+
+        mThreadModerateDialog = new AccentAlertDialog.Builder(this)
+                .setTitle(R.string.action_moderate_thread)
+                .setView(dialogView)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        mThreadModerateDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                mThreadModerateDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                String reason = ((TextView)dialogView.findViewById(R.id.operate_reason))
+                                        .getText().toString();
+                                String expiration = "";
+                                if (displayDatepicker != null && displayDatepicker.isChecked()) {
+                                    Date date = new Date(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
+                                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                                    dateFormat.setTimeZone(TimeZone.getDefault());
+                                    expiration = dateFormat.format(date);
+                                }
+                                if (layout == R.layout.dialog_bump_thread) {
+                                    String operation = ((Spinner)dialogView.findViewById(R.id.bump_or_down))
+                                            .getSelectedItemPosition() == 0 ? "bump" : "down";
+                                    doModerateThread(operation, reason);
+                                }
+                                else if (layout == R.layout.dialog_stick_thread) {
+                                    int stickLevel = ((Spinner)dialogView.findViewById(R.id.stick_level))
+                                            .getSelectedItemPosition();
+                                    doModerateThread("stick", reason, stickLevel, expiration);
+                                }
+                                else if (layout == R.layout.dialog_highlight_thread) {
+                                    int highlightColor = ((Spinner)dialogView.findViewById(R.id.highlight_color))
+                                            .getSelectedItemPosition();
+                                    doModerateThread("highlight", reason, highlightColor, expiration,
+                                            ((CheckBox) dialogView.findViewById(R.id.highlight_bold)).isChecked() ? 1 : 0,
+                                            ((CheckBox) dialogView.findViewById(R.id.highlight_italic)).isChecked() ? 1 : 0,
+                                            ((CheckBox) dialogView.findViewById(R.id.highlight_underline)).isChecked() ? 1 : 0);
+                                }
+                                else if (layout == R.layout.dialog_digest_thread) {
+                                    int digestLevel = ((Spinner)dialogView.findViewById(R.id.digest_level))
+                                            .getSelectedItemPosition();
+                                    doModerateThread("digest", reason, digestLevel, expiration);
+                                }
+                                else if (layout == R.layout.dialog_open_thread) {
+                                    String operation = ((Spinner)dialogView.findViewById(R.id.bump_or_down))
+                                            .getSelectedItemPosition() == 0 ? "open" : "close";
+                                    doModerateThread(operation, reason);
+                                }
+                                else if (layout == R.layout.dialog_delete_thread) {
+                                    doModerateThread("delete", reason);
+                                }
+                                else if (layout == R.layout.dialog_delete_post) {
+                                    doModerateThread("delpost", reason, mSelectedPost);
+                                }
+                                else if (layout == R.layout.dialog_warn_post) {
+                                    doModerateThread("warn", reason, mSelectedPost,
+                                            ((Spinner)dialogView.findViewById(R.id.warn_or_not)).getSelectedItemPosition() == 0 ? 1 : 0);
+                                }
+                                else if (layout == R.layout.dialog_ban_post) {
+                                    doModerateThread("banpost", reason, mSelectedPost,
+                                            ((Spinner)dialogView.findViewById(R.id.ban_or_not)).getSelectedItemPosition() == 0 ? 1 : 0);
+                                }
+                                else {
+                                    mThreadModerateDialog.dismiss();
+                                }
+                            }
+                        });
+            }
+        });
+        mThreadModerateDialog.show();
+    }
+
+    public void showModerateOptions() {
+        final ListView listView = new ListView(this);
+        final AlertDialog dialog =  new AccentAlertDialog.Builder(this)
+                .setTitle(R.string.action_moderate_thread)
+                .setView(listView)
+                .create();
+
+        // Note: these layouts correspond to moderate_options
+        final int[] layouts = {
+                R.layout.dialog_bump_thread,
+                R.layout.dialog_stick_thread,
+                R.layout.dialog_highlight_thread,
+                R.layout.dialog_digest_thread,
+                R.layout.dialog_open_thread,
+                R.layout.dialog_delete_thread,
+        };
+        listView.setAdapter(ArrayAdapter.createFromResource(this,
+                R.array.moderate_options, android.R.layout.simple_list_item_1));
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i >= 0 && i < layouts.length)
+                    moderateThread(layouts[i]);
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -568,6 +787,8 @@ public class PostListActivity extends BaseThemedActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_post_list, menu);
+
+        menu.findItem(R.id.action_moderate_thread).setVisible(Discuz.sIsModerator);
         return true;
     }
 
@@ -607,6 +828,10 @@ public class PostListActivity extends BaseThemedActivity
                     putExtra("fid", mForumId);
                 }});
             finish();
+            return true;
+        }
+        else if (id == R.id.action_moderate_thread) {
+            showModerateOptions();
             return true;
         }
         return super.onOptionsItemSelected(item);

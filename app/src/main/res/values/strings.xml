@@ -135,6 +135,19 @@
     <string name="action_see_author">只看楼主</string>
     <string name="action_reverse_order">倒序查看</string>
     <string name="toast_open_image_fail">打开图片失败</string>
+    <string name="operate_reason">操作理由</string>
+    <string name="thread_operation">操作</string>
+    <string name="action_moderate_thread">管理帖子</string>
+    <string name="thread_stick">置顶</string>
+    <string name="thread_moderate_expiration">有效期</string>
+    <string name="thread_digest">精华</string>
+    <string name="thread_delete_confirm">你真的要把这个扔进隙间回收站吗？</string>
+    <string name="action_delete">删除</string>
+    <string name="action_warn">警告</string>
+    <string name="action_ban">屏蔽</string>
+    <string name="check_updates">更新</string>
+    <string name="check_new_versions">启动时检查新版本</string>
+    <string name="do_not_remind">不再提示</string>
     <string name="thread_title_hidden">此贴已隐藏</string>
     <string-array name="thumb_size">
         <item>较小</item>
@@ -145,5 +158,52 @@
         <item>仅使用 Wifi 时</item>
         <item>始终显示</item>
         <item>始终不显示</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>提升/下降</item>
+        <item>置顶</item>
+        <item>高亮</item>
+        <item>精华</item>
+        <item>开启/关闭</item>
+        <item>删除</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>提升</item>
+        <item>下降</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>不置顶</item>
+        <item>本版置顶</item>
+        <item>分类置顶</item>
+        <item>全局置顶</item>
+    </string-array>
+    <string-array name="highlight_color">
+        <item>Black</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Cyan</item>
+        <item>Blue</item>
+        <item>Purple</item>
+        <item>Pink</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>非精华</item>
+        <item>精华1</item>
+        <item>精华2</item>
+        <item>精华3</item>
+    </string-array>
+    <string-array name="open_or_close_thread">
+        <item>开启</item>
+        <item>关闭</item>
+    </string-array>
+    <string-array name="warn_or_not">
+        <item>警告</item>
+        <item>撤销</item>
+    </string-array>
+    <string-array name="ban_or_not">
+        <item>屏蔽</item>
+        <item>撤销</item>
     </string-array>
 </resources>
