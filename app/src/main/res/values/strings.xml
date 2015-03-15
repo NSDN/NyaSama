@@ -149,6 +149,9 @@
     <string name="check_new_versions">启动时检查新版本</string>
     <string name="do_not_remind">不再提示</string>
     <string name="thread_title_hidden">此贴已隐藏</string>
+    <string name="thread_target">目标板块</string>
+    <string name="thread_type">目标分类</string>
+    <string name="move_type">移动方式</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
@@ -165,6 +168,7 @@
         <item>高亮</item>
         <item>精华</item>
         <item>开启/关闭</item>
+        <item>移动</item>
         <item>删除</item>
     </string-array>
     <string-array name="bump_or_down_thread">
@@ -205,5 +209,9 @@
     <string-array name="ban_or_not">
         <item>屏蔽</item>
         <item>撤销</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>移动主题</item>
+        <item>保留转向</item>
     </string-array>
 </resources>

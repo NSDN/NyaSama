@@ -509,16 +509,26 @@ public class Discuz {
         }
     }
 
-    private static SparseArray<ThreadTypes> sThreadTypes;
-
-    @SuppressWarnings("unused")
-    public static SparseArray<ThreadTypes> getThreadTypes() {
-        return sThreadTypes;
+    public static class ForumThreadInfo {
+        public String name;
+        public ThreadTypes types;
+        public ForumThreadInfo(JSONObject data) {
+            name = data.optString("name");
+            JSONObject threadtypes = data.optJSONObject("threadtypes");
+            if (threadtypes != null && !threadtypes.isNull("types"))
+                types = new ThreadTypes(threadtypes.optJSONObject("types"));
+        }
     }
 
-    public static void loadThreadTypes(final Response.Listener<SparseArray<ThreadTypes>> callback) {
-        if (sThreadTypes != null) {
-            callback.onResponse(sThreadTypes);
+    private static SparseArray<ForumThreadInfo> sForumThreadInfo;
+
+    public static SparseArray<ForumThreadInfo> getForumThreadInfo() {
+        return sForumThreadInfo;
+    }
+
+    public static void loadForumThreadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
+        if (sForumThreadInfo != null) {
+            callback.onResponse(sForumThreadInfo);
             return;
         }
         Discuz.execute("forumnav", new HashMap<String, Object>(), null,
@@ -527,16 +537,14 @@ public class Discuz {
                     public void onResponse(JSONObject data) {
                         JSONObject var = data.optJSONObject("Variables");
                         if (var == null) return;
-                        sThreadTypes = new SparseArray<ThreadTypes>();
+                        sForumThreadInfo = new SparseArray<ForumThreadInfo>();
                         JSONArray forums = var.optJSONArray("forums");
                         for (int i = 0; i < forums.length(); i++) {
                             JSONObject forum = forums.optJSONObject(i);
-                            JSONObject threadtypes = forum.optJSONObject("threadtypes");
-                            if (threadtypes != null && !threadtypes.isNull("types"))
-                                sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
-                                        new ThreadTypes(threadtypes.optJSONObject("types")));
+                            int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
+                            sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
                         }
-                        callback.onResponse(sThreadTypes);
+                        callback.onResponse(sForumThreadInfo);
                     }
                 });
     }

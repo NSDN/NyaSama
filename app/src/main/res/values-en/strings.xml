@@ -147,6 +147,9 @@
     <string name="check_new_versions">Check New Versions When Starting up</string>
     <string name="do_not_remind">Never</string>
     <string name="thread_title_hidden">This Thread is Hidden</string>
+    <string name="thread_target">Target Forum</string>
+    <string name="thread_type">Thread Catalog</string>
+    <string name="move_type">Move Type</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
@@ -163,6 +166,7 @@
         <item>Highlight</item>
         <item>Digest</item>
         <item>Open or Close</item>
+        <item>Move</item>
         <item>Delete</item>
     </string-array>
     <string-array name="bump_or_down_thread">
@@ -180,5 +184,9 @@
         <item>Digest1</item>
         <item>Digest2</item>
         <item>Digest3</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>Replace</item>
+        <item>Redirect</item>
     </string-array>
 </resources>

@@ -291,6 +291,85 @@ public class PostListActivity extends BaseThemedActivity
         });
     }
 
+    public void doModerateThread(final String operation, final String reason, final Object... args) {
+        Helper.disableDialog(mThreadModerateDialog);
+        Discuz.execute("topicadmin", new HashMap<String, Object>(){{
+            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation))
+                put("action", operation);
+
+            else
+                put("action", "moderate");
+
+            if ("bump".equals(operation) || "down".equals(operation) || "delete".equals(operation))
+                put("optgroup", 3);
+
+            else if ("open".equals(operation) || "close".equals(operation))
+                put("optgroup", 4);
+
+            else if ("stick".equals(operation))
+                put("optgroup", 1);
+
+            else if ("move".equals(operation))
+                put("optgroup", 2);
+
+        }}, new HashMap<String, Object>(){{
+            put("fid", mForumId);
+            put("reason", reason);
+
+            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation)) {
+                put("topiclist[]", args[0]);
+                put("tid", getIntent().getIntExtra("tid", 0));
+
+                if ("warn".equals(operation))
+                    put("warned", args[1]);
+                else if ("banpost".equals(operation))
+                    put("banned", args[1]);
+            }
+            else {
+                put("moderate[]", getIntent().getIntExtra("tid", 0));
+                put("operations[]", operation);
+            }
+
+            if ("stick".equals(operation)) {
+                put("sticklevel", args[0]);
+                put("expirationstick", args[1]);
+            }
+            else if ("highlight".equals(operation)) {
+                put("highlight_color", args[0]);
+                put("expirationhighlight", args[1]);
+                put("highlight_style[1]", args[2]);
+                put("highlight_style[2]", args[3]);
+                put("highlight_style[3]", args[4]);
+            }
+            else if ("digest".equals(operation)) {
+                put("digestlevel", args[0]);
+                put("expirationdigest", args[1]);
+            }
+            else if ("move".equals(operation)) {
+                put("moveto", args[0]);
+                put("threadtypeid", args[1]);
+                put("type", args[2]);
+            }
+
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                JSONObject message = Helper.optJSONObject(jsonObject, "Message");
+                if (message != null)
+                    Helper.toast(message.optString("messagestr", getString(R.string.there_is_something_wrong)));
+                mThreadModerateDialog.dismiss();
+
+                // reload
+                if ("delpost".equals(operation))
+                    mListFragment.reloadAll();
+                // close this thread if deleted
+                else if ("delete".equals(operation))
+                    PostListActivity.this.finish();
+
+            }
+        });
+    }
+
     public void doMarkFavourite() {
         Discuz.execute("favthread", new HashMap<String, Object>() {{
             put("id", getIntent().getIntExtra("tid", 0));
@@ -506,77 +585,6 @@ public class PostListActivity extends BaseThemedActivity
         mVoteDialog.show();
     }
 
-    public void doModerateThread(final String operation, final String reason, final Object... args) {
-        Helper.disableDialog(mThreadModerateDialog);
-        Discuz.execute("topicadmin", new HashMap<String, Object>(){{
-            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation))
-                put("action", operation);
-
-            else
-                put("action", "moderate");
-
-            if ("bump".equals(operation) || "down".equals(operation) || "delete".equals(operation))
-                put("optgroup", 3);
-
-            else if ("open".equals(operation) || "close".equals(operation))
-                put("optgroup", 4);
-
-            else if ("stick".equals(operation))
-                put("optgroup", 1);
-
-        }}, new HashMap<String, Object>(){{
-            put("fid", mForumId);
-            put("reason", reason);
-
-            if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation)) {
-                put("topiclist[]", args[0]);
-                put("tid", getIntent().getIntExtra("tid", 0));
-
-                if ("warn".equals(operation))
-                    put("warned", args[1]);
-                else if ("banpost".equals(operation))
-                    put("banned", args[1]);
-            }
-            else {
-                put("moderate[]", getIntent().getIntExtra("tid", 0));
-                put("operations[]", operation);
-            }
-
-            if ("stick".equals(operation)) {
-                put("sticklevel", args[0]);
-                put("expirationstick", args[1]);
-            }
-            else if ("highlight".equals(operation)) {
-                put("highlight_color", args[0]);
-                put("expirationhighlight", args[1]);
-                put("highlight_style[1]", args[2]);
-                put("highlight_style[2]", args[3]);
-                put("highlight_style[3]", args[4]);
-            }
-            else if ("digest".equals(operation)) {
-                put("digestlevel", args[0]);
-                put("expirationdigest", args[1]);
-            }
-
-        }}, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                JSONObject message = Helper.optJSONObject(jsonObject, "Message");
-                if (message != null)
-                    Helper.toast(message.optString("messagestr", getString(R.string.there_is_something_wrong)));
-                mThreadModerateDialog.dismiss();
-
-                // reload
-                if ("delpost".equals(operation))
-                    mListFragment.reloadAll();
-                // close this thread if deleted
-                else if ("delete".equals(operation))
-                    PostListActivity.this.finish();
-
-            }
-        });
-    }
-
     public void moderateThread(final int layout) {
         final View dialogView = View.inflate(this, layout, null);
 
@@ -594,6 +602,45 @@ public class PostListActivity extends BaseThemedActivity
                 }
             });
         }
+
+        final Spinner moveToForum = ((Spinner) dialogView.findViewById(R.id.move_to));
+        final Spinner threadTypes = ((Spinner) dialogView.findViewById(R.id.thread_type));
+        if (moveToForum != null) Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
+            @Override
+            public void onResponse(final SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
+                final List<String> list = new ArrayList<String>();
+                int position = 0;
+                for (int i = 0; i < forumThreadInfo.size(); i ++) {
+                    int fid = forumThreadInfo.keyAt(i);
+                    list.add(forumThreadInfo.get(fid).name);
+                    if (fid == mForumId)
+                        position = list.size() - 1;
+                }
+                moveToForum.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        int fid = forumThreadInfo.keyAt(i);
+                        Discuz.ThreadTypes types = forumThreadInfo.get(fid).types;
+                        List<String> list = new ArrayList<String>();
+                        list.add(getString(R.string.string_uncategorized));
+                        if (types != null) for (Map.Entry<String, Integer> e : types.entrySet())
+                            list.add(e.getKey());
+                        ArrayAdapter adapter = new ArrayAdapter<String>(PostListActivity.this,
+                                android.R.layout.simple_spinner_item, list);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        threadTypes.setAdapter(adapter);
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                    }
+                });
+                ArrayAdapter adapter = new ArrayAdapter<String>(PostListActivity.this,
+                        android.R.layout.simple_spinner_item, list);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                moveToForum.setAdapter(adapter);
+                moveToForum.setSelection(position);
+            }
+        });
 
         mThreadModerateDialog = new AccentAlertDialog.Builder(this)
                 .setTitle(R.string.action_moderate_thread)
@@ -648,6 +695,16 @@ public class PostListActivity extends BaseThemedActivity
                                 else if (layout == R.layout.dialog_delete_thread) {
                                     doModerateThread("delete", reason);
                                 }
+                                else if (layout == R.layout.dialog_move_thread) {
+                                    int i = moveToForum.getSelectedItemPosition();
+                                    int fid = Discuz.getForumThreadInfo().keyAt(i);
+                                    String type = threadTypes.getSelectedItem().toString();
+                                    Discuz.ThreadTypes types = Discuz.getForumThreadInfo().get(fid).types;
+                                    int typeId = types != null &&  types.containsKey(type) ? types.get(type) : 0;
+                                    String move = ((Spinner)dialogView.findViewById(R.id.move_type))
+                                            .getSelectedItemPosition() == 0 ? "normal" : "redirect";
+                                    doModerateThread("move", reason, fid, typeId, move);
+                                }
                                 else if (layout == R.layout.dialog_delete_post) {
                                     doModerateThread("delpost", reason, mSelectedPost);
                                 }
@@ -683,6 +740,7 @@ public class PostListActivity extends BaseThemedActivity
                 R.layout.dialog_highlight_thread,
                 R.layout.dialog_digest_thread,
                 R.layout.dialog_open_thread,
+                R.layout.dialog_move_thread,
                 R.layout.dialog_delete_thread,
         };
         listView.setAdapter(ArrayAdapter.createFromResource(this,
