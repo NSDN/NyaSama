@@ -175,11 +175,34 @@
         <item>This Catalog</item>
         <item>Global</item>
     </string-array>
+    <string-array name="highlight_color">
+        <item>Black</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Cyan</item>
+        <item>Blue</item>
+        <item>Purple</item>
+        <item>Pink</item>
+    </string-array>
     <string-array name="digest_level">
         <item>None</item>
         <item>Digest1</item>
         <item>Digest2</item>
         <item>Digest3</item>
+    </string-array>
+    <string-array name="open_or_close_thread">
+        <item>Open</item>
+        <item>Close</item>
+    </string-array>
+    <string-array name="warn_or_not">
+        <item>Warn</item>
+        <item>Undo</item>
+    </string-array>
+    <string-array name="ban_or_not">
+        <item>Ban</item>
+        <item>Undo</item>
     </string-array>
     <string name="action_moderate_thread">Manage threads</string>
     <string name="check_updates">Update</string>

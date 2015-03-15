@@ -178,15 +178,15 @@
         <item>全局置顶</item>
     </string-array>
     <string-array name="highlight_color">
-        <item>Black</item>
-        <item>Red</item>
-        <item>Orange</item>
-        <item>Brown</item>
-        <item>Green</item>
-        <item>Cyan</item>
-        <item>Blue</item>
-        <item>Purple</item>
-        <item>Pink</item>
+        <item>黑</item>
+        <item>红</item>
+        <item>橙</item>
+        <item>棕</item>
+        <item>绿</item>
+        <item>青</item>
+        <item>烂</item>
+        <item>紫</item>
+        <item>粉</item>
     </string-array>
     <string-array name="digest_level">
         <item>非精华</item>
