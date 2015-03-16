@@ -407,7 +407,7 @@ public class PostListActivity extends BaseThemedActivity
         menu.findItem(R.id.action_more_comment).setVisible(showLoadCommentMenu);
 
         boolean showEditPostMenu = item.author.equals(Discuz.sUsername);
-        menu.findItem(R.id.action_edit).setVisible(showEditPostMenu);
+        menu.findItem(R.id.action_edit).setVisible(showEditPostMenu || Discuz.sIsModerator);
         menu.findItem(R.id.action_delete).setVisible(Discuz.sIsModerator);
         menu.findItem(R.id.action_warn).setVisible(Discuz.sIsModerator);
         menu.findItem(R.id.action_ban).setVisible(Discuz.sIsModerator);
