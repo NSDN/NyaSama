@@ -270,10 +270,10 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void loadThreadTypes(final int fid, final int typeid) {
-        Discuz.loadThreadTypes(new Response.Listener<SparseArray<Discuz.ThreadTypes>>() {
+        Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
-            public void onResponse(SparseArray<Discuz.ThreadTypes> threadTypesSparseArray) {
-                mThreadTypes = threadTypesSparseArray.get(fid);
+            public void onResponse(SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
+                mThreadTypes = forumThreadInfo.get(fid).types;
                 Helper.updateVisibility(mSpinnerTypes, mThreadTypes != null);
                 if (mThreadTypes != null) {
                     List<String> list = new ArrayList<String>();
