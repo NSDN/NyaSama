@@ -233,7 +233,7 @@ public class MainActivity extends BaseThemedActivity implements
     @Override
     public void onGetThreadData(DiscuzThreadListFragment fragment) {
         if (fragment.getMessage() != null) {
-            new AccentAlertDialog.Builder(this)
+            new AccentAlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.there_is_something_wrong)
                     .setMessage(fragment.getMessage())
                     .setPositiveButton(android.R.string.yes, null)
