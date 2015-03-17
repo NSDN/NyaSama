@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
+import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -270,10 +271,10 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void loadThreadTypes(final int fid, final int typeid) {
-        Discuz.loadThreadTypes(new Response.Listener<SparseArray<Discuz.ThreadTypes>>() {
+        Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
-            public void onResponse(SparseArray<Discuz.ThreadTypes> threadTypesSparseArray) {
-                mThreadTypes = threadTypesSparseArray.get(fid);
+            public void onResponse(SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
+                mThreadTypes = forumThreadInfo.get(fid).types;
                 Helper.updateVisibility(mSpinnerTypes, mThreadTypes != null);
                 if (mThreadTypes != null) {
                     List<String> list = new ArrayList<String>();
@@ -302,7 +303,7 @@ public class NewPostActivity extends BaseThemedActivity {
         choicesText.setText("" + mPollChoices);
         final EditText expirationText = (EditText) view.findViewById(R.id.expiration);
         expirationText.setText("" + mPollExpiration);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(getString(R.string.action_setup_poll))
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, null)
@@ -311,6 +312,7 @@ public class NewPostActivity extends BaseThemedActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
+                new DividerPainter(NewPostActivity.this).paint(dialog.getWindow());
                 dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -443,7 +445,7 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void refreshFormHash() {
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.dialog_update_user).setCancelable(false)
                 .show();
         // refresh the form hash, or posting will fail
@@ -551,7 +553,7 @@ public class NewPostActivity extends BaseThemedActivity {
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             View loadingView = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_upload_process, null, false);
-            final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+            final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                     .setTitle(R.string.dialog_uploading).setCancelable(false)
                     .setView(loadingView)
                     .show();
@@ -618,7 +620,7 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_add_smiley) {
             if (Discuz.getSmilies() == null) {
-                final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+                final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
                 Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {

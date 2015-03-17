@@ -135,6 +135,21 @@
     <string name="action_see_author">Thread Author Only</string>
     <string name="action_reverse_order">Reverse Order</string>
     <string name="toast_open_image_fail">Open Image Failed</string>
+    <string name="operate_reason">Operate Reason</string>
+    <string name="thread_operation">Operation</string>
+    <string name="thread_stick">Stick</string>
+    <string name="thread_moderate_expiration">Expiration</string>
+    <string name="thread_digest">Digest</string>
+    <string name="thread_delete_confirm">Are You Sure to Delete This Thread?</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_warn">Warn</string>
+    <string name="action_ban">Ban</string>
+    <string name="check_new_versions">Check New Versions When Starting up</string>
+    <string name="do_not_remind">Never</string>
+    <string name="thread_title_hidden">This Thread is Hidden</string>
+    <string name="thread_target">Target Forum</string>
+    <string name="thread_type">Thread Catalog</string>
+    <string name="move_type">Move Type</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
@@ -144,5 +159,34 @@
         <item>Only When Using Wifi</item>
         <item>Always</item>
         <item>Never</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>Bump or Down</item>
+        <item>Stick</item>
+        <item>Highlight</item>
+        <item>Digest</item>
+        <item>Open or Close</item>
+        <item>Move</item>
+        <item>Delete</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>Bump</item>
+        <item>Down</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>None</item>
+        <item>This Board</item>
+        <item>This Catalog</item>
+        <item>Global</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>None</item>
+        <item>Digest1</item>
+        <item>Digest2</item>
+        <item>Digest3</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>Replace</item>
+        <item>Redirect</item>
     </string-array>
 </resources>

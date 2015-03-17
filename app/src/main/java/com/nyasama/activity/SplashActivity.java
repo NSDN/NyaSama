@@ -16,7 +16,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
-import com.nyasama.BuildConfig;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 
@@ -78,6 +77,7 @@ public class SplashActivity extends Activity {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             startActivity(new Intent(Intent.ACTION_VIEW,
                                     Uri.parse(releaseUrl + "/NyaSama-" + mVersion + ".apk")));
+                            finish();
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -86,7 +86,16 @@ public class SplashActivity extends Activity {
                             startActivity(new Intent(SplashActivity.this, MainActivity.class));
                             finish();
                         }
-                    }).show();
+                    })
+                    .setNeutralButton(R.string.do_not_remind, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ThisApp.preferences.edit().putBoolean(getString(R.string.pref_key_check_update), false).commit();
+                            startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                            finish();
+                        }
+                    })
+                    .show();
         }
         else {
             Log.e(SplashActivity.class.toString(), "check update failed: no new version found");
@@ -101,11 +110,12 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         mInitJobs ++;
-        if (BuildConfig.DEBUG) new android.os.Handler().post(new Runnable() {
+        boolean checkUpdate = ThisApp.preferences.getBoolean(getString(R.string.pref_key_check_update), true);
+        if (!checkUpdate) new android.os.Handler().post(new Runnable() {
             @Override
             public void run() {
                 Log.e(SplashActivity.class.toString(),
-                        "This version is for debug only and will not check for updates automatically!");
+                        "we are not checking for updates.");
                 checkInitJobs();
             }
         });

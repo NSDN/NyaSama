@@ -68,16 +68,16 @@ import java.util.regex.Pattern;
  * utils to handle Discuz data
  */
 public class Discuz {
-    public static String DISCUZ_HOST = "http://bbs.nyasama.com";
-    public static String DISCUZ_URL = DISCUZ_HOST + "/";
-    public static String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
-    public static String DISCUZ_ENC = "gbk";
+    public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static final String DISCUZ_URL = DISCUZ_HOST + "/";
+    public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
+    public static final String DISCUZ_ENC = "gbk";
 
-    public static String VOLLEY_ERROR = "volleyError";
+    public static final String VOLLEY_ERROR = "volleyError";
 
-    public static int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
-    public static String BROADCAST_FILTER_LOGIN = "login";
+    public static final String BROADCAST_FILTER_LOGIN = "login";
 
     public static class JSONVolleyError extends JSONObject {
         public JSONVolleyError(String message) {
@@ -138,7 +138,7 @@ public class Discuz {
         public int attachments;
 
         public Thread(JSONObject data) {
-            id = Integer.parseInt(data.optString("tid"));
+            id = Helper.toSafeInteger(data.optString("tid"), 0);
             title = data.optString("subject");
             author = data.optString("author");
             lastpost = data.optString("lastpost");
@@ -147,8 +147,8 @@ public class Discuz {
             int dateVal = Helper.toSafeInteger(lastpost, 0);
             if (dateVal > 0)
                 lastpost = Helper.datelineToString(dateVal, null);
-            replies = Integer.parseInt(data.optString("replies"));
-            views = Integer.parseInt(data.optString("views"));
+            replies = Helper.toSafeInteger(data.optString("replies"), 0);
+            views = Helper.toSafeInteger(data.optString("views"), 0);
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
@@ -312,6 +312,7 @@ public class Discuz {
     public static int sNewMessages = 0;
     public static int sNewPrompts = 0;
     public static boolean sHasLogined;
+    public static boolean sIsModerator;
 
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
@@ -508,16 +509,26 @@ public class Discuz {
         }
     }
 
-    private static SparseArray<ThreadTypes> sThreadTypes;
-
-    @SuppressWarnings("unused")
-    public static SparseArray<ThreadTypes> getThreadTypes() {
-        return sThreadTypes;
+    public static class ForumThreadInfo {
+        public String name;
+        public ThreadTypes types;
+        public ForumThreadInfo(JSONObject data) {
+            name = data.optString("name");
+            JSONObject threadtypes = data.optJSONObject("threadtypes");
+            if (threadtypes != null && !threadtypes.isNull("types"))
+                types = new ThreadTypes(threadtypes.optJSONObject("types"));
+        }
     }
 
-    public static void loadThreadTypes(final Response.Listener<SparseArray<ThreadTypes>> callback) {
-        if (sThreadTypes != null) {
-            callback.onResponse(sThreadTypes);
+    private static SparseArray<ForumThreadInfo> sForumThreadInfo;
+
+    public static SparseArray<ForumThreadInfo> getForumThreadInfo() {
+        return sForumThreadInfo;
+    }
+
+    public static void loadForumThreadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
+        if (sForumThreadInfo != null) {
+            callback.onResponse(sForumThreadInfo);
             return;
         }
         Discuz.execute("forumnav", new HashMap<String, Object>(), null,
@@ -526,16 +537,14 @@ public class Discuz {
                     public void onResponse(JSONObject data) {
                         JSONObject var = data.optJSONObject("Variables");
                         if (var == null) return;
-                        sThreadTypes = new SparseArray<ThreadTypes>();
+                        sForumThreadInfo = new SparseArray<ForumThreadInfo>();
                         JSONArray forums = var.optJSONArray("forums");
                         for (int i = 0; i < forums.length(); i++) {
                             JSONObject forum = forums.optJSONObject(i);
-                            JSONObject threadtypes = forum.optJSONObject("threadtypes");
-                            if (threadtypes != null && !threadtypes.isNull("types"))
-                                sThreadTypes.put(Helper.toSafeInteger(forum.optString("fid"), 0),
-                                        new ThreadTypes(threadtypes.optJSONObject("types")));
+                            int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
+                            sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
                         }
-                        callback.onResponse(sThreadTypes);
+                        callback.onResponse(sForumThreadInfo);
                     }
                 });
     }
@@ -560,6 +569,7 @@ public class Discuz {
                 sFormHash = var.optString("formhash", "");
                 sUsername = var.optString("member_username", "");
                 sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                sIsModerator = !"0".equals(var.optString("ismoderator"));
                 if (!var.isNull("allowperm"))
                     sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
                 if (!var.isNull("group"))
@@ -637,6 +647,13 @@ public class Discuz {
             Helper.putIfNull(params, "version", "2");
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "pollsubmit", "true");
+        } else if (module.equals("topicadmin")) {
+            Helper.putIfNull(params, "modsubmit", "yes");
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "modsubmit", "true");
+        } else if (module.equals("friendcp")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "add2submit", "yes");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");

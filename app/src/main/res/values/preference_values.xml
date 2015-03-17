@@ -53,4 +53,7 @@
     </string-array>
 
     <string name="pref_key_version" translatable="false">version_number</string>
+
+    <string name="pref_key_check_update" translatable="false">check_update</string>
+
 </resources>

@@ -106,7 +106,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                 names));
         listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         listView.setItemChecked(mPager.getCurrentItem(), true);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AccentAlertDialog.Builder(AttachmentViewer.this)
                 .setTitle("Attachments")
                 .setView(listView)
                 .show();
@@ -189,7 +189,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         mAttachmentList.clear();
-                        new AccentAlertDialog.Builder(ThisApp.context)
+                        new AccentAlertDialog.Builder(AttachmentViewer.this)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

@@ -88,10 +88,12 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
     public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
         Intent intent = new Intent(getActivity(), PostListActivity.class);
         Thread thread = (Thread) fragment.getData(position);
-        intent.putExtra("tid", thread.id);
-        intent.putExtra("title", thread.title);
-        intent.putExtra("fid", getArguments() != null ? getArguments().getInt("fid") : 0);
-        startActivity(intent);
+        if (thread.id > 0) {
+            intent.putExtra("tid", thread.id);
+            intent.putExtra("title", thread.title);
+            intent.putExtra("fid", getArguments() != null ? getArguments().getInt("fid") : 0);
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -143,6 +145,15 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
                             threads = var.getJSONArray("data");
                         else
                             threads = new JSONArray();
+
+                        if (var.has("hiddennum")) {
+                            int hiddenNum = Helper.toSafeInteger(var.optString("hiddennum"), 0);
+                            JSONObject hiddenThread = new JSONObject();
+                            hiddenThread.put("subject", getString(R.string.thread_title_hidden));
+                            for (int i = 0; i < hiddenNum; i ++)
+                                threads.put(hiddenThread);
+                        }
+
                         for (int i = 0; i < threads.length(); i++) {
                             final JSONObject thread = threads.getJSONObject(i);
                             listData.add(new Thread(thread));
@@ -152,6 +163,7 @@ public class DiscuzThreadListFragment extends CommonListFragment<Thread>
                             JSONObject forum = var.getJSONObject("forum");
                             mTitle = forum.getString("name");
                         }
+
                         // if we don't know the number of items
                         // just keep loading until there is no more
                         if (threads.length() < pps)

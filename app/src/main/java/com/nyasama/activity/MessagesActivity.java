@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
+import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -76,7 +77,7 @@ public class MessagesActivity extends BaseThemedActivity
 
     public void sendMessage() {
         final EditText input = new EditText(this);
-        mReplyDialog = new AccentAlertDialog.Builder(this)
+        mReplyDialog = new AccentAlertDialog.Builder(MessagesActivity.this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -86,17 +87,18 @@ public class MessagesActivity extends BaseThemedActivity
         mReplyDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
+                new DividerPainter(MessagesActivity.this).paint(mReplyDialog.getWindow());
                 mReplyDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String text = input.getText().toString();
-                        if (!text.isEmpty()) {
-                            Helper.disableDialog(mReplyDialog);
-                            doSendMessage(text);
-                        }
-                    }
-                });
+                            @Override
+                            public void onClick(View view) {
+                                String text = input.getText().toString();
+                                if (!text.isEmpty()) {
+                                    Helper.disableDialog(mReplyDialog);
+                                    doSendMessage(text);
+                                }
+                            }
+                        });
             }
         });
         mReplyDialog.show();

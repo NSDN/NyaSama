@@ -55,9 +55,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_category_version">
+
+        <com.negusoft.holoaccent.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_check_update"
+            android:title="@string/check_updates"
+            android:summary="@string/check_new_versions" />
+
         <Preference
             android:key="@string/pref_key_version"
             android:title="@string/pref_title_version_number"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

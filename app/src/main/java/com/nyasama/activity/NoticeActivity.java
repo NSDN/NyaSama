@@ -1,6 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
@@ -127,6 +129,35 @@ public class NoticeActivity extends BaseThemedActivity
                                 }});
                                 return true;
                             }
+                        }
+                        else if ("spacecp".equals(mod) &&
+                                "friend".equals(uri.getQueryParameter("ac")) &&
+                                "add".equals(uri.getQueryParameter("op"))) {
+                            final AlertDialog dialog = new AccentAlertDialog.Builder(NoticeActivity.this)
+                                    .setMessage(R.string.list_loading_text)
+                                    .show();
+                            final int uid = Helper.toSafeInteger(uri.getQueryParameter("uid"), 0);
+                            Discuz.execute("friendcp", new HashMap<String, Object>() {{
+                                put("op", "add");
+                                put("uid", uid);
+                            }}, new HashMap<String, Object>() {{
+                                // gid = 1 means "friends known from this forum"
+                                // TODO: make this changable
+                                put("gid", 1);
+                            }}, new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject data) {
+                                    if (data.has("Message")) {
+                                        JSONObject message = data.optJSONObject("Message");
+                                        Helper.toast(message.optString("messagestr"));
+                                    }
+                                    else {
+                                        Helper.toast(R.string.there_is_something_wrong);
+                                    }
+                                    dialog.dismiss();
+                                }
+                            });
+                            return true;
                         }
                         return false;
                     }

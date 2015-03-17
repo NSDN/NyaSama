@@ -19,9 +19,12 @@ import android.widget.Toast;
 
 import com.nyasama.ThisApp;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -89,11 +92,21 @@ public class Helper {
     }
 
     public static String datelineToString(long time, String format) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format, Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date();
         date.setTime(time * 1000);
         return dateFormat.format(date);
+    }
+
+    public static JSONObject optJSONObject(JSONObject data, String... path) {
+        for (String name : path) {
+            if (data != null)
+                data = data.optJSONObject(name);
+            else
+                return null;
+        }
+        return data;
     }
 
     public static void setListLength(List list, int size) {
