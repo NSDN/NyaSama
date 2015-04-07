@@ -150,20 +150,22 @@
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
-        <item>Original Image</item>
+        <item>Original image</item>
     </string-array>
     <string-array name="show_image">
-        <item>Only When Using Wifi</item>
+        <item>Only when using wifi</item>
         <item>Always</item>
         <item>Never</item>
     </string-array>
     <string-array name="moderate_options">
-        <item>Bump or Down</item>
+        <item>Bump or down</item>
         <item>Stick</item>
         <item>Highlight</item>
         <item>Digest</item>
-        <item>Open or Close</item>
+        <item>Open or close</item>
+        <item>Move</item>
         <item>Delete</item>
+
     </string-array>
     <string-array name="bump_or_down_thread">
         <item>Bump</item>
@@ -171,8 +173,8 @@
     </string-array>
     <string-array name="stick_level">
         <item>None</item>
-        <item>This Board</item>
-        <item>This Catalog</item>
+        <item>This board</item>
+        <item>This catalog</item>
         <item>Global</item>
     </string-array>
     <string-array name="highlight_color">
@@ -204,6 +206,13 @@
         <item>Ban</item>
         <item>Undo</item>
     </string-array>
+    <string-array name="move_type">
+        <item>Move directly</item>
+        <item>Keep redirection</item>
+    </string-array>
     <string name="action_moderate_thread">Manage threads</string>
     <string name="check_updates">Update</string>
+    <string name="thread_target">Target thread</string>
+    <string name="thread_type">Target type</string>
+    <string name="move_type">Move type</string>
 </resources>

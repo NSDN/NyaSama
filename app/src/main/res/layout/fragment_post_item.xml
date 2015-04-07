@@ -73,8 +73,8 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:layout_below="@+id/comment_list"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_toRightOf="@+id/votes"
+        android:layout_toEndOf="@+id/votes" />
 
     <Button
         android:id="@+id/votes"
@@ -83,7 +83,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:layout_below="@+id/attachment_list"
+        android:layout_below="@+id/comment_list"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
