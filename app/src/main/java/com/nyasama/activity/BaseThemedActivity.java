@@ -113,4 +113,5 @@ public class BaseThemedActivity extends FragmentActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
