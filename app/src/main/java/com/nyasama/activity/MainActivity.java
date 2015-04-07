@@ -1,8 +1,7 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
-
 import android.app.ActionBar;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,24 +13,24 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
+import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
-import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
-import com.nyasama.R;
+import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
@@ -92,7 +91,8 @@ public class MainActivity extends BaseThemedActivity implements
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
+            finish();
+            System.exit(0);
             return;
         }
 
