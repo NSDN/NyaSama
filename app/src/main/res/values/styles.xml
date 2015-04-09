@@ -1,29 +1,55 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.HoloAccent.Light.ColoredActionBar.Inverse">
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
         <!-- Note: remove shadow under actionbar
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:actionBarSize">57dp</item>
+        <!--item name="android:actionBarStyle">@style/ActionBarStyle</item-->
+        <!--item name="android:actionBarItemBackground">@android:color/transparent</item-->
+        <!--item name="android:actionBarTabTextStyle">@style/PagerTextStyle</item-->
+        <item name="android:colorPrimary">@color/ThemeColor</item>
+        <item name="android:colorPrimaryDark">@color/ThemeColorDark</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:windowBackground">@color/ThemeColor</item>
+        <item name="android:navigationBarColor">@color/ThemeColorDark</item>
+        <item name="android:textColorLink">@color/ThemeColorDark</item>
+        <!--item name="android:actionMenuTextColor">@color/text_color_secondary</item-->
+        <item name="android:colorAccent">@color/ThemeColorDark</item>
+        <!--item name="android:actionBarSize">57dp</item-->
     </style>
+
+    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar.Fullscreen"> </style>
 
     <!-- animated theme. -->
     <style name="AppThemeAni" parent="AppTheme">
         <item name="android:animateLayoutChanges">true</item>
     </style>
 
-    <style name="PagerTabStrip" parent="HoloAccent.PagerTabStrip.Light">
+    <style name="PagerTabStrip" parent="AppTheme">
         <!-- Note: remember to use color as color & drawable as background -->
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@drawable/ha__ab_background</item>
+        <item name="android:textAppearance">@style/PagerTextStyle</item>
+        <item name="android:background">@color/ThemeColor</item>
     </style>
 
-    <style name="NavigationDrawer">
+    <style name="PagerTextStyle" parent="AppTheme">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="NavigationDrawerStyle">
         <item name="android:background">@drawable/ha__ab_background_stacked</item>
     </style>
 
-    <color name="background_light_gray">#ececec</color>
+    <style name="ButtonStyle" parent="@android:style/Widget.Material.Button"> </style>
+
+    <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
+
+    <color name="ThemeColor">#a3b36a</color>
+    <color name="ThemeColorLight">#dcecbd</color>
+    <color name="ThemeColorDark">#6a6e54</color>
+    <color name="ThemeBackground">#dcecbd</color>
+    <color name="AppBackground">#a3b36a</color>
     <color name="text_color_secondary">#999999</color>
 
 </resources>

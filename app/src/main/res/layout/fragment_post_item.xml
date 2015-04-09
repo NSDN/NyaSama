@@ -1,7 +1,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:padding="5dp"
-    android:background="@android:color/background_light"
+    android:background="@color/ThemeBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -67,7 +67,7 @@
 
     <Button
         android:id="@+id/attachment_list"
-        style="@style/HoloAccent.Button.Small.Colored.Bright"
+        style="@style/ButtonStyle"
         android:text="@string/text_view_attachments"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
 
     <Button
         android:id="@+id/votes"
-        style="@style/HoloAccent.Button.Small.Colored.Bright"
+        style="@style/ButtonStyle"
         android:text="@string/text_view_vote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

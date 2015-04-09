@@ -236,7 +236,7 @@ public class ThreadListActivity extends BaseThemedActivity implements
             if (getActivity() != null)
                 updateSubList(((ThreadListActivity) getActivity()).mSubList);
 
-            rootView.setBackgroundColor(getResources().getColor(R.color.background_light_gray));
+            rootView.setBackgroundColor(getResources().getColor(R.color.AppBackground));
             return rootView;
         }
     }
