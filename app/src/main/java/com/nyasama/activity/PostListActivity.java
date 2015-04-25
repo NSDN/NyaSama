@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,6 +82,8 @@ public class PostListActivity extends BaseThemedActivity
     private static final int COMMENT_PAGE_SIZE = 10;
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
+    private boolean isPaused = false;
+
     private CommonListFragment<Post> mListFragment;
     private int mListPages;
 
@@ -98,7 +102,7 @@ public class PostListActivity extends BaseThemedActivity
     private int mForumId;
     private int mAuthorId;
 
-    private int mPrefMaxImageSize = -1;
+    private Point mPrefMaxImageSize = new Point(-1, -1);
     private int mPrefFontSize = 16;
 
     private int mSelectedPost;
@@ -160,6 +164,7 @@ public class PostListActivity extends BaseThemedActivity
     public void loadDisplayPreference() {
         String displayImageSetting =
                 ThisApp.preferences.getString(getString(R.string.pref_key_show_image), "");
+
         boolean shallDisplayImage = !"false".equals(displayImageSetting);
         if ("auto".equals(displayImageSetting)) {
             ConnectivityManager connectivityManager =
@@ -168,8 +173,15 @@ public class PostListActivity extends BaseThemedActivity
                     connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             shallDisplayImage = networkInfo.isConnected();
         }
-        mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        mPrefMaxImageSize.x = shallDisplayImage ? Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
+        if (mPrefMaxImageSize.x == 0) mPrefMaxImageSize.x = size.x * 4 / 5;
+        mPrefMaxImageSize.y = mPrefMaxImageSize.x * size.y / size.x;
+
         mPrefFontSize = Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 16);
     }
@@ -793,15 +805,9 @@ public class PostListActivity extends BaseThemedActivity
         return message;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simple_framelayout);
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        String title = getIntent().getStringExtra("title");
-        if (title != null) setTitle(title);
+    private void setupListFragment() {
+        if (mListFragment != null)
+            return;
 
         mListFragment = CommonListFragment.getNewFragment(
                 Post.class,
@@ -834,6 +840,54 @@ public class PostListActivity extends BaseThemedActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
                 .commit();
+    }
+
+    private void destroyListFragment() {
+        if (mListFragment != null) try{
+            getSupportFragmentManager().beginTransaction()
+                    .remove(mListFragment)
+                    .commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        mListFragment = null;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_simple_framelayout);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        String title = getIntent().getStringExtra("title");
+        if (title != null) setTitle(title);
+
+        setupListFragment();
+    }
+
+    @Override
+    protected void onPause() {
+        isPaused = true;
+        // remove fragment to recycle memory
+        if (PostListActivity.this.mPrefMaxImageSize.x >= 0)
+            // after some milliseconds to avoid splash
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (PostListActivity.this.isPaused)
+                        destroyListFragment();
+                }
+            }, 500);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        isPaused = false;
+        setupListFragment();
+        super.onResume();
     }
 
     @Override
@@ -923,11 +977,15 @@ public class PostListActivity extends BaseThemedActivity
         "[/quote]";
     }
 
-    final BitmapLruCache mImageCache = new BitmapLruCache();
-    final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
+
+            // Note: must put huge objects in fragment scope!
+            final HtmlImageGetter.HtmlImageCache mImageCache =
+                    new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
+            final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
+
             @Override
             public void convertView(ViewHolder viewHolder, final Post item) {
                 String avatar_url = Discuz.DISCUZ_URL +
@@ -957,7 +1015,7 @@ public class PostListActivity extends BaseThemedActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 messageText.setTextSize(mPrefFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
+                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -1147,7 +1205,7 @@ public class PostListActivity extends BaseThemedActivity
                                 mAttachmentMap.put(attachment.src, attachment);
                             post.message = compileMessage(post.message, mAttachmentMap,
                                     // TODO: add more image size here (see forumimage.php
-                                    mPrefMaxImageSize < 0 ? "" : "268x380");
+                                    mPrefMaxImageSize.x < 0 ? "" : "268x380");
                             listData.add(post);
                         }
 
