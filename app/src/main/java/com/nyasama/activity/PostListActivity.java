@@ -621,12 +621,12 @@ public class PostListActivity extends BaseThemedActivity
 
         final Spinner moveToForum = ((Spinner) dialogView.findViewById(R.id.move_to));
         final Spinner threadTypes = ((Spinner) dialogView.findViewById(R.id.thread_type));
-        if (moveToForum != null) Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
+        if (moveToForum != null) Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
             public void onResponse(final SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
                 final List<String> list = new ArrayList<String>();
                 int position = 0;
-                for (int i = 0; i < forumThreadInfo.size(); i ++) {
+                for (int i = 0; i < forumThreadInfo.size(); i++) {
                     int fid = forumThreadInfo.keyAt(i);
                     list.add(forumThreadInfo.get(fid).name);
                     if (fid == mForumId)
@@ -646,6 +646,7 @@ public class PostListActivity extends BaseThemedActivity
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         threadTypes.setAdapter(adapter);
                     }
+
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) {
                     }
@@ -714,9 +715,9 @@ public class PostListActivity extends BaseThemedActivity
                                 }
                                 else if (layout == R.layout.dialog_move_thread) {
                                     int i = moveToForum.getSelectedItemPosition();
-                                    int fid = Discuz.getForumThreadInfo().keyAt(i);
+                                    int fid = Discuz.ForumThreadInfo.getInfo().keyAt(i);
                                     String type = threadTypes.getSelectedItem().toString();
-                                    Discuz.ThreadTypes types = Discuz.getForumThreadInfo().get(fid).types;
+                                    Discuz.ThreadTypes types = Discuz.ForumThreadInfo.getInfo().get(fid).types;
                                     int typeId = types != null &&  types.containsKey(type) ? types.get(type) : 0;
                                     String move = ((Spinner)dialogView.findViewById(R.id.move_type))
                                             .getSelectedItemPosition() == 0 ? "normal" : "redirect";
@@ -824,7 +825,7 @@ public class PostListActivity extends BaseThemedActivity
                     Intent intent = getIntent();
                     int pageOffset = intent.getIntExtra("page", 0);
                     int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
-                    if (actionBar.getSelectedNavigationIndex() != pageScroll) {
+                    if (actionBar != null && actionBar.getSelectedNavigationIndex() != pageScroll) {
                         intent.putExtra("update-nav-spinner", true);
                         actionBar.setSelectedNavigationItem(pageScroll);
                     }

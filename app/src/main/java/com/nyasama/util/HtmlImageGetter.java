@@ -51,8 +51,8 @@ public class HtmlImageGetter implements Html.ImageGetter {
         final LevelListDrawable drawable = new LevelListDrawable();
 
         // for smilies, we will cache it in Discuz
-        boolean isSmileyUrl = Discuz.isSmileyUrl(url);
-        final ImageLoader.ImageCache imageCache = isSmileyUrl ? Discuz.getSmileyCache() : cache.images;
+        boolean isSmileyUrl = Discuz.Smiley.isSmileyUrl(url);
+        final ImageLoader.ImageCache imageCache = isSmileyUrl ? Discuz.Smiley.getCache() : cache.images;
         final Map<String, Point> imageSize = cache.size;
         final int imageWidth = isSmileyUrl ? 0 : maxSize.x;
         final int imageHeight = isSmileyUrl ? 0 : maxSize.y;
