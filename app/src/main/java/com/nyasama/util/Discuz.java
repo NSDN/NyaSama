@@ -304,6 +304,175 @@ public class Discuz {
         }
     }
 
+    public static class Smiley {
+        public String code;
+        public String image;
+
+        // cache
+        private static BitmapLruCache smileyCache = new BitmapLruCache();
+        public static BitmapLruCache getCache() {
+            return smileyCache;
+        }
+
+        // helper
+        public static boolean isSmileyUrl(String url) {
+            return url.startsWith(DISCUZ_URL + "static/image/smiley/");
+        }
+    }
+
+    public static class SmileyGroup {
+        public String name;
+        public String path;
+        public List<Smiley> list;
+
+        // saved list
+        private static List<SmileyGroup> sSmilies;
+        private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
+
+        public static List<SmileyGroup> getSmilies() {
+            return sSmilies;
+        }
+
+        public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
+            if (sSmilies != null) {
+                callback.onResponse(sSmilies);
+                return;
+            }
+            mSmiliesCallback = callback;
+            Request request = new StringRequest(DISCUZ_URL + "data/cache/common_smilies_var.js", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    parseSmileyString(s);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    if (mSmiliesCallback != null)
+                        mSmiliesCallback.onResponse(null);
+                }
+            }) {
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    try {
+                        // Note: charset not confirmed in other Discuz versions
+                        return Response.success(new String(response.data, "gb18030"), getCacheEntry());
+                    } catch (UnsupportedEncodingException e) {
+                        return Response.error(new VolleyError("decode failed!"));
+                    }
+                }
+            };
+            ThisApp.requestQueue.add(request);
+        }
+
+        // helpers
+        private static List<SmileyGroup> parseSmilies(JSONArray data) {
+            List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
+            for (int i = 0; i < data.length(); i++) {
+                final JSONObject jsonData = data.optJSONObject(i);
+                final JSONArray jsonList = jsonData.optJSONArray("list");
+                final List<Smiley> smileyList = new ArrayList<Smiley>();
+                for (int j = 0; j < jsonList.length(); j++) {
+                    final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                    smileyList.add(new Smiley() {{
+                        code = jsonSmiley.optString(1);
+                        image = jsonSmiley.optString(2);
+                    }});
+                }
+                smileyGroups.add(new SmileyGroup() {{
+                    name = jsonData.optString("name");
+                    path = jsonData.optString("path");
+                    list = smileyList;
+                }});
+            }
+            return smileyGroups;
+        }
+
+        private static class JSInterface {
+            @JavascriptInterface
+            @SuppressWarnings("unused")
+            public void setSmilies(String json) {
+                try {
+                    if (mSmiliesCallback != null)
+                        mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
+                    Log.d("Discuz", "got smilies!");
+                } catch (JSONException e) {
+                    Log.e("Discuz", "load smilies failed");
+                }
+            }
+        }
+
+        private static void parseSmileyString(String content) {
+            content = "<script>" + content + "</script>" +
+                    "<script>" +
+                    "var list = [];" +
+                    "var type = smilies_type;" +
+                    "var array = smilies_array;" +
+                    "for (var k in type) {" +
+                    "var d = type[k];" +
+                    "var i = parseInt(k.substring(1));" +
+                    " if (array[i]) {" +
+                    "list.push({ name:d[0], path:d[1], list:array[i][1]})" +
+                    "}" +
+                    "}" +
+                    "JSInterface.setSmilies(JSON.stringify(list))" +
+                    "</script>";
+            ThisApp.webView.getSettings().setJavaScriptEnabled(true);
+            ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
+            ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
+        }
+    }
+
+    public static class ThreadTypes extends HashMap<String, Integer> {
+        public ThreadTypes(JSONObject data) {
+            for (Iterator<String> iter = data.keys(); iter.hasNext(); ) {
+                String key = iter.next();
+                put(data.optString(key),
+                        Helper.toSafeInteger(key, 0));
+            }
+        }
+    }
+
+    public static class ForumThreadInfo {
+        public String name;
+        public ThreadTypes types;
+
+        public ForumThreadInfo(JSONObject data) {
+            name = data.optString("name");
+            JSONObject threadtypes = data.optJSONObject("threadtypes");
+            if (threadtypes != null && !threadtypes.isNull("types"))
+                types = new ThreadTypes(threadtypes.optJSONObject("types"));
+        }
+
+        private static SparseArray<ForumThreadInfo> sForumThreadInfo;
+
+        public static SparseArray<ForumThreadInfo> getInfo() {
+            return sForumThreadInfo;
+        }
+
+        public static void loadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
+            if (sForumThreadInfo != null) {
+                callback.onResponse(sForumThreadInfo);
+                return;
+            }
+            Discuz.execute("forumnav", new HashMap<String, Object>(), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject data) {
+                            JSONObject var = data.optJSONObject("Variables");
+                            if (var == null) return;
+                            sForumThreadInfo = new SparseArray<ForumThreadInfo>();
+                            JSONArray forums = var.optJSONArray("forums");
+                            for (int i = 0; i < forums.length(); i++) {
+                                JSONObject forum = forums.optJSONObject(i);
+                                int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
+                                sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
+                            }
+                            callback.onResponse(sForumThreadInfo);
+                        }
+                    });
+        }
+    }
+
     public static String sFormHash = "";
     public static String sUploadHash = "";
     public static String sUsername = "";
@@ -313,14 +482,6 @@ public class Discuz {
     public static int sNewPrompts = 0;
     public static boolean sHasLogined;
     public static boolean sIsModerator;
-
-    private static List<NameValuePair> map2list(Map<String, Object> map) {
-        List<NameValuePair> list = new ArrayList<NameValuePair>();
-        for (Map.Entry<String, Object> e : map.entrySet())
-            list.add(new BasicNameValuePair(e.getKey(),
-                    e.getValue() != null ? e.getValue().toString() : ""));
-        return list;
-    }
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
     public static String getAttachmentThumb(int attachmentId, String size) {
@@ -346,15 +507,6 @@ public class Discuz {
         return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
     }
 
-    public static boolean isSmileyUrl(String url) {
-        return url.startsWith(DISCUZ_URL + "static/image/smiley/");
-    }
-
-    private static BitmapLruCache smileyCache = new BitmapLruCache();
-    public static BitmapLruCache getSmileyCache() {
-        return smileyCache;
-    }
-
     public static String getSafeUrl(String url) {
         if (url == null)
             return "";
@@ -367,189 +519,7 @@ public class Discuz {
             return DISCUZ_URL + url;
     }
 
-    private static void notifyNewMessage() {
-        Class activityClass = UserProfileActivity.class;
-        if (sNewMessages > 0 && sNewPrompts == 0)
-            activityClass = PMListActivity.class;
-        else if (sNewMessages == 0 && sNewPrompts > 0)
-            activityClass = NoticeActivity.class;
-        Context context = ThisApp.context;
-        Intent intents[] = {new Intent(context, activityClass)};
-        PendingIntent pendingIntent = PendingIntent.getActivities(context,
-                0,
-                intents,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        String text = context.getString(R.string.prompt_1) + " " +
-                (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
-                (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
-        Notification notification = new NotificationCompat.Builder(ThisApp.context)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setDefaults(Notification.DEFAULT_SOUND)
-                .setContentTitle(context.getString(R.string.notify_title_text))
-                .setContentText(text)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build();
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(NOTIFICATION_ID, notification);
-    }
-
-    public static class Smiley {
-        public String code;
-        public String image;
-    }
-
-    public static class SmileyGroup {
-        public String name;
-        public String path;
-        public List<Smiley> list;
-    }
-
-    private static List<SmileyGroup> parseSmilies(JSONArray data) {
-        List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
-        for (int i = 0; i < data.length(); i++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
-                }});
-            }
-            smileyGroups.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
-        }
-        return smileyGroups;
-    }
-
-    private static List<SmileyGroup> sSmilies;
-    private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
-
-    private static class JSInterface {
-        @JavascriptInterface
-        @SuppressWarnings("unused")
-        public void setSmilies(String json) {
-            try {
-                if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
-                Log.d("Discuz", "got smilies!");
-            } catch (JSONException e) {
-                Log.e("Discuz", "load smilies failed");
-            }
-        }
-    }
-
-    private static void parseSmileyString(String content) {
-        content = "<script>" + content + "</script>" +
-                "<script>" +
-                "var list = [];" +
-                "var type = smilies_type;" +
-                "var array = smilies_array;" +
-                "for (var k in type) {" +
-                "var d = type[k];" +
-                "var i = parseInt(k.substring(1));" +
-                " if (array[i]) {" +
-                "list.push({ name:d[0], path:d[1], list:array[i][1]})" +
-                "}" +
-                "}" +
-                "JSInterface.setSmilies(JSON.stringify(list))" +
-                "</script>";
-        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
-        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
-    }
-
-    public static List<SmileyGroup> getSmilies() {
-        return sSmilies;
-    }
-
-    public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
-        if (sSmilies != null) {
-            callback.onResponse(sSmilies);
-            return;
-        }
-        mSmiliesCallback = callback;
-        Request request = new StringRequest(DISCUZ_URL + "data/cache/common_smilies_var.js", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                parseSmileyString(s);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(null);
-            }
-        }) {
-            @Override
-            protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                try {
-                    // Note: charset not confirmed in other Discuz versions
-                    return Response.success(new String(response.data, "gb18030"), getCacheEntry());
-                } catch (UnsupportedEncodingException e) {
-                    return Response.error(new VolleyError("decode failed!"));
-                }
-            }
-        };
-        ThisApp.requestQueue.add(request);
-    }
-
-    public static class ThreadTypes extends HashMap<String, Integer> {
-        public ThreadTypes(JSONObject data) {
-            for (Iterator<String> iter = data.keys(); iter.hasNext(); ) {
-                String key = iter.next();
-                put(data.optString(key),
-                        Helper.toSafeInteger(key, 0));
-            }
-        }
-    }
-
-    public static class ForumThreadInfo {
-        public String name;
-        public ThreadTypes types;
-        public ForumThreadInfo(JSONObject data) {
-            name = data.optString("name");
-            JSONObject threadtypes = data.optJSONObject("threadtypes");
-            if (threadtypes != null && !threadtypes.isNull("types"))
-                types = new ThreadTypes(threadtypes.optJSONObject("types"));
-        }
-    }
-
-    private static SparseArray<ForumThreadInfo> sForumThreadInfo;
-
-    public static SparseArray<ForumThreadInfo> getForumThreadInfo() {
-        return sForumThreadInfo;
-    }
-
-    public static void loadForumThreadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
-        if (sForumThreadInfo != null) {
-            callback.onResponse(sForumThreadInfo);
-            return;
-        }
-        Discuz.execute("forumnav", new HashMap<String, Object>(), null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject data) {
-                        JSONObject var = data.optJSONObject("Variables");
-                        if (var == null) return;
-                        sForumThreadInfo = new SparseArray<ForumThreadInfo>();
-                        JSONArray forums = var.optJSONArray("forums");
-                        for (int i = 0; i < forums.length(); i++) {
-                            JSONObject forum = forums.optJSONObject(i);
-                            int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
-                            sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
-                        }
-                        callback.onResponse(sForumThreadInfo);
-                    }
-                });
-    }
-
-    public static class ResponseListener implements Response.Listener<String> {
+    private static class ResponseListener implements Response.Listener<String> {
         Response.Listener<JSONObject> callback;
 
         public ResponseListener(Response.Listener<JSONObject> callback) {
@@ -600,7 +570,7 @@ public class Discuz {
         }
     }
 
-    public static class ResponseErrorListener implements Response.ErrorListener {
+    private static class ResponseErrorListener implements Response.ErrorListener {
         Response.Listener<JSONObject> callback;
 
         public ResponseErrorListener(Response.Listener<JSONObject> callback) {
@@ -872,7 +842,7 @@ public class Discuz {
         task.execute();
     }
 
-    public static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
+    static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
             Pattern.DOTALL | Pattern.MULTILINE);
     public static void search(final String text,
                               final Map<String, Object> params,
@@ -964,7 +934,6 @@ public class Discuz {
     }
 
     static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
-
     public static void signin(final Response.Listener<String> callback) {
         String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
         Request request = new StringRequest(url, new Response.Listener<String>() {
@@ -985,4 +954,41 @@ public class Discuz {
         ThisApp.requestQueue.add(request);
     }
 
+    //
+    // helpers
+    //
+    private static List<NameValuePair> map2list(Map<String, Object> map) {
+        List<NameValuePair> list = new ArrayList<NameValuePair>();
+        for (Map.Entry<String, Object> e : map.entrySet())
+            list.add(new BasicNameValuePair(e.getKey(),
+                    e.getValue() != null ? e.getValue().toString() : ""));
+        return list;
+    }
+
+    private static void notifyNewMessage() {
+        Class activityClass = UserProfileActivity.class;
+        if (sNewMessages > 0 && sNewPrompts == 0)
+            activityClass = PMListActivity.class;
+        else if (sNewMessages == 0 && sNewPrompts > 0)
+            activityClass = NoticeActivity.class;
+        Context context = ThisApp.context;
+        Intent intents[] = {new Intent(context, activityClass)};
+        PendingIntent pendingIntent = PendingIntent.getActivities(context,
+                0,
+                intents,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        String text = context.getString(R.string.prompt_1) + " " +
+                (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
+                (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
+        Notification notification = new NotificationCompat.Builder(ThisApp.context)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setContentTitle(context.getString(R.string.notify_title_text))
+                .setContentText(text)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build();
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(NOTIFICATION_ID, notification);
+    }
 }

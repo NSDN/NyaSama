@@ -271,7 +271,7 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void loadThreadTypes(final int fid, final int typeid) {
-        Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
+        Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
             public void onResponse(SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
                 mThreadTypes = forumThreadInfo.get(fid).types;
@@ -336,7 +336,7 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void showInsertSmileyOptions() {
-        final List<SmileyGroup> smilyGroups = Discuz.getSmilies();
+        final List<SmileyGroup> smilyGroups = SmileyGroup.getSmilies();
         if (smilyGroups == null) {
             Helper.toast(R.string.there_is_something_wrong);
             return;
@@ -619,11 +619,11 @@ public class NewPostActivity extends BaseThemedActivity {
             editPollOptions();
         }
         else if (id == R.id.action_add_smiley) {
-            if (Discuz.getSmilies() == null) {
+            if (SmileyGroup.getSmilies() == null) {
                 final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
-                Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
+                SmileyGroup.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
                     @Override
                     public void onResponse(List<SmileyGroup> smileyGroups) {
                         dialog.cancel();

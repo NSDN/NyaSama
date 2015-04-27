@@ -32,7 +32,6 @@ import com.android.volley.toolbox.ImageRequest;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Attachment;
 import com.nyasama.util.Discuz.Post;
@@ -76,7 +75,6 @@ public class AttachmentViewer extends BaseThemedActivity {
     private FragmentStatePagerAdapter mPageAdapter;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
-    private BitmapLruCache mBitmapCache = new BitmapLruCache();
     private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
     private boolean mHasAttachmentsPrev;
     private boolean mHasAttachmentsNext;
@@ -385,48 +383,42 @@ public class AttachmentViewer extends BaseThemedActivity {
             else if (bundle.getBoolean("isImage")) {
                 final View view = inflater.inflate(R.layout.fragment_attachment_image, container, false);
                 final PhotoView photoView = (PhotoView) view.findViewById(R.id.image_view);
-                Bitmap bitmap = mActivity.mBitmapCache.getBitmap(src);
-                if (bitmap != null) {
-                    photoView.setImageBitmap(bitmap);
-                } else {
-                    Bitmap thumb = mActivity.mThumbCache.get(src);
-                    if (thumb != null)
-                        photoView.setImageBitmap(thumb);
-                    else
-                        photoView.setImageResource(android.R.drawable.ic_menu_gallery);
-                    Helper.updateVisibility(view, R.id.loading, true);
-                    ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap bitmap) {
-                            // Note: On some old devices like Galaxy Nexus,
-                            // images larger than 2048x2048 will not be rendered.
-                            // As volley is facing OOM when resizing images
-                            // we have to resize it here
-                            if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
-                                    bitmap.getHeight() > MAX_TEXTURE_SIZE) {
-                                try {
-                                    bitmap = Helper.getFittedBitmap(bitmap,
-                                            MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
-                                }
-                                catch (OutOfMemoryError e) {
-                                    bitmap = Helper.getFittedBitmap(bitmap,
-                                            MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
-                                }
+                Bitmap thumb = mActivity.mThumbCache.get(src);
+                if (thumb != null)
+                    photoView.setImageBitmap(thumb);
+                else
+                    photoView.setImageResource(android.R.drawable.ic_menu_gallery);
+                Helper.updateVisibility(view, R.id.loading, true);
+                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        // Note: On some old devices like Galaxy Nexus,
+                        // images larger than 2048x2048 will not be rendered.
+                        // As volley is facing OOM when resizing images
+                        // we have to resize it here
+                        if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
+                                bitmap.getHeight() > MAX_TEXTURE_SIZE) {
+                            try {
+                                bitmap = Helper.getFittedBitmap(bitmap,
+                                        MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
                             }
-                            mActivity.mBitmapCache.putBitmap(src, bitmap);
-                            mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
-                                    IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
-                            photoView.setImageBitmap(bitmap);
-                            Helper.updateVisibility(view, R.id.loading, false);
+                            catch (OutOfMemoryError e) {
+                                bitmap = Helper.getFittedBitmap(bitmap,
+                                        MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                            }
                         }
-                    }, 0, 0, null, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError volleyError) {
-                            Helper.updateVisibility(view, R.id.loading, false);
-                        }
-                    });
-                    mActivity.mRequestQueue.add(imageRequest);
-                }
+                        mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
+                                IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
+                        photoView.setImageBitmap(bitmap);
+                        Helper.updateVisibility(view, R.id.loading, false);
+                    }
+                }, 0, 0, null, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Helper.updateVisibility(view, R.id.loading, false);
+                    }
+                });
+                mActivity.mRequestQueue.add(imageRequest);
                 return view;
             } else {
                 View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);
