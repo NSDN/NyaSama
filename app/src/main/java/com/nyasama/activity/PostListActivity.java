@@ -1052,10 +1052,13 @@ public class PostListActivity extends BaseThemedActivity
                         new Helper.OnSpanClickListener() {
                             @Override
                             public boolean onClick(View widget, String src) {
+                                Intent oldInt = getIntent();
                                 Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
-                                intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                int offset = getIntent().getIntExtra("page", 0) * PAGE_SIZE_COUNT;
+                                intent.putExtra("tid", oldInt.getIntExtra("tid", 0));
+                                int offset = oldInt.getIntExtra("page", 0) * PAGE_SIZE_COUNT;
                                 intent.putExtra("index", offset + mListFragment.getIndex(item));
+                                intent.putExtra("reverse", oldInt.getBooleanExtra("reverse", false));
+                                intent.putExtra("authorid", oldInt.getIntExtra("authorid", 0));
 
                                 Attachment attachment = mAttachmentMap.get(src);
                                 // attachment image
@@ -1120,9 +1123,12 @@ public class PostListActivity extends BaseThemedActivity
                 attachments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        final Intent oldInt = getIntent();
                         startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
-                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+                            putExtra("tid", oldInt.getIntExtra("tid", 0));
                             putExtra("index", offset + mListFragment.getIndex(item));
+                            putExtra("reverse", oldInt.getBooleanExtra("reverse", false));
+                            putExtra("authorid", oldInt.getIntExtra("authorid", 0));
                         }});
                     }
                 });

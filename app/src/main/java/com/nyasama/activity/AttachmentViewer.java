@@ -175,6 +175,13 @@ public class AttachmentViewer extends BaseThemedActivity {
             put("ppp", pageSize);
             put("page", pageIndex + 1);
             put("tid", getIntent().getIntExtra("tid", 0));
+
+            Intent intent = getIntent();
+            int authorId = intent.getIntExtra("authorid", 0);
+            if (authorId > 0)
+                put("authorid", authorId);
+            if (intent.getBooleanExtra("reverse", false))
+                put("ordertype", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
