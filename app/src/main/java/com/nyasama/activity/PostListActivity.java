@@ -807,36 +807,37 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     private void setupListFragment() {
-        if (mListFragment != null)
-            return;
+        if (mListFragment == null) {
 
-        mListFragment = CommonListFragment.getNewFragment(
-                Post.class,
-                R.layout.fragment_simple_list,
-                R.layout.fragment_post_item,
-                R.id.list);
+            mListFragment = CommonListFragment.getNewFragment(
+                    Post.class,
+                    R.layout.fragment_simple_list,
+                    R.layout.fragment_post_item,
+                    R.id.list);
 
-        mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
-            private int mCurrentItem;
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-                if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
-                    ActionBar actionBar = getActionBar();
-                    Intent intent = getIntent();
-                    int pageOffset = intent.getIntExtra("page", 0);
-                    int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
-                    if (actionBar != null && actionBar.getSelectedNavigationIndex() != pageScroll) {
-                        intent.putExtra("update-nav-spinner", true);
-                        actionBar.setSelectedNavigationItem(pageScroll);
+            mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
+                private int mCurrentItem;
+                @Override
+                public void onScrollStateChanged(AbsListView absListView, int i) {
+                    if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
+                        ActionBar actionBar = getActionBar();
+                        Intent intent = getIntent();
+                        int pageOffset = intent.getIntExtra("page", 0);
+                        int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
+                        if (actionBar != null && actionBar.getSelectedNavigationIndex() != pageScroll) {
+                            intent.putExtra("update-nav-spinner", true);
+                            actionBar.setSelectedNavigationItem(pageScroll);
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-                mCurrentItem = i;
-            }
-        });
+                @Override
+                public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                    mCurrentItem = i;
+                }
+            });
+
+        }
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
@@ -848,11 +849,11 @@ public class PostListActivity extends BaseThemedActivity
             getSupportFragmentManager().beginTransaction()
                     .remove(mListFragment)
                     .commit();
+            ((BitmapLruCache) mImageCache.images).evictAll();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        mListFragment = null;
     }
 
     @Override
@@ -873,7 +874,7 @@ public class PostListActivity extends BaseThemedActivity
         isPaused = true;
         // remove fragment to recycle memory
         if (PostListActivity.this.mPrefMaxImageSize.x >= 0)
-            // after some milliseconds to avoid splash
+            // remove fragment after some milliseconds to avoid splash
             new android.os.Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -978,14 +979,14 @@ public class PostListActivity extends BaseThemedActivity
         "[/quote]";
     }
 
+    // Note: must put huge objects in fragment scope!
+    final HtmlImageGetter.HtmlImageCache mImageCache =
+            new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
+    final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
+
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
-
-            // Note: must put huge objects in fragment scope!
-            final HtmlImageGetter.HtmlImageCache mImageCache =
-                    new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
-            final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
 
             @Override
             public void convertView(ViewHolder viewHolder, final Post item) {
