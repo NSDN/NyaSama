@@ -44,6 +44,7 @@ import com.nyasama.util.Helper.Size;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -56,8 +57,10 @@ import java.util.Map;
 
 public class NewPostActivity extends BaseThemedActivity {
 
-    static final Size uploadSize = new Size(800, 800);
-    static final Size thumbSize = new Size(100, 100);
+    // TODO: get MAX_UPLOAD_BYTES by user group
+    static final int MAX_UPLOAD_BYTES = 700 * 1024;
+    static final Size MAX_UPLOAD_SIZE = new Size(2048, 2048);
+    static final Size THUMBNAIL_SIZE = new Size(100, 100);
 
     static final String ARG_POST_TITLE = "thread_title";
     static final String ARG_POST_TRIMSTR = "notice_trimstr";
@@ -214,7 +217,7 @@ public class NewPostActivity extends BaseThemedActivity {
                                     .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
                                     "replyperm_login_nopermission//1".equals(messageval))
-                                builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
+                                builder.setNegativeButton(R.string.login_button_text, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
@@ -502,15 +505,24 @@ public class NewPostActivity extends BaseThemedActivity {
         if ((requestCode == REQCODE_PICK_IMAGE || requestCode == REQCODE_PICK_CAPTURE)
                 && resultCode == RESULT_OK) {
 
-            // TODO: make me pretty
-            Bitmap bitmap;
+            // get file path
             String filePath;
             try {
                 filePath = requestCode == REQCODE_PICK_IMAGE ?
                         Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+                Helper.toast(R.string.toast_open_file_failed);
+                return;
+            }
+
+            // decode to bitmap
+            Bitmap bitmap;
+            try {
                 bitmap = BitmapFactory.decodeFile(filePath);
                 if (bitmap == null) {
-                    Helper.toast(getString(R.string.toast_open_image_fail));
+                    Helper.toast(R.string.toast_open_image_fail);
                     return;
                 }
             }
@@ -522,15 +534,33 @@ public class NewPostActivity extends BaseThemedActivity {
 
             // resize the image if too large
             Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
-            if (bitmap.getWidth() > uploadSize.width || bitmap.getHeight() > uploadSize.height) {
-                bitmapSize = Helper.getFittedSize(bitmapSize, uploadSize, false);
+            if (bitmap.getWidth() > MAX_UPLOAD_SIZE.width || bitmap.getHeight() > MAX_UPLOAD_SIZE.height) {
+                bitmapSize = Helper.getFittedSize(bitmapSize, MAX_UPLOAD_SIZE, false);
                 File dir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES);
+
+                // make sure the image size is smaller than MAX_UPLOAD_BYTES
+                ByteArrayOutputStream blob = new ByteArrayOutputStream();
+                while (true) {
+                    blob.reset();
+                    bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
+                    if (blob.size() > MAX_UPLOAD_BYTES && bitmapSize.width > 100) {
+                        bitmapSize.width = bitmapSize.width * 9 / 10;
+                        bitmapSize.height = bitmapSize.height * 9 / 10;
+                    }
+                    else {
+                        Log.d(NewPostActivity.class.toString(),
+                                "resize upload image to " + bitmapSize.width + "x" + bitmapSize.height);
+                        break;
+                    }
+                }
+
+                // write to file
                 try {
                     File file = new File(dir, "nyasama_upload_resized.jpg");
                     FileOutputStream stream = new FileOutputStream(file);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    stream.write(blob.toByteArray());
                     stream.flush();
                     stream.close();
                     filePath = file.getAbsolutePath();
@@ -541,12 +571,15 @@ public class NewPostActivity extends BaseThemedActivity {
                 catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
+
             }
 
             // create thumbnail
-            Size newSize = Helper.getFittedSize(bitmapSize, thumbSize, true);
+            Size newSize = Helper.getFittedSize(bitmapSize, THUMBNAIL_SIZE, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                     bitmap, newSize.width, newSize.height);
+
+            // upload
             final String uploadFile = filePath;
             final String fileName =
                     (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +

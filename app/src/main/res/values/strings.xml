@@ -152,6 +152,7 @@
     <string name="thread_target">目标板块</string>
     <string name="thread_type">目标分类</string>
     <string name="move_type">移动方式</string>
+    <string name="toast_open_file_failed">读取文件失败</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
