@@ -209,7 +209,7 @@ public class NewPostActivity extends BaseThemedActivity {
                             finish();
                         } else {
                             AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
-                                    .setTitle(R.string.there_is_something_wrong)
+                                    .setTitle(R.string.error_new_post)
                                     .setMessage(message.getString("messagestr"))
                                     .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
@@ -338,7 +338,7 @@ public class NewPostActivity extends BaseThemedActivity {
     public void showInsertSmileyOptions() {
         final List<SmileyGroup> smilyGroups = SmileyGroup.getSmilies();
         if (smilyGroups == null) {
-            Helper.toast(R.string.there_is_something_wrong);
+            Helper.toast(R.string.error_smilely_load);
             return;
         }
 
@@ -516,7 +516,7 @@ public class NewPostActivity extends BaseThemedActivity {
             }
             catch (Throwable e) {
                 e.printStackTrace();
-                Helper.toast(R.string.there_is_something_wrong);
+                Helper.toast(R.string.error_new_post);
                 return;
             }
 

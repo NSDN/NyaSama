@@ -41,6 +41,9 @@
     <string name="thread_list_threads_title">主题</string>
     <string name="thread_list_subforum_title">子版块</string>
     <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
+    <string name="error_new_post">诶多，帖子被大结界挡住了……</string>
+    <string name="error_no_internet">紫大人网断了TAT</string>
+    <string name="error_smilely_load">秦心偷走了重要的东西（</string>
     <string name="diag_insert_options">插入图片</string>
     <string name="diag_insert_from_gallery">来自图库</string>
     <string name="diag_insert_from_camera">来自相机</string>

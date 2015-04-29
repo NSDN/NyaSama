@@ -188,7 +188,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                         JSONObject message = data.getJSONObject("Message");
                         mAttachmentList.clear();
                         new AccentAlertDialog.Builder(AttachmentViewer.this)
-                                .setTitle(R.string.there_is_something_wrong)
+                                .setTitle(R.string.error_no_internet)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override

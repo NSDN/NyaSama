@@ -215,4 +215,7 @@
     <string name="thread_target">Target thread</string>
     <string name="thread_type">Target type</string>
     <string name="move_type">Move type</string>
+    <string name="error_new_post">Post failed</string>
+    <string name="error_no_internet">Request timeout</string>
+    <string name="error_smilely_load">We have no smilely</string>
 </resources>

@@ -234,7 +234,7 @@ public class MainActivity extends BaseThemedActivity implements
     public void onGetThreadData(DiscuzThreadListFragment fragment) {
         if (fragment.getMessage() != null) {
             new AccentAlertDialog.Builder(MainActivity.this)
-                    .setTitle(R.string.there_is_something_wrong)
+                    .setTitle(R.string.error_no_internet)
                     .setMessage(fragment.getMessage())
                     .setPositiveButton(android.R.string.yes, null)
                     .show();
