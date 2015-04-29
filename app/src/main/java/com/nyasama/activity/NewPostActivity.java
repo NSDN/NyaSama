@@ -6,12 +6,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -35,11 +38,14 @@ import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
+import com.nyasama.util.BitmapLruCache;
+import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
+import com.nyasama.util.HtmlImageGetter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +60,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class NewPostActivity extends BaseThemedActivity {
 
@@ -87,12 +94,43 @@ public class NewPostActivity extends BaseThemedActivity {
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
+    HtmlImageGetter.HtmlImageCache mImageCache = new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
+    Point mMaxImageSize = new Point(100, 100);
+
+    public String compileToString(EditText html) {
+        /*
+        // TODO: replace html tags with discuz tags
+        return Html.toHtml(html.getText());
+        */
+        return html.getText().toString();
+    }
+
+    public void loadToEditor(EditText html, String string) {
+        /*
+        // TODO: replace discuz tags with html tags
+        Spanned span = Html.fromHtml(string,
+                new HtmlImageGetter(html, mImageCache, mMaxImageSize),
+                null);
+        html.setText(span);
+        */
+        html.setText(string);
+    }
+
+    public void insertCodeToContent(String code) {
+        int start = mInputContent.getSelectionStart();
+        mInputContent.getText().insert(start, code);
+    }
+
+    public void insertImageToContent(ImageAttachment image) {
+        insertCodeToContent("[attachimg]" + image.uploadId + "[/attachimg]");
+    }
+
     public void doEdit(View view) {
         if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
             return;
 
         final String title = mInputTitle.getText().toString();
-        final String content = mInputContent.getText().toString();
+        final String content = compileToString(mInputContent);
         if (content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
             return;
@@ -149,7 +187,7 @@ public class NewPostActivity extends BaseThemedActivity {
             return;
 
         final String title = mInputTitle.getText().toString();
-        final String content = mInputContent.getText().toString();
+        final String content = compileToString(mInputContent);
         final String noticetrimstr = getIntent().getStringExtra(ARG_POST_TRIMSTR);
         if (title.isEmpty() || content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
@@ -261,7 +299,7 @@ public class NewPostActivity extends BaseThemedActivity {
                         postinfo = var.optJSONObject("postinfo");
                     if (postinfo != null) {
                         mInputTitle.setText(postinfo.optString("subject"));
-                        mInputContent.setText(postinfo.optString("message"));
+                        loadToEditor(mInputContent, postinfo.optString("message"));
                         if ("1".equals(postinfo.optString("first"))) {
                             int fid = Helper.toSafeInteger(postinfo.optString("fid"), 0);
                             if (fid > 0) loadThreadTypes(fid,
@@ -327,15 +365,6 @@ public class NewPostActivity extends BaseThemedActivity {
             }
         });
         dialog.show();
-    }
-
-    public void insertCodeToContent(String code) {
-        int start = mInputContent.getSelectionStart();
-        mInputContent.getText().insert(start, code);
-    }
-
-    public void insertImageToContent(ImageAttachment image) {
-        insertCodeToContent("[attachimg]"+image.uploadId+"[/attachimg]");
     }
 
     public void showInsertSmileyOptions() {
