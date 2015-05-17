@@ -46,9 +46,13 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -827,6 +831,54 @@ public class Discuz {
                 } catch (IOException e) {
                     return null;
                 }
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                process.onResponse(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callback.onResponse(s);
+            }
+        };
+        task.execute();
+    }
+
+    // to be finished
+    @SuppressWarnings("unchecked")
+    public static void download(final String url,
+                              final Response.Listener<String> callback,
+                              final Response.Listener<Integer> process) {
+        AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            @Override
+            protected String doInBackground(Object... objects) {
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                        Log.e("Discuz", "http get failed");
+                        return null;
+                    }
+
+                    int contentLength = conn.getContentLength();
+                    InputStream input = conn.getInputStream();
+                    int count, recvd = 0;
+                    byte data[] = new byte[4096];
+                    while ((count = input.read(data)) >= 0) {
+                        recvd += count;
+                        publishProgress(recvd * 100 / contentLength);
+                    }
+
+                    input.close();
+                }
+                catch (MalformedURLException e) {
+                    Log.e("Discuz", "invalid url");
+                }
+                catch (IOException e) {
+                    Log.e("Discuz", "open connection failed");
+                }
+                return null;
             }
 
             @Override
