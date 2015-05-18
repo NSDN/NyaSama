@@ -18,6 +18,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.activity.SplashActivity;
 import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Helper;
@@ -44,6 +45,7 @@ public class ThisApp extends Application {
     public static ImageLoader imageLoader;
     public static PersistenceCookieStore cookieStore;
     public static WebView webView;
+    public static DiskLruCache fileDiskCache;
 
     private static Locale getLocale(String language) {
         String[] values = context.getResources().getStringArray(R.array.language_preference);
@@ -114,6 +116,15 @@ public class ThisApp extends Application {
 
         webView = new WebView(context);
         webView.getSettings().setJavaScriptEnabled(true);
+
+        try {
+            // TODO: add an option for cache size
+            fileDiskCache = DiskLruCache.open(new File(getExternalCacheDir(), "file-cache"), 0, 1, 256 * 1024 * 1024);
+        }
+        catch (IOException e) {
+            Helper.toast(e.getMessage());
+            System.exit(1);
+        }
     }
 
     public static void restart() {

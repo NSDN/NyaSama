@@ -28,6 +28,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
@@ -40,7 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -362,19 +363,24 @@ public class AttachmentViewer extends BaseThemedActivity {
             mActivity = (AttachmentViewer) activity;
         }
 
-        private Bitmap decodeBitmap(String path) {
-            // decode file
+        private Bitmap getCachedBitmap(String cacheKey) {
+            DiskLruCache.Snapshot snapshot;
+            try {
+                snapshot = ThisApp.fileDiskCache.get(cacheKey);
+                if (snapshot == null) return null;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
             Bitmap bitmap;
             try {
-                bitmap = BitmapFactory.decodeFile(path);
-                if (bitmap == null) {
-                    Helper.toast(R.string.toast_open_image_fail);
-                    return null;
-                }
+                bitmap = BitmapFactory.decodeStream(snapshot.getInputStream(0));
+                if (bitmap == null) return null;
             }
             catch (Throwable e) {
                 e.printStackTrace();
-                Helper.toast(R.string.there_is_something_wrong);
                 return null;
             }
 
@@ -435,17 +441,16 @@ public class AttachmentViewer extends BaseThemedActivity {
                 else
                     photoView.setImageResource(android.R.drawable.ic_menu_gallery);
 
-                File dir = ThisApp.context.getCacheDir();
-                final File file = new File(dir, "nyasama-cache-" + Helper.toSafeMD5(src));
-                if (file.exists()) {
-                    Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                final String cacheKey = Helper.toSafeMD5(src);
+                final Bitmap bitmap = getCachedBitmap(cacheKey);
+                if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
                     mActivity.mThumbCache.put(src,
                             Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    Discuz.download(Discuz.getSafeUrl(src), file.getAbsolutePath(), new Response.Listener<String>() {
+                    Discuz.download(Discuz.getSafeUrl(src), cacheKey, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String err) {
                             loading.setVisibility(View.GONE);
@@ -455,7 +460,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                             }
                             else {
                                 message.setVisibility(View.GONE);
-                                Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                                Bitmap bitmap = getCachedBitmap(cacheKey);
                                 photoView.setImageBitmap(bitmap);
                                 mActivity.mThumbCache.put(src,
                                         Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));

@@ -23,6 +23,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.activity.NoticeActivity;
@@ -45,7 +46,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -869,7 +869,7 @@ public class Discuz {
     // to be finished
     @SuppressWarnings("unchecked unused")
     public static void download(final String url,
-                              final String path,
+                              final String cacheKey,
                               final Response.Listener<String> callback,
                               final Response.Listener<Integer> process) {
         AsyncTask task = new AsyncTask<Object, Integer, String>() {
@@ -878,15 +878,19 @@ public class Discuz {
                 try {
                     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                        Log.e("Discuz", "http get failed");
                         return "http get failed";
+                    }
+
+                    DiskLruCache.Editor editor = ThisApp.fileDiskCache.edit(cacheKey);
+                    if (editor == null) {
+                        return "open cache failed";
                     }
 
                     int contentLength = conn.getContentLength();
                     InputStream input = conn.getInputStream();
-                    OutputStream output = new FileOutputStream(path);
+                    OutputStream output = editor.newOutputStream(0);
                     int count, recvd = 0;
-                    byte data[] = new byte[4096];
+                    byte data[] = new byte[16 * 1024];
                     while ((count = input.read(data)) >= 0) {
                         recvd += count;
                         publishProgress(recvd * 100 / contentLength);
@@ -894,6 +898,8 @@ public class Discuz {
                     }
 
                     input.close();
+                    output.close();
+                    editor.commit();
                     return null;
                 }
                 catch (Throwable e) {
