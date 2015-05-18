@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
@@ -482,6 +483,7 @@ public class Discuz {
     public static String sUsername = "";
     public static String sGroupName = "";
     public static int sUid = 0;
+    public static int sGid = 0;
     public static int sNewMessages = 0;
     public static int sNewPrompts = 0;
     public static boolean sHasLogined;
@@ -523,6 +525,33 @@ public class Discuz {
             return DISCUZ_URL + url;
     }
 
+    static SparseIntArray maxUploadSize = new SparseIntArray() {{
+        put(1, 2048*1024);
+        put(2, 500*1024);
+        put(3, 1024*1024);
+        put(38, 1024*1024);
+        put(32, 16*1024*1024);
+        put(43, 500*1024);
+        put(47, 999*1024);
+
+        put(22, 2048*1024);
+        put(42, 1024*1024);
+        put(45, 500*1024);
+
+        put(11, 500*1024);
+        put(11, 700*1024);
+        put(12, 900*1024);
+        put(13, 1170*1024);
+        put(14, 1460*1024);
+        put(15, 1760*1024);
+        put(20, 2048*1024);
+        put(21, 2048*1024);
+        put(39, 2048*1024);
+    }};
+    public static int getMaxUploadSize() {
+        return maxUploadSize.get(sGid);
+    }
+
     private static class ResponseListener implements Response.Listener<String> {
         Response.Listener<JSONObject> callback;
 
@@ -542,7 +571,8 @@ public class Discuz {
             if (var != null) {
                 sFormHash = var.optString("formhash", "");
                 sUsername = var.optString("member_username", "");
-                sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                sUid = Helper.toSafeInteger(var.optString("member_uid", "0"), 0);
+                sGid = Helper.toSafeInteger(var.optString("groupid", "0"), 0);
                 sIsModerator = !"0".equals(var.optString("ismoderator"));
                 if (!var.isNull("allowperm"))
                     sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
@@ -847,7 +877,7 @@ public class Discuz {
     }
 
     // to be finished
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked unused")
     public static void download(final String url,
                               final Response.Listener<String> callback,
                               final Response.Listener<Integer> process) {

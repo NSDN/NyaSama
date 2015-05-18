@@ -6,15 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -38,14 +35,11 @@ import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.util.BitmapLruCache;
-import com.nyasama.util.CallbackMatcher;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.Discuz.SmileyGroup;
 import com.nyasama.util.Helper.Size;
-import com.nyasama.util.HtmlImageGetter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,12 +54,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class NewPostActivity extends BaseThemedActivity {
 
-    // TODO: get MAX_UPLOAD_BYTES by user group
-    static final int MAX_UPLOAD_BYTES = 700 * 1024;
     static final Size MAX_UPLOAD_SIZE = new Size(2048, 2048);
     static final Size THUMBNAIL_SIZE = new Size(100, 100);
 
@@ -94,8 +85,11 @@ public class NewPostActivity extends BaseThemedActivity {
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
+    /*
+    // TODO: replace html tags with discuz tags
     HtmlImageGetter.HtmlImageCache mImageCache = new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
     Point mMaxImageSize = new Point(100, 100);
+    */
 
     public String compileToString(EditText html) {
         /*
@@ -574,7 +568,7 @@ public class NewPostActivity extends BaseThemedActivity {
                     blob.reset();
                     bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
-                    if (blob.size() > MAX_UPLOAD_BYTES && bitmapSize.width > 100) {
+                    if (blob.size() > Discuz.getMaxUploadSize() && bitmapSize.width > 100) {
                         bitmapSize.width = bitmapSize.width * 9 / 10;
                         bitmapSize.height = bitmapSize.height * 9 / 10;
                     }
