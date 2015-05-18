@@ -86,7 +86,7 @@
     <string name="preference_language">语言</string>
     <string name="preference_animation">过渡动画</string>
     <string name="preference_category_version">版本</string>
-    <string name="preference_cachesize">缓存大小</string>
+    <string name="preference_web_cache">网络缓存</string>
     <string name="preference_category_explore">浏览</string>
     <string name="preference_thumbsize">帖子图片尺寸</string>
     <string name="new_version_alert_title">有新版本啦</string>
@@ -153,6 +153,7 @@
     <string name="thread_type">目标分类</string>
     <string name="move_type">移动方式</string>
     <string name="toast_open_file_failed">读取文件失败</string>
+    <string name="preference_manga_cache">漫画缓存</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>

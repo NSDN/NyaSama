@@ -78,11 +78,23 @@ public class ThisApp extends Application {
     }
 
     public static void onSharedPreferenceChanged(SharedPreferences pref, String s) {
-        if (s.equals(context.getString(R.string.pref_key_language)))
+        if (s.equals(context.getString(R.string.pref_key_language))) {
             loadLocale(pref.getString(s, ""));
-        else if (s.equals(context.getString(R.string.pref_key_cache_size)))
+        }
+        else if (s.equals(context.getString(R.string.pref_key_web_cache_size))) {
             volleyCache = new DiskBasedCache(new File(context.getCacheDir(), "NyasamaVolleyCache"),
                     1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
+        }
+        else if (s.equals("disk_cache")) {
+            try {
+                fileDiskCache = DiskLruCache.open(new File(context.getExternalCacheDir(), "file-cache"),
+                        0, 1, 1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 256));
+            }
+            catch (IOException e) {
+                Helper.toast(e.getMessage());
+                System.exit(1);
+            }
+        }
     }
 
     @Override
@@ -93,7 +105,8 @@ public class ThisApp extends Application {
         // load preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
-        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_cache_size));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_web_cache_size));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_manga_cache_size));
 
         // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
         Network network = new BasicNetwork(new HurlStack() {
@@ -116,15 +129,6 @@ public class ThisApp extends Application {
 
         webView = new WebView(context);
         webView.getSettings().setJavaScriptEnabled(true);
-
-        try {
-            // TODO: add an option for cache size
-            fileDiskCache = DiskLruCache.open(new File(getExternalCacheDir(), "file-cache"), 0, 1, 256 * 1024 * 1024);
-        }
-        catch (IOException e) {
-            Helper.toast(e.getMessage());
-            System.exit(1);
-        }
     }
 
     public static void restart() {
