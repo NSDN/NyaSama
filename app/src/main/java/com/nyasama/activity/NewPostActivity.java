@@ -559,8 +559,7 @@ public class NewPostActivity extends BaseThemedActivity {
             Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
             if (bitmap.getWidth() > MAX_UPLOAD_SIZE.width || bitmap.getHeight() > MAX_UPLOAD_SIZE.height) {
                 bitmapSize = Helper.getFittedSize(bitmapSize, MAX_UPLOAD_SIZE, false);
-                File dir = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES);
+                File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
                 // make sure the image size is smaller than MAX_UPLOAD_BYTES
                 ByteArrayOutputStream blob = new ByteArrayOutputStream();

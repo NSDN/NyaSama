@@ -45,19 +45,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -491,14 +488,7 @@ public class Discuz {
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
     public static String getAttachmentThumb(int attachmentId, String size) {
-        String str = attachmentId + "|" + size.replace('x', '|');
-        String key;
-        try {
-            byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
-            key = String.format("%032x", new BigInteger(1, buffer));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        String key = Helper.toSafeMD5(attachmentId + "|" + size.replace('x', '|'));
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("module", "forumimage");
         params.put("aid", attachmentId);
@@ -879,6 +869,7 @@ public class Discuz {
     // to be finished
     @SuppressWarnings("unchecked unused")
     public static void download(final String url,
+                              final String path,
                               final Response.Listener<String> callback,
                               final Response.Listener<Integer> process) {
         AsyncTask task = new AsyncTask<Object, Integer, String>() {
@@ -888,27 +879,26 @@ public class Discuz {
                     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                         Log.e("Discuz", "http get failed");
-                        return null;
+                        return "http get failed";
                     }
 
                     int contentLength = conn.getContentLength();
                     InputStream input = conn.getInputStream();
+                    OutputStream output = new FileOutputStream(path);
                     int count, recvd = 0;
                     byte data[] = new byte[4096];
                     while ((count = input.read(data)) >= 0) {
                         recvd += count;
                         publishProgress(recvd * 100 / contentLength);
+                        output.write(data, 0, count);
                     }
 
                     input.close();
+                    return null;
                 }
-                catch (MalformedURLException e) {
-                    Log.e("Discuz", "invalid url");
+                catch (Throwable e) {
+                    return e.getMessage();
                 }
-                catch (IOException e) {
-                    Log.e("Discuz", "open connection failed");
-                }
-                return null;
             }
 
             @Override
