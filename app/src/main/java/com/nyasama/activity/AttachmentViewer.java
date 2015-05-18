@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,10 +26,8 @@ import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.ImageRequest;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
@@ -41,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -175,6 +175,13 @@ public class AttachmentViewer extends BaseThemedActivity {
             put("ppp", pageSize);
             put("page", pageIndex + 1);
             put("tid", getIntent().getIntExtra("tid", 0));
+
+            Intent intent = getIntent();
+            int authorId = intent.getIntExtra("authorid", 0);
+            if (authorId > 0)
+                put("authorid", authorId);
+            if (intent.getBooleanExtra("reverse", false))
+                put("ordertype", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
@@ -355,6 +362,42 @@ public class AttachmentViewer extends BaseThemedActivity {
             mActivity = (AttachmentViewer) activity;
         }
 
+        private Bitmap decodeBitmap(String path) {
+            // decode file
+            Bitmap bitmap;
+            try {
+                bitmap = BitmapFactory.decodeFile(path);
+                if (bitmap == null) {
+                    Helper.toast(R.string.toast_open_image_fail);
+                    return null;
+                }
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+                Helper.toast(R.string.there_is_something_wrong);
+                return null;
+            }
+
+            // Note: On some old devices like Galaxy Nexus,
+            // images larger than 2048x2048 will not be rendered.
+            // As volley is facing OOM when resizing images
+            // we have to resize it here
+            if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
+                    bitmap.getHeight() > MAX_TEXTURE_SIZE) {
+                try {
+                    bitmap = Helper.getFittedBitmap(bitmap,
+                            MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                }
+                catch (OutOfMemoryError e) {
+                    bitmap = Helper.getFittedBitmap(bitmap,
+                            MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                }
+            }
+
+            return bitmap;
+        }
+
+
         @Override
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
@@ -383,42 +426,49 @@ public class AttachmentViewer extends BaseThemedActivity {
             else if (bundle.getBoolean("isImage")) {
                 final View view = inflater.inflate(R.layout.fragment_attachment_image, container, false);
                 final PhotoView photoView = (PhotoView) view.findViewById(R.id.image_view);
+                final TextView message = (TextView) view.findViewById(R.id.message);
+                final View loading = view.findViewById(R.id.loading);
+
                 Bitmap thumb = mActivity.mThumbCache.get(src);
                 if (thumb != null)
                     photoView.setImageBitmap(thumb);
                 else
                     photoView.setImageResource(android.R.drawable.ic_menu_gallery);
-                Helper.updateVisibility(view, R.id.loading, true);
-                ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap bitmap) {
-                        // Note: On some old devices like Galaxy Nexus,
-                        // images larger than 2048x2048 will not be rendered.
-                        // As volley is facing OOM when resizing images
-                        // we have to resize it here
-                        if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
-                                bitmap.getHeight() > MAX_TEXTURE_SIZE) {
-                            try {
-                                bitmap = Helper.getFittedBitmap(bitmap,
-                                        MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+
+                File dir = ThisApp.context.getCacheDir();
+                final File file = new File(dir, "nyasama-cache-" + Helper.toSafeMD5(src));
+                if (file.exists()) {
+                    Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                    photoView.setImageBitmap(bitmap);
+                    mActivity.mThumbCache.put(src,
+                            Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
+                }
+                else {
+                    loading.setVisibility(View.VISIBLE);
+                    Discuz.download(Discuz.getSafeUrl(src), file.getAbsolutePath(), new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String err) {
+                            loading.setVisibility(View.GONE);
+                            if (err != null) {
+                                message.setVisibility(View.VISIBLE);
+                                message.setText(err);
                             }
-                            catch (OutOfMemoryError e) {
-                                bitmap = Helper.getFittedBitmap(bitmap,
-                                        MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                            else {
+                                message.setVisibility(View.GONE);
+                                Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                                photoView.setImageBitmap(bitmap);
+                                mActivity.mThumbCache.put(src,
+                                        Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             }
                         }
-                        mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
-                                IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
-                        photoView.setImageBitmap(bitmap);
-                        Helper.updateVisibility(view, R.id.loading, false);
-                    }
-                }, 0, 0, null, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        Helper.updateVisibility(view, R.id.loading, false);
-                    }
-                });
-                mActivity.mRequestQueue.add(imageRequest);
+                    }, new Response.Listener<Integer>() {
+                        @Override
+                        public void onResponse(Integer progress) {
+                            message.setVisibility(View.VISIBLE);
+                            message.setText(progress > 0 ? progress + "%" : "loading");
+                        }
+                    });
+                }
                 return view;
             } else {
                 View view = inflater.inflate(R.layout.fragment_attachment_item, container, false);

@@ -21,6 +21,9 @@ import com.nyasama.ThisApp;
 
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -89,6 +92,17 @@ public class Helper {
         catch (NumberFormatException e) {
             return defValue;
         }
+    }
+
+    public static String toSafeMD5(String input) {
+        String output;
+        try {
+            byte[] buffer = MessageDigest.getInstance("MD5").digest(input.getBytes());
+            output = String.format("%032x", new BigInteger(1, buffer));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return output;
     }
 
     public static String datelineToString(long time, String format) {

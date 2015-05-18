@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
@@ -44,15 +45,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -478,6 +480,7 @@ public class Discuz {
     public static String sUsername = "";
     public static String sGroupName = "";
     public static int sUid = 0;
+    public static int sGid = 0;
     public static int sNewMessages = 0;
     public static int sNewPrompts = 0;
     public static boolean sHasLogined;
@@ -485,14 +488,7 @@ public class Discuz {
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
     public static String getAttachmentThumb(int attachmentId, String size) {
-        String str = attachmentId + "|" + size.replace('x', '|');
-        String key;
-        try {
-            byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
-            key = String.format("%032x", new BigInteger(1, buffer));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        String key = Helper.toSafeMD5(attachmentId + "|" + size.replace('x', '|'));
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("module", "forumimage");
         params.put("aid", attachmentId);
@@ -519,6 +515,33 @@ public class Discuz {
             return DISCUZ_URL + url;
     }
 
+    static SparseIntArray maxUploadSize = new SparseIntArray() {{
+        put(1, 2048*1024);
+        put(2, 500*1024);
+        put(3, 1024*1024);
+        put(38, 1024*1024);
+        put(32, 16*1024*1024);
+        put(43, 500*1024);
+        put(47, 999*1024);
+
+        put(22, 2048*1024);
+        put(42, 1024*1024);
+        put(45, 500*1024);
+
+        put(11, 500*1024);
+        put(11, 700*1024);
+        put(12, 900*1024);
+        put(13, 1170*1024);
+        put(14, 1460*1024);
+        put(15, 1760*1024);
+        put(20, 2048*1024);
+        put(21, 2048*1024);
+        put(39, 2048*1024);
+    }};
+    public static int getMaxUploadSize() {
+        return maxUploadSize.get(sGid);
+    }
+
     private static class ResponseListener implements Response.Listener<String> {
         Response.Listener<JSONObject> callback;
 
@@ -538,7 +561,8 @@ public class Discuz {
             if (var != null) {
                 sFormHash = var.optString("formhash", "");
                 sUsername = var.optString("member_username", "");
-                sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                sUid = Helper.toSafeInteger(var.optString("member_uid", "0"), 0);
+                sGid = Helper.toSafeInteger(var.optString("groupid", "0"), 0);
                 sIsModerator = !"0".equals(var.optString("ismoderator"));
                 if (!var.isNull("allowperm"))
                     sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
@@ -826,6 +850,54 @@ public class Discuz {
                     return EntityUtils.toString(new DefaultHttpClient().execute(post).getEntity());
                 } catch (IOException e) {
                     return null;
+                }
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                process.onResponse(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callback.onResponse(s);
+            }
+        };
+        task.execute();
+    }
+
+    // to be finished
+    @SuppressWarnings("unchecked unused")
+    public static void download(final String url,
+                              final String path,
+                              final Response.Listener<String> callback,
+                              final Response.Listener<Integer> process) {
+        AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            @Override
+            protected String doInBackground(Object... objects) {
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                        Log.e("Discuz", "http get failed");
+                        return "http get failed";
+                    }
+
+                    int contentLength = conn.getContentLength();
+                    InputStream input = conn.getInputStream();
+                    OutputStream output = new FileOutputStream(path);
+                    int count, recvd = 0;
+                    byte data[] = new byte[4096];
+                    while ((count = input.read(data)) >= 0) {
+                        recvd += count;
+                        publishProgress(recvd * 100 / contentLength);
+                        output.write(data, 0, count);
+                    }
+
+                    input.close();
+                    return null;
+                }
+                catch (Throwable e) {
+                    return e.getMessage();
                 }
             }
 
