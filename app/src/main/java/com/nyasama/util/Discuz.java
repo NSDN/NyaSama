@@ -866,13 +866,17 @@ public class Discuz {
         task.execute();
     }
 
-    // to be finished
-    @SuppressWarnings("unchecked unused")
+    public interface DownloadProgressListener {
+        boolean onResponse(int progress);
+    }
+
+    @SuppressWarnings("unchecked")
     public static void download(final String url,
                               final String cacheKey,
                               final Response.Listener<String> callback,
-                              final Response.Listener<Integer> process) {
+                              final DownloadProgressListener process) {
         AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            boolean mCanceled = false;
             @Override
             protected String doInBackground(Object... objects) {
                 try {
@@ -891,7 +895,7 @@ public class Discuz {
                     OutputStream output = editor.newOutputStream(0);
                     int count, recvd = 0;
                     byte data[] = new byte[16 * 1024];
-                    while ((count = input.read(data)) >= 0) {
+                    while ((count = input.read(data)) >= 0 && !mCanceled) {
                         recvd += count;
                         publishProgress(recvd * 100 / contentLength);
                         output.write(data, 0, count);
@@ -899,8 +903,12 @@ public class Discuz {
 
                     input.close();
                     output.close();
-                    editor.commit();
-                    return null;
+                    conn.disconnect();
+                    if (mCanceled)
+                        editor.abort();
+                    else
+                        editor.commit();
+                    return mCanceled ? "calceled" : null;
                 }
                 catch (Throwable e) {
                     return e.getMessage();
@@ -909,7 +917,7 @@ public class Discuz {
 
             @Override
             protected void onProgressUpdate(Integer... values) {
-                process.onResponse(values[0]);
+                mCanceled = process.onResponse(values[0]);
             }
 
             @Override

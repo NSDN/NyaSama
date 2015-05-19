@@ -496,11 +496,12 @@ public class AttachmentViewer extends BaseThemedActivity {
                                         Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             }
                         }
-                    }, new Response.Listener<Integer>() {
+                    }, new Discuz.DownloadProgressListener() {
                         @Override
-                        public void onResponse(Integer progress) {
+                        public boolean onResponse(int progress) {
                             message.setVisibility(View.VISIBLE);
                             message.setText(progress > 0 ? progress + "%" : "loading");
+                            return mActivity.isFinishing();
                         }
                     });
                 }
