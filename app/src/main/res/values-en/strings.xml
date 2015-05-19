@@ -218,4 +218,6 @@
     <string name="error_new_post">Request timeout</string>
     <string name="error_no_internet">No connection</string>
     <string name="error_smilely_load">We can not get smilelies</string>
+    <string name="preference_manga_cache">Manga Cache</string>
+    <string name="preference_web_cache">Web Cache Size</string>
 </resources>
