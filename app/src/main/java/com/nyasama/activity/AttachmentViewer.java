@@ -28,6 +28,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
@@ -40,7 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -166,105 +167,124 @@ public class AttachmentViewer extends BaseThemedActivity {
         return list;
     }
 
-    public void loadAttachments() {
-        Helper.updateVisibility(findViewById(R.id.loading), true);
-        final int index = getIntent().getIntExtra("index", 0);
+    interface AttachmentLoadedListener {
+        void onResponse(JSONObject data, int dataIndex);
+    }
+    private static int sCachedThreadId;
+    private static Map<String, JSONObject> sCachedAttachmentJson = new HashMap<String, JSONObject>();
+    private void parseAttachments(JSONObject data, int dataIndex) {
+        int position = -1;
+        if (data.has(Discuz.VOLLEY_ERROR)) {
+            Helper.toast(R.string.network_error_toast);
+        }
+        else if (data.opt("Message") instanceof JSONObject) {
+            try {
+                JSONObject message = data.getJSONObject("Message");
+                mAttachmentList.clear();
+                new AccentAlertDialog.Builder(AttachmentViewer.this)
+                        .setTitle(R.string.there_is_something_wrong)
+                        .setMessage(message.getString("messagestr"))
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        })
+                        .show();
+            }
+            catch (JSONException e) {
+                Log.e(AttachmentViewer.class.toString(),
+                        "JsonError: Load Post Failed (" + e.getMessage() + ")");
+                Helper.toast(R.string.load_failed_toast);
+            }
+        }
+        else {
+            try {
+                JSONObject var = data.getJSONObject("Variables");
+                JSONArray postlist = var.getJSONArray("postlist");
+                mAttachmentList.clear();
+                if (postlist.length() > dataIndex) {
+                    Post post = new Post(postlist.getJSONObject(dataIndex));
+                    mAttachmentList = compileAttachments(post.message, post.attachments);
+                    if ("-1".equals(getIntent().getStringExtra("src"))) {
+                        int size = mAttachmentList.size();
+                        if (size > 0)
+                            getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
+                    }
+                    if (dataIndex - 1 >= 0) {
+                        post = new Post(postlist.getJSONObject(dataIndex - 1));
+                        int attachments = compileAttachments(post.message, post.attachments).size();
+                        if (mHasAttachmentsPrev = attachments > 0)
+                            mAttachmentList.add(0, new RedirectPostAttachment(String.format(
+                                    getString(R.string.goto_prev_post_attachments), attachments)));
+                    }
+                    if (dataIndex + 1 < postlist.length()) {
+                        post = new Post(postlist.getJSONObject(dataIndex + 1));
+                        int attachments = compileAttachments(post.message, post.attachments).size();
+                        if (mHasAttachmentsNext = attachments > 0)
+                            mAttachmentList.add(new RedirectPostAttachment(String.format(
+                                    getString(R.string.goto_next_post_attachments), attachments)));
+                    }
+                }
+                mPageAdapter.notifyDataSetChanged();
+
+                final String src = getIntent().getStringExtra("src");
+                mPager.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (src != null) for (int i = 0; i < mAttachmentList.size(); i ++)
+                            if (src.equals(mAttachmentList.get(i).src)) {
+                                mPager.setCurrentItem(i, false);
+                                return;
+                            }
+                        if (mHasAttachmentsPrev)
+                            mPager.setCurrentItem(1, false);
+                    }
+                });
+
+                position = 0;
+            }
+            catch (JSONException e) {
+                Log.e(AttachmentViewer.class.toString(),
+                        "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                Helper.toast(R.string.load_failed_toast);
+            }
+        }
+        updatePagerTitle(position);
+    }
+    public void loadAttachments(int indexOffset, final AttachmentLoadedListener callback) {
+        Intent intent = getIntent();
+        final int index = intent.getIntExtra("index", 0) + indexOffset;
         final int pageSize = getPageSize(index > 0 ? index - 1 : 0, index + 2);
         final int pageIndex = index / pageSize;
-        Discuz.execute("viewthread", new HashMap<String, Object>() {{
+        final int tid = intent.getIntExtra("tid", 0);
+        final int authorId = intent.getIntExtra("authorid", 0);
+        final boolean reversed = intent.getBooleanExtra("reverse", false);
+
+        final int dataIndex = index - pageSize * pageIndex;
+        final String cacheKey = Helper.toSafeMD5(pageSize+"|"+pageIndex+"|"+tid+"|"+authorId+"|"+reversed);
+        if (sCachedAttachmentJson.containsKey(cacheKey)) {
+            if (callback != null)
+                callback.onResponse(sCachedAttachmentJson.get(cacheKey), dataIndex);
+        }
+        else Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("ppp", pageSize);
             put("page", pageIndex + 1);
-            put("tid", getIntent().getIntExtra("tid", 0));
-
-            Intent intent = getIntent();
-            int authorId = intent.getIntExtra("authorid", 0);
+            put("tid", tid);
             if (authorId > 0)
                 put("authorid", authorId);
-            if (intent.getBooleanExtra("reverse", false))
+            if (reversed)
                 put("ordertype", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
-                Helper.updateVisibility(findViewById(R.id.loading), false);
-                int position = -1;
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
+                if (sCachedThreadId != tid) {
+                    sCachedAttachmentJson.clear();
+                    sCachedThreadId = tid;
                 }
-                else if (data.opt("Message") instanceof JSONObject) {
-                    try {
-                        JSONObject message = data.getJSONObject("Message");
-                        mAttachmentList.clear();
-                        new AccentAlertDialog.Builder(AttachmentViewer.this)
-                                .setTitle(R.string.error_no_internet)
-                                .setMessage(message.getString("messagestr"))
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        finish();
-                                    }
-                                })
-                                .show();
-                    }
-                    catch (JSONException e) {
-                        Log.e(AttachmentViewer.class.toString(),
-                                "JsonError: Load Post Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                }
-                else {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-                        JSONArray postlist = var.getJSONArray("postlist");
-                        mAttachmentList.clear();
-                        int i = index - pageIndex * pageSize;
-                        if (postlist.length() > i) {
-                            Post post = new Post(postlist.getJSONObject(i));
-                            mAttachmentList = compileAttachments(post.message, post.attachments);
-                            if ("-1".equals(getIntent().getStringExtra("src"))) {
-                                int size = mAttachmentList.size();
-                                if (size > 0)
-                                    getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
-                            }
-                            if (i - 1 >= 0) {
-                                post = new Post(postlist.getJSONObject(i - 1));
-                                int attachments = compileAttachments(post.message, post.attachments).size();
-                                if (mHasAttachmentsPrev = attachments > 0)
-                                    mAttachmentList.add(0, new RedirectPostAttachment(String.format(
-                                            getString(R.string.goto_prev_post_attachments), attachments)));
-                            }
-                            if (i + 1 < postlist.length()) {
-                                post = new Post(postlist.getJSONObject(i + 1));
-                                int attachments = compileAttachments(post.message, post.attachments).size();
-                                if (mHasAttachmentsNext = attachments > 0)
-                                    mAttachmentList.add(new RedirectPostAttachment(String.format(
-                                            getString(R.string.goto_next_post_attachments), attachments)));
-                            }
-                        }
-                        mPageAdapter.notifyDataSetChanged();
-
-                        final String src = getIntent().getStringExtra("src");
-                        mPager.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (src != null) for (int i = 0; i < mAttachmentList.size(); i ++)
-                                    if (src.equals(mAttachmentList.get(i).src)) {
-                                        mPager.setCurrentItem(i, false);
-                                        return;
-                                    }
-                                if (mHasAttachmentsPrev)
-                                    mPager.setCurrentItem(1, false);
-                            }
-                        });
-
-                        position = 0;
-                    }
-                    catch (JSONException e) {
-                        Log.e(AttachmentViewer.class.toString(),
-                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                }
-                updatePagerTitle(position);
+                sCachedAttachmentJson.put(cacheKey, data);
+                if (callback != null)
+                    callback.onResponse(data, dataIndex);
             }
         });
     }
@@ -342,7 +362,18 @@ public class AttachmentViewer extends BaseThemedActivity {
 
         mRequestQueue.start();
 
-        loadAttachments();
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        loadAttachments(0, new AttachmentLoadedListener() {
+            @Override
+            public void onResponse(JSONObject data, int dataIndex) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
+                parseAttachments(data, dataIndex);
+                if (mHasAttachmentsNext)
+                    loadAttachments(-1, null);
+                if (mHasAttachmentsNext)
+                    loadAttachments(1, null);
+            }
+        });
     }
 
     public static class AttachmentFragment extends Fragment {
@@ -362,19 +393,24 @@ public class AttachmentViewer extends BaseThemedActivity {
             mActivity = (AttachmentViewer) activity;
         }
 
-        private Bitmap decodeBitmap(String path) {
-            // decode file
+        private Bitmap getCachedBitmap(String cacheKey) {
+            DiskLruCache.Snapshot snapshot;
+            try {
+                snapshot = ThisApp.fileDiskCache.get(cacheKey);
+                if (snapshot == null) return null;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
             Bitmap bitmap;
             try {
-                bitmap = BitmapFactory.decodeFile(path);
-                if (bitmap == null) {
-                    Helper.toast(R.string.toast_open_image_fail);
-                    return null;
-                }
+                bitmap = BitmapFactory.decodeStream(snapshot.getInputStream(0));
+                if (bitmap == null) return null;
             }
             catch (Throwable e) {
                 e.printStackTrace();
-                Helper.toast(R.string.there_is_something_wrong);
                 return null;
             }
 
@@ -435,17 +471,16 @@ public class AttachmentViewer extends BaseThemedActivity {
                 else
                     photoView.setImageResource(android.R.drawable.ic_menu_gallery);
 
-                File dir = ThisApp.context.getCacheDir();
-                final File file = new File(dir, "nyasama-cache-" + Helper.toSafeMD5(src));
-                if (file.exists()) {
-                    Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                final String cacheKey = Helper.toSafeMD5(src);
+                final Bitmap bitmap = getCachedBitmap(cacheKey);
+                if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
                     mActivity.mThumbCache.put(src,
                             Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    Discuz.download(Discuz.getSafeUrl(src), file.getAbsolutePath(), new Response.Listener<String>() {
+                    Discuz.download(Discuz.getSafeUrl(src), cacheKey, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String err) {
                             loading.setVisibility(View.GONE);
@@ -455,17 +490,18 @@ public class AttachmentViewer extends BaseThemedActivity {
                             }
                             else {
                                 message.setVisibility(View.GONE);
-                                Bitmap bitmap = decodeBitmap(file.getAbsolutePath());
+                                Bitmap bitmap = getCachedBitmap(cacheKey);
                                 photoView.setImageBitmap(bitmap);
                                 mActivity.mThumbCache.put(src,
                                         Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             }
                         }
-                    }, new Response.Listener<Integer>() {
+                    }, new Discuz.DownloadProgressListener() {
                         @Override
-                        public void onResponse(Integer progress) {
+                        public boolean onResponse(int progress) {
                             message.setVisibility(View.VISIBLE);
                             message.setText(progress > 0 ? progress + "%" : "loading");
+                            return mActivity.isFinishing();
                         }
                     });
                 }
