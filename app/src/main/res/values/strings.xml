@@ -154,6 +154,7 @@
     <string name="move_type">移动方式</string>
     <string name="toast_open_file_failed">读取文件失败</string>
     <string name="preference_manga_cache">漫画缓存</string>
+    <string name="acra_reporting_error">啊咧咧喵玉殿好像坏掉了…\n正在收集错误信息请稍候…</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
