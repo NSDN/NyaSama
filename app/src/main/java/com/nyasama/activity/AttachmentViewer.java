@@ -70,13 +70,11 @@ public class AttachmentViewer extends BaseThemedActivity {
 
     private static float REDIRECT_PAGER_WIDTH = 0.3f;
     private static int MAX_TEXTURE_SIZE = 2048;
-    private static int IMAGE_THUMB_SIZE = 128;
 
     private ViewPager mPager;
     private FragmentStatePagerAdapter mPageAdapter;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
-    private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
     private boolean mHasAttachmentsPrev;
     private boolean mHasAttachmentsNext;
 
@@ -465,18 +463,10 @@ public class AttachmentViewer extends BaseThemedActivity {
                 final TextView message = (TextView) view.findViewById(R.id.message);
                 final View loading = view.findViewById(R.id.loading);
 
-                Bitmap thumb = mActivity.mThumbCache.get(src);
-                if (thumb != null)
-                    photoView.setImageBitmap(thumb);
-                else
-                    photoView.setImageResource(android.R.drawable.ic_menu_gallery);
-
                 final String cacheKey = Helper.toSafeMD5(src);
                 final Bitmap bitmap = getCachedBitmap(cacheKey);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
-                    mActivity.mThumbCache.put(src,
-                            Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
@@ -492,8 +482,6 @@ public class AttachmentViewer extends BaseThemedActivity {
                                 message.setVisibility(View.GONE);
                                 Bitmap bitmap = getCachedBitmap(cacheKey);
                                 photoView.setImageBitmap(bitmap);
-                                mActivity.mThumbCache.put(src,
-                                        Helper.getFittedBitmap(bitmap, IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
                             }
                         }
                     }, new Discuz.DownloadProgressListener() {
