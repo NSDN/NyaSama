@@ -24,6 +24,11 @@ import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Helper;
 import com.nyasama.util.PersistenceCookieStore;
 
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.HttpSender;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -37,6 +42,14 @@ import java.util.Locale;
  * Created by oxyflour on 2014/11/15.
  *
  */
+@ReportsCrashes(
+        formUri = "https://nsdn.cloudant.com/acra-nyasama/_design/acra-storage/_update/report",
+        reportType = HttpSender.Type.JSON,
+        httpMethod = HttpSender.Method.PUT,
+        formUriBasicAuthLogin="diatimakedlyredgaingires",
+        formUriBasicAuthPassword="GHxhyFvXLUoHAqMVkgCLSboe",
+        mode = ReportingInteractionMode.TOAST,
+        resToastText = R.string.acra_reporting_error)
 public class ThisApp extends Application {
     public static SharedPreferences preferences;
     public static Context context;
@@ -101,6 +114,8 @@ public class ThisApp extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+
+        ACRA.init(this);
 
         // load preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(context);

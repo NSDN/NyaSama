@@ -881,21 +881,27 @@ public class Discuz {
             protected String doInBackground(Object... objects) {
                 try {
                     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                        return "http get failed";
-                    }
+                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(30000);
 
-                    DiskLruCache.Editor editor = ThisApp.fileDiskCache.edit(cacheKey);
-                    if (editor == null) {
-                        return "open cache failed";
-                    }
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
+                        return "http get failed";
+                    if (mCanceled) // check this because it takes long to go on
+                        return "canceled";
 
                     int contentLength = conn.getContentLength();
+                    if (mCanceled) // check this because it takes long to go on
+                        return "canceled";
+
+                    DiskLruCache.Editor editor = ThisApp.fileDiskCache.edit(cacheKey);
+                    if (editor == null)
+                        return "open cache failed";
+
                     InputStream input = conn.getInputStream();
                     OutputStream output = editor.newOutputStream(0);
                     int count, recvd = 0;
                     byte data[] = new byte[16 * 1024];
-                    while ((count = input.read(data)) >= 0 && !mCanceled) {
+                    while (!mCanceled && (count = input.read(data)) >= 0) {
                         recvd += count;
                         publishProgress(recvd * 100 / contentLength);
                         output.write(data, 0, count);
