@@ -219,4 +219,5 @@
         <item>移动主题</item>
         <item>保留转向</item>
     </string-array>
+    <string name="preference_cachesize">缓存大小</string>
 </resources>
