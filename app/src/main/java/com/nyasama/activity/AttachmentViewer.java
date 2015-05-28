@@ -423,8 +423,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                             MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
                 }
                 catch (OutOfMemoryError e) {
-                    bitmap = Helper.getFittedBitmap(bitmap,
-                            MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                    return null;
                 }
             }
 
