@@ -271,7 +271,8 @@ public class AttachmentViewer extends BaseThemedActivity {
                     sCachedAttachmentJson.clear();
                     sCachedThreadId = tid;
                 }
-                sCachedAttachmentJson.put(cacheKey, data);
+                if (data != null && !data.has(Discuz.VOLLEY_ERROR))
+                    sCachedAttachmentJson.put(cacheKey, data);
                 if (callback != null)
                     callback.onResponse(data, dataIndex);
             }
