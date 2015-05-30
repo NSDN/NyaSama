@@ -18,12 +18,21 @@
 
         <ListPreference
             android:defaultValue="32"
-            android:dialogTitle="@string/preference_cachesize"
-            android:entries="@array/cache_size"
-            android:entryValues="@array/cache_size_value"
-            android:key="@string/pref_key_cache_size"
+            android:dialogTitle="@string/preference_web_cache"
+            android:entries="@array/web_cache_size"
+            android:entryValues="@array/web_cache_size_value"
+            android:key="@string/pref_key_web_cache_size"
             android:summary="%s"
-            android:title="@string/preference_cachesize" />
+            android:title="@string/preference_web_cache" />
+
+        <com.negusoft.holoaccent.preference.ListPreference
+            android:defaultValue="256"
+            android:dialogTitle="@string/preference_manga_cache"
+            android:entries="@array/manga_cache_size"
+            android:entryValues="@array/manga_cache_size_value"
+            android:key="@string/pref_key_manga_cache_size"
+            android:summary="%s"
+            android:title="@string/preference_manga_cache" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_category_explore">

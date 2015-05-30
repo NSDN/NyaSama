@@ -3,7 +3,7 @@
 
     <string name="app_name">NyaSama</string>
     <string name="title_section1">Forum</string>
-    <string name="title_section2">THWiki</string>
+    <string name="title_section2">THBWiki</string>
     <string name="title_section3">THVideo</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -18,7 +18,7 @@
     <string name="list_empty">Nothing here</string>
     <string name="title_activity_login">Login</string>
     <string name="login_button_text">Login</string>
-    <string name="login_hint_username">Username</string>
+    <string name="login_hint_username">User name</string>
     <string name="login_hint_password">Password</string>
     <string name="drawer_button_login">Login</string>
     <string name="login_empty_message">Username and password are both required!</string>
@@ -48,7 +48,7 @@
     <string name="diag_insert_smiley_title">Insert an smiley</string>
     <string name="diag_quick_reply_title">Quick reply</string>
     <string name="mythread_button_text">My threads</string>
-    <string name="there_is_something_wrong">There is something wrong...</string>
+    <string name="there_is_something_wrong">There issomething wrong...</string>
     <string name="thread_list_subforum_title">SUB FORUM</string>
     <string name="thread_list_threads_title">THREADS</string>
     <string name="title_activity_messages">Messages</string>
@@ -56,7 +56,7 @@
     <string name="my_message_button">My messages</string>
     <string name="login_message">Drop in Genso!</string>
     <string name="my_notice_button">My notice</string>
-    <string name="text_view_attachments">[View attachments]</string>
+    <string name="text_view_attachments">[View Attachments]</string>
     <string name="title_activity_attachment_viewer">View attachments</string>
     <string name="title_activity_notice">My notice</string>
     <string name="title_notice_read">Read</string>
@@ -77,8 +77,8 @@
     <string name="signin_button_text">Sign in</string>
     <string name="title_section4">Settings</string>
     <string name="title_section5">About</string>
-    <string name="next_post_button"><![CDATA[Next post >>]]></string>
-    <string name="prev_post_button"><![CDATA[<< Previous post]]></string>
+    <string name="next_post_button"><![CDATA[Next Post >>]]></string>
+    <string name="prev_post_button"><![CDATA[<< Previous Post]]></string>
     <string name="action_my_profile">My profile</string>
     <string name="action_edit">Edit</string>
     <string name="forum_index_threads">Threads</string>
@@ -99,7 +99,7 @@
     <string name="string_uncategorized">Uncategorized</string>
     <string name="toast_click_again_to_exit">Click back again to exit</string>
     <string name="action_goto_forum">Goto thread list</string>
-    <string name="text_view_vote">[View votes]</string>
+    <string name="text_view_vote">[View Votes]</string>
     <string name="prompt_1">You have got</string>
     <string name="prompt_2">PMs</string>
     <string name="prompt_3">and</string>
@@ -126,8 +126,8 @@
     <string name="toast_too_many_votes">You can only select %d items in total</string>
     <string name="preference_showimg">Display images</string>
     <string name="new_feature">New features:</string>
-    <string name="goto_prev_post_attachments"><![CDATA[Previous post\n(%d items)\n<<]]></string>
-    <string name="goto_next_post_attachments"><![CDATA[Next post\n(%d items)\n>>]]></string>
+    <string name="goto_prev_post_attachments"><![CDATA[Previous Post\n(%d items)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[Next Post\n(%d items)\n>>]]></string>
     <string name="poll_max_choices">Max choices</string>
     <string name="poll_expiration_days">Expiration</string>
     <string name="diag_title_max_choices">Max choices: %d</string>
@@ -142,30 +142,34 @@
     <string name="thread_digest">Digest</string>
     <string name="thread_delete_confirm">Are you sure to delete this thread?</string>
     <string name="action_delete">Delete</string>
-    <string name="action_warn">Warning</string>
+    <string name="action_warn">Warn</string>
     <string name="action_ban">Ban</string>
-    <string name="check_new_versions">Check new versions when launching</string>
+    <string name="check_new_versions">Check new versions when starting up</string>
     <string name="do_not_remind">Never</string>
     <string name="thread_title_hidden">This thread is hidden</string>
+    <string name="thread_target">Target forum</string>
+    <string name="thread_type">Thread catalog</string>
+    <string name="move_type">Move type</string>
+    <string name="toast_open_file_failed">Open file failed</string>
+    <string name="acra_reporting_error">Oops! There is some thing wrong!\nSending error report...</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
-        <item>Original image</item>
+        <item>Original Image</item>
     </string-array>
     <string-array name="show_image">
-        <item>Only when using wifi</item>
+        <item>Only When Using Wifi</item>
         <item>Always</item>
         <item>Never</item>
     </string-array>
     <string-array name="moderate_options">
-        <item>Bump or down</item>
+        <item>Bump or Down</item>
         <item>Stick</item>
         <item>Highlight</item>
         <item>Digest</item>
-        <item>Open or close</item>
+        <item>Open or Close</item>
         <item>Move</item>
         <item>Delete</item>
-
     </string-array>
     <string-array name="bump_or_down_thread">
         <item>Bump</item>
@@ -173,9 +177,19 @@
     </string-array>
     <string-array name="stick_level">
         <item>None</item>
-        <item>This board</item>
-        <item>This catalog</item>
+        <item>This Board</item>
+        <item>This Catalog</item>
         <item>Global</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>None</item>
+        <item>Digest1</item>
+        <item>Digest2</item>
+        <item>Digest3</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>Replace</item>
+        <item>Redirect</item>
     </string-array>
     <string-array name="highlight_color">
         <item>Black</item>
@@ -188,31 +202,23 @@
         <item>Purple</item>
         <item>Pink</item>
     </string-array>
-    <string-array name="digest_level">
-        <item>None</item>
-        <item>Digest1</item>
-        <item>Digest2</item>
-        <item>Digest3</item>
-    </string-array>
     <string-array name="open_or_close_thread">
         <item>Open</item>
         <item>Close</item>
     </string-array>
     <string-array name="warn_or_not">
         <item>Warn</item>
-        <item>Undo</item>
+        <item>Revoke</item>
     </string-array>
     <string-array name="ban_or_not">
         <item>Ban</item>
-        <item>Undo</item>
+        <item>Revoke</item>
     </string-array>
-    <string-array name="move_type">
-        <item>Move directly</item>
-        <item>Keep redirection</item>
-    </string-array>
-    <string name="action_moderate_thread">Manage threads</string>
+    <string name="action_moderate_thread">Manage thread</string>
     <string name="check_updates">Update</string>
-    <string name="thread_target">Target thread</string>
-    <string name="thread_type">Target type</string>
-    <string name="move_type">Move type</string>
+    <string name="error_new_post">Request timeout</string>
+    <string name="error_no_internet">No connection</string>
+    <string name="error_smilely_load">We can not get smilelies</string>
+    <string name="preference_manga_cache">Manga Cache</string>
+    <string name="preference_web_cache">Web Cache Size</string>
 </resources>

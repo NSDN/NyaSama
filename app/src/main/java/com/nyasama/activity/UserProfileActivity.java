@@ -37,7 +37,7 @@ public class UserProfileActivity extends BaseThemedActivity {
             @Override
             public void onResponse(String s) {
                 findViewById(R.id.signin_button).setEnabled(true);
-                Helper.toast(s == null ? getString(R.string.there_is_something_wrong) : s);
+                Helper.toast(s == null ? getString(R.string.error_no_internet) : s);
             }
         });
     }

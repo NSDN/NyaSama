@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,23 +26,23 @@ import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.ImageRequest;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
-import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Attachment;
 import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Helper;
+import com.nyasama.util.SimpleIndicator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,14 +71,12 @@ public class AttachmentViewer extends BaseThemedActivity {
 
     private static float REDIRECT_PAGER_WIDTH = 0.3f;
     private static int MAX_TEXTURE_SIZE = 2048;
-    private static int IMAGE_THUMB_SIZE = 128;
 
     private ViewPager mPager;
     private FragmentStatePagerAdapter mPageAdapter;
+    private SimpleIndicator mIndicator;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
-    private BitmapLruCache mBitmapCache = new BitmapLruCache();
-    private Map<String, Bitmap> mThumbCache = new HashMap<String, Bitmap>();
     private boolean mHasAttachmentsPrev;
     private boolean mHasAttachmentsNext;
 
@@ -119,23 +118,6 @@ public class AttachmentViewer extends BaseThemedActivity {
         });
     }
 
-    public void updatePagerTitle(int position) {
-        TextView title = (TextView) findViewById(R.id.view_title);
-        if (position >= 0 && position < mAttachmentList.size() &&
-                !(mAttachmentList.get(position) instanceof RedirectPostAttachment)) {
-            title.setVisibility(View.VISIBLE);
-            int index = position +
-                    (mHasAttachmentsPrev ? 0 : 1 );
-            int total = mAttachmentList.size() -
-                    (mHasAttachmentsPrev ? 1 : 0) -
-                    (mHasAttachmentsNext ? 1 : 0);
-            title.setText(index + "/" + total);
-        }
-        else {
-            title.setVisibility(View.GONE);
-        }
-    }
-
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
     static List<Attachment> compileAttachments(String message, final List<Attachment> attachments) {
         List<Attachment> list = new ArrayList<Attachment>();
@@ -168,98 +150,131 @@ public class AttachmentViewer extends BaseThemedActivity {
         return list;
     }
 
-    public void loadAttachments() {
-        Helper.updateVisibility(findViewById(R.id.loading), true);
-        final int index = getIntent().getIntExtra("index", 0);
+    interface AttachmentLoadedListener {
+        void onResponse(JSONObject data, int dataIndex);
+    }
+    private static int sCachedThreadId;
+    private static Map<String, JSONObject> sCachedAttachmentJson = new HashMap<String, JSONObject>();
+    private void parseAttachments(JSONObject data, int dataIndex) {
+        int position = -1;
+        if (data.has(Discuz.VOLLEY_ERROR)) {
+            Helper.toast(R.string.network_error_toast);
+        }
+        else if (data.opt("Message") instanceof JSONObject) {
+            try {
+                JSONObject message = data.getJSONObject("Message");
+                mAttachmentList.clear();
+                new AccentAlertDialog.Builder(AttachmentViewer.this)
+                        .setTitle(R.string.there_is_something_wrong)
+                        .setMessage(message.getString("messagestr"))
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        })
+                        .show();
+            }
+            catch (JSONException e) {
+                Log.e(AttachmentViewer.class.toString(),
+                        "JsonError: Load Post Failed (" + e.getMessage() + ")");
+                Helper.toast(R.string.load_failed_toast);
+            }
+        }
+        else {
+            try {
+                JSONObject var = data.getJSONObject("Variables");
+                JSONArray postlist = var.getJSONArray("postlist");
+                mAttachmentList.clear();
+                if (postlist.length() > dataIndex) {
+                    Post post = new Post(postlist.getJSONObject(dataIndex));
+                    mAttachmentList = compileAttachments(post.message, post.attachments);
+                    if ("-1".equals(getIntent().getStringExtra("src"))) {
+                        int size = mAttachmentList.size();
+                        if (size > 0)
+                            getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
+                    }
+                    if (dataIndex - 1 >= 0) {
+                        post = new Post(postlist.getJSONObject(dataIndex - 1));
+                        int attachments = compileAttachments(post.message, post.attachments).size();
+                        if (mHasAttachmentsPrev = attachments > 0)
+                            mAttachmentList.add(0, new RedirectPostAttachment(String.format(
+                                    getString(R.string.goto_prev_post_attachments), attachments)));
+                    }
+                    if (dataIndex + 1 < postlist.length()) {
+                        post = new Post(postlist.getJSONObject(dataIndex + 1));
+                        int attachments = compileAttachments(post.message, post.attachments).size();
+                        if (mHasAttachmentsNext = attachments > 0)
+                            mAttachmentList.add(new RedirectPostAttachment(String.format(
+                                    getString(R.string.goto_next_post_attachments), attachments)));
+                    }
+                }
+                mPageAdapter.notifyDataSetChanged();
+
+                final String src = getIntent().getStringExtra("src");
+                mPager.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (src != null) for (int i = 0; i < mAttachmentList.size(); i ++)
+                            if (src.equals(mAttachmentList.get(i).src)) {
+                                mPager.setCurrentItem(i, false);
+                                return;
+                            }
+                        if (mHasAttachmentsPrev)
+                            mPager.setCurrentItem(1, false);
+                    }
+                });
+
+                position = 0;
+            }
+            catch (JSONException e) {
+                Log.e(AttachmentViewer.class.toString(),
+                        "JsonError: Load Post List Failed (" + e.getMessage() + ")");
+                Helper.toast(R.string.load_failed_toast);
+            }
+        }
+
+        mIndicator = (SimpleIndicator) findViewById(R.id.view_title);
+        int total = mAttachmentList.size() -
+                (mHasAttachmentsPrev ? 1 : 0) -
+                (mHasAttachmentsNext ? 1 : 0);
+        mIndicator.createIndicators(total, R.layout.fragment_attachment_indicator);
+        mIndicator.setActive(position);
+    }
+    public void loadAttachments(int indexOffset, final AttachmentLoadedListener callback) {
+        Intent intent = getIntent();
+        final int index = intent.getIntExtra("index", 0) + indexOffset;
         final int pageSize = getPageSize(index > 0 ? index - 1 : 0, index + 2);
         final int pageIndex = index / pageSize;
-        Discuz.execute("viewthread", new HashMap<String, Object>() {{
+        final int tid = intent.getIntExtra("tid", 0);
+        final int authorId = intent.getIntExtra("authorid", 0);
+        final boolean reversed = intent.getBooleanExtra("reverse", false);
+
+        final int dataIndex = index - pageSize * pageIndex;
+        final String cacheKey = Helper.toSafeMD5(pageSize+"|"+pageIndex+"|"+tid+"|"+authorId+"|"+reversed);
+        if (sCachedAttachmentJson.containsKey(cacheKey)) {
+            if (callback != null)
+                callback.onResponse(sCachedAttachmentJson.get(cacheKey), dataIndex);
+        }
+        else Discuz.execute("viewthread", new HashMap<String, Object>() {{
             put("ppp", pageSize);
             put("page", pageIndex + 1);
-            put("tid", getIntent().getIntExtra("tid", 0));
+            put("tid", tid);
+            if (authorId > 0)
+                put("authorid", authorId);
+            if (reversed)
+                put("ordertype", 1);
         }}, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
-                Helper.updateVisibility(findViewById(R.id.loading), false);
-                int position = -1;
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
+                if (sCachedThreadId != tid) {
+                    sCachedAttachmentJson.clear();
+                    sCachedThreadId = tid;
                 }
-                else if (data.opt("Message") instanceof JSONObject) {
-                    try {
-                        JSONObject message = data.getJSONObject("Message");
-                        mAttachmentList.clear();
-                        new AccentAlertDialog.Builder(AttachmentViewer.this)
-                                .setTitle(R.string.there_is_something_wrong)
-                                .setMessage(message.getString("messagestr"))
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        finish();
-                                    }
-                                })
-                                .show();
-                    }
-                    catch (JSONException e) {
-                        Log.e(AttachmentViewer.class.toString(),
-                                "JsonError: Load Post Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                }
-                else {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-                        JSONArray postlist = var.getJSONArray("postlist");
-                        mAttachmentList.clear();
-                        int i = index - pageIndex * pageSize;
-                        if (postlist.length() > i) {
-                            Post post = new Post(postlist.getJSONObject(i));
-                            mAttachmentList = compileAttachments(post.message, post.attachments);
-                            if ("-1".equals(getIntent().getStringExtra("src"))) {
-                                int size = mAttachmentList.size();
-                                if (size > 0)
-                                    getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
-                            }
-                            if (i - 1 >= 0) {
-                                post = new Post(postlist.getJSONObject(i - 1));
-                                int attachments = compileAttachments(post.message, post.attachments).size();
-                                if (mHasAttachmentsPrev = attachments > 0)
-                                    mAttachmentList.add(0, new RedirectPostAttachment(String.format(
-                                            getString(R.string.goto_prev_post_attachments), attachments)));
-                            }
-                            if (i + 1 < postlist.length()) {
-                                post = new Post(postlist.getJSONObject(i + 1));
-                                int attachments = compileAttachments(post.message, post.attachments).size();
-                                if (mHasAttachmentsNext = attachments > 0)
-                                    mAttachmentList.add(new RedirectPostAttachment(String.format(
-                                            getString(R.string.goto_next_post_attachments), attachments)));
-                            }
-                        }
-                        mPageAdapter.notifyDataSetChanged();
-
-                        final String src = getIntent().getStringExtra("src");
-                        mPager.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (src != null) for (int i = 0; i < mAttachmentList.size(); i ++)
-                                    if (src.equals(mAttachmentList.get(i).src)) {
-                                        mPager.setCurrentItem(i, false);
-                                        return;
-                                    }
-                                if (mHasAttachmentsPrev)
-                                    mPager.setCurrentItem(1, false);
-                            }
-                        });
-
-                        position = 0;
-                    }
-                    catch (JSONException e) {
-                        Log.e(AttachmentViewer.class.toString(),
-                                "JsonError: Load Post List Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                }
-                updatePagerTitle(position);
+                if (data != null && !data.has(Discuz.VOLLEY_ERROR))
+                    sCachedAttachmentJson.put(cacheKey, data);
+                if (callback != null)
+                    callback.onResponse(data, dataIndex);
             }
         });
     }
@@ -294,7 +309,9 @@ public class AttachmentViewer extends BaseThemedActivity {
 
             @Override
             public void onPageSelected(int position) {
-                updatePagerTitle(position);
+                int index = position +
+                        (mHasAttachmentsPrev ? 0 : 1 ) - 1;
+                if (mIndicator != null) mIndicator.setActive(index);
                 getIntent().putExtra("src", mAttachmentList.get(position).src);
             }
 
@@ -337,7 +354,18 @@ public class AttachmentViewer extends BaseThemedActivity {
 
         mRequestQueue.start();
 
-        loadAttachments();
+        Helper.updateVisibility(findViewById(R.id.loading), true);
+        loadAttachments(0, new AttachmentLoadedListener() {
+            @Override
+            public void onResponse(JSONObject data, int dataIndex) {
+                Helper.updateVisibility(findViewById(R.id.loading), false);
+                parseAttachments(data, dataIndex);
+                if (mHasAttachmentsNext)
+                    loadAttachments(-1, null);
+                if (mHasAttachmentsNext)
+                    loadAttachments(1, null);
+            }
+        });
     }
 
     public static class AttachmentFragment extends Fragment {
@@ -356,6 +384,46 @@ public class AttachmentViewer extends BaseThemedActivity {
             super.onAttach(activity);
             mActivity = (AttachmentViewer) activity;
         }
+
+        private Bitmap getCachedBitmap(String cacheKey) {
+            DiskLruCache.Snapshot snapshot;
+            try {
+                snapshot = ThisApp.fileDiskCache.get(cacheKey);
+                if (snapshot == null) return null;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            Bitmap bitmap;
+            try {
+                bitmap = BitmapFactory.decodeStream(snapshot.getInputStream(0));
+                if (bitmap == null) return null;
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            // Note: On some old devices like Galaxy Nexus,
+            // images larger than 2048x2048 will not be rendered.
+            // As volley is facing OOM when resizing images
+            // we have to resize it here
+            if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
+                    bitmap.getHeight() > MAX_TEXTURE_SIZE) {
+                try {
+                    bitmap = Helper.getFittedBitmap(bitmap,
+                            MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
+                }
+                catch (OutOfMemoryError e) {
+                    return null;
+                }
+            }
+
+            return bitmap;
+        }
+
 
         @Override
         public View onCreateView(LayoutInflater inflater,
@@ -385,47 +453,38 @@ public class AttachmentViewer extends BaseThemedActivity {
             else if (bundle.getBoolean("isImage")) {
                 final View view = inflater.inflate(R.layout.fragment_attachment_image, container, false);
                 final PhotoView photoView = (PhotoView) view.findViewById(R.id.image_view);
-                Bitmap bitmap = mActivity.mBitmapCache.getBitmap(src);
+                final TextView message = (TextView) view.findViewById(R.id.message);
+                final View loading = view.findViewById(R.id.loading);
+
+                final String cacheKey = Helper.toSafeMD5(src);
+                final Bitmap bitmap = getCachedBitmap(cacheKey);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);
-                } else {
-                    Bitmap thumb = mActivity.mThumbCache.get(src);
-                    if (thumb != null)
-                        photoView.setImageBitmap(thumb);
-                    else
-                        photoView.setImageResource(android.R.drawable.ic_menu_gallery);
-                    Helper.updateVisibility(view, R.id.loading, true);
-                    ImageRequest imageRequest = new ImageRequest(Discuz.getSafeUrl(src), new Response.Listener<Bitmap>() {
+                }
+                else {
+                    loading.setVisibility(View.VISIBLE);
+                    Discuz.download(Discuz.getSafeUrl(src), cacheKey, new Response.Listener<String>() {
                         @Override
-                        public void onResponse(Bitmap bitmap) {
-                            // Note: On some old devices like Galaxy Nexus,
-                            // images larger than 2048x2048 will not be rendered.
-                            // As volley is facing OOM when resizing images
-                            // we have to resize it here
-                            if (bitmap.getWidth() > MAX_TEXTURE_SIZE ||
-                                    bitmap.getHeight() > MAX_TEXTURE_SIZE) {
-                                try {
-                                    bitmap = Helper.getFittedBitmap(bitmap,
-                                            MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
-                                }
-                                catch (OutOfMemoryError e) {
-                                    bitmap = Helper.getFittedBitmap(bitmap,
-                                            MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
-                                }
+                        public void onResponse(String err) {
+                            loading.setVisibility(View.GONE);
+                            if (err != null) {
+                                message.setVisibility(View.VISIBLE);
+                                message.setText(err);
                             }
-                            mActivity.mBitmapCache.putBitmap(src, bitmap);
-                            mActivity.mThumbCache.put(src, Helper.getFittedBitmap(bitmap,
-                                    IMAGE_THUMB_SIZE, IMAGE_THUMB_SIZE, true));
-                            photoView.setImageBitmap(bitmap);
-                            Helper.updateVisibility(view, R.id.loading, false);
+                            else {
+                                message.setVisibility(View.GONE);
+                                Bitmap bitmap = getCachedBitmap(cacheKey);
+                                photoView.setImageBitmap(bitmap);
+                            }
                         }
-                    }, 0, 0, null, new Response.ErrorListener() {
+                    }, new Discuz.DownloadProgressListener() {
                         @Override
-                        public void onErrorResponse(VolleyError volleyError) {
-                            Helper.updateVisibility(view, R.id.loading, false);
+                        public boolean onResponse(int progress) {
+                            message.setVisibility(View.VISIBLE);
+                            message.setText(progress > 0 ? progress + "%" : "loading");
+                            return mActivity.isFinishing();
                         }
                     });
-                    mActivity.mRequestQueue.add(imageRequest);
                 }
                 return view;
             } else {

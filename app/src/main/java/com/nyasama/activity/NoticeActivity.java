@@ -152,7 +152,7 @@ public class NoticeActivity extends BaseThemedActivity
                                         Helper.toast(message.optString("messagestr"));
                                     }
                                     else {
-                                        Helper.toast(R.string.there_is_something_wrong);
+                                        Helper.toast(R.string.error_no_internet);
                                     }
                                     dialog.dismiss();
                                 }

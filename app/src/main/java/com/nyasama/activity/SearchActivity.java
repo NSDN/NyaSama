@@ -122,7 +122,7 @@ public class SearchActivity extends BaseThemedActivity
                     Helper.toast(R.string.there_is_something_wrong);
                 } else if (data.has("Message")) {
                     new AccentAlertDialog.Builder(SearchActivity.this)
-                            .setTitle(R.string.there_is_something_wrong)
+                            .setTitle(R.string.error_no_internet)
                             .setMessage(data.optJSONObject("Message").optString("messagestr"))
                             .setPositiveButton(android.R.string.ok, null)
                             .show();

@@ -41,6 +41,9 @@
     <string name="thread_list_threads_title">主题</string>
     <string name="thread_list_subforum_title">子版块</string>
     <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
+    <string name="error_new_post">诶多，帖子被大结界挡住了……</string>
+    <string name="error_no_internet">紫大人网断了TAT</string>
+    <string name="error_smilely_load">秦心偷走了重要的东西（</string>
     <string name="diag_insert_options">插入图片</string>
     <string name="diag_insert_from_gallery">来自图库</string>
     <string name="diag_insert_from_camera">来自相机</string>
@@ -86,7 +89,7 @@
     <string name="preference_language">语言</string>
     <string name="preference_animation">过渡动画</string>
     <string name="preference_category_version">版本</string>
-    <string name="preference_cachesize">缓存大小</string>
+    <string name="preference_web_cache">网络缓存</string>
     <string name="preference_category_explore">浏览</string>
     <string name="preference_thumbsize">帖子图片尺寸</string>
     <string name="new_version_alert_title">有新版本啦</string>
@@ -152,6 +155,9 @@
     <string name="thread_target">目标板块</string>
     <string name="thread_type">目标分类</string>
     <string name="move_type">移动方式</string>
+    <string name="toast_open_file_failed">读取文件失败</string>
+    <string name="preference_manga_cache">漫画缓存</string>
+    <string name="acra_reporting_error">啊咧咧喵玉殿好像坏掉了…\n正在收集错误信息\n请稍候…</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
@@ -188,7 +194,7 @@
         <item>棕</item>
         <item>绿</item>
         <item>青</item>
-        <item>烂</item>
+        <item>蓝</item>
         <item>紫</item>
         <item>粉</item>
     </string-array>
@@ -214,4 +220,5 @@
         <item>移动主题</item>
         <item>保留转向</item>
     </string-array>
+    <string name="preference_cachesize">缓存大小</string>
 </resources>

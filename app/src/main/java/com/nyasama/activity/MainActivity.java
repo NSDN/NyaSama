@@ -92,7 +92,6 @@ public class MainActivity extends BaseThemedActivity implements
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             finish();
-            System.exit(0);
             return;
         }
 
@@ -105,6 +104,19 @@ public class MainActivity extends BaseThemedActivity implements
                 doubleBackToExitPressedOnce = false;
             }
         }, 2000);
+    }
+
+    BroadcastReceiver mLoginReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadUserInfo();
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(ThisApp.context).unregisterReceiver(mLoginReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -138,12 +150,7 @@ public class MainActivity extends BaseThemedActivity implements
         loadUserInfo();
 
         LocalBroadcastManager.getInstance(ThisApp.context)
-                .registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        loadUserInfo();
-                    }
-                }, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
+                .registerReceiver(mLoginReceiver, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
     }
 
     @Override
@@ -234,7 +241,7 @@ public class MainActivity extends BaseThemedActivity implements
     public void onGetThreadData(DiscuzThreadListFragment fragment) {
         if (fragment.getMessage() != null) {
             new AccentAlertDialog.Builder(MainActivity.this)
-                    .setTitle(R.string.there_is_something_wrong)
+                    .setTitle(R.string.error_no_internet)
                     .setMessage(fragment.getMessage())
                     .setPositiveButton(android.R.string.yes, null)
                     .show();
