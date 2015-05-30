@@ -36,6 +36,7 @@ import com.nyasama.util.Discuz;
 import com.nyasama.util.Discuz.Attachment;
 import com.nyasama.util.Discuz.Post;
 import com.nyasama.util.Helper;
+import com.nyasama.util.SimpleIndicator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,6 +74,7 @@ public class AttachmentViewer extends BaseThemedActivity {
 
     private ViewPager mPager;
     private FragmentStatePagerAdapter mPageAdapter;
+    private SimpleIndicator mIndicator;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
     private boolean mHasAttachmentsPrev;
@@ -114,23 +116,6 @@ public class AttachmentViewer extends BaseThemedActivity {
                 dialog.cancel();
             }
         });
-    }
-
-    public void updatePagerTitle(int position) {
-        TextView title = (TextView) findViewById(R.id.view_title);
-        if (position >= 0 && position < mAttachmentList.size() &&
-                !(mAttachmentList.get(position) instanceof RedirectPostAttachment)) {
-            title.setVisibility(View.VISIBLE);
-            int index = position +
-                    (mHasAttachmentsPrev ? 0 : 1 );
-            int total = mAttachmentList.size() -
-                    (mHasAttachmentsPrev ? 1 : 0) -
-                    (mHasAttachmentsNext ? 1 : 0);
-            title.setText(index + "/" + total);
-        }
-        else {
-            title.setVisibility(View.GONE);
-        }
     }
 
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
@@ -248,7 +233,13 @@ public class AttachmentViewer extends BaseThemedActivity {
                 Helper.toast(R.string.load_failed_toast);
             }
         }
-        updatePagerTitle(position);
+
+        mIndicator = (SimpleIndicator) findViewById(R.id.view_title);
+        int total = mAttachmentList.size() -
+                (mHasAttachmentsPrev ? 1 : 0) -
+                (mHasAttachmentsNext ? 1 : 0);
+        mIndicator.createIndicators(total, R.layout.fragment_attachment_indicator);
+        mIndicator.setActive(position);
     }
     public void loadAttachments(int indexOffset, final AttachmentLoadedListener callback) {
         Intent intent = getIntent();
@@ -280,7 +271,8 @@ public class AttachmentViewer extends BaseThemedActivity {
                     sCachedAttachmentJson.clear();
                     sCachedThreadId = tid;
                 }
-                sCachedAttachmentJson.put(cacheKey, data);
+                if (data != null && !data.has(Discuz.VOLLEY_ERROR))
+                    sCachedAttachmentJson.put(cacheKey, data);
                 if (callback != null)
                     callback.onResponse(data, dataIndex);
             }
@@ -317,7 +309,9 @@ public class AttachmentViewer extends BaseThemedActivity {
 
             @Override
             public void onPageSelected(int position) {
-                updatePagerTitle(position);
+                int index = position +
+                        (mHasAttachmentsPrev ? 0 : 1 ) - 1;
+                if (mIndicator != null) mIndicator.setActive(index);
                 getIntent().putExtra("src", mAttachmentList.get(position).src);
             }
 
@@ -423,8 +417,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                             MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, false);
                 }
                 catch (OutOfMemoryError e) {
-                    bitmap = Helper.getFittedBitmap(bitmap,
-                            MAX_TEXTURE_SIZE / 2, MAX_TEXTURE_SIZE / 2, false);
+                    return null;
                 }
             }
 

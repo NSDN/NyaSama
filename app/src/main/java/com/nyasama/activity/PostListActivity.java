@@ -841,7 +841,8 @@ public class PostListActivity extends BaseThemedActivity
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, mListFragment)
-                .commit();
+                // don't use commit()
+                .commitAllowingStateLoss();
     }
 
     private void destroyListFragment() {
