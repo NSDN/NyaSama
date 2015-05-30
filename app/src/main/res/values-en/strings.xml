@@ -49,8 +49,8 @@
     <string name="diag_quick_reply_title">Quick reply</string>
     <string name="mythread_button_text">My threads</string>
     <string name="there_is_something_wrong">There issomething wrong...</string>
-    <string name="thread_list_subforum_title">Sub forum</string>
-    <string name="thread_list_threads_title">Threads</string>
+    <string name="thread_list_subforum_title">SUB FORUM</string>
+    <string name="thread_list_threads_title">THREADS</string>
     <string name="title_activity_messages">Messages</string>
     <string name="title_activity_personal_messages">Personal messages</string>
     <string name="my_message_button">My messages</string>
@@ -71,7 +71,7 @@
     <string name="action_mark_fav">Mark favourite</string>
     <string name="title_activity_fav_list">My favourites</string>
     <string name="title_activity_setting">Settings</string>
-    <string name="thread_list_toplist_title">Top list</string>
+    <string name="thread_list_toplist_title">TOP LIST</string>
     <string name="title_main_hot_threads">HOT THREADS</string>
     <string name="title_main_translated">TRANSLATION</string>
     <string name="signin_button_text">Sign in</string>
