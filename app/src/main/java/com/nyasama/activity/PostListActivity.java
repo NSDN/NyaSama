@@ -1179,7 +1179,10 @@ public class PostListActivity extends BaseThemedActivity
             @Override
             public void onResponse(JSONObject data) {
                 int total = -1;
-                if (data.has(Discuz.VOLLEY_ERROR)) {
+                if (PostListActivity.this.isFinishing()) {
+                    Log.w(PostListActivity.class.toString(), "activity is finished.");
+                }
+                else if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
                 else if (data.opt("Message") instanceof JSONObject) {
