@@ -115,7 +115,7 @@ public class PostListActivity extends BaseThemedActivity
         final Intent intent = getIntent();
         int authorId = intent.getIntExtra("authorid", 0);
         boolean reversed = intent.getBooleanExtra("reverse", false);
-        final String title = actionBar.getTitle().toString();
+        final String title = actionBar.getTitle() != null ? actionBar.getTitle().toString() : "";
         final String sub =
                 (authorId == mAuthorId ? getString(R.string.action_see_author) : "") + " " +
                 (reversed ? getString(R.string.action_reverse_order) : "");
