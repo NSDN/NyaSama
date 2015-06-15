@@ -1098,19 +1098,22 @@ public class PostListActivity extends BaseThemedActivity
                 if (comments != null) {
                     for (int i = 0; i < comments.size(); i ++) {
                         Comment comment = comments.get(i);
-                        View commentView;
+                        View commentView = null;
+                        // First try to get commentView from cache
                         if (i < cachedViews.size()) {
                             commentView = cachedViews.get(i);
+                            if (commentView.getParent() != null)
+                                ((ViewGroup) commentView.getParent()).removeView(commentView);
                         }
-                        else {
+                        // Note: removeView() is not working sometimes, so we may have to recreate one
+                        // see nsdn bug #448d2
+                        if (commentView == null || commentView.getParent() != null) {
                             commentView = new TextView(PostListActivity.this);
                             commentView.setPadding(32, 0, 0, 0);
                             cachedViews.add(commentView);
                         }
                         ((TextView) commentView).setText(
                                 Html.fromHtml("<b>" + comment.author + "</b>&nbsp;&nbsp;" + comment.comment));
-                        if (commentView.getParent() != null)
-                            ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
                     }
                 }
