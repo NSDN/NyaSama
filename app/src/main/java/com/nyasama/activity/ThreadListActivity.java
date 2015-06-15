@@ -196,7 +196,7 @@ public class ThreadListActivity extends BaseThemedActivity implements
 
         public void updateSubList(List<Forum> subList) {
             mSubList.clear();
-            for (Forum forum : subList)
+            if (subList != null) for (Forum forum : subList)
                 mSubList.add(forum);
             if (mListAdaptor != null)
                 mListAdaptor.notifyDataSetChanged();
