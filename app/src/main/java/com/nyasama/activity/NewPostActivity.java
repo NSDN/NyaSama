@@ -309,6 +309,7 @@ public class NewPostActivity extends BaseThemedActivity {
         Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
             public void onResponse(SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
+                if (forumThreadInfo.get(fid) == null) return;
                 mThreadTypes = forumThreadInfo.get(fid).types;
                 Helper.updateVisibility(mSpinnerTypes, mThreadTypes != null);
                 if (mThreadTypes != null) {
