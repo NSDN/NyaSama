@@ -8,8 +8,11 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import com.nyasama.libgdx.utility.BulletObject;
+import com.nyasama.libgdx.utility.DrawCore;
+import com.nyasama.libgdx.utility.Utility;
+
 
 /**
  * Created by D.zzm on 2014.12.14.
@@ -436,7 +439,7 @@ public class AboutCore extends ApplicationAdapter {
                         if (Bullets[i][j].x < -300 || Bullets[i][j].x > DeviceWidth + 300 || Bullets[i][j].y < -100 || Bullets[i][j].y > DeviceHeight + 100)
                             Bullets[i][j].Init();
                     } else {
-                        if (Distance(Bullets[i][j].x, Bullets[i][j].y, DeviceWidth / 2, DeviceHeight / 2) > Math.max(DeviceWidth, DeviceHeight))
+                        if (Utility.Distance(Bullets[i][j].x, Bullets[i][j].y, DeviceWidth / 2, DeviceHeight / 2) > Math.max(DeviceWidth, DeviceHeight))
                             Bullets[i][j].Init();
                     }
                 }
@@ -447,128 +450,6 @@ public class AboutCore extends ApplicationAdapter {
         if (PlayerY > DeviceHeight) PlayerY = DeviceHeight;
         if (PlayerX < 0) PlayerX = 0;
         if (PlayerY < 0) PlayerY = 0;
-    }
-
-    public float Distance(float x1, float y1, float x2, float y2) {
-        return (float) Math.sqrt(Math.pow((double) x2 - (double) x1, (double) 2) + Math.pow((double) y2 - (double) y1, (double) 2));
-    }
-
-
-    class DrawCore {
-        private SpriteBatch Batch;
-        private BitmapFont Font;
-
-        public void DrawBegin() {
-            Batch.begin();
-        }
-
-        public void DrawEnd() {
-            Batch.end();
-        }
-
-        public void DrawString(float x, float y, float Scale, Color color, String Str) {
-            Font.setScale(Scale);
-            Font.setColor(color);
-            Font.draw(Batch, Str, x, y);
-        }
-
-        public void DrawBack(Texture Tex) {
-            Batch.draw(Tex, 0, 0, Tex.getWidth(), Tex.getHeight());
-        }
-
-        public void DrawPic(Texture Tex, float x, float y, int Rotate) {
-            int Width = Tex.getWidth(), Height = Tex.getHeight();
-            Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, Rotate, 0, 0, Width, Height, false, false);
-        }
-
-        public void DrawPic(Texture Tex, float x, float y, float alpha) {
-            int Width = Tex.getWidth(), Height = Tex.getHeight();
-            Batch.setColor(1, 1, 1, alpha);
-            Batch.draw(Tex, x - Width / 2, y - Height / 2, Width / 2, Height / 2, Width, Height, 1, 1, 0, 0, 0, Width, Height, false, false);
-            Batch.setColor(1, 1, 1, 1);
-        }
-
-        public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY) {
-            int Width = Tex.getWidth(), Height = Tex.getHeight();
-            Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
-        }
-
-        public void DrawPic(Texture Tex, float x, float y, float Rotate, float ScX, float ScY, float r, float g, float b, float a) {
-            int Width = Tex.getWidth(), Height = Tex.getHeight();
-            Batch.setColor(r, g, b, a);
-            Batch.draw(Tex, x - Width / 2 * ScX, y - Height / 2 * ScY, Width / 2, Height / 2, Width, Height, ScX, ScY, Rotate, 0, 0, Width, Height, false, false);
-            Batch.setColor(1, 1, 1, 1);
-        }
-
-        public DrawCore() {
-            Batch = new SpriteBatch();
-            Font = new BitmapFont();
-        }
-    }
-
-    class BulletObject {
-        public final static int JUDGE_GRAZE = 1;
-        public final static int JUDGE_MISS = 2;
-        public final static int JUDGE_AWAY = 3;
-
-        public float x;
-        public float y;
-        public float dx;
-        public float dy;
-        public int Rotate;
-        public boolean Direction;
-        public boolean IsEnabled;
-        public boolean IsGrazed;
-        public Texture Tex;
-        public float ScaleXY;
-        public float r;
-        public float g;
-        public float b;
-        public float a;
-
-        public BulletObject() {
-            x = 0;
-            y = 0;
-            dx = 0;
-            dy = 0;
-            Rotate = 0;
-            Direction = true;
-            IsEnabled = false;
-            IsGrazed = true;
-            Tex = null;
-            ScaleXY = 0;
-            r = 0;
-            g = 0;
-            b = 0;
-            a = 0;
-        }
-
-        public void Init() {
-            x = 0;
-            y = 0;
-            dx = 0;
-            dy = 0;
-            Rotate = 0;
-            Direction = true;
-            IsEnabled = false;
-            IsGrazed = true;
-            Tex = null;
-            ScaleXY = 0;
-            r = 0;
-            g = 0;
-            b = 0;
-            a = 0;
-        }
-
-        public boolean PreJudge(float pX, float pY, float Range) {
-           return Math.abs((double) pX - (double) x) < (double) Range && Math.abs((double) pY - (double) y) < (double) Range;
-        }
-
-        public int Judge(float pX, float pY, float Min, float Max) {
-            if (Distance(x, y, pX, pY) > Max) return JUDGE_AWAY;
-            else if (Distance(x, y, pX, pY) > Min) return JUDGE_GRAZE;
-            else return JUDGE_MISS;
-        }
     }
 }
 
