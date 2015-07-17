@@ -942,6 +942,15 @@ public class PostListActivity extends BaseThemedActivity
             mListFragment.reloadAll();
             return true;
         }
+        else if (id == R.id.action_share) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, getTitle() + "\n" + Discuz.DISCUZ_URL +
+                    "forum.php?mod=viewthread&tid=" + getIntent().getIntExtra("tid", 0));
+            intent.setType("text/plain");
+            startActivity(intent);
+            return true;
+        }
         else if (id == R.id.action_goto_forum) {
             if (mForumId > 0 && getIntent().getIntExtra("fid", 0) != mForumId)
                 startActivity(new Intent(this, ThreadListActivity.class) {{

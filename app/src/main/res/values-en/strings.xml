@@ -153,6 +153,7 @@
     <string name="toast_open_file_failed">Open File Failed</string>
     <string name="preference_manga_cache">Manga Cache</string>
     <string name="acra_reporting_error">Oops! There is some thing wrong!\nSending error report...</string>
+    <string name="action_share">Share</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
