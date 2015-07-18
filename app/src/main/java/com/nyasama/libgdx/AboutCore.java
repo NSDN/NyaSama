@@ -21,7 +21,7 @@ import com.nyasama.libgdx.utility.Utility;
 public class AboutCore extends ApplicationAdapter {
 
     DrawCore DrawCoreObj;
-    Texture TexBullet, TexPlayer, TexBack[] = new Texture[2];
+    Texture TexBullet, TexPlayer, TexSlow, TexBack[] = new Texture[2];
     Texture Scene[] = new Texture[10];
     BulletObject[][] Bullets = new BulletObject[51][51];
     public float DeviceWidth, DeviceHeight;
@@ -83,7 +83,7 @@ public class AboutCore extends ApplicationAdapter {
 
         if (Angle >= 360) Angle = 0;
         if (BackA <= -256) BackA = 0;
-        if (BackB >= 256) BackB = 0;
+        if (BackB >= 512) BackB = 0;
         Angle++;
         BackA = BackA - 0.5f;
         BackB = BackB + 0.5f;
@@ -93,11 +93,12 @@ public class AboutCore extends ApplicationAdapter {
     private void LoadTexture() {
         TexBullet = new Texture("Bullet.png");
         TexPlayer = new Texture("Player.png");
+        TexSlow = new Texture("Slow.png");
         TexBack[0] = new Texture("Back01.png");
         TexBack[1] = new Texture("Back02.png");
         Scene[0] = new Texture("Nyasama.png");
         for (int i = 1; i <= 5; i++) {
-            Scene[i] = new Texture(Integer.toString(i) + ".png");
+            Scene[i] = new Texture("w" + Integer.toString(i) + ".png");
         }
     }
 
@@ -120,28 +121,45 @@ public class AboutCore extends ApplicationAdapter {
             } else {
                 Music_obj.setVolume(1f);
                 BackAlpha = 1.0f;
-                if (Time < 200) DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, (Time - 100) / 100f);
-                else if (Time < 300) DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, 1f);
-                else if (Time < 400) DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, (400 - Time) / 100f);
+                if (Time < 200)
+                    DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, (Time - 100) / 100f);
+                else if (Time < 300)
+                    DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 400)
+                    DrawCoreObj.DrawPic(Scene[1], DeviceWidth / 2, DeviceHeight / 2, (400 - Time) / 100f);
 
-                else if (Time < 500) DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, (Time - 400) / 100f);
-                else if (Time < 600) DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, 1f);
-                else if (Time < 700) DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, (700 - Time) / 100f);
+                else if (Time < 500)
+                    DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, (Time - 400) / 100f);
+                else if (Time < 600)
+                    DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 700)
+                    DrawCoreObj.DrawPic(Scene[2], DeviceWidth / 2, DeviceHeight / 2, (700 - Time) / 100f);
 
-                else if (Time < 800) DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, (Time - 700) / 100f);
-                else if (Time < 900) DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, 1f);
-                else if (Time < 1000) DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, (1000 - Time) / 100f);
+                else if (Time < 800)
+                    DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, (Time - 700) / 100f);
+                else if (Time < 900)
+                    DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 1000)
+                    DrawCoreObj.DrawPic(Scene[3], DeviceWidth / 2, DeviceHeight / 2, (1000 - Time) / 100f);
 
-                else if (Time < 1100) DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, (Time - 1000) / 100f);
-                else if (Time < 1200) DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, 1f);
-                else if (Time < 1300) DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, (1300 - Time) / 100f);
+                else if (Time < 1100)
+                    DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, (Time - 1000) / 100f);
+                else if (Time < 1200)
+                    DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 1300)
+                    DrawCoreObj.DrawPic(Scene[4], DeviceWidth / 2, DeviceHeight / 2, (1300 - Time) / 100f);
 
-                else if (Time < 1400) DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, (Time - 1300) / 100f);
-                else if (Time < 1500) DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, 1f);
-                else if (Time < 1600) DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, (1600 - Time) / 100f);
+                else if (Time < 1400)
+                    DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, (Time - 1300) / 100f);
+                else if (Time < 1500)
+                    DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 1600)
+                    DrawCoreObj.DrawPic(Scene[5], DeviceWidth / 2, DeviceHeight / 2, (1600 - Time) / 100f);
 
-                else if (Time < 1700) DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, (Time - 1600) / 100f);
-                else if (Time < 1800) DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, 1f);
+                else if (Time < 1700)
+                    DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, (Time - 1600) / 100f);
+                else if (Time < 1800)
+                    DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, 1f);
                 else if (Time < 1900) {
                     DrawCoreObj.DrawPic(Scene[0], DeviceWidth / 2, DeviceHeight / 2, (1900 - Time) / 100f);
                     BackAlpha = (1900 - Time) / 100f;
@@ -167,8 +185,8 @@ public class AboutCore extends ApplicationAdapter {
                 JudgeBullet();
 
                 DrawCoreObj.DrawPic(TexPlayer, PlayerX, PlayerY, 0);
-                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
-                    DrawCoreObj.DrawPic(TexBullet, PlayerX, PlayerY, Angle);
+                //if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                DrawCoreObj.DrawPic(TexSlow, PlayerX, PlayerY, Angle);
 
                 DrawCoreObj.DrawString(50f, DeviceHeight - 50f, 1.8f, Color.WHITE, "Graze: " + Integer.toString(Graze));
                 DrawCoreObj.DrawString(50f, DeviceHeight - 70f, 1.8f, Color.WHITE, "Miss:  " + Integer.toString(Miss));
@@ -190,7 +208,7 @@ public class AboutCore extends ApplicationAdapter {
         } else {
             for (int i = -1; i <= 10; i++) {
                 for (int j = -1; j <= 10; j++) {
-                    DrawCoreObj.DrawPic(TexBack[1], BackB + 128f + 256f * i, BackB + 128f + 256f * j, BackAlpha);
+                    DrawCoreObj.DrawPic(TexBack[1], BackB + 256f + 512f * i, BackB + 256f + 512f * j, BackAlpha);
                 }
             }
         }
@@ -293,9 +311,9 @@ public class AboutCore extends ApplicationAdapter {
             for (int i = 0; i <= CtrlValueA; i++) {
                 for (int j = 0; j <= CtrlValueB; j++) {
                     if ((!Bullets[i][j].IsEnabled) && (Time % 2 == 0)) {
-                        DoubleTmp = Math.cos(i) + i * Math.cos(0.15d * j);
+                        DoubleTmp = Math.cos(i) + i * Math.sin(0.15d * j);
                         Bullets[i][j].x = DoubleTmp.floatValue() + (DeviceWidth / 2);
-                        DoubleTmp = Math.sin(i) - i * Math.sin(0.15d * j);
+                        DoubleTmp = Math.sin(i) - i * Math.cos(0.15d * j);
                         Bullets[i][j].y = DoubleTmp.floatValue() + (DeviceHeight * 0.75f);
 
                         DoubleTmp = Math.random();
@@ -338,9 +356,9 @@ public class AboutCore extends ApplicationAdapter {
             for (int i = 0; i <= CtrlValueA; i++) {
                 for (int j = 0; j <= CtrlValueB; j++) {
                     if ((!Bullets[i][j].IsEnabled) && (Time % 10 == 0)) {
-                        DoubleTmp = Math.cos(i) + j * Math.cos(0.15d * j);
+                        DoubleTmp = Math.cos(i) + j * Math.asin(0.15d * j);
                         Bullets[i][j].x = DoubleTmp.floatValue() + (DeviceWidth / 2);
-                        DoubleTmp = Math.sin(i) - j * Math.sin(0.15d * j);
+                        DoubleTmp = Math.sin(i) - j * Math.acos(0.15d * j);
                         Bullets[i][j].y = DoubleTmp.floatValue() + (DeviceHeight * 0.75f);
 
                         DoubleTmp = Math.random();
