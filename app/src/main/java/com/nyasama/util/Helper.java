@@ -66,11 +66,11 @@ public class Helper {
             updateVisibility(view.findViewById(id), show);
     }
 
-    public static void disableDialog(AlertDialog dialog) {
-        dialog.setCancelable(false);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
+    public static void enableDialog(AlertDialog dialog, boolean enabled) {
+        dialog.setCancelable(enabled);
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(enabled);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(enabled);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(enabled);
     }
 
     public static int toSafeInteger(String string, int defValue) {
