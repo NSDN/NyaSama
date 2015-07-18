@@ -223,4 +223,5 @@
         <item>保留转向</item>
     </string-array>
     <string name="preference_cachesize">缓存大小</string>
+    <string name="action_save_draft">保存为草稿</string>
 </resources>
