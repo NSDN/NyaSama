@@ -371,14 +371,15 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void saveDraft() {
+        String type = "" + mSpinnerTypes.getSelectedItem();
+        int typeid = mThreadTypes.containsKey(type) ? mThreadTypes.get(type) : 0;
         ThisApp.preferences.edit()
             .putBoolean(PREF_KEY_HAS_DRAFT, true)
             .putString(PREF_KEY_DRAFT_TITLE, mInputTitle.getText().toString())
             .putString(PREF_KEY_DRAFT_CONTENT, mInputContent.getText().toString())
             .putInt(PREF_KEY_DRAFT_TID, getIntent().getIntExtra("tid", 0))
             .putInt(PREF_KEY_DRAFT_FID, getIntent().getIntExtra("fid", 0))
-            .putInt(PREF_KEY_DRAFT_TYPEID, mSpinnerTypes.getSelectedItem() != null ?
-                    mThreadTypes.get(mSpinnerTypes.getSelectedItem().toString()) : 0)
+            .putInt(PREF_KEY_DRAFT_TYPEID, typeid)
             .commit();
         Helper.toast(R.string.toast_draft_saved);
     }
