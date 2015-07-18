@@ -75,6 +75,8 @@ public class Discuz {
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
 
+    public static final int MAX_COMMENT_LENGTH = 200;
+
     public static final String VOLLEY_ERROR = "volleyError";
 
     public static final int NOTIFICATION_ID = 1;
