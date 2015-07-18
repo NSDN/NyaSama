@@ -601,6 +601,8 @@ public class NewPostActivity extends BaseThemedActivity {
             Size newSize = Helper.getFittedSize(bitmapSize, THUMBNAIL_SIZE, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                     bitmap, newSize.width, newSize.height);
+            bitmap.recycle();
+            bitmap = null;
 
             // upload
             final String uploadFile = filePath;
