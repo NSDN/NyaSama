@@ -372,7 +372,7 @@ public class NewPostActivity extends BaseThemedActivity {
 
     public void saveDraft() {
         String type = "" + mSpinnerTypes.getSelectedItem();
-        int typeid = mThreadTypes.containsKey(type) ? mThreadTypes.get(type) : 0;
+        int typeid = mThreadTypes != null && mThreadTypes.containsKey(type) ? mThreadTypes.get(type) : 0;
         ThisApp.preferences.edit()
             .putBoolean(PREF_KEY_HAS_DRAFT, true)
             .putString(PREF_KEY_DRAFT_TITLE, mInputTitle.getText().toString())
