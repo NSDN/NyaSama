@@ -16,6 +16,8 @@
         android:showAsAction="never" />
     <item android:id="@+id/action_goto_forum" android:title="@string/action_goto_forum"
         android:showAsAction="never" />
+    <item android:id="@+id/action_share" android:title="@string/action_share"
+        android:showAsAction="never" />
     <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
         android:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"

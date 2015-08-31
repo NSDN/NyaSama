@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -28,7 +29,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
-import com.jakewharton.disklrucache.DiskLruCache;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
@@ -42,7 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +79,8 @@ public class AttachmentViewer extends BaseThemedActivity {
     private SimpleIndicator mIndicator;
 
     private List<Attachment> mAttachmentList = new ArrayList<Attachment>();
+    private Discuz.Thread mThread;
+    private Discuz.Post mPost;
     private boolean mHasAttachmentsPrev;
     private boolean mHasAttachmentsNext;
 
@@ -184,25 +188,33 @@ public class AttachmentViewer extends BaseThemedActivity {
         else {
             try {
                 JSONObject var = data.getJSONObject("Variables");
+                mThread = var.has("thread") ? new Discuz.Thread(var.getJSONObject("thread")) : null;
+
                 JSONArray postlist = var.getJSONArray("postlist");
                 mAttachmentList.clear();
                 if (postlist.length() > dataIndex) {
-                    Post post = new Post(postlist.getJSONObject(dataIndex));
-                    mAttachmentList = compileAttachments(post.message, post.attachments);
+                    mPost = new Post(postlist.getJSONObject(dataIndex));
+                    mAttachmentList = compileAttachments(mPost.message, mPost.attachments);
+
+                    // get src of last attachment
                     if ("-1".equals(getIntent().getStringExtra("src"))) {
                         int size = mAttachmentList.size();
                         if (size > 0)
                             getIntent().putExtra("src", mAttachmentList.get(size - 1).src);
                     }
+
+                    // check previous post
                     if (dataIndex - 1 >= 0) {
-                        post = new Post(postlist.getJSONObject(dataIndex - 1));
+                        Post post = new Post(postlist.getJSONObject(dataIndex - 1));
                         int attachments = compileAttachments(post.message, post.attachments).size();
                         if (mHasAttachmentsPrev = attachments > 0)
                             mAttachmentList.add(0, new RedirectPostAttachment(String.format(
                                     getString(R.string.goto_prev_post_attachments), attachments)));
                     }
+
+                    // check next post
                     if (dataIndex + 1 < postlist.length()) {
-                        post = new Post(postlist.getJSONObject(dataIndex + 1));
+                        Post post = new Post(postlist.getJSONObject(dataIndex + 1));
                         int attachments = compileAttachments(post.message, post.attachments).size();
                         if (mHasAttachmentsNext = attachments > 0)
                             mAttachmentList.add(new RedirectPostAttachment(String.format(
@@ -211,6 +223,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                 }
                 mPageAdapter.notifyDataSetChanged();
 
+                // select the page by src
                 final String src = getIntent().getStringExtra("src");
                 mPager.post(new Runnable() {
                     @Override
@@ -220,8 +233,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                                 mPager.setCurrentItem(i, false);
                                 return;
                             }
-                        if (mHasAttachmentsPrev)
-                            mPager.setCurrentItem(1, false);
+                        mPager.setCurrentItem(mHasAttachmentsPrev ? 1 : 0, false);
                     }
                 });
 
@@ -330,7 +342,11 @@ public class AttachmentViewer extends BaseThemedActivity {
 
             @Override
             public Fragment getItem(final int i) {
-                return AttachmentFragment.getNewFragment(i);
+                AttachmentFragment fragment = new AttachmentFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt("position", i);
+                fragment.setArguments(bundle);
+                return fragment;
             }
 
             @Override
@@ -369,14 +385,6 @@ public class AttachmentViewer extends BaseThemedActivity {
     }
 
     public static class AttachmentFragment extends Fragment {
-        public static Fragment getNewFragment(int position) {
-            AttachmentFragment fragment = new AttachmentFragment();
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", position);
-            fragment.setArguments(bundle);
-            return fragment;
-        }
-
         private AttachmentViewer mActivity;
 
         @Override
@@ -386,19 +394,9 @@ public class AttachmentViewer extends BaseThemedActivity {
         }
 
         private Bitmap getCachedBitmap(String cacheKey) {
-            DiskLruCache.Snapshot snapshot;
-            try {
-                snapshot = ThisApp.fileDiskCache.get(cacheKey);
-                if (snapshot == null) return null;
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-
             Bitmap bitmap;
             try {
-                bitmap = BitmapFactory.decodeStream(snapshot.getInputStream(0));
+                bitmap = BitmapFactory.decodeStream(Discuz.getCache(cacheKey));
                 if (bitmap == null) return null;
             }
             catch (Throwable e) {
@@ -439,6 +437,10 @@ public class AttachmentViewer extends BaseThemedActivity {
                 bundle.putString("src", attachment.src);
                 bundle.putString("name", attachment.name);
                 bundle.putString("size", attachment.size);
+                bundle.putString("title", mActivity.mThread.title);
+                bundle.putInt("tid", mActivity.mThread.id);
+                bundle.putInt("pid", mActivity.mPost.id);
+                bundle.putInt("index", position + (mActivity.mHasAttachmentsPrev ? -1 : 0));
             }
 
             final String src = bundle.getString("src");
@@ -456,7 +458,24 @@ public class AttachmentViewer extends BaseThemedActivity {
                 final TextView message = (TextView) view.findViewById(R.id.message);
                 final View loading = view.findViewById(R.id.loading);
 
-                final String cacheKey = Helper.toSafeMD5(src);
+                String key = getString(R.string.pref_key_manga_cache_size);
+                int size = Helper.toSafeInteger(ThisApp.preferences.getString(key, ""), 256);
+                final String cacheKey;
+                if (size > 0) {
+                    cacheKey = Helper.toSafeMD5(src);
+                }
+                else {
+                    final String mime = URLConnection.guessContentTypeFromName(src);
+                    // Note: your file will probably not be seen from PC until next reboot
+                    // REF: https://code.google.com/p/android/issues/detail?id=38282
+                    final File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                            "/Nyasama/Images/" +
+                            bundle.getInt("tid", 0) + "-" + bundle.getString("title", ""),
+                            bundle.getInt("pid", 0) + "-" + bundle.getInt("index", 0) + "-" +
+                                    Helper.toSafeMD5(src).substring(0, 5) + "." + mime.substring(mime.indexOf('/') + 1));
+                    cacheKey = "file:" + file.getAbsolutePath();
+                }
+
                 final Bitmap bitmap = getCachedBitmap(cacheKey);
                 if (bitmap != null) {
                     photoView.setImageBitmap(bitmap);

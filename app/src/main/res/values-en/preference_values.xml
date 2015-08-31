@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Note: add translatable="false" to void errors when building release
+    REF: http://stackoverflow.com/questions/11443996/lint-how-to-ignore-key-is-not-translated-in-language-errors
+-->
+<resources>
+    <string-array name="manga_cache_size" translatable="true">
+        <item>256MB</item>
+        <item>512MB</item>
+        <item>1GB</item>
+        <item>Save to Nyasama/Images/</item>
+    </string-array>
+
+</resources>

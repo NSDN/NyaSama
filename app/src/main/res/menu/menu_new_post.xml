@@ -7,6 +7,8 @@
         android:showAsAction="always" android:icon="@drawable/ic_action_send_now" />
     <item android:id="@+id/action_save" android:title="@string/action_save"
         android:showAsAction="always" android:icon="@drawable/ic_action_save" />
+    <item android:id="@+id/action_save_draft" android:title="@string/action_save_draft"
+        android:showAsAction="never" />
     <item android:id="@+id/action_add_image" android:title="@string/action_add_image"
         android:showAsAction="never" />
     <item android:id="@+id/action_setup_poll" android:title="@string/action_setup_poll"

@@ -10,8 +10,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
@@ -187,7 +189,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doReply(final String text, final String trimstr) {
-        Helper.disableDialog(mReplyDialog);
+        Helper.enableDialog(mReplyDialog, false);
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("replysubmit", "yes");
@@ -220,7 +222,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doComment(final int pid, final String comment) {
-        Helper.disableDialog(mCommentDialog);
+        Helper.enableDialog(mCommentDialog, false);
         Discuz.execute("addcomment", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("pid", pid);
@@ -229,9 +231,9 @@ public class PostListActivity extends BaseThemedActivity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
-                mCommentDialog.dismiss();
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
+                    Helper.enableDialog(mCommentDialog, true);
                 }
                 else if (data.opt("Message") instanceof JSONObject) {
                     JSONObject message = data.optJSONObject("Message");
@@ -243,16 +245,19 @@ public class PostListActivity extends BaseThemedActivity
                         comments.add(0, new Comment(Discuz.sUid, Discuz.sUsername, comment));
                         mCommentCount.put(pid, comments.size());
                         mListFragment.getListAdapter().notifyDataSetChanged();
+                        mCommentDialog.dismiss();
                     }
-                    else
+                    else {
                         Helper.toast(message.optString("messagestr"));
+                        Helper.enableDialog(mCommentDialog, true);
+                    }
                 }
             }
         });
     }
 
     public void doPollVote(final List<Integer> selected) {
-        Helper.disableDialog(mVoteDialog);
+        Helper.enableDialog(mVoteDialog, false);
         Discuz.execute("pollvote", new HashMap<String, Object>() {{
             put("fid", getIntent().getIntExtra("fid", 0));
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -305,7 +310,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doModerateThread(final String operation, final String reason, final Object... args) {
-        Helper.disableDialog(mThreadModerateDialog);
+        Helper.enableDialog(mThreadModerateDialog, false);
         Discuz.execute("topicadmin", new HashMap<String, Object>(){{
             if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation))
                 put("action", operation);
@@ -437,6 +442,19 @@ public class PostListActivity extends BaseThemedActivity
     public void addComment(Post item) {
         final int pid = item.id;
         final EditText input = new EditText(this);
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                mCommentDialog.setMessage(getString(R.string.diag_hint_type_something) + " " +
+                    "(" + editable.toString().length() + "/" + Discuz.MAX_COMMENT_LENGTH + ")");
+            }
+        });
         mCommentDialog = new AccentAlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
@@ -940,6 +958,15 @@ public class PostListActivity extends BaseThemedActivity
             intent.putExtra("page", 0);
             intent.putExtra("authorid", authorId > 0 ? 0 : mAuthorId);
             mListFragment.reloadAll();
+            return true;
+        }
+        else if (id == R.id.action_share) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, getTitle() + "\n" + Discuz.DISCUZ_URL +
+                    "forum.php?mod=viewthread&tid=" + getIntent().getIntExtra("tid", 0));
+            intent.setType("text/plain");
+            startActivity(intent);
             return true;
         }
         else if (id == R.id.action_goto_forum) {

@@ -31,6 +31,7 @@
     <string name="action_post_now">Post now</string>
     <string name="action_reply">Reply</string>
     <string name="title_main_home">NYASAMA</string>
+    <string name="action_save_draft">Save as draft</string>
     <string name="action_add_image">Add image</string>
     <string name="image_upload_failed_toast">Upload image failed</string>
     <string name="title_activity_user_profile">User profile</string>
@@ -152,6 +153,8 @@
     <string name="move_type">Move type</string>
     <string name="toast_open_file_failed">Open file failed</string>
     <string name="acra_reporting_error">Oops! There is some thing wrong!\nSending error report...</string>
+    <string name="action_share">Share</string>
+    <string name="toast_draft_saved">Draft saved</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

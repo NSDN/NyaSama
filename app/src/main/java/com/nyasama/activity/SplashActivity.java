@@ -76,7 +76,7 @@ public class SplashActivity extends Activity {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             startActivity(new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(releaseUrl + "/NyaSama-" + mVersion + ".apk")));
+                                    Uri.parse(releaseUrl + "/dlapk.php?v=" + mVersion)));
                             finish();
                         }
                     })

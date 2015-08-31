@@ -46,6 +46,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,6 +76,8 @@ public class Discuz {
     public static final String DISCUZ_URL = DISCUZ_HOST + "/";
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
+
+    public static final int MAX_COMMENT_LENGTH = 200;
 
     public static final String VOLLEY_ERROR = "volleyError";
 
@@ -870,6 +874,23 @@ public class Discuz {
         boolean onResponse(int progress);
     }
 
+    public static InputStream getCache(final String cacheKey) {
+        try {
+            if (cacheKey.startsWith("file:")) {
+                return new FileInputStream(cacheKey.substring("file:".length()));
+            }
+            else {
+                DiskLruCache.Snapshot snapshot = ThisApp.fileDiskCache.get(cacheKey);
+                if (snapshot == null) return null;
+                return snapshot.getInputStream(0);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     public static void download(final String url,
                               final String cacheKey,
@@ -893,12 +914,24 @@ public class Discuz {
                     if (mCanceled) // check this because it takes long to go on
                         return "canceled";
 
-                    DiskLruCache.Editor editor = ThisApp.fileDiskCache.edit(cacheKey);
-                    if (editor == null)
-                        return "open cache failed";
+                    OutputStream output;
+                    DiskLruCache.Editor editor = null;
+                    File tmpFile = null;
+                    File saveFile = null;
+                    if (cacheKey.startsWith("file:")) {
+                        tmpFile = File.createTempFile("nyasama_", "downloading", ThisApp.context.getExternalCacheDir());
+                        saveFile = new File(cacheKey.substring("file:".length()));
+                        output = new FileOutputStream(tmpFile);
+                        saveFile.getParentFile().mkdirs();
+                    }
+                    else {
+                        editor = ThisApp.fileDiskCache.edit(cacheKey);
+                        if (editor == null)
+                            return "open cache failed";
+                        output = editor.newOutputStream(0);
+                    }
 
                     InputStream input = conn.getInputStream();
-                    OutputStream output = editor.newOutputStream(0);
                     int count, recvd = 0;
                     byte data[] = new byte[16 * 1024];
                     while (!mCanceled && (count = input.read(data)) >= 0) {
@@ -910,10 +943,20 @@ public class Discuz {
                     input.close();
                     output.close();
                     conn.disconnect();
-                    if (mCanceled)
-                        editor.abort();
-                    else
-                        editor.commit();
+
+                    if (editor != null) {
+                        if (mCanceled)
+                            editor.abort();
+                        else
+                            editor.commit();
+                    }
+                    if (tmpFile != null) {
+                        if (mCanceled)
+                            tmpFile.delete();
+                        else
+                            tmpFile.renameTo(saveFile);
+                    }
+
                     return mCanceled ? "calceled" : null;
                 }
                 catch (Throwable e) {

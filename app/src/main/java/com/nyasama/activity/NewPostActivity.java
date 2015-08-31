@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -62,6 +63,13 @@ public class NewPostActivity extends BaseThemedActivity {
 
     static final String ARG_POST_TITLE = "thread_title";
     static final String ARG_POST_TRIMSTR = "notice_trimstr";
+
+    static final String PREF_KEY_HAS_DRAFT = "has_draft";
+    static final String PREF_KEY_DRAFT_TITLE = "draft_title";
+    static final String PREF_KEY_DRAFT_CONTENT = "draft_content";
+    static final String PREF_KEY_DRAFT_TYPEID = "draft_typeid";
+    static final String PREF_KEY_DRAFT_TID = "draft_tid";
+    static final String PREF_KEY_DRAFT_FID = "draft_fid";
 
     static final String TAG = "NewPost";
     static final int REQCODE_PICK_IMAGE = 1;
@@ -165,6 +173,8 @@ public class NewPostActivity extends BaseThemedActivity {
                         if ("post_edit_succeed".equals(messageval)) {
                             setResult(1);
                             finish();
+                            ThisApp.preferences.edit()
+                                    .putBoolean(PREF_KEY_HAS_DRAFT, false);
                         } else {
                             Helper.toast(message.getString("messagestr"));
                         }
@@ -174,6 +184,11 @@ public class NewPostActivity extends BaseThemedActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     public void doPost(View view) {
@@ -242,6 +257,8 @@ public class NewPostActivity extends BaseThemedActivity {
                             String tid = data.getJSONObject("Variables").getString("tid");
                             setResult(Integer.parseInt(tid));
                             finish();
+                            ThisApp.preferences.edit()
+                                    .putBoolean(PREF_KEY_HAS_DRAFT, false);
                         } else {
                             AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
                                     .setTitle(R.string.error_new_post)
@@ -305,6 +322,28 @@ public class NewPostActivity extends BaseThemedActivity {
         });
     }
 
+    public void loadThreadDraft(int tid) {
+        SharedPreferences pref = ThisApp.preferences;
+        if (pref.getBoolean(PREF_KEY_HAS_DRAFT, false) &&
+                pref.getInt(PREF_KEY_DRAFT_TID, 0) == tid) {
+            mInputTitle.setText(pref.getString(PREF_KEY_DRAFT_TITLE, ""));
+            mInputContent.setText(pref.getString(PREF_KEY_DRAFT_CONTENT, ""));
+        }
+    }
+
+    public void loadNewDraft(int fid) {
+        SharedPreferences pref = ThisApp.preferences;
+        if (pref.getBoolean(PREF_KEY_HAS_DRAFT, false) &&
+                pref.getInt(PREF_KEY_DRAFT_FID, 0) == fid) {
+            mInputTitle.setText(pref.getString(PREF_KEY_DRAFT_TITLE, ""));
+            mInputContent.setText(pref.getString(PREF_KEY_DRAFT_CONTENT, ""));
+            loadThreadTypes(fid, pref.getInt(PREF_KEY_DRAFT_TYPEID, 0));
+        }
+        else {
+            loadThreadTypes(fid, 0);
+        }
+    }
+
     public void loadThreadTypes(final int fid, final int typeid) {
         Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
@@ -329,6 +368,20 @@ public class NewPostActivity extends BaseThemedActivity {
                 }
             }
         });
+    }
+
+    public void saveDraft() {
+        String type = "" + mSpinnerTypes.getSelectedItem();
+        int typeid = mThreadTypes != null && mThreadTypes.containsKey(type) ? mThreadTypes.get(type) : 0;
+        ThisApp.preferences.edit()
+            .putBoolean(PREF_KEY_HAS_DRAFT, true)
+            .putString(PREF_KEY_DRAFT_TITLE, mInputTitle.getText().toString())
+            .putString(PREF_KEY_DRAFT_CONTENT, mInputContent.getText().toString())
+            .putInt(PREF_KEY_DRAFT_TID, getIntent().getIntExtra("tid", 0))
+            .putInt(PREF_KEY_DRAFT_FID, getIntent().getIntExtra("fid", 0))
+            .putInt(PREF_KEY_DRAFT_TYPEID, typeid)
+            .commit();
+        Helper.toast(R.string.toast_draft_saved);
     }
 
     public void editPollOptions() {
@@ -514,10 +567,11 @@ public class NewPostActivity extends BaseThemedActivity {
         // replying
         else if (intent.getIntExtra("tid", 0) > 0) {
             setTitle(getString(R.string.title_editing_reply));
+            loadThreadDraft(intent.getIntExtra("tid", 0));
         }
         // creating new post
         else if (intent.getIntExtra("fid", 0) > 0) {
-            loadThreadTypes(intent.getIntExtra("fid", 0), 0);
+            loadNewDraft(intent.getIntExtra("fid", 0));
         }
     }
 
@@ -601,6 +655,8 @@ public class NewPostActivity extends BaseThemedActivity {
             Size newSize = Helper.getFittedSize(bitmapSize, THUMBNAIL_SIZE, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                     bitmap, newSize.width, newSize.height);
+            // Note: have to recycle memory here
+            bitmap.recycle();
 
             // upload
             final String uploadFile = filePath;
@@ -670,6 +726,9 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_save) {
             doEdit(null);
+        }
+        else if (id == R.id.action_save_draft) {
+            saveDraft();
         }
         else if (id == R.id.action_setup_poll) {
             editPollOptions();

@@ -50,6 +50,7 @@ import java.util.Locale;
         formUriBasicAuthPassword="GHxhyFvXLUoHAqMVkgCLSboe",
         mode = ReportingInteractionMode.TOAST,
         resToastText = R.string.acra_reporting_error)
+
 public class ThisApp extends Application {
     public static SharedPreferences preferences;
     public static Context context;
@@ -99,9 +100,11 @@ public class ThisApp extends Application {
                     1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
         }
         else if (s.equals("disk_cache")) {
+            int size = Helper.toSafeInteger(pref.getString(s, ""), 256);
             try {
-                fileDiskCache = DiskLruCache.open(new File(context.getExternalCacheDir(), "file-cache"),
-                        0, 1, 1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 256));
+                if (size > 0)
+                    fileDiskCache = DiskLruCache.open(new File(context.getExternalCacheDir(), "file-cache"),
+                        0, 1, 1024 * 1024 * size);
             }
             catch (IOException e) {
                 Helper.toast(e.getMessage());

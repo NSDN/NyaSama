@@ -120,6 +120,25 @@ public class MainActivity extends BaseThemedActivity implements
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        Uri uri = intent.getData();
+        if (intent.getData() != null) {
+            // TODO: deal with pages, titles, etc
+            final int tid = Helper.toSafeInteger(uri.getQueryParameter("tid"), 0);
+            final int fid = Helper.toSafeInteger(uri.getQueryParameter("fid"), 0);
+            if (tid > 0) startActivity(new Intent(this, PostListActivity.class) {{
+                putExtra("tid", tid);
+            }});
+            else if (fid > 0) startActivity(new Intent(this, ThreadListActivity.class) {{
+                putExtra("fid", fid);
+            }});
+        }
+        else {
+            super.onNewIntent(intent);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -151,6 +170,8 @@ public class MainActivity extends BaseThemedActivity implements
 
         LocalBroadcastManager.getInstance(ThisApp.context)
                 .registerReceiver(mLoginReceiver, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
+
+        onNewIntent(getIntent());
     }
 
     @Override
