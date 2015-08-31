@@ -9,11 +9,11 @@
         <!--item name="android:actionBarItemBackground">@android:color/transparent</item-->
         <!--item name="android:actionBarTabTextStyle">@style/PagerTextStyle</item-->
         <item name="android:colorPrimary">@color/ThemeColor</item>
-        <item name="android:colorPrimaryDark">@color/ThemeColor</item>
+        <item name="android:colorPrimaryDark">@color/ThemeColorDark</item>
         <item name="android:textColorPrimary">@color/ThemeColorDark</item>
         <item name="android:windowBackground">@color/ThemeColor</item>
         <item name="android:navigationBarColor">@color/ThemeColor</item>
-        <item name="android:textColorLink">@color/ThemeColor</item>
+        <item name="android:textColorLink">@color/ThemeColorLight</item>
         <!--item name="android:actionMenuTextColor">@color/text_color_secondary</item-->
         <item name="android:colorAccent">@color/ThemeColorLight</item>
         <!--item name="android:actionBarSize">57dp</item-->
