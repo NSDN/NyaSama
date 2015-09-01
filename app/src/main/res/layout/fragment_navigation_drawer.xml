@@ -10,7 +10,7 @@
         android:onClick="gotoProfile"
         android:visibility="gone"
         android:padding="8dp"
-        android:background="@color/ThemeColorLight"
+        android:background="@color/ThemeBackground"
         android:orientation="horizontal"
         android:id="@+id/show_logined"
         android:layout_width="match_parent"
@@ -46,7 +46,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@color/ThemeColorLight"
+        android:background="@color/ThemeBackground"
         android:id="@+id/hide_logined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

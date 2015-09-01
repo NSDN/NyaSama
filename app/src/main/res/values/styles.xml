@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Material.Light">
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
         <!-- Note: remove shadow under actionbar
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <item name="android:windowContentOverlay">@null</item>
@@ -13,7 +13,7 @@
         <item name="android:textColorPrimary">@color/ThemeColorDark</item>
         <item name="android:windowBackground">@color/ThemeColor</item>
         <item name="android:navigationBarColor">@color/ThemeColor</item>
-        <item name="android:textColorLink">@color/ThemeColorLight</item>
+        <item name="android:textColorLink">@color/text_color_secondary</item>
         <!--item name="android:actionMenuTextColor">@color/text_color_secondary</item-->
         <item name="android:colorAccent">@color/ThemeColorLight</item>
         <!--item name="android:actionBarSize">57dp</item-->
@@ -35,9 +35,10 @@
     <style name="PagerTextStyle" parent="AppTheme">
         <item name="android:textColor">@color/ThemeColorLight</item>
         <item name="android:background">@android:color/transparent</item>
+        <item name="android:padding">5dp</item>
     </style>
 
-    <style name="NavigationDrawerStyle">
+    <style name="NavigationDrawerStyle" parent="android:Widget.Material.Toolbar">
         <item name="android:background">@color/ThemeBackground</item>
     </style>
 
@@ -47,9 +48,9 @@
 
     <color name="ThemeColor">#75a2ae</color>
     <color name="ThemeColorLight">#b2e0ef</color>
-    <color name="ThemeColorDark">#486d77</color>
-    <color name="ThemeBackground">#b2e0ef</color>
+    <color name="ThemeColorDark">#1e4049</color>
+    <color name="ThemeBackground">#8cb9c8</color>
     <color name="AppBackground">#75a2ae</color>
-    <color name="text_color_secondary">#999999</color>
+    <color name="text_color_secondary">#486d77</color>
 
 </resources>
