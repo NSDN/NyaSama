@@ -42,15 +42,18 @@
         <item name="android:background">@color/ThemeBackground</item>
     </style>
 
-    <style name="ButtonStyle" parent="@android:style/Widget.Material.Button"> </style>
+    <style name="ButtonStyle" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@color/ThemeColorDark</item>
+        <item name="android:textColor">@color/ThemeColorLight</item>
+    </style>
 
     <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
 
-    <color name="ThemeColor">#75a2ae</color>
-    <color name="ThemeColorLight">#b2e0ef</color>
-    <color name="ThemeColorDark">#1e4049</color>
-    <color name="ThemeBackground">#8cb9c8</color>
-    <color name="AppBackground">#75a2ae</color>
-    <color name="text_color_secondary">#486d77</color>
+    <color name="ThemeColor">#c56d53</color>
+    <color name="ThemeColorLight">#e0856f</color>
+    <color name="ThemeColorDark">#86463d</color>
+    <color name="ThemeBackground">#cb866f</color>
+    <color name="AppBackground">#c56d53</color>
+    <color name="text_color_secondary">#9b554e</color>
 
 </resources>
