@@ -40,7 +40,7 @@ public class DiscuzForumIndexFragment extends CommonListFragment
         // hide the divider
         ((ListView) view.findViewById(R.id.list)).setDividerHeight(0);
         // set background color
-        view.setBackgroundColor(getResources().getColor(R.color.AppBackground));
+        view.setBackgroundColor(getResources().getColor(R.color.ThemeBackground));
         return view;
     }
 

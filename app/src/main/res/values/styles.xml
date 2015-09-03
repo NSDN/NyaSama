@@ -4,22 +4,27 @@
     <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
         <!-- Note: remove shadow under actionbar
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
-        <item name="android:windowContentOverlay">@null</item>
-        <!--item name="android:actionBarStyle">@style/ActionBarStyle</item-->
-        <!--item name="android:actionBarItemBackground">@android:color/transparent</item-->
-        <!--item name="android:actionBarTabTextStyle">@style/PagerTextStyle</item-->
+        <!--item name="android:windowContentOverlay">@null</item-->
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:clipToPadding">true</item>
+
         <item name="android:colorPrimary">@color/ThemeColor</item>
         <item name="android:colorPrimaryDark">@color/ThemeColorDark</item>
-        <item name="android:textColorPrimary">@color/ThemeColorDark</item>
+        <item name="android:textColorPrimary">@color/text_color_primary</item>
+        <item name="android:textColor">@color/text_color_primary</item>
         <item name="android:windowBackground">@color/ThemeColor</item>
-        <item name="android:navigationBarColor">@color/ThemeColor</item>
         <item name="android:textColorLink">@color/text_color_secondary</item>
-        <!--item name="android:actionMenuTextColor">@color/text_color_secondary</item-->
         <item name="android:colorAccent">@color/ThemeColorLight</item>
-        <!--item name="android:actionBarSize">57dp</item-->
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar.Fullscreen"> </style>
+    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 
     <!-- animated theme. -->
     <style name="AppThemeAni" parent="AppTheme">
@@ -33,7 +38,7 @@
     </style>
 
     <style name="PagerTextStyle" parent="AppTheme">
-        <item name="android:textColor">@color/ThemeColorLight</item>
+        <item name="android:textColor">@color/text_color_primary</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:padding">5dp</item>
     </style>
@@ -43,17 +48,16 @@
     </style>
 
     <style name="ButtonStyle" parent="@android:style/Widget.Material.Button">
-        <item name="android:background">@color/ThemeColorDark</item>
-        <item name="android:textColor">@color/ThemeColorLight</item>
+        <item name="android:backgroundTint">@color/ThemeColor</item>
     </style>
 
     <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
 
-    <color name="ThemeColor">#c56d53</color>
-    <color name="ThemeColorLight">#e0856f</color>
-    <color name="ThemeColorDark">#86463d</color>
-    <color name="ThemeBackground">#cb866f</color>
-    <color name="AppBackground">#c56d53</color>
-    <color name="text_color_secondary">#9b554e</color>
+    <color name="ThemeColor">#d06b82</color>
+    <color name="ThemeColorLight">#ff9bb2</color>
+    <color name="ThemeColorDark">#973f53</color>
+    <color name="ThemeBackground">#d6afaa</color>
+    <color name="text_color_primary">#ffffff</color>
+    <color name="text_color_secondary">#eeeeee</color>
 
 </resources>

@@ -33,7 +33,7 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         // set background color
-        view.setBackgroundColor(getResources().getColor(R.color.AppBackground));
+        view.setBackgroundColor(getResources().getColor(R.color.ThemeBackground));
         return view;
     }
 
