@@ -652,6 +652,9 @@ public class Discuz {
         } else if (module.equals("friendcp")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "add2submit", "yes");
+        } else if (module.equals("buythread")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "paysubmit", "yes");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
