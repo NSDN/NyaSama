@@ -1,4 +1,217 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">喵玉殿</string>
+    <string name="title_section1">论坛</string>
+    <string name="title_section2">THBWiki</string>
+    <string name="title_section3">THVideo</string>
+    <string name="navigation_drawer_open">打开导航栏</string>
+    <string name="navigation_drawer_close">关闭导航栏</string>
+    <string name="action_example">搜索</string>
+    <string name="action_settings">设置</string>
+    <string name="title_activity_thread_list">主题列表</string>
+    <string name="hello_world">来世愿生幻想乡！</string>
+    <string name="load_failed_toast">读取好像出现问题了，请过会儿再来</string>
+    <string name="network_error_toast">网络好像有问题，请过会儿再试试</string>
+    <string name="list_loading_text">载入中……</string>
+    <string name="title_activity_post_list">回复列表</string>
+    <string name="list_empty">什么也没找到</string>
+    <string name="title_activity_login">登录</string>
+    <string name="login_button_text">登录</string>
+    <string name="login_hint_username">用户名</string>
+    <string name="login_hint_password">密码</string>
+    <string name="drawer_button_login">登录</string>
+    <string name="login_empty_message">请输入用户名和密码！</string>
+    <string name="title_activity_new_post">新建主题</string>
+    <string name="post_title_hint">在这里输入标题</string>
+    <string name="post_content_hint">在这里输入内容</string>
+    <string name="post_thread_button">发布</string>
+    <string name="post_content_empty_message">是不是把什么忘了啊？</string>
+    <string name="action_new_post">新主题</string>
+    <string name="action_post_now">发表</string>
+    <string name="action_reply">回复</string>
+    <string name="title_main_home">板块列表</string>
+    <string name="action_add_image">添加图片</string>
+    <string name="image_upload_failed_toast">图片上传失败</string>
+    <string name="title_activity_user_profile">用户信息</string>
+    <string name="logout_button_text">退出登录</string>
+    <string name="action_quick_reply">快速回复</string>
+    <string name="action_comment">点评</string>
+    <string name="notify_title_text">来自喵玉殿的消息</string>
+    <string name="thread_list_threads_title">主题</string>
+    <string name="thread_list_subforum_title">子版块</string>
+    <string name="there_is_something_wrong">啊咧有什么地方出错了……</string>
+    <string name="diag_insert_options">插入图片</string>
+    <string name="diag_insert_from_gallery">来自图库</string>
+    <string name="diag_insert_from_camera">来自相机</string>
+    <string name="diag_insert_smiley_title">插入表情</string>
+    <string name="diag_quick_reply_title">快速回复</string>
+    <string name="diag_hint_type_something">在这里输入些什么吧</string>
+    <string name="action_reload">重新加载</string>
+    <string name="mythread_button_text">我的主题</string>
+    <string name="title_activity_personal_messages">私信</string>
+    <string name="title_activity_messages">提醒</string>
+    <string name="send_message_button">发送信息</string>
+    <string name="fragment_blank_msg">喵......</string>
+    <string name="my_message_button">我的私信</string>
+    <string name="login_message">登了个录</string>
+    <string name="title_activity_notice">我的提醒</string>
+    <string name="my_notice_button">我的提醒</string>
+    <string name="title_notice_read">已读</string>
+    <string name="title_notice_unread">未读</string>
+    <string name="title_activity_attachment_viewer">查看附件</string>
+    <string name="text_view_attachments">[查看附件]</string>
+    <string name="title_activity_setting">设置</string>
+    <string name="pref_category_general">通用</string>
+    <string name="alert_need_reboot">需要重启才能应用更改</string>
+    <string name="diag_loading_smilies">载入表情中......</string>
+    <string name="dialog_update_user">更新用户信息中......</string>
+    <string name="dialog_uploading">正在上传......</string>
+    <string name="action_more_comments">更多点评</string>
+    <string name="show_favs_button">我的收藏</string>
+    <string name="action_mark_fav">收藏</string>
+    <string name="title_activity_fav_list">我的收藏</string>
+    <string name="thread_list_toplist_title">置顶</string>
+    <string name="title_main_hot_threads">热门帖子</string>
+    <string name="title_main_translated">汉化推送</string>
+    <string name="signin_button_text">签到</string>
+    <string name="title_section4">设置</string>
+    <string name="title_section5">关于</string>
+    <string name="next_post_button"><![CDATA[下一帖 >>]]></string>
+    <string name="prev_post_button"><![CDATA[<< 上一贴]]></string>
+    <string name="action_my_profile">个人中心</string>
+    <string name="action_edit">编辑</string>
+    <string name="forum_index_threads">主题</string>
+    <string name="forum_index_posts">今日</string>
+    <string name="preference_language">语言</string>
+    <string name="preference_animation">过渡动画</string>
+    <string name="preference_category_version">版本</string>
+    <string name="preference_cachesize">缓存大小</string>
+    <string name="preference_category_explore">浏览</string>
+    <string name="preference_thumbsize">帖子图片尺寸</string>
+    <string name="new_version_alert_title">有新版本啦</string>
+    <string name="new_version_alert_message">去下载新版本 %s 吗?</string>
+    <string name="title_editing_post">编辑帖子</string>
+    <string name="title_editing_reply">编辑回复</string>
+    <string name="action_save">保存</string>
+    <string name="action_add_smiley">插入表情</string>
+    <string name="button_back">返回</string>
+    <string name="string_uncategorized">未分类</string>
+    <string name="toast_click_again_to_exit">再按一次后退来退出</string>
+    <string name="action_goto_forum">返回板块</string>
+    <string name="text_view_vote">[查看投票]</string>
+    <string name="prompt_1">你收到了</string>
+    <string name="prompt_2">条私信</string>
+    <string name="prompt_3">和</string>
+    <string name="prompt_4">条提醒</string>
+    <string name="title_activity_search">搜索</string>
+    <string name="search_hint">搜索帖子</string>
+    <string name="pref_title_version_number">版本号</string>
+    <string name="pref_diag_title_select_lang">选择语言</string>
+    <string name="preference_textsize">文本大小</string>
+    <string name="last_activity">最后活动</string>
+    <string name="last_post">最后发帖</string>
+    <string name="last_visit">最后访问</string>
+    <string name="gender">性别</string>
+    <string name="gender_male">男</string>
+    <string name="gender_femal">女</string>
+    <string name="reside">居住地</string>
+    <string name="like">喜欢的东西</string>
+    <string name="site">个人网站</string>
+    <string name="unknown">未知</string>
+    <string name="action_setup_poll">设定投票</string>
+    <string name="diag_title_setup_poll">每行为一个选项</string>
+    <string name="diag_title_vote_result">投票结果</string>
+    <string name="you_can_not_voted">你无法投票</string>
+    <string name="toast_too_many_votes">你最多只能投 %d 项</string>
+    <string name="preference_showimg">显示帖子图片</string>
+    <string name="new_feature">更新内容:</string>
+    <string name="goto_prev_post_attachments"><![CDATA[上一楼\n(%d 附件)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[下一楼\n(%d 附件)\n>>]]></string>
+    <string name="poll_max_choices">最多可选</string>
+    <string name="poll_expiration_days">有效天数</string>
+    <string name="diag_title_max_choices">最多投 %d 项</string>
+    <string name="page_index">第 %d 页</string>
+    <string name="action_see_author">只看楼主</string>
+    <string name="action_reverse_order">倒序查看</string>
+    <string name="toast_open_image_fail">打开图片失败</string>
+    <string name="operate_reason">操作理由</string>
+    <string name="thread_operation">操作</string>
+    <string name="action_moderate_thread">管理帖子</string>
+    <string name="thread_stick">置顶</string>
+    <string name="thread_moderate_expiration">有效期</string>
+    <string name="thread_digest">精华</string>
+    <string name="thread_delete_confirm">你真的要把这个扔进隙间回收站吗？</string>
+    <string name="action_delete">删除</string>
+    <string name="action_warn">警告</string>
+    <string name="action_ban">屏蔽</string>
+    <string name="check_updates">更新</string>
+    <string name="check_new_versions">启动时检查新版本</string>
+    <string name="do_not_remind">不再提示</string>
+    <string name="thread_title_hidden">此贴已隐藏</string>
+    <string name="thread_target">目标板块</string>
+    <string name="thread_type">目标分类</string>
+    <string name="move_type">移动方式</string>
+    <string-array name="thumb_size">
+        <item>较小</item>
+        <item>中等</item>
+        <item>原图</item>
+    </string-array>
+    <string-array name="show_image">
+        <item>仅使用 Wifi 时</item>
+        <item>始终显示</item>
+        <item>始终不显示</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>提升/下降</item>
+        <item>置顶</item>
+        <item>高亮</item>
+        <item>精华</item>
+        <item>开启/关闭</item>
+        <item>移动</item>
+        <item>删除</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>提升</item>
+        <item>下降</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>不置顶</item>
+        <item>本版置顶</item>
+        <item>分类置顶</item>
+        <item>全局置顶</item>
+    </string-array>
+    <string-array name="highlight_color">
+        <item>Black</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Cyan</item>
+        <item>Blue</item>
+        <item>Purple</item>
+        <item>Pink</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>非精华</item>
+        <item>精华1</item>
+        <item>精华2</item>
+        <item>精华3</item>
+    </string-array>
+    <string-array name="open_or_close_thread">
+        <item>开启</item>
+        <item>关闭</item>
+    </string-array>
+    <string-array name="warn_or_not">
+        <item>警告</item>
+        <item>撤销</item>
+    </string-array>
+    <string-array name="ban_or_not">
+        <item>屏蔽</item>
+        <item>撤销</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>移动主题</item>
+        <item>保留转向</item>
+    </string-array>
 </resources>
