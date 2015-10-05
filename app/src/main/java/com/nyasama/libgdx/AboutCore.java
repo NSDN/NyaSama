@@ -185,7 +185,7 @@ public class AboutCore extends ApplicationAdapter {
                 JudgeBullet();
 
                 DrawCoreObj.DrawPic(TexPlayer, PlayerX, PlayerY, 0);
-                //if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
                 DrawCoreObj.DrawPic(TexSlow, PlayerX, PlayerY, Angle);
 
                 DrawCoreObj.DrawString(50f, DeviceHeight - 50f, 1.8f, Color.WHITE, "Graze: " + Integer.toString(Graze));

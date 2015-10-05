@@ -6,11 +6,11 @@
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <!--item name="android:windowContentOverlay">@null</item-->
 
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowTranslucentNavigation">true</item>
 
-        <!--item name="android:fitsSystemWindows">true</item-->
-        <!--item name="android:clipToPadding">true</item-->
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:clipToPadding">true</item>
 
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
 
@@ -23,9 +23,20 @@
         <item name="android:colorAccent">@color/ThemeColorLight</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
+    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:clipToPadding">false</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.FullScreen" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:clipToPadding">false</item>
     </style>
 
     <!-- animated theme. -->

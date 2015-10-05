@@ -6,10 +6,10 @@
     android:paddingBottom="@dimen/ActivityPaddingBottom"
     android:orientation="vertical">
 
-    <View
+    <!--View
         android:layout_width="match_parent"
         android:layout_height="@dimen/ActivityPaddingTop"
-        android:background="@color/ThemeColor" />
+        android:background="@color/ThemeColor" /-->
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

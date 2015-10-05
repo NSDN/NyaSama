@@ -6,9 +6,9 @@
     android:orientation="vertical"
     android:background="@android:color/transparent" >
 
-    <View
+    <!--View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/ActivityPaddingTop" />
+        android:layout_height="@dimen/ActivityPaddingTop" /-->
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

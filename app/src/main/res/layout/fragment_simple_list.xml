@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <!--LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -27,7 +27,15 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/ActivityPaddingBottom" />
-        </LinearLayout>
+        </LinearLayout-->
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@null"
+            android:footerDividersEnabled="false" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView

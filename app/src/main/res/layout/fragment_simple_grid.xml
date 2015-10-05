@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <!--LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -29,7 +29,15 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/ActivityPaddingBottom" />
-        </LinearLayout>
+        </LinearLayout-->
+
+        <com.etsy.android.grid.StaggeredGridView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:column_count_landscape="4"
+            app:column_count_portrait="2"
+            app:item_margin="8dp" />
 
         <!--GridView
             android:columnWidth="128dp"
