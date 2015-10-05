@@ -6,17 +6,19 @@
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <!--item name="android:windowContentOverlay">@null</item-->
 
-        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
 
-        <item name="android:fitsSystemWindows">true</item>
-        <item name="android:clipToPadding">true</item>
+        <!--item name="android:fitsSystemWindows">true</item-->
+        <!--item name="android:clipToPadding">true</item-->
+
+        <item name="android:actionBarStyle">@style/ActionBarStyle</item>
 
         <item name="android:colorPrimary">@color/ThemeColor</item>
         <item name="android:colorPrimaryDark">@color/ThemeColorDark</item>
         <item name="android:textColorPrimary">@color/text_color_primary</item>
         <item name="android:textColor">@color/text_color_primary</item>
-        <item name="android:windowBackground">@color/ThemeColor</item>
+        <item name="android:windowBackground">@color/ThemeBackground</item>
         <item name="android:textColorLink">@color/text_color_secondary</item>
         <item name="android:colorAccent">@color/ThemeColorLight</item>
     </style>
@@ -31,16 +33,14 @@
         <item name="android:animateLayoutChanges">true</item>
     </style>
 
-    <style name="PagerTabStrip" parent="AppTheme">
-        <!-- Note: remember to use color as color & drawable as background -->
-        <item name="android:textAppearance">@style/PagerTextStyle</item>
+    <style name="ActionBarStyle" parent="android:Widget.Material.Light.ActionBar">
         <item name="android:background">@color/ThemeColor</item>
     </style>
 
-    <style name="PagerTextStyle" parent="AppTheme">
-        <item name="android:textColor">@color/text_color_primary</item>
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:padding">5dp</item>
+    <style name="PagerTabStrip" parent="AppTheme">
+        <!-- Note: remember to use color as color & drawable as background -->
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/ThemeColor</item>
     </style>
 
     <style name="NavigationDrawerStyle" parent="android:Widget.Material.Toolbar">
@@ -54,11 +54,21 @@
 
     <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
 
+    <dimen name="ActivityPaddingTop">82dp</dimen>
+    <dimen name="ActivityPaddingBottom">48dp</dimen>
+
     <color name="ThemeColor">#d06b82</color>
-    <color name="ThemeColorLight">#ff9bb2</color>
+    <color name="ThemeColorLight">#ffffff</color>
     <color name="ThemeColorDark">#973f53</color>
     <color name="ThemeBackground">#d6afaa</color>
-    <color name="text_color_primary">#744651</color>
-    <color name="text_color_secondary">#a67984</color>
+    <color name="text_color_primary">#613640</color>
+    <color name="text_color_secondary">#95737b</color>
+
+    <!--color name="ThemeColor">#9d544d</color>
+    <color name="ThemeColorLight">#ffffff</color>
+    <color name="ThemeColorDark">#83433a</color>
+    <color name="ThemeBackground">#cb876e</color>
+    <color name="text_color_primary">#4c2523</color>
+    <color name="text_color_secondary">#8b6663</color-->
 
 </resources>

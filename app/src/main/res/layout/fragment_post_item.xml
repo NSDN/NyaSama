@@ -1,90 +1,98 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="5dp"
-    android:background="@color/ThemeColorLight"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp">
 
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/avatar"
-        android:layout_width="56dp"
-        android:layout_height="56dp" />
-
-    <TextView
-        android:layout_toRightOf="@id/avatar"
-        android:paddingLeft="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/author" />
-
-    <TextView
-        android:layout_toRightOf="@id/avatar"
-        android:paddingLeft="5dp"
-        android:layout_below="@id/author"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#999999"
-        android:id="@+id/date" />
-
-    <TextView
-        android:id="@+id/menu"
-        android:text="..."
-        android:padding="5dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/text_color_secondary"
-        android:textSize="30dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/index"
-        android:layout_alignParentRight="true"
-        android:textColor="#999999"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <com.nyasama.util.SafeHtmlText
-        android:layout_below="@id/avatar"
-        android:layout_toLeftOf="@+id/menu"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:id="@+id/message"
-        android:textIsSelectable="true"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:background="@color/ThemeColorLight"
+        android:padding="5dp">
 
-    <LinearLayout
-        android:layout_toLeftOf="@+id/menu"
-        android:layout_below="@id/message"
-        android:id="@+id/comment_list"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/avatar"
+            android:layout_width="56dp"
+            android:layout_height="56dp" />
 
-    <Button
-        android:id="@+id/attachment_list"
-        style="@style/ButtonStyle"
-        android:text="@string/text_view_attachments"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:layout_below="@+id/comment_list"
-        android:layout_toRightOf="@+id/votes"
-        android:layout_toEndOf="@+id/votes" />
+        <TextView
+            android:id="@+id/author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/avatar"
+            android:paddingLeft="5dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button
-        android:id="@+id/votes"
-        style="@style/ButtonStyle"
-        android:text="@string/text_view_vote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:layout_below="@+id/comment_list"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/author"
+            android:layout_toRightOf="@id/avatar"
+            android:paddingLeft="5dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#999999" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:padding="5dp"
+            android:text="..."
+            android:textColor="@color/text_color_secondary"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/index"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textColor="#999999" />
+
+        <com.nyasama.util.SafeHtmlText
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/avatar"
+            android:layout_toLeftOf="@+id/menu"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:textIsSelectable="true" />
+
+        <LinearLayout
+            android:id="@+id/comment_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/message"
+            android:layout_toLeftOf="@+id/menu"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/attachment_list"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/comment_list"
+            android:layout_toEndOf="@+id/votes"
+            android:layout_toRightOf="@+id/votes"
+            android:text="@string/text_view_attachments"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/votes"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/comment_list"
+            android:text="@string/text_view_vote"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+</FrameLayout>

@@ -10,7 +10,7 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             app:item_margin="8dp"
             app:column_count_portrait="2"
-            app:column_count_landscape="5"
+            app:column_count_landscape="4"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/list" />
