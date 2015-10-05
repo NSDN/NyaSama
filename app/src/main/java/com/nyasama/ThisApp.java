@@ -66,7 +66,8 @@ public class ThisApp extends Application {
         Locale[] locales = {
                 Locale.getDefault(),
                 Locale.SIMPLIFIED_CHINESE,
-                Locale.ENGLISH
+                Locale.ENGLISH,
+                Locale.JAPANESE
         };
         for (int i = 0; i < locales.length && i < values.length; i ++)
             if (values[i].equals(language)) return locales[i];

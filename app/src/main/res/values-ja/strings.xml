@@ -73,7 +73,7 @@
     <string name="title_activity_fav_list">お気に入り</string>
     <string name="thread_list_toplist_title">スティッキーポスト</string>
     <string name="title_main_hot_threads">人気のスレッド</string>
-    <string name="title_main_translated"漢化おすすめ</string>
+    <string name="title_main_translated">漢化おすすめ</string>
     <string name="signin_button_text">出勤</string>
     <string name="title_section4">設定</string>
     <string name="title_section5">喵玉殿について</string>
@@ -100,7 +100,7 @@
     <string name="toast_click_again_to_exit">もう一度リターンキー を押して终了</string>
     <string name="action_goto_forum">フォーラムに戻る</string>
     <string name="text_view_vote">[投票をチェック]</string>
-    <string name="prompt_1"></string>
+    <string name="prompt_1">TRANS:你收到了</string>
     <string name="prompt_2">のメッセージ</string>
     <string name="prompt_3">と</string>
     <string name="prompt_4">の通知を届けました</string>
@@ -214,4 +214,17 @@
         <item>スレッドを移動</item>
         <item>リンクを保留</item>
     </string-array>
+    <string name="acra_reporting_error">TRANS:啊咧咧喵玉殿好像坏掉了…\n正在收集错误信息请稍候…</string>
+    <string name="action_save_draft">TRANS:保存为草稿</string>
+    <string name="action_share">TRANS:分享</string>
+    <string name="buy_thread">TRANS:购买帖子</string>
+    <string name="error_new_post">TRANS:诶多，帖子被大结界挡住了……</string>
+    <string name="error_no_internet">TRANS:紫大人网断了TAT</string>
+    <string name="error_smilely_load">TRANS:秦心偷走了重要的东西（</string>
+    <string name="preference_manga_cache">TRANS:漫画缓存</string>
+    <string name="preference_web_cache">TRANS:网络缓存</string>
+    <string name="text_view_pay">TRANS:[购买主题]</string>
+    <string name="toast_draft_saved">TRANS:草稿已保存</string>
+    <string name="toast_open_file_failed">TRANS:读取文件失败</string>
+    <string name="thread_price_info">TRANS:此帖子价格为 %d，确认购买吗？</string>
 </resources>
