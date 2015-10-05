@@ -54,8 +54,7 @@
 
     <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
 
-    <dimen name="ActivityPaddingTop">82dp</dimen>
-    <dimen name="ActivityPaddingBottom">48dp</dimen>
+
 
     <color name="ThemeColor">#d06b82</color>
     <color name="ThemeColorLight">#ffffff</color>

@@ -10,8 +10,7 @@
         style="@style/PagerTabStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:touchscreenBlocksFocus="false"
-        android:paddingTop="@dimen/ActivityPaddingTop" />
+        android:touchscreenBlocksFocus="false" />
 
 </android.support.v4.view.ViewPager>
 

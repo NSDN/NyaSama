@@ -12,6 +12,10 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ActivityPaddingTop" />
+
         <RelativeLayout
             android:background="@color/ThemeColorLight"
             android:paddingLeft="6dp"
@@ -338,6 +342,9 @@
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ActivityPaddingBottom" />
 
     </LinearLayout>
 

@@ -1,19 +1,36 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.etsy.android.grid.StaggeredGridView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:item_margin="8dp"
-            app:column_count_portrait="2"
-            app:column_count_landscape="4"
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/list" />
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/ActivityPaddingBottom">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/ActivityPaddingTop"
+                android:background="@color/ThemeColor" />
+
+            <com.etsy.android.grid.StaggeredGridView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:column_count_landscape="4"
+                app:column_count_portrait="2"
+                app:item_margin="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/ActivityPaddingBottom" />
+        </LinearLayout>
+
         <!--GridView
             android:columnWidth="128dp"
             android:numColumns="auto_fit"
@@ -23,29 +40,33 @@
             android:footerDividersEnabled="false"
             android:id="@+id/list" /-->
     </android.support.v4.widget.SwipeRefreshLayout>
+
     <TextView
         android:id="@+id/empty"
-        android:padding="16dp"
-        android:visibility="gone"
-        android:gravity="center"
-        android:text="@string/list_empty"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/list_empty"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/error"
-        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:visibility="gone">
+
         <TextView
-            android:text="@string/error_no_internet"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@string/error_no_internet" />
+
         <Button
             android:id="@+id/reload"
-            android:text="@string/action_reload"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@string/action_reload" />
     </LinearLayout>
 </FrameLayout>
