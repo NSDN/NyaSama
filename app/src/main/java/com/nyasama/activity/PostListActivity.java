@@ -103,6 +103,7 @@ public class PostListActivity extends BaseThemedActivity
 
     private int mForumId;
     private int mAuthorId;
+    private int mThreadPrice;
 
     private Point mPrefMaxImageSize = new Point(-1, -1);
     private int mPrefFontSize = 16;
@@ -405,6 +406,27 @@ public class PostListActivity extends BaseThemedActivity
         });
     }
 
+    public void doBuyThread(final AlertDialog dialog) {
+        Helper.enableDialog(dialog, false);
+        Discuz.execute("buythread", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+        }}, new HashMap<String, Object>() {{
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                } else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    Helper.toast(message.optString("messagestr"));
+                    if ("thread_pay_succeed".equals(message.optString("messageval")))
+                        mListFragment.reloadAll();
+                }
+                dialog.dismiss();
+            }
+        });
+    }
+
     public void editPost(Post item) {
         Intent intent = new Intent(this, NewPostActivity.class);
         intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
@@ -617,6 +639,29 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
         mVoteDialog.show();
+    }
+
+    public void showPayDialog() {
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+                .setTitle(R.string.buy_thread)
+                .setMessage(String.format(getString(R.string.thread_price_info), mThreadPrice))
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                new DividerPainter(PostListActivity.this).paint(dialog.getWindow());
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                doBuyThread(dialog);
+                            }
+                        });
+            }
+        });
+        dialog.show();
     }
 
     public void moderateThread(final int layout) {
@@ -1176,6 +1221,19 @@ public class PostListActivity extends BaseThemedActivity
                         }
                     });
                 }
+
+                // buy thread
+                TextView buy = (TextView) viewHolder.getView(R.id.pay);
+                Helper.updateVisibility(buy, false);
+                if (item.number == 1 && mThreadPrice > 0) {
+                    Helper.updateVisibility(buy, true);
+                    buy.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showPayDialog();
+                        }
+                    });
+                }
             }
         };
     }
@@ -1257,6 +1315,9 @@ public class PostListActivity extends BaseThemedActivity
                         mAuthorId = Helper.toSafeInteger(thread.optString("authorid"), 0);
                         int replies = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies"));
+                        // get thread price
+                        mThreadPrice = var.getBoolean("forum_threadpay") ?
+                                Helper.toSafeInteger(thread.optString("price"), 0) : 0;
                         // setup action bar only once when loading items
                         if (page == 0)
                             setupActionBarPages(replies / PAGE_SIZE_COUNT + 1);

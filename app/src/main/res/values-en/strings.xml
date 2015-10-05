@@ -155,6 +155,9 @@
     <string name="acra_reporting_error">Oops! There is some thing wrong!\nSending error report...</string>
     <string name="action_share">Share</string>
     <string name="toast_draft_saved">Draft saved</string>
+    <string name="text_view_pay">[Buy Thread]</string>
+    <string name="buy_thread">Buy this thread</string>
+    <string name="thread_price_info">The price of this thread is %d. Buy it now?</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
