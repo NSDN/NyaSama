@@ -1,4 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">喵玉殿</string>
+    <string name="title_section1">フォーラム</string>
+    <string name="title_section2">THBWiki</string>
+    <string name="title_section3">THVideo</string>
+    <string name="navigation_drawer_open">ナビゲーションバーを開く</string>
+    <string name="navigation_drawer_close">ナビゲーションバーを閉じる</string>
+    <string name="action_example">検索</string>
+    <string name="action_settings">設定</string>
+    <string name="title_activity_thread_list">スレッド一覧</string>
+    <string name="hello_world">幻想郷へようこそ！</string>
+    <string name="load_failed_toast">ロードの問題があるだが、しばらく待ってください</string>
+    <string name="network_error_toast">ネットワークに問題があるだが、しばらく待ってください</string>
+    <string name="list_loading_text">読み取る中……</string>
+    <string name="title_activity_post_list">リプライリスト</string>
+    <string name="list_empty">何も見つからない</string>
+    <string name="title_activity_login">ログイン</string>
+    <string name="login_button_text">ログイン</string>
+    <string name="login_hint_username">ユーザID</string>
+    <string name="login_hint_password">パスワール</string>
+    <string name="drawer_button_login">ログイン</string>
+    <string name="login_empty_message">ユーザーID・パスワードを入力してください！</string>
+    <string name="title_activity_new_post">新しいスレッド</string>
+    <string name="post_title_hint">ここにタイトルを入力するよ</string>
+    <string name="post_content_hint">ここに本文を</string>
+    <string name="post_thread_button">投稿する</string>
+    <string name="post_content_empty_message">何かを忘れてかしら？</string>
+    <string name="action_new_post">新しいスレッド</string>
+    <string name="action_post_now">投稿</string>
+    <string name="action_reply">リプライ</string>
+    <string name="title_main_home">ホームページ</string>
+    <string name="action_add_image">画像を挿入</string>
+    <string name="image_upload_failed_toast">画像のアップロードが失敗しました</string>
+    <string name="title_activity_user_profile">ユーザー情報</string>
+    <string name="logout_button_text">ログアウト</string>
+    <string name="action_quick_reply">ファーストリプライ</string>
+    <string name="action_comment">コメント</string>
+    <string name="notify_title_text">喵玉殿からのメッセージ</string>
+    <string name="thread_list_threads_title">スレッド</string>
+    <string name="thread_list_subforum_title">サブフォーラム</string>
+    <string name="there_is_something_wrong">あれ、何が違う…</string>
+    <string name="diag_insert_options">画像を挿入</string>
+    <string name="diag_insert_from_gallery">ギヤラリーから</string>
+    <string name="diag_insert_from_camera">カメラから</string>
+    <string name="diag_insert_smiley_title">顔文字を挿入</string>
+    <string name="diag_quick_reply_title">ファーストリプライ</string>
+    <string name="diag_hint_type_something">ここに何かを入力しましょう</string>
+    <string name="action_reload">再読込み</string>
+    <string name="mythread_button_text">マイスレッド</string>
+    <string name="title_activity_personal_messages">メッセージ</string>
+    <string name="title_activity_messages">通知</string>
+    <string name="send_message_button">送信</string>
+    <string name="fragment_blank_msg">にゃ......</string>
+    <string name="my_message_button">マイメッセじ</string>
+    <string name="login_message">ログインするにゃ</string>
+    <string name="title_activity_notice">マイ通知</string>
+    <string name="my_notice_button">マイ通知</string>
+    <string name="title_notice_read">既読</string>
+    <string name="title_notice_unread">未読</string>
+    <string name="title_activity_attachment_viewer">添付ファイルをチェック</string>
+    <string name="text_view_attachments">[添付ファイルをチェック]</string>
+    <string name="title_activity_setting">設定</string>
+    <string name="pref_category_general">通用</string>
+    <string name="alert_need_reboot">変更が応用されるために、再起動が必要です</string>
+    <string name="diag_loading_smilies">顔文字を読み取る中……</string>
+    <string name="dialog_update_user">ユーザー情報を更新中……</string>
+    <string name="dialog_uploading">アップロード 中……</string>
+    <string name="action_more_comments">もっとコメント</string>
+    <string name="show_favs_button">お気に入り</string>
+    <string name="action_mark_fav">お気に入り追加</string>
+    <string name="title_activity_fav_list">お気に入り</string>
+    <string name="thread_list_toplist_title">スティッキーポスト</string>
+    <string name="title_main_hot_threads">人気のスレッド</string>
+    <string name="title_main_translated"漢化おすすめ</string>
+    <string name="signin_button_text">出勤</string>
+    <string name="title_section4">設定</string>
+    <string name="title_section5">喵玉殿について</string>
+    <string name="next_post_button"><![CDATA[次のスレッド >>]]></string>
+    <string name="prev_post_button"><![CDATA[<< 前のスレッド]]></string>
+    <string name="action_my_profile">マイページ</string>
+    <string name="action_edit">編集</string>
+    <string name="forum_index_threads">スレッド</string>
+    <string name="forum_index_posts">今日</string>
+    <string name="preference_language">言語</string>
+    <string name="preference_animation">カットシーン</string>
+    <string name="preference_category_version">バージョン</string>
+    <string name="preference_cachesize">キャッシュサイズ</string>
+    <string name="preference_category_explore">ブラウズ </string>
+    <string name="preference_thumbsize">サムネイルサイズ</string>
+    <string name="new_version_alert_title">新しいバージョンがありますよ</string>
+    <string name="new_version_alert_message">新しいバージョン %s をダウンロードしますか？</string>
+    <string name="title_editing_post">スレッドを編集</string>
+    <string name="title_editing_reply">リプライを編集</string>
+    <string name="action_save">セーブ</string>
+    <string name="action_add_smiley">顔文字を挿入</string>
+    <string name="button_back">戻る</string>
+    <string name="string_uncategorized">未分類</string>
+    <string name="toast_click_again_to_exit">もう一度リターンキー を押して终了</string>
+    <string name="action_goto_forum">フォーラムに戻る</string>
+    <string name="text_view_vote">[投票をチェック]</string>
+    <string name="prompt_1"></string>
+    <string name="prompt_2">のメッセージ</string>
+    <string name="prompt_3">と</string>
+    <string name="prompt_4">の通知を届けました</string>
+    <string name="title_activity_search">検索</string>
+    <string name="search_hint">スレッドを検索</string>
+    <string name="pref_title_version_number">バージョン番号</string>
+    <string name="pref_diag_title_select_lang">言語を選ぶ</string>
+    <string name="preference_textsize">文字サイズ</string>
+    <string name="last_activity">最近の活動</string>
+    <string name="last_post">最近の投稿</string>
+    <string name="last_visit">最近のアクセス</string>
+    <string name="gender">性別</string>
+    <string name="gender_male">男</string>
+    <string name="gender_femal">女</string>
+    <string name="reside">居住地</string>
+    <string name="like">好きなもの </string>
+    <string name="site">個人サイト</string>
+    <string name="unknown">未知</string>
+    <string name="action_setup_poll">投票の設定</string>
+    <string name="diag_title_setup_poll">每行为一个选项</string>
+    <string name="diag_title_vote_result">投票の結果</string>
+    <string name="you_can_not_voted">投票はできません</string>
+    <string name="toast_too_many_votes">最大 %d 個を投票する</string>
+    <string name="preference_showimg">画像を表示</string>
+    <string name="new_feature">更新内容：</string>
+    <string name="goto_prev_post_attachments"><![CDATA[前のリプライ\n(%d 添付ファイル)\n<<]]></string>
+    <string name="goto_next_post_attachments"><![CDATA[次のリプライ\n(%d 添付ファイル)\n>>]]></string>
+    <string name="poll_max_choices">最大</string>
+    <string name="poll_expiration_days">有効期間</string>
+    <string name="diag_title_max_choices">最大 %d 個を選ぶ</string>
+    <string name="page_index">第 %d ページ</string>
+    <string name="action_see_author">スレ主だけ</string>
+    <string name="action_reverse_order">リバースに読む</string>
+    <string name="toast_open_image_fail">画像の読み取るが失敗</string>
+    <string name="operate_reason">操作理由</string>
+    <string name="thread_operation">操作</string>
+    <string name="action_moderate_thread">スレッドを管理</string>
+    <string name="thread_stick">スティッキ</string>
+    <string name="thread_moderate_expiration">有効期間</string>
+    <string name="thread_digest">エキス</string>
+    <string name="thread_delete_confirm">これを削除しては宜しいですか？</string>
+    <string name="action_delete">削除</string>
+    <string name="action_warn">警告</string>
+    <string name="action_ban">ブロック</string>
+    <string name="check_updates">更新</string>
+    <string name="check_new_versions">起動のときにバージョンチェックする</string>
+    <string name="do_not_remind">二度と提示しない</string>
+    <string name="thread_title_hidden">このスレッドは隠れられる</string>
+    <string name="thread_target">目標フォーラム</string>
+    <string name="thread_type">目標分類</string>
+    <string name="move_type">移動の方</string>
+    <string-array name="thumb_size">
+        <item>小さい</item>
+        <item>中等</item>
+        <item>元画像</item>
+    </string-array>
+    <string-array name="show_image">
+        <item>WiFiだけ</item>
+        <item>常時表示</item>
+        <item>常時表示しない</item>
+    </string-array>
+    <string-array name="moderate_options">
+        <item>アップ/ダウン</item>
+        <item></item>
+        <item>ハイライト</item>
+        <item>スティッキ</item>
+        <item>開く/閉じる</item>
+        <item>移動</item>
+        <item>削除</item>
+    </string-array>
+    <string-array name="bump_or_down_thread">
+        <item>アップ</item>
+        <item>ダウン</item>
+    </string-array>
+    <string-array name="stick_level">
+        <item>スティッキしない不置顶</item>
+        <item>サブフォーラムスティッキ</item>
+        <item>分類にスティッキ</item>
+        <item>全局スティッキ</item>
+    </string-array>
+    <string-array name="highlight_color">
+        <item>Black</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Cyan</item>
+        <item>Blue</item>
+        <item>Purple</item>
+        <item>Pink</item>
+    </string-array>
+    <string-array name="digest_level">
+        <item>普通</item>
+        <item>良質1</item>
+        <item>良質2</item>
+        <item>良質3</item>
+    </string-array>
+    <string-array name="open_or_close_thread">
+        <item>開く</item>
+        <item>閉じる</item>
+    </string-array>
+    <string-array name="warn_or_not">
+        <item>警告</item>
+        <item>取り消す</item>
+    </string-array>
+    <string-array name="ban_or_not">
+        <item>ブロック</item>
+        <item>取り消す</item>
+    </string-array>
+    <string-array name="move_type">
+        <item>スレッドを移動</item>
+        <item>リンクを保留</item>
+    </string-array>
 </resources>
