@@ -10,7 +10,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
 
         <item name="android:fitsSystemWindows">true</item>
-        <item name="android:clipToPadding">true</item>
+        <!--item name="android:clipToPadding">false</item-->
 
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
 
@@ -28,7 +28,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
 
         <item name="android:fitsSystemWindows">false</item>
-        <item name="android:clipToPadding">false</item>
+        <!--item name="android:clipToPadding">false</item-->
     </style>
 
     <style name="AppTheme.NoActionBar.FullScreen" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
@@ -36,7 +36,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
 
         <item name="android:fitsSystemWindows">false</item>
-        <item name="android:clipToPadding">false</item>
+        <!--item name="android:clipToPadding">false</item-->
     </style>
 
     <!-- animated theme. -->

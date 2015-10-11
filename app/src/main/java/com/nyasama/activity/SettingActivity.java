@@ -29,6 +29,7 @@ public class SettingActivity extends BaseThemedActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            
             addPreferencesFromResource(R.xml.preference);
 
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
