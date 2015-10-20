@@ -158,6 +158,16 @@
     <string name="text_view_pay">[Buy Thread]</string>
     <string name="buy_thread">Buy This Thread</string>
     <string name="thread_price_info">The price of this thread is %d. Buy it now?</string>
+    <string name="auth_button_text">登陆口令</string>
+    <string name="diag_request_key">申请口令密钥</string>
+    <string name="diag_input_phone_number">输入接收的手机号码</string>
+    <string name="action_request_key">申请密钥</string>
+    <string name="action_update_key">更新密钥</string>
+    <string name="diag_update_key">更新密钥</string>
+    <string name="diag_input_downloadcode">请输入接收到的短信验证码</string>
+    <string name="update_naysec_key_success">更新密钥成功</string>
+    <string name="action_clear_key">清除密钥</string>
+    <string name="toast_key_cleared">已清除保存在设备上的密钥</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

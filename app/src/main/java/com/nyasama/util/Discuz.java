@@ -22,6 +22,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.R;
@@ -1087,6 +1088,34 @@ public class Discuz {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 callback.onResponse(volleyError.getMessage());
+            }
+        });
+        ThisApp.requestQueue.add(request);
+    }
+
+    public static void pluginapi(Map<String, Object> params, final Response.Listener<JSONObject> callback) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            for (Map.Entry<String, Object> e : params.entrySet()) {
+                builder.append(URLEncoder.encode(e.getKey(), DISCUZ_ENC));
+                builder.append('=');
+                builder.append(URLEncoder.encode(e.getValue() + "", DISCUZ_ENC));
+                builder.append('&');
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        String url = DISCUZ_URL + "plugin.php?" + builder.toString();
+        Request request = new JsonObjectRequest(url, new JSONObject(), new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                callback.onResponse(jsonObject);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                callback.onResponse(new JSONVolleyError(volleyError.getMessage()));
             }
         });
         ThisApp.requestQueue.add(request);

@@ -160,6 +160,16 @@
     <string name="text_view_pay">[购买主题]</string>
     <string name="buy_thread">购买帖子</string>
     <string name="thread_price_info">此帖子价格为 %d，确认购买吗？</string>
+    <string name="auth_button_text">登陆口令</string>
+    <string name="diag_request_key">申请口令密钥</string>
+    <string name="diag_input_phone_number">输入接收的手机号码</string>
+    <string name="action_request_key">申请密钥</string>
+    <string name="action_update_key">更新密钥</string>
+    <string name="diag_update_key">更新密钥</string>
+    <string name="diag_input_downloadcode">请输入接收到的短信验证码</string>
+    <string name="update_naysec_key_success">更新密钥成功</string>
+    <string name="action_clear_key">清除密钥</string>
+    <string name="toast_key_cleared">已清除保存在设备上的密钥</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
