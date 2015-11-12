@@ -12,6 +12,14 @@ import com.nyasama.ThisApp;
 // REF: http://blog.csdn.net/lincyang/article/details/20609673
 // REF: https://github.com/negusoft/holoaccent/wiki/Preferences-Activity
 
+//设置activity
+//
+//设置activity 和普通activity区别不大，只是layout文件的格式略不一样
+//详细文档见：http://developer.android.com/guide/topics/ui/settings.html
+//有两个建议：1, 添加 PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+//              见详细文档 Setting Default Values 节，虽然感觉上不加这句也没问题，但还是加上安心
+//            2，明确创建出 OnSharedPreferenceChangeListener 实例
+//              见详细文档Reading Preference 节，Listening for preference changes 块的最后部分，同样是加上更安心
 public class SettingActivity extends BaseThemedActivity {
 
     @Override
