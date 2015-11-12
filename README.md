@@ -17,7 +17,7 @@ NyaSama
 
 
 ## Contributing
-请阅读 wiki 上的 [路线图](#) 和 [待办事项](#)。
+请阅读 wiki 上的 [路线图](https://github.com/NSDN/NyaSama/wiki/Plan) 和 [待办事项](https://github.com/NSDN/NyaSama/wiki/TODOs)
 
 ## Credits
 这个项目使用了以下开源项目提供的功能
