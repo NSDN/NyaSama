@@ -16,18 +16,32 @@
 
     <string name="pref_key_animation" translatable="false">animation</string>
 
-    <string name="pref_key_cache_size" translatable="false">cache_size</string>
-    <string-array name="cache_size" translatable="false">
+    <string name="pref_key_web_cache_size" translatable="false">cache_size</string>
+    <string-array name="web_cache_size" translatable="false">
         <item>16MB</item>
         <item>32MB</item>
         <item>64MB</item>
         <item>128MB</item>
     </string-array>
-    <string-array name="cache_size_value" translatable="false">
+    <string-array name="web_cache_size_value" translatable="false">
         <item>16</item>
         <item>32</item>
         <item>64</item>
         <item>128</item>
+    </string-array>
+
+    <string name="pref_key_manga_cache_size" translatable="false">disk_cache</string>
+    <string-array name="manga_cache_size" translatable="false">
+        <item>256MB</item>
+        <item>512MB</item>
+        <item>1GB</item>
+        <item>保存到 Nyasama/Images/</item>
+    </string-array>
+    <string-array name="manga_cache_size_value" translatable="false">
+        <item>256</item>
+        <item>512</item>
+        <item>1024</item>
+        <item>0</item>
     </string-array>
 
     <string name="pref_key_show_image" translatable="false">show_image_l</string>

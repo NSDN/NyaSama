@@ -5,18 +5,22 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,6 +84,8 @@ public class PostListActivity extends BaseThemedActivity
     private static final int COMMENT_PAGE_SIZE = 10;
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
+    private boolean isPaused = false;
+
     private CommonListFragment<Post> mListFragment;
     private int mListPages;
 
@@ -97,8 +103,9 @@ public class PostListActivity extends BaseThemedActivity
 
     private int mForumId;
     private int mAuthorId;
+    private int mThreadPrice;
 
-    private int mPrefMaxImageSize = -1;
+    private Point mPrefMaxImageSize = new Point(-1, -1);
     private int mPrefFontSize = 16;
 
     private int mSelectedPost;
@@ -111,7 +118,7 @@ public class PostListActivity extends BaseThemedActivity
         final Intent intent = getIntent();
         int authorId = intent.getIntExtra("authorid", 0);
         boolean reversed = intent.getBooleanExtra("reverse", false);
-        final String title = actionBar.getTitle().toString();
+        final String title = actionBar.getTitle() != null ? actionBar.getTitle().toString() : "";
         final String sub =
                 (authorId == mAuthorId ? getString(R.string.action_see_author) : "") + " " +
                 (reversed ? getString(R.string.action_reverse_order) : "");
@@ -160,6 +167,7 @@ public class PostListActivity extends BaseThemedActivity
     public void loadDisplayPreference() {
         String displayImageSetting =
                 ThisApp.preferences.getString(getString(R.string.pref_key_show_image), "");
+
         boolean shallDisplayImage = !"false".equals(displayImageSetting);
         if ("auto".equals(displayImageSetting)) {
             ConnectivityManager connectivityManager =
@@ -168,14 +176,21 @@ public class PostListActivity extends BaseThemedActivity
                     connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             shallDisplayImage = networkInfo.isConnected();
         }
-        mPrefMaxImageSize = shallDisplayImage ? Helper.toSafeInteger(
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        mPrefMaxImageSize.x = shallDisplayImage ? Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_thumb_size), ""), -1) : -1;
+        if (mPrefMaxImageSize.x == 0) mPrefMaxImageSize.x = size.x * 4 / 5;
+        mPrefMaxImageSize.y = mPrefMaxImageSize.x * size.y / size.x;
+
         mPrefFontSize = Helper.toSafeInteger(
                 ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 16);
     }
 
     public void doReply(final String text, final String trimstr) {
-        Helper.disableDialog(mReplyDialog);
+        Helper.enableDialog(mReplyDialog, false);
         Discuz.execute("sendreply", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("replysubmit", "yes");
@@ -208,7 +223,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doComment(final int pid, final String comment) {
-        Helper.disableDialog(mCommentDialog);
+        Helper.enableDialog(mCommentDialog, false);
         Discuz.execute("addcomment", new HashMap<String, Object>() {{
             put("tid", getIntent().getIntExtra("tid", 0));
             put("pid", pid);
@@ -217,9 +232,9 @@ public class PostListActivity extends BaseThemedActivity
         }}, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject data) {
-                mCommentDialog.dismiss();
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
+                    Helper.enableDialog(mCommentDialog, true);
                 }
                 else if (data.opt("Message") instanceof JSONObject) {
                     JSONObject message = data.optJSONObject("Message");
@@ -231,16 +246,19 @@ public class PostListActivity extends BaseThemedActivity
                         comments.add(0, new Comment(Discuz.sUid, Discuz.sUsername, comment));
                         mCommentCount.put(pid, comments.size());
                         mListFragment.getListAdapter().notifyDataSetChanged();
+                        mCommentDialog.dismiss();
                     }
-                    else
+                    else {
                         Helper.toast(message.optString("messagestr"));
+                        Helper.enableDialog(mCommentDialog, true);
+                    }
                 }
             }
         });
     }
 
     public void doPollVote(final List<Integer> selected) {
-        Helper.disableDialog(mVoteDialog);
+        Helper.enableDialog(mVoteDialog, false);
         Discuz.execute("pollvote", new HashMap<String, Object>() {{
             put("fid", getIntent().getIntExtra("fid", 0));
             put("tid", getIntent().getIntExtra("tid", 0));
@@ -293,7 +311,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void doModerateThread(final String operation, final String reason, final Object... args) {
-        Helper.disableDialog(mThreadModerateDialog);
+        Helper.enableDialog(mThreadModerateDialog, false);
         Discuz.execute("topicadmin", new HashMap<String, Object>(){{
             if ("delpost".equals(operation) || "warn".equals(operation) || "banpost".equals(operation))
                 put("action", operation);
@@ -388,6 +406,27 @@ public class PostListActivity extends BaseThemedActivity
         });
     }
 
+    public void doBuyThread(final AlertDialog dialog) {
+        Helper.enableDialog(dialog, false);
+        Discuz.execute("buythread", new HashMap<String, Object>() {{
+            put("tid", getIntent().getIntExtra("tid", 0));
+        }}, new HashMap<String, Object>() {{
+        }}, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject data) {
+                if (data.has(Discuz.VOLLEY_ERROR)) {
+                    Helper.toast(R.string.network_error_toast);
+                } else if (data.opt("Message") instanceof JSONObject) {
+                    JSONObject message = data.optJSONObject("Message");
+                    Helper.toast(message.optString("messagestr"));
+                    if ("thread_pay_succeed".equals(message.optString("messageval")))
+                        mListFragment.reloadAll();
+                }
+                dialog.dismiss();
+            }
+        });
+    }
+
     public void editPost(Post item) {
         Intent intent = new Intent(this, NewPostActivity.class);
         intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
@@ -425,6 +464,19 @@ public class PostListActivity extends BaseThemedActivity
     public void addComment(Post item) {
         final int pid = item.id;
         final EditText input = new EditText(this);
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                mCommentDialog.setMessage(getString(R.string.diag_hint_type_something) + " " +
+                    "(" + editable.toString().length() + "/" + Discuz.MAX_COMMENT_LENGTH + ")");
+            }
+        });
         mCommentDialog = new AccentAlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
@@ -589,6 +641,29 @@ public class PostListActivity extends BaseThemedActivity
         mVoteDialog.show();
     }
 
+    public void showPayDialog() {
+        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+                .setTitle(R.string.buy_thread)
+                .setMessage(String.format(getString(R.string.thread_price_info), mThreadPrice))
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                new DividerPainter(PostListActivity.this).paint(dialog.getWindow());
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                doBuyThread(dialog);
+                            }
+                        });
+            }
+        });
+        dialog.show();
+    }
+
     public void moderateThread(final int layout) {
         final View dialogView = View.inflate(this, layout, null);
 
@@ -609,12 +684,12 @@ public class PostListActivity extends BaseThemedActivity
 
         final Spinner moveToForum = ((Spinner) dialogView.findViewById(R.id.move_to));
         final Spinner threadTypes = ((Spinner) dialogView.findViewById(R.id.thread_type));
-        if (moveToForum != null) Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
+        if (moveToForum != null) Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
             public void onResponse(final SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
                 final List<String> list = new ArrayList<String>();
                 int position = 0;
-                for (int i = 0; i < forumThreadInfo.size(); i ++) {
+                for (int i = 0; i < forumThreadInfo.size(); i++) {
                     int fid = forumThreadInfo.keyAt(i);
                     list.add(forumThreadInfo.get(fid).name);
                     if (fid == mForumId)
@@ -634,6 +709,7 @@ public class PostListActivity extends BaseThemedActivity
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         threadTypes.setAdapter(adapter);
                     }
+
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) {
                     }
@@ -702,9 +778,9 @@ public class PostListActivity extends BaseThemedActivity
                                 }
                                 else if (layout == R.layout.dialog_move_thread) {
                                     int i = moveToForum.getSelectedItemPosition();
-                                    int fid = Discuz.getForumThreadInfo().keyAt(i);
+                                    int fid = Discuz.ForumThreadInfo.getInfo().keyAt(i);
                                     String type = threadTypes.getSelectedItem().toString();
-                                    Discuz.ThreadTypes types = Discuz.getForumThreadInfo().get(fid).types;
+                                    Discuz.ThreadTypes types = Discuz.ForumThreadInfo.getInfo().get(fid).types;
                                     int typeId = types != null &&  types.containsKey(type) ? types.get(type) : 0;
                                     String move = ((Spinner)dialogView.findViewById(R.id.move_type))
                                             .getSelectedItemPosition() == 0 ? "normal" : "redirect";
@@ -793,6 +869,57 @@ public class PostListActivity extends BaseThemedActivity
         return message;
     }
 
+    private void setupListFragment() {
+        if (mListFragment == null) {
+
+            mListFragment = CommonListFragment.getNewFragment(
+                    Post.class,
+                    R.layout.fragment_simple_list,
+                    R.layout.fragment_post_item,
+                    R.id.list);
+
+            mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
+                private int mCurrentItem;
+                @Override
+                public void onScrollStateChanged(AbsListView absListView, int i) {
+                    if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
+                        ActionBar actionBar = getActionBar();
+                        Intent intent = getIntent();
+                        int pageOffset = intent.getIntExtra("page", 0);
+                        int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
+                        if (actionBar != null && actionBar.getSelectedNavigationIndex() != pageScroll) {
+                            intent.putExtra("update-nav-spinner", true);
+                            actionBar.setSelectedNavigationItem(pageScroll);
+                        }
+                    }
+                }
+
+                @Override
+                public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                    mCurrentItem = i;
+                }
+            });
+
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, mListFragment)
+                // don't use commit()
+                .commitAllowingStateLoss();
+    }
+
+    private void destroyListFragment() {
+        if (mListFragment != null) try{
+            getSupportFragmentManager().beginTransaction()
+                    .remove(mListFragment)
+                    .commit();
+            ((BitmapLruCache) mImageCache.images).evictAll();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -803,37 +930,30 @@ public class PostListActivity extends BaseThemedActivity
         String title = getIntent().getStringExtra("title");
         if (title != null) setTitle(title);
 
-        mListFragment = CommonListFragment.getNewFragment(
-                Post.class,
-                R.layout.fragment_simple_list,
-                R.layout.fragment_post_item,
-                R.id.list);
+        setupListFragment();
+    }
 
-        mListFragment.setOnScrollListener(new AbsListView.OnScrollListener() {
-            private int mCurrentItem;
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-                if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && mListPages > 1) {
-                    ActionBar actionBar = getActionBar();
-                    Intent intent = getIntent();
-                    int pageOffset = intent.getIntExtra("page", 0);
-                    int pageScroll = mCurrentItem / PAGE_SIZE_COUNT + pageOffset;
-                    if (actionBar.getSelectedNavigationIndex() != pageScroll) {
-                        intent.putExtra("update-nav-spinner", true);
-                        actionBar.setSelectedNavigationItem(pageScroll);
-                    }
+    @Override
+    protected void onPause() {
+        isPaused = true;
+        // remove fragment to recycle memory
+        if (PostListActivity.this.mPrefMaxImageSize.x >= 0)
+            // remove fragment after some milliseconds to avoid splash
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (PostListActivity.this.isPaused)
+                        destroyListFragment();
                 }
-            }
+            }, 500);
+        super.onPause();
+    }
 
-            @Override
-            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-                mCurrentItem = i;
-            }
-        });
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, mListFragment)
-                .commit();
+    @Override
+    protected void onResume() {
+        isPaused = false;
+        setupListFragment();
+        super.onResume();
     }
 
     @Override
@@ -885,6 +1005,15 @@ public class PostListActivity extends BaseThemedActivity
             mListFragment.reloadAll();
             return true;
         }
+        else if (id == R.id.action_share) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, getTitle() + "\n" + Discuz.DISCUZ_URL +
+                    "forum.php?mod=viewthread&tid=" + getIntent().getIntExtra("tid", 0));
+            intent.setType("text/plain");
+            startActivity(intent);
+            return true;
+        }
         else if (id == R.id.action_goto_forum) {
             if (mForumId > 0 && getIntent().getIntExtra("fid", 0) != mForumId)
                 startActivity(new Intent(this, ThreadListActivity.class) {{
@@ -923,11 +1052,15 @@ public class PostListActivity extends BaseThemedActivity
         "[/quote]";
     }
 
-    final BitmapLruCache mImageCache = new BitmapLruCache();
+    // Note: must put huge objects in fragment scope!
+    final HtmlImageGetter.HtmlImageCache mImageCache =
+            new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
     final SparseArray<List<View>> mCommentCache = new SparseArray<List<View>>();
+
     @Override
     public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
         return new CommonListAdapter<Post>() {
+
             @Override
             public void convertView(ViewHolder viewHolder, final Post item) {
                 String avatar_url = Discuz.DISCUZ_URL +
@@ -957,7 +1090,7 @@ public class PostListActivity extends BaseThemedActivity
                 TextView messageText = (TextView) viewHolder.getView(R.id.message);
                 messageText.setTextSize(mPrefFontSize);
                 Spannable messageContent = (Spannable) Html.fromHtml(item.message,
-                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize, mPrefMaxImageSize), null);
+                        new HtmlImageGetter(messageText, mImageCache, mPrefMaxImageSize), null);
                 messageContent = (Spannable) Helper.setSpanClickListener(messageContent,
                         URLSpan.class,
                         new Helper.OnSpanClickListener() {
@@ -992,10 +1125,13 @@ public class PostListActivity extends BaseThemedActivity
                         new Helper.OnSpanClickListener() {
                             @Override
                             public boolean onClick(View widget, String src) {
+                                Intent oldInt = getIntent();
                                 Intent intent = new Intent(ThisApp.context, AttachmentViewer.class);
-                                intent.putExtra("tid", getIntent().getIntExtra("tid", 0));
-                                int offset = getIntent().getIntExtra("page", 0) * PAGE_SIZE_COUNT;
+                                intent.putExtra("tid", oldInt.getIntExtra("tid", 0));
+                                int offset = oldInt.getIntExtra("page", 0) * PAGE_SIZE_COUNT;
                                 intent.putExtra("index", offset + mListFragment.getIndex(item));
+                                intent.putExtra("reverse", oldInt.getBooleanExtra("reverse", false));
+                                intent.putExtra("authorid", oldInt.getIntExtra("authorid", 0));
 
                                 Attachment attachment = mAttachmentMap.get(src);
                                 // attachment image
@@ -1034,19 +1170,22 @@ public class PostListActivity extends BaseThemedActivity
                 if (comments != null) {
                     for (int i = 0; i < comments.size(); i ++) {
                         Comment comment = comments.get(i);
-                        View commentView;
+                        View commentView = null;
+                        // First try to get commentView from cache
                         if (i < cachedViews.size()) {
                             commentView = cachedViews.get(i);
+                            if (commentView.getParent() != null)
+                                ((ViewGroup) commentView.getParent()).removeView(commentView);
                         }
-                        else {
+                        // Note: removeView() is not working sometimes, so we may have to recreate one
+                        // see nsdn bug #448d2
+                        if (commentView == null || commentView.getParent() != null) {
                             commentView = new TextView(PostListActivity.this);
                             commentView.setPadding(32, 0, 0, 0);
                             cachedViews.add(commentView);
                         }
                         ((TextView) commentView).setText(
                                 Html.fromHtml("<b>" + comment.author + "</b>&nbsp;&nbsp;" + comment.comment));
-                        if (commentView.getParent() != null)
-                            ((ViewGroup) commentView.getParent()).removeView(commentView);
                         commentList.addView(commentView);
                     }
                 }
@@ -1060,9 +1199,12 @@ public class PostListActivity extends BaseThemedActivity
                 attachments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        final Intent oldInt = getIntent();
                         startActivity(new Intent(ThisApp.context, AttachmentViewer.class) {{
-                            putExtra("tid", PostListActivity.this.getIntent().getIntExtra("tid", 0));
+                            putExtra("tid", oldInt.getIntExtra("tid", 0));
                             putExtra("index", offset + mListFragment.getIndex(item));
+                            putExtra("reverse", oldInt.getBooleanExtra("reverse", false));
+                            putExtra("authorid", oldInt.getIntExtra("authorid", 0));
                         }});
                     }
                 });
@@ -1076,6 +1218,19 @@ public class PostListActivity extends BaseThemedActivity
                         @Override
                         public void onClick(View view) {
                             showPollOptions();
+                        }
+                    });
+                }
+
+                // buy thread
+                TextView buy = (TextView) viewHolder.getView(R.id.pay);
+                Helper.updateVisibility(buy, false);
+                if (item.number == 1 && mThreadPrice > 0) {
+                    Helper.updateVisibility(buy, true);
+                    buy.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showPayDialog();
                         }
                     });
                 }
@@ -1109,7 +1264,10 @@ public class PostListActivity extends BaseThemedActivity
             @Override
             public void onResponse(JSONObject data) {
                 int total = -1;
-                if (data.has(Discuz.VOLLEY_ERROR)) {
+                if (PostListActivity.this.isFinishing()) {
+                    Log.w(PostListActivity.class.toString(), "activity is finished.");
+                }
+                else if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.network_error_toast);
                 }
                 else if (data.opt("Message") instanceof JSONObject) {
@@ -1147,7 +1305,7 @@ public class PostListActivity extends BaseThemedActivity
                                 mAttachmentMap.put(attachment.src, attachment);
                             post.message = compileMessage(post.message, mAttachmentMap,
                                     // TODO: add more image size here (see forumimage.php
-                                    mPrefMaxImageSize < 0 ? "" : "268x380");
+                                    mPrefMaxImageSize.x < 0 ? "" : "268x380");
                             listData.add(post);
                         }
 
@@ -1157,6 +1315,9 @@ public class PostListActivity extends BaseThemedActivity
                         mAuthorId = Helper.toSafeInteger(thread.optString("authorid"), 0);
                         int replies = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies"));
+                        // get thread price
+                        mThreadPrice = var.getBoolean("forum_threadpay") ?
+                                Helper.toSafeInteger(thread.optString("price"), 0) : 0;
                         // setup action bar only once when loading items
                         if (page == 0)
                             setupActionBarPages(replies / PAGE_SIZE_COUNT + 1);

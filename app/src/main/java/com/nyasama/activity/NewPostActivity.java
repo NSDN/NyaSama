@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -44,6 +45,7 @@ import com.nyasama.util.Helper.Size;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -56,11 +58,18 @@ import java.util.Map;
 
 public class NewPostActivity extends BaseThemedActivity {
 
-    static final Size uploadSize = new Size(800, 800);
-    static final Size thumbSize = new Size(100, 100);
+    static final Size MAX_UPLOAD_SIZE = new Size(2048, 2048);
+    static final Size THUMBNAIL_SIZE = new Size(100, 100);
 
     static final String ARG_POST_TITLE = "thread_title";
     static final String ARG_POST_TRIMSTR = "notice_trimstr";
+
+    static final String PREF_KEY_HAS_DRAFT = "has_draft";
+    static final String PREF_KEY_DRAFT_TITLE = "draft_title";
+    static final String PREF_KEY_DRAFT_CONTENT = "draft_content";
+    static final String PREF_KEY_DRAFT_TYPEID = "draft_typeid";
+    static final String PREF_KEY_DRAFT_TID = "draft_tid";
+    static final String PREF_KEY_DRAFT_FID = "draft_fid";
 
     static final String TAG = "NewPost";
     static final int REQCODE_PICK_IMAGE = 1;
@@ -84,12 +93,46 @@ public class NewPostActivity extends BaseThemedActivity {
     Discuz.ThreadTypes mThreadTypes;
     List<ImageAttachment> mImageAttachments = new ArrayList<ImageAttachment>();
 
+    /*
+    // TODO: replace html tags with discuz tags
+    HtmlImageGetter.HtmlImageCache mImageCache = new HtmlImageGetter.HtmlImageCache(new BitmapLruCache());
+    Point mMaxImageSize = new Point(100, 100);
+    */
+
+    public String compileToString(EditText html) {
+        /*
+        // TODO: replace html tags with discuz tags
+        return Html.toHtml(html.getText());
+        */
+        return html.getText().toString();
+    }
+
+    public void loadToEditor(EditText html, String string) {
+        /*
+        // TODO: replace discuz tags with html tags
+        Spanned span = Html.fromHtml(string,
+                new HtmlImageGetter(html, mImageCache, mMaxImageSize),
+                null);
+        html.setText(span);
+        */
+        html.setText(string);
+    }
+
+    public void insertCodeToContent(String code) {
+        int start = mInputContent.getSelectionStart();
+        mInputContent.getText().insert(start, code);
+    }
+
+    public void insertImageToContent(ImageAttachment image) {
+        insertCodeToContent("[attachimg]" + image.uploadId + "[/attachimg]");
+    }
+
     public void doEdit(View view) {
         if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
             return;
 
         final String title = mInputTitle.getText().toString();
-        final String content = mInputContent.getText().toString();
+        final String content = compileToString(mInputContent);
         if (content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
             return;
@@ -130,6 +173,8 @@ public class NewPostActivity extends BaseThemedActivity {
                         if ("post_edit_succeed".equals(messageval)) {
                             setResult(1);
                             finish();
+                            ThisApp.preferences.edit()
+                                    .putBoolean(PREF_KEY_HAS_DRAFT, false);
                         } else {
                             Helper.toast(message.getString("messagestr"));
                         }
@@ -141,12 +186,17 @@ public class NewPostActivity extends BaseThemedActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     public void doPost(View view) {
         if (findViewById(R.id.loading).getVisibility() == View.VISIBLE)
             return;
 
         final String title = mInputTitle.getText().toString();
-        final String content = mInputContent.getText().toString();
+        final String content = compileToString(mInputContent);
         final String noticetrimstr = getIntent().getStringExtra(ARG_POST_TRIMSTR);
         if (title.isEmpty() || content.isEmpty()) {
             Helper.toast(R.string.post_content_empty_message);
@@ -207,6 +257,8 @@ public class NewPostActivity extends BaseThemedActivity {
                             String tid = data.getJSONObject("Variables").getString("tid");
                             setResult(Integer.parseInt(tid));
                             finish();
+                            ThisApp.preferences.edit()
+                                    .putBoolean(PREF_KEY_HAS_DRAFT, false);
                         } else {
                             AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
                                     .setTitle(R.string.there_is_something_wrong)
@@ -214,7 +266,7 @@ public class NewPostActivity extends BaseThemedActivity {
                                     .setPositiveButton(android.R.string.ok, null);
                             if ("postperm_login_nopermission//1".equals(messageval) ||
                                     "replyperm_login_nopermission//1".equals(messageval))
-                                builder.setNegativeButton("Login", new DialogInterface.OnClickListener() {
+                                builder.setNegativeButton(R.string.login_button_text, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         startActivityForResult(new Intent(NewPostActivity.this, LoginActivity.class),
@@ -258,7 +310,7 @@ public class NewPostActivity extends BaseThemedActivity {
                         postinfo = var.optJSONObject("postinfo");
                     if (postinfo != null) {
                         mInputTitle.setText(postinfo.optString("subject"));
-                        mInputContent.setText(postinfo.optString("message"));
+                        loadToEditor(mInputContent, postinfo.optString("message"));
                         if ("1".equals(postinfo.optString("first"))) {
                             int fid = Helper.toSafeInteger(postinfo.optString("fid"), 0);
                             if (fid > 0) loadThreadTypes(fid,
@@ -270,10 +322,33 @@ public class NewPostActivity extends BaseThemedActivity {
         });
     }
 
+    public void loadThreadDraft(int tid) {
+        SharedPreferences pref = ThisApp.preferences;
+        if (pref.getBoolean(PREF_KEY_HAS_DRAFT, false) &&
+                pref.getInt(PREF_KEY_DRAFT_TID, 0) == tid) {
+            mInputTitle.setText(pref.getString(PREF_KEY_DRAFT_TITLE, ""));
+            mInputContent.setText(pref.getString(PREF_KEY_DRAFT_CONTENT, ""));
+        }
+    }
+
+    public void loadNewDraft(int fid) {
+        SharedPreferences pref = ThisApp.preferences;
+        if (pref.getBoolean(PREF_KEY_HAS_DRAFT, false) &&
+                pref.getInt(PREF_KEY_DRAFT_FID, 0) == fid) {
+            mInputTitle.setText(pref.getString(PREF_KEY_DRAFT_TITLE, ""));
+            mInputContent.setText(pref.getString(PREF_KEY_DRAFT_CONTENT, ""));
+            loadThreadTypes(fid, pref.getInt(PREF_KEY_DRAFT_TYPEID, 0));
+        }
+        else {
+            loadThreadTypes(fid, 0);
+        }
+    }
+
     public void loadThreadTypes(final int fid, final int typeid) {
-        Discuz.loadForumThreadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
+        Discuz.ForumThreadInfo.loadInfo(new Response.Listener<SparseArray<Discuz.ForumThreadInfo>>() {
             @Override
             public void onResponse(SparseArray<Discuz.ForumThreadInfo> forumThreadInfo) {
+                if (forumThreadInfo.get(fid) == null) return;
                 mThreadTypes = forumThreadInfo.get(fid).types;
                 Helper.updateVisibility(mSpinnerTypes, mThreadTypes != null);
                 if (mThreadTypes != null) {
@@ -293,6 +368,20 @@ public class NewPostActivity extends BaseThemedActivity {
                 }
             }
         });
+    }
+
+    public void saveDraft() {
+        String type = "" + mSpinnerTypes.getSelectedItem();
+        int typeid = mThreadTypes != null && mThreadTypes.containsKey(type) ? mThreadTypes.get(type) : 0;
+        ThisApp.preferences.edit()
+            .putBoolean(PREF_KEY_HAS_DRAFT, true)
+            .putString(PREF_KEY_DRAFT_TITLE, mInputTitle.getText().toString())
+            .putString(PREF_KEY_DRAFT_CONTENT, mInputContent.getText().toString())
+            .putInt(PREF_KEY_DRAFT_TID, getIntent().getIntExtra("tid", 0))
+            .putInt(PREF_KEY_DRAFT_FID, getIntent().getIntExtra("fid", 0))
+            .putInt(PREF_KEY_DRAFT_TYPEID, typeid)
+            .commit();
+        Helper.toast(R.string.toast_draft_saved);
     }
 
     public void editPollOptions() {
@@ -326,17 +415,8 @@ public class NewPostActivity extends BaseThemedActivity {
         dialog.show();
     }
 
-    public void insertCodeToContent(String code) {
-        int start = mInputContent.getSelectionStart();
-        mInputContent.getText().insert(start, code);
-    }
-
-    public void insertImageToContent(ImageAttachment image) {
-        insertCodeToContent("[attachimg]"+image.uploadId+"[/attachimg]");
-    }
-
     public void showInsertSmileyOptions() {
-        final List<SmileyGroup> smilyGroups = Discuz.getSmilies();
+        final List<SmileyGroup> smilyGroups = SmileyGroup.getSmilies();
         if (smilyGroups == null) {
             Helper.toast(R.string.there_is_something_wrong);
             return;
@@ -487,10 +567,11 @@ public class NewPostActivity extends BaseThemedActivity {
         // replying
         else if (intent.getIntExtra("tid", 0) > 0) {
             setTitle(getString(R.string.title_editing_reply));
+            loadThreadDraft(intent.getIntExtra("tid", 0));
         }
         // creating new post
         else if (intent.getIntExtra("fid", 0) > 0) {
-            loadThreadTypes(intent.getIntExtra("fid", 0), 0);
+            loadNewDraft(intent.getIntExtra("fid", 0));
         }
     }
 
@@ -502,15 +583,24 @@ public class NewPostActivity extends BaseThemedActivity {
         if ((requestCode == REQCODE_PICK_IMAGE || requestCode == REQCODE_PICK_CAPTURE)
                 && resultCode == RESULT_OK) {
 
-            // TODO: make me pretty
-            Bitmap bitmap;
+            // get file path
             String filePath;
             try {
                 filePath = requestCode == REQCODE_PICK_IMAGE ?
                         Helper.getPathFromUri(data.getData()) : mPhotoFilePath;
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+                Helper.toast(R.string.toast_open_file_failed);
+                return;
+            }
+
+            // decode to bitmap
+            Bitmap bitmap;
+            try {
                 bitmap = BitmapFactory.decodeFile(filePath);
                 if (bitmap == null) {
-                    Helper.toast(getString(R.string.toast_open_image_fail));
+                    Helper.toast(R.string.toast_open_image_fail);
                     return;
                 }
             }
@@ -522,15 +612,32 @@ public class NewPostActivity extends BaseThemedActivity {
 
             // resize the image if too large
             Size bitmapSize = new Size(bitmap.getWidth(), bitmap.getHeight());
-            if (bitmap.getWidth() > uploadSize.width || bitmap.getHeight() > uploadSize.height) {
-                bitmapSize = Helper.getFittedSize(bitmapSize, uploadSize, false);
-                File dir = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES);
+            if (bitmap.getWidth() > MAX_UPLOAD_SIZE.width || bitmap.getHeight() > MAX_UPLOAD_SIZE.height) {
+                bitmapSize = Helper.getFittedSize(bitmapSize, MAX_UPLOAD_SIZE, false);
+                File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+                // make sure the image size is smaller than MAX_UPLOAD_BYTES
+                ByteArrayOutputStream blob = new ByteArrayOutputStream();
+                while (true) {
+                    blob.reset();
+                    bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
+                    if (blob.size() > Discuz.getMaxUploadSize() && bitmapSize.width > 100) {
+                        bitmapSize.width = bitmapSize.width * 9 / 10;
+                        bitmapSize.height = bitmapSize.height * 9 / 10;
+                    }
+                    else {
+                        Log.d(NewPostActivity.class.toString(),
+                                "resize upload image to " + bitmapSize.width + "x" + bitmapSize.height);
+                        break;
+                    }
+                }
+
+                // write to file
                 try {
                     File file = new File(dir, "nyasama_upload_resized.jpg");
                     FileOutputStream stream = new FileOutputStream(file);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, bitmapSize.width, bitmapSize.height, false);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    stream.write(blob.toByteArray());
                     stream.flush();
                     stream.close();
                     filePath = file.getAbsolutePath();
@@ -541,12 +648,17 @@ public class NewPostActivity extends BaseThemedActivity {
                 catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
+
             }
 
             // create thumbnail
-            Size newSize = Helper.getFittedSize(bitmapSize, thumbSize, true);
+            Size newSize = Helper.getFittedSize(bitmapSize, THUMBNAIL_SIZE, true);
             final Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
                     bitmap, newSize.width, newSize.height);
+            // Note: have to recycle memory here
+            bitmap.recycle();
+
+            // upload
             final String uploadFile = filePath;
             final String fileName =
                     (requestCode == REQCODE_PICK_IMAGE ? "image" : "photo") +
@@ -615,15 +727,18 @@ public class NewPostActivity extends BaseThemedActivity {
         else if (id == R.id.action_save) {
             doEdit(null);
         }
+        else if (id == R.id.action_save_draft) {
+            saveDraft();
+        }
         else if (id == R.id.action_setup_poll) {
             editPollOptions();
         }
         else if (id == R.id.action_add_smiley) {
-            if (Discuz.getSmilies() == null) {
+            if (SmileyGroup.getSmilies() == null) {
                 final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
-                Discuz.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
+                SmileyGroup.loadSmilies(new Response.Listener<List<SmileyGroup>>() {
                     @Override
                     public void onResponse(List<SmileyGroup> smileyGroups) {
                         dialog.cancel();

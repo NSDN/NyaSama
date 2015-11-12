@@ -1,8 +1,7 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
-
 import android.app.ActionBar;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,24 +13,24 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
 import com.negusoft.holoaccent.dialog.AccentAlertDialog;
+import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzComicListFragment;
 import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
-import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.fragment.NavigationDrawerFragment;
-import com.nyasama.R;
+import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
@@ -92,7 +91,7 @@ public class MainActivity extends BaseThemedActivity implements
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
+            finish();
             return;
         }
 
@@ -105,6 +104,38 @@ public class MainActivity extends BaseThemedActivity implements
                 doubleBackToExitPressedOnce = false;
             }
         }, 2000);
+    }
+
+    BroadcastReceiver mLoginReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadUserInfo();
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(ThisApp.context).unregisterReceiver(mLoginReceiver);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Uri uri = intent.getData();
+        if (intent.getData() != null) {
+            // TODO: deal with pages, titles, etc
+            final int tid = Helper.toSafeInteger(uri.getQueryParameter("tid"), 0);
+            final int fid = Helper.toSafeInteger(uri.getQueryParameter("fid"), 0);
+            if (tid > 0) startActivity(new Intent(this, PostListActivity.class) {{
+                putExtra("tid", tid);
+            }});
+            else if (fid > 0) startActivity(new Intent(this, ThreadListActivity.class) {{
+                putExtra("fid", fid);
+            }});
+        }
+        else {
+            super.onNewIntent(intent);
+        }
     }
 
     @Override
@@ -138,12 +169,9 @@ public class MainActivity extends BaseThemedActivity implements
         loadUserInfo();
 
         LocalBroadcastManager.getInstance(ThisApp.context)
-                .registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        loadUserInfo();
-                    }
-                }, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
+                .registerReceiver(mLoginReceiver, new IntentFilter(Discuz.BROADCAST_FILTER_LOGIN));
+
+        onNewIntent(getIntent());
     }
 
     @Override

@@ -21,6 +21,9 @@ import com.nyasama.ThisApp;
 
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +34,18 @@ import java.util.TimeZone;
 /**
  * Created by oxyflour on 2014/11/13.
  *
+ * 这是一个纯粹的工具类，本类提供了以下方法：
+ * toast显示 String , int， （toast）;
+ * 使调试用的文字消失   （updateVisibility） 用例见 DiscuzForumIndexFragment.java;
+ * 字符转整数       （toSafeInteger）;
+ * 字符转double      (toSafeDouble) ;
+ * 使对话框的按钮失效(估计是在启动下载后用的吧)  (disableDialog);
+ * 毫秒时间转规范时间      (datelineToString);
+ * 删掉过长链表的队尾，以缩减至要求长度     (setListLength);
+ * 检查Map中是否已有数据，没有则填入       (putIfNull);
+ * 处理menu 中的选项,用例见MainActivity       (handleOption)  ;
+ * size 类，getfittedsize 和 getfittedbitmap 都是用户 imageview 和 bitmap 尺寸不符时，调整 bitmap 大小的;
+ * 具体调整方法见下面的注释
  */
 public class Helper {
     public static void toast(String text) {
@@ -63,11 +78,11 @@ public class Helper {
             updateVisibility(view.findViewById(id), show);
     }
 
-    public static void disableDialog(AlertDialog dialog) {
-        dialog.setCancelable(false);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(false);
+    public static void enableDialog(AlertDialog dialog, boolean enabled) {
+        dialog.setCancelable(enabled);
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(enabled);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(enabled);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(enabled);
     }
 
     public static int toSafeInteger(String string, int defValue) {
@@ -89,6 +104,17 @@ public class Helper {
         catch (NumberFormatException e) {
             return defValue;
         }
+    }
+
+    public static String toSafeMD5(String input) {
+        String output;
+        try {
+            byte[] buffer = MessageDigest.getInstance("MD5").digest(input.getBytes());
+            output = String.format("%032x", new BigInteger(1, buffer));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return output;
     }
 
     public static String datelineToString(long time, String format) {
@@ -113,7 +139,7 @@ public class Helper {
         if (size < list.size())
             list.subList(size, list.size()).clear();
     }
-
+//@SuppressWarnings("unchecked") 这句是说：用不着报告类型检查的warning 了
     @SuppressWarnings("unchecked")
     public static boolean putIfNull(Map map, Object key, Object value) {
         if (map != null && map.get(key) == null) {
@@ -132,6 +158,15 @@ public class Helper {
             this.height = height;
         }
     }
+/*
+source.width * target.height > source.height * target.width  
+=> source.width / source.height > target.width / target.height
+这个条件判断是否过宽，
+
+在182行的用例中，converTarget 为true,也就是说，进入 if 的判断条件为 !tooWide：
+也就是：没有过宽，调整高度，如果过宽，调整宽度
+*/
+    
     public static Size getFittedSize(Size source, Size target, boolean coverTarget) {
         boolean tooWide = source.width * target.height > source.height * target.width;
         if ((tooWide && !coverTarget) || (!tooWide && coverTarget))
@@ -151,6 +186,15 @@ public class Helper {
     public static abstract class OnSpanClickListener {
         public abstract boolean onClick(View widget, String data);
     }
+    
+    /*
+    这个方法给CharSequence 加上了点击事件
+    调用时直接 Helper.OnSpanClickListener(){} 并加入 setSpanClickListener
+    
+    具体加法是，先去除CharSequence 上的装饰（span）,然后创建一个带onclick的 span，再装上去
+    但是URLSpan 和 ImageSpan 去除 span 的方法不大一样
+    URLSpan 用 removespan，ImageSpan 用getSource
+    */
     public static CharSequence setSpanClickListener(CharSequence text, Class cls, final OnSpanClickListener onClickListener) {
         if (!(text instanceof Spannable))
             return text;
@@ -192,7 +236,16 @@ public class Helper {
 
     // REF: http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
     // by bluebrain
+    /*
+    这个函数把看起来很干净漂亮的逻辑地址转化成真实地址
+    
+    新android 的 contentprovider 将整个android 机当做一个大数据库管理
+    比如： android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI 也就是一个媒体.图片的外存文件表
+    
+    contentprovider 文档：http://developer.android.com/guide/topics/providers/content-providers.html
+    */
     public static String getPathFromUri(Uri uri) {
+         //首先通过Uri查到文件名
         ContentResolver resolver = ThisApp.context.getContentResolver();
         Cursor cursor = resolver.query(uri, null, null, null, null);
         if (cursor == null) {
@@ -203,11 +256,20 @@ public class Helper {
             String document_id = cursor.getString(0);
             document_id = document_id.substring(document_id.lastIndexOf(":")+1);
             cursor.close();
-
+            //得到文件名后，到媒体主外存中查文件
             cursor = resolver.query(
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
             cursor.moveToFirst();
+            
+            /*
+            但是这里是个很神奇的语句
+            
+            文档:http://developer.android.com/reference/android/provider/MediaStore.MediaColumns.html#DATA
+            文档和常识都表示，data里放的是该文件的数据流
+            用getString 获得这个数据流应该是抛出 exception 的用法
+            但不仅没有抛出exception，而且还返回了真实地址，实在是出乎意料
+            */
             String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
             cursor.close();
             return path;

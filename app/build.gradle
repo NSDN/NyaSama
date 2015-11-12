@@ -69,4 +69,6 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-backend-android:1.5.0"
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'com.negusoft.holoaccent:library:1.1'
+    compile 'com.jakewharton:disklrucache:2.0.2'
+    compile 'ch.acra:acra:4.6.2'
 }

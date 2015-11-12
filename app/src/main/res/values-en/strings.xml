@@ -86,7 +86,7 @@
     <string name="preference_language">Language</string>
     <string name="preference_animation">Fade Animation</string>
     <string name="preference_category_version">Version</string>
-    <string name="preference_cachesize">Cache Size</string>
+    <string name="preference_web_cache">Web Cache Size</string>
     <string name="preference_category_explore">Explore</string>
     <string name="preference_thumbsize">Image Size</string>
     <string name="new_version_alert_title">New Version Is Ready</string>
@@ -150,6 +150,14 @@
     <string name="thread_target">Target Forum</string>
     <string name="thread_type">Thread Catalog</string>
     <string name="move_type">Move Type</string>
+    <string name="toast_open_file_failed">Open File Failed</string>
+    <string name="preference_manga_cache">Manga Cache</string>
+    <string name="acra_reporting_error">Oops! There is some thing wrong!\nSending error report...</string>
+    <string name="action_share">Share</string>
+    <string name="toast_draft_saved">Draft Saved.</string>
+    <string name="text_view_pay">[Buy Thread]</string>
+    <string name="buy_thread">Buy This Thread</string>
+    <string name="thread_price_info">The price of this thread is %d. Buy it now?</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>

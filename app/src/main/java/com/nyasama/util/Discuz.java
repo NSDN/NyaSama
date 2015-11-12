@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 
@@ -22,6 +23,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.activity.NoticeActivity;
@@ -44,15 +46,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,12 +70,26 @@ import java.util.regex.Pattern;
 /**
  * Created by Oxyflour on 2014/11/13.
  * utils to handle Discuz data
+ * 
+ * 这里是整个客户端的核心，所有论坛操作都由这里控制
+ * 大体工作思路仍然是：上传request，然后下载所需数，这个工作流程建立在 ThisApp 中的 requestqueue 基础上
+ * 看来Discuz！的工作流程也就是接受JSON数据包（无论来自浏览器还是来自客户端）
+ * 然后进行处理并显示
+ * 
+ * 这里的注释将分别对各个函数进行
+ * execute 函数以上的部分，基本上都是工具
+ * execute 函数一下的部分，则是一些Discuz！的操作
+ * execute 则是核心中的核心
+ * 
+ * JSON数据包的分析是由OFZ完成的
  */
 public class Discuz {
     public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
     public static final String DISCUZ_URL = DISCUZ_HOST + "/";
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
+
+    public static final int MAX_COMMENT_LENGTH = 200;
 
     public static final String VOLLEY_ERROR = "volleyError";
 
@@ -93,7 +111,7 @@ public class Discuz {
             this(e.getMessage());
         }
     }
-
+//论坛类
     public static class Forum {
         public int id;
         public String name;
@@ -101,13 +119,17 @@ public class Discuz {
         public int posts;
         public int threads;
         public int todayPosts;
-
+//从JSON中抽取各个论坛属性
         public Forum(JSONObject data) {
             id = Integer.parseInt(data.optString("fid"));
             name = data.optString("name");
             posts = Integer.parseInt(data.optString("posts"));
             threads = Integer.parseInt(data.optString("threads"));
             todayPosts = Integer.parseInt(data.optString("todayposts"));
+             /*
+            这里比较令人在意，因为论坛的图标是不经常变化的，所以建议下载图标后放入工程作为本地资源使用
+            嘛，不过下载几个图标，也不会太费流量
+            */
             if (!data.isNull("icon")) {
                 String html = data.optString("icon");
                 Matcher matcher = Pattern.compile(" src=\"([^\"]+)\"").matcher(html);
@@ -126,7 +148,7 @@ public class Discuz {
             this.name = name;
         }
     }
-
+//话题类
     public static class Thread {
         public int id;
         public String title;
@@ -136,7 +158,7 @@ public class Discuz {
         public int replies;
         public int views;
         public int attachments;
-
+//从JSON中抽取话题的各个属性
         public Thread(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("tid"), 0);
             title = data.optString("subject");
@@ -152,7 +174,7 @@ public class Discuz {
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
-
+//发言类
     public static class Post {
         public int id;
         public int authorId;
@@ -161,7 +183,7 @@ public class Discuz {
         public String message;
         public String dateline;
         public List<Attachment> attachments;
-
+//从JSON中抽取信息
         public Post(JSONObject data) {
             id = Integer.parseInt(data.optString("pid", "0"));
             author = data.optString("author");
@@ -184,7 +206,7 @@ public class Discuz {
             }
         }
     }
-
+//上面的Post类中用到的 Attachment 类，有图片附件或者String
     public static class Attachment {
         public int id;
         public boolean isImage;
@@ -194,7 +216,7 @@ public class Discuz {
 
         public Attachment() {
         }
-
+//从JSON中提取附加图片的URL
         public Attachment(JSONObject data) {
             id = Integer.parseInt(data.optString("aid", "0"));
             name = data.optString("filename");
@@ -204,25 +226,25 @@ public class Discuz {
             isImage = !"0".equals(data.optString("isimage"));
         }
     }
-
+//点评类
     public static class Comment {
         public int authorId;
         public String author;
         public String comment;
-
+//抽取点评
         public Comment(JSONObject data) {
             authorId = Integer.parseInt(data.optString("authorid"));
             author = data.optString("author");
             comment = data.optString("comment");
         }
-
+//创建点评
         public Comment(int authorId, String author, String comment) {
             this.authorId = authorId;
             this.author = author;
             this.comment = comment;
         }
     }
-
+//私信列表
     public static class PMList {
         public boolean isNew;
         public String author;
@@ -234,7 +256,7 @@ public class Discuz {
         public String message;
         public int number;
         public String lastdate;
-
+//依然是从JSON中提取私信信息
         public PMList(JSONObject data) {
             isNew = "1".equals(data.optString("isnew"));
             author = data.optString("author");
@@ -257,13 +279,13 @@ public class Discuz {
                 number = Integer.parseInt(data.optString("pmnum"));
         }
     }
-
+//通知类
     public static class Notice {
         public int id;
         public String type;
         public String note;
         public String dateline;
-
+//抽取通知信息
         public Notice(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("id"), 0);
             type = data.optString("type");
@@ -272,14 +294,14 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
+//收藏类
     public static class FavItem {
         public int id;
         public String type;
         public int dataId;
         public String title;
         public String dateline;
-
+//抽取信息
         public FavItem(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("favid"), 0);
             type = data.optString("idtype");
@@ -289,13 +311,13 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
+//投票类
     public static class PollOption {
         public int id;
         public String option;
         public int votes;
         public double percent;
-
+//抽取信息并整理
         public PollOption(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("polloptionid"), 0);
             option = data.optString("polloption");
@@ -304,199 +326,145 @@ public class Discuz {
         }
     }
 
-    public static String sFormHash = "";
-    public static String sUploadHash = "";
-    public static String sUsername = "";
-    public static String sGroupName = "";
-    public static int sUid = 0;
-    public static int sNewMessages = 0;
-    public static int sNewPrompts = 0;
-    public static boolean sHasLogined;
-    public static boolean sIsModerator;
+//表情组
+/*
+表情获得是一个非常复杂的流程，大概可以描述为：
+1.有什么人调用了全局函数LoadSmileies 附带一个 response.listener
+2.于是getSmileies 就创建了一个Stringrequest，发到discuz 的 common_smilies_var.js 那里进行处理
+3.common_smilies_var.js 理解这边的意图后，发回来一个String，里面装着smilies_type ; smilies_array 两个信息
+  实质上也包含了所有表情的名称和URL，但是返回的String 还要经过编码转化（gb18030）才能用
+4.得到字符串并完成编码转化后，调用parseSmileyString进行字符串的解析
+5.字符串的解析过程是用ThisApp 中的webview，调用javascript 完成的，之所以这么做是想用webview 来显示表情
+  于是在webview中，把这个字符串转化成了JSON
+6.然而JSON的解析则要回到java中完成，于是创建了JSInterface 类以便让javascript 调用其中的setSmilies 函数
+7.但是setSmilies 本身不解析JSON，它把解析JSON 的工作交给parseSmilies 完成
+8.parseSmilies 就完全是一般的JSON 解析函数了，它解析之后把信息放入事先定义的sSmilies 中
+9.以上全部完成之后，setSmilies会通过调用onResponse函数通知调用getSmileies 的组件，说载入表情已经完成
+  都装在sSmilies 里，用getSmilies 获得
 
-    private static List<NameValuePair> map2list(Map<String, Object> map) {
-        List<NameValuePair> list = new ArrayList<NameValuePair>();
-        for (Map.Entry<String, Object> e : map.entrySet())
-            list.add(new BasicNameValuePair(e.getKey(),
-                    e.getValue() != null ? e.getValue().toString() : ""));
-        return list;
-    }
-
-    // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
-    public static String getAttachmentThumb(int attachmentId, String size) {
-        String str = attachmentId + "|" + size.replace('x', '|');
-        String key;
-        try {
-            byte[] buffer = MessageDigest.getInstance("MD5").digest(str.getBytes());
-            key = String.format("%032x", new BigInteger(1, buffer));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("module", "forumimage");
-        params.put("aid", attachmentId);
-        params.put("version", 2);
-        params.put("size", size);
-        params.put("key", key);
-        params.put("type", "fixnone");
-        return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
-    }
-
-    public static String getThreadCoverThumb(int threadId) {
-        return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
-    }
-
-    public static boolean isSmileyUrl(String url) {
-        return url.startsWith(DISCUZ_URL + "static/image/smiley/");
-    }
-
-    private static BitmapLruCache smileyCache = new BitmapLruCache();
-    public static BitmapLruCache getSmileyCache() {
-        return smileyCache;
-    }
-
-    public static String getSafeUrl(String url) {
-        if (url == null)
-            return "";
-        url = url.replace(" ", "%20");
-        if (url.startsWith("http://") || url.startsWith("https://"))
-            return url;
-        else if (url.startsWith("/"))
-            return DISCUZ_HOST + url;
-        else
-            return DISCUZ_URL + url;
-    }
-
-    private static void notifyNewMessage() {
-        Class activityClass = UserProfileActivity.class;
-        if (sNewMessages > 0 && sNewPrompts == 0)
-            activityClass = PMListActivity.class;
-        else if (sNewMessages == 0 && sNewPrompts > 0)
-            activityClass = NoticeActivity.class;
-        Context context = ThisApp.context;
-        Intent intents[] = {new Intent(context, activityClass)};
-        PendingIntent pendingIntent = PendingIntent.getActivities(context,
-                0,
-                intents,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        String text = context.getString(R.string.prompt_1) + " " +
-                (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
-                (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
-        Notification notification = new NotificationCompat.Builder(ThisApp.context)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setDefaults(Notification.DEFAULT_SOUND)
-                .setContentTitle(context.getString(R.string.notify_title_text))
-                .setContentText(text)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build();
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(NOTIFICATION_ID, notification);
-    }
-
+  具体见函数注释
+*/
     public static class Smiley {
         public String code;
         public String image;
+
+        // cache
+        private static BitmapLruCache smileyCache = new BitmapLruCache();
+        public static BitmapLruCache getCache() {
+            return smileyCache;
+        }
+
+        // helper
+        public static boolean isSmileyUrl(String url) {
+            return url.startsWith(DISCUZ_URL + "static/image/smiley/");
+        }
     }
 
     public static class SmileyGroup {
         public String name;
         public String path;
         public List<Smiley> list;
-    }
 
-    private static List<SmileyGroup> parseSmilies(JSONArray data) {
-        List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
-        for (int i = 0; i < data.length(); i++) {
-            final JSONObject jsonData = data.optJSONObject(i);
-            final JSONArray jsonList = jsonData.optJSONArray("list");
-            final List<Smiley> smileyList = new ArrayList<Smiley>();
-            for (int j = 0; j < jsonList.length(); j++) {
-                final JSONArray jsonSmiley = jsonList.optJSONArray(j);
-                smileyList.add(new Smiley() {{
-                    code = jsonSmiley.optString(1);
-                    image = jsonSmiley.optString(2);
+        // saved list
+        private static List<SmileyGroup> sSmilies;
+        private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
+
+        public static List<SmileyGroup> getSmilies() {
+            return sSmilies;
+        }
+
+        public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
+            if (sSmilies != null) {
+                callback.onResponse(sSmilies);
+                return;
+            }
+            mSmiliesCallback = callback;
+            Request request = new StringRequest(DISCUZ_URL + "data/cache/common_smilies_var.js", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    parseSmileyString(s);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    if (mSmiliesCallback != null)
+                        mSmiliesCallback.onResponse(null);
+                }
+            }) {
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    try {
+                        // Note: charset not confirmed in other Discuz versions
+                        return Response.success(new String(response.data, "gb18030"), getCacheEntry());
+                    } catch (UnsupportedEncodingException e) {
+                        return Response.error(new VolleyError("decode failed!"));
+                    }
+                }
+            };
+            ThisApp.requestQueue.add(request);
+        }
+
+        // helpers
+        private static List<SmileyGroup> parseSmilies(JSONArray data) {
+            List<SmileyGroup> smileyGroups = new ArrayList<SmileyGroup>();
+            for (int i = 0; i < data.length(); i++) {
+                final JSONObject jsonData = data.optJSONObject(i);
+                final JSONArray jsonList = jsonData.optJSONArray("list");
+                final List<Smiley> smileyList = new ArrayList<Smiley>();
+                for (int j = 0; j < jsonList.length(); j++) {
+                    final JSONArray jsonSmiley = jsonList.optJSONArray(j);
+                    smileyList.add(new Smiley() {{
+                        code = jsonSmiley.optString(1);
+                        image = jsonSmiley.optString(2);
+                    }});
+                }
+                smileyGroups.add(new SmileyGroup() {{
+                    name = jsonData.optString("name");
+                    path = jsonData.optString("path");
+                    list = smileyList;
                 }});
             }
-            smileyGroups.add(new SmileyGroup() {{
-                name = jsonData.optString("name");
-                path = jsonData.optString("path");
-                list = smileyList;
-            }});
+            return smileyGroups;
         }
-        return smileyGroups;
-    }
 
-    private static List<SmileyGroup> sSmilies;
-    private static Response.Listener<List<SmileyGroup>> mSmiliesCallback = null;
-
-    private static class JSInterface {
-        @JavascriptInterface
-        @SuppressWarnings("unused")
-        public void setSmilies(String json) {
-            try {
-                if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
-                Log.d("Discuz", "got smilies!");
-            } catch (JSONException e) {
-                Log.e("Discuz", "load smilies failed");
-            }
-        }
-    }
-
-    private static void parseSmileyString(String content) {
-        content = "<script>" + content + "</script>" +
-                "<script>" +
-                "var list = [];" +
-                "var type = smilies_type;" +
-                "var array = smilies_array;" +
-                "for (var k in type) {" +
-                "var d = type[k];" +
-                "var i = parseInt(k.substring(1));" +
-                " if (array[i]) {" +
-                "list.push({ name:d[0], path:d[1], list:array[i][1]})" +
-                "}" +
-                "}" +
-                "JSInterface.setSmilies(JSON.stringify(list))" +
-                "</script>";
-        ThisApp.webView.getSettings().setJavaScriptEnabled(true);
-        ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
-        ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
-    }
-
-    public static List<SmileyGroup> getSmilies() {
-        return sSmilies;
-    }
-
-    public static void loadSmilies(Response.Listener<List<SmileyGroup>> callback) {
-        if (sSmilies != null) {
-            callback.onResponse(sSmilies);
-            return;
-        }
-        mSmiliesCallback = callback;
-        Request request = new StringRequest(DISCUZ_URL + "data/cache/common_smilies_var.js", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                parseSmileyString(s);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if (mSmiliesCallback != null)
-                    mSmiliesCallback.onResponse(null);
-            }
-        }) {
-            @Override
-            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+        //JS接口类
+        private static class JSInterface {
+            //这句会使这个方法暴露给javascript代码，使其能被调用
+            @JavascriptInterface
+            @SuppressWarnings("unused")
+            public void setSmilies(String json) {
                 try {
-                    // Note: charset not confirmed in other Discuz versions
-                    return Response.success(new String(response.data, "gb18030"), getCacheEntry());
-                } catch (UnsupportedEncodingException e) {
-                    return Response.error(new VolleyError("decode failed!"));
+                    if (mSmiliesCallback != null)
+                        mSmiliesCallback.onResponse(sSmilies = parseSmilies(new JSONArray(json)));
+                    Log.d("Discuz", "got smilies!");
+                } catch (JSONException e) {
+                    Log.e("Discuz", "load smilies failed");
                 }
             }
-        };
-        ThisApp.requestQueue.add(request);
+        }
+
+        //content中含有smilies_type 和smilies_array 两个域
+        //因此才能在javascript中调用
+        //调用JSinterface 的语句位于443行
+        private static void parseSmileyString(String content) {
+            content = "<script>" + content + "</script>" +
+                    "<script>" +
+                    "var list = [];" +
+                    "var type = smilies_type;" +
+                    "var array = smilies_array;" +
+                    "for (var k in type) {" +
+                    "var d = type[k];" +
+                    "var i = parseInt(k.substring(1));" +
+                    " if (array[i]) {" +
+                    "list.push({ name:d[0], path:d[1], list:array[i][1]})" +
+                    "}" +
+                    "}" +
+                    "JSInterface.setSmilies(JSON.stringify(list))" +
+                    "</script>";
+            ThisApp.webView.getSettings().setJavaScriptEnabled(true);
+            ThisApp.webView.addJavascriptInterface(new JSInterface(), "JSInterface");
+            ThisApp.webView.loadDataWithBaseURL(null, content, "text/html", "utf-8", null);
+        }
     }
 
     public static class ThreadTypes extends HashMap<String, Integer> {
@@ -512,44 +480,115 @@ public class Discuz {
     public static class ForumThreadInfo {
         public String name;
         public ThreadTypes types;
+
         public ForumThreadInfo(JSONObject data) {
             name = data.optString("name");
             JSONObject threadtypes = data.optJSONObject("threadtypes");
             if (threadtypes != null && !threadtypes.isNull("types"))
                 types = new ThreadTypes(threadtypes.optJSONObject("types"));
         }
-    }
 
-    private static SparseArray<ForumThreadInfo> sForumThreadInfo;
+        private static SparseArray<ForumThreadInfo> sForumThreadInfo;
 
-    public static SparseArray<ForumThreadInfo> getForumThreadInfo() {
-        return sForumThreadInfo;
-    }
-
-    public static void loadForumThreadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
-        if (sForumThreadInfo != null) {
-            callback.onResponse(sForumThreadInfo);
-            return;
+        public static SparseArray<ForumThreadInfo> getInfo() {
+            return sForumThreadInfo;
         }
-        Discuz.execute("forumnav", new HashMap<String, Object>(), null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject data) {
-                        JSONObject var = data.optJSONObject("Variables");
-                        if (var == null) return;
-                        sForumThreadInfo = new SparseArray<ForumThreadInfo>();
-                        JSONArray forums = var.optJSONArray("forums");
-                        for (int i = 0; i < forums.length(); i++) {
-                            JSONObject forum = forums.optJSONObject(i);
-                            int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
-                            sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
+
+        public static void loadInfo(final Response.Listener<SparseArray<ForumThreadInfo>> callback) {
+            if (sForumThreadInfo != null) {
+                callback.onResponse(sForumThreadInfo);
+                return;
+            }
+            Discuz.execute("forumnav", new HashMap<String, Object>(), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject data) {
+                            JSONObject var = data.optJSONObject("Variables");
+                            if (var == null) return;
+                            sForumThreadInfo = new SparseArray<ForumThreadInfo>();
+                            JSONArray forums = var.optJSONArray("forums");
+                            for (int i = 0; i < forums.length(); i++) {
+                                JSONObject forum = forums.optJSONObject(i);
+                                int fid = Helper.toSafeInteger(forum.optString("fid"), 0);
+                                sForumThreadInfo.put(fid, new ForumThreadInfo(forum));
+                            }
+                            callback.onResponse(sForumThreadInfo);
                         }
-                        callback.onResponse(sForumThreadInfo);
-                    }
-                });
+                    });
+        }
     }
 
-    public static class ResponseListener implements Response.Listener<String> {
+    public static String sFormHash = "";
+    public static String sUploadHash = "";
+    public static String sUsername = "";
+    public static String sGroupName = "";
+    public static int sUid = 0;
+    public static int sGid = 0;
+    public static int sNewMessages = 0;
+    public static int sNewPrompts = 0;
+    public static boolean sHasLogined;
+    public static boolean sIsModerator;
+
+    // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
+    //根据Discuz API 定义的获得缩略图URL 的函数
+    public static String getAttachmentThumb(int attachmentId, String size) {
+        String key = Helper.toSafeMD5(attachmentId + "|" + size.replace('x', '|'));
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("module", "forumimage");
+        params.put("aid", attachmentId);
+        params.put("version", 2);
+        params.put("size", size);
+        params.put("key", key);
+        params.put("type", "fixnone");
+        return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
+    }
+
+    //根据Discuz API 定义的获得缩略图URL 的函数
+    public static String getThreadCoverThumb(int threadId) {
+        return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
+    }
+
+    //检查并修改URL 格式
+    public static String getSafeUrl(String url) {
+        if (url == null)
+            return "";
+        url = url.replace(" ", "%20");
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;
+        else if (url.startsWith("/"))
+            return DISCUZ_HOST + url;
+        else
+            return DISCUZ_URL + url;
+    }
+
+    static SparseIntArray maxUploadSize = new SparseIntArray() {{
+        put(1, 2048*1024);
+        put(2, 500*1024);
+        put(3, 1024*1024);
+        put(38, 1024*1024);
+        put(32, 16*1024*1024);
+        put(43, 500*1024);
+        put(47, 999*1024);
+
+        put(22, 2048*1024);
+        put(42, 1024*1024);
+        put(45, 500*1024);
+
+        put(11, 500*1024);
+        put(11, 700*1024);
+        put(12, 900*1024);
+        put(13, 1170*1024);
+        put(14, 1460*1024);
+        put(15, 1760*1024);
+        put(20, 2048*1024);
+        put(21, 2048*1024);
+        put(39, 2048*1024);
+    }};
+    public static int getMaxUploadSize() {
+        return maxUploadSize.get(sGid);
+    }
+
+    private static class ResponseListener implements Response.Listener<String> {
         Response.Listener<JSONObject> callback;
 
         public ResponseListener(Response.Listener<JSONObject> callback) {
@@ -568,7 +607,8 @@ public class Discuz {
             if (var != null) {
                 sFormHash = var.optString("formhash", "");
                 sUsername = var.optString("member_username", "");
-                sUid = Integer.parseInt(var.optString("member_uid", "0"));
+                sUid = Helper.toSafeInteger(var.optString("member_uid", "0"), 0);
+                sGid = Helper.toSafeInteger(var.optString("groupid", "0"), 0);
                 sIsModerator = !"0".equals(var.optString("ismoderator"));
                 if (!var.isNull("allowperm"))
                     sUploadHash = var.optJSONObject("allowperm").optString("uploadhash", "");
@@ -600,7 +640,7 @@ public class Discuz {
         }
     }
 
-    public static class ResponseErrorListener implements Response.ErrorListener {
+    private static class ResponseErrorListener implements Response.ErrorListener {
         Response.Listener<JSONObject> callback;
 
         public ResponseErrorListener(Response.Listener<JSONObject> callback) {
@@ -617,6 +657,16 @@ public class Discuz {
         }
     }
 
+/*
+核心中的核心，execute 函数
+还是比较朴素的
+module决定调用哪种操作
+根据body是否为空决定GET还是POST
+如果是POST方法，其参数放在body当中
+然后对接受到的JSON进行解析，并返回数据
+具体用途得参见用例才能明确
+不过具体的param和body到底有哪些职责，哪些域，怎样解析，恐怕只有OFZ知道了
+*/
     public static Request execute(String module,
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
@@ -654,6 +704,9 @@ public class Discuz {
         } else if (module.equals("friendcp")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "add2submit", "yes");
+        } else if (module.equals("buythread")) {
+            Helper.putIfNull(body, "formhash", sFormHash);
+            Helper.putIfNull(body, "paysubmit", "yes");
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
@@ -663,6 +716,7 @@ public class Discuz {
         if (module.equals("editpost") && body != null) {
             Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
+                //把body中的参数转入一个新的params map中，返回
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
                             new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
@@ -675,6 +729,7 @@ public class Discuz {
                     new ResponseErrorListener(callback));
         }
         else {
+            //创建Stringrequest ，详细文档：http://afzaln.com/volley/
             request =  new StringRequest(
                     body == null ? Request.Method.GET : Request.Method.POST, url,
                     new ResponseListener(callback),
@@ -714,9 +769,11 @@ public class Discuz {
                     }
                 }
 
+                //这个getparam函数用来获得当方法为POST时，需要的参数
                 @Override
                 protected Map<String, String> getParams() {
                     HashMap<String, String> params = new HashMap<String, String>();
+                    //把body中的参数转入一个新的params map中，返回
                     if (body != null)
                         for (Map.Entry<String, Object> e : body.entrySet())
                             if (e.getValue() != null)
@@ -726,6 +783,7 @@ public class Discuz {
 
                 @Override
                 protected String getParamsEncoding() {
+                    //返回参数的编码方式
                     return DISCUZ_ENC;
                 }
             };
@@ -872,7 +930,114 @@ public class Discuz {
         task.execute();
     }
 
-    public static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
+    public interface DownloadProgressListener {
+        boolean onResponse(int progress);
+    }
+
+    public static InputStream getCache(final String cacheKey) {
+        try {
+            if (cacheKey.startsWith("file:")) {
+                return new FileInputStream(cacheKey.substring("file:".length()));
+            }
+            else {
+                DiskLruCache.Snapshot snapshot = ThisApp.fileDiskCache.get(cacheKey);
+                if (snapshot == null) return null;
+                return snapshot.getInputStream(0);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void download(final String url,
+                              final String cacheKey,
+                              final Response.Listener<String> callback,
+                              final DownloadProgressListener process) {
+        AsyncTask task = new AsyncTask<Object, Integer, String>() {
+            boolean mCanceled = false;
+            @Override
+            protected String doInBackground(Object... objects) {
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(30000);
+
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
+                        return "http get failed";
+                    if (mCanceled) // check this because it takes long to go on
+                        return "canceled";
+
+                    int contentLength = conn.getContentLength();
+                    if (mCanceled) // check this because it takes long to go on
+                        return "canceled";
+
+                    OutputStream output;
+                    DiskLruCache.Editor editor = null;
+                    File tmpFile = null;
+                    File saveFile = null;
+                    if (cacheKey.startsWith("file:")) {
+                        tmpFile = File.createTempFile("nyasama_", "downloading", ThisApp.context.getExternalCacheDir());
+                        saveFile = new File(cacheKey.substring("file:".length()));
+                        output = new FileOutputStream(tmpFile);
+                        saveFile.getParentFile().mkdirs();
+                    }
+                    else {
+                        editor = ThisApp.fileDiskCache.edit(cacheKey);
+                        if (editor == null)
+                            return "open cache failed";
+                        output = editor.newOutputStream(0);
+                    }
+
+                    InputStream input = conn.getInputStream();
+                    int count, recvd = 0;
+                    byte data[] = new byte[16 * 1024];
+                    while (!mCanceled && (count = input.read(data)) >= 0) {
+                        recvd += count;
+                        publishProgress(recvd * 100 / contentLength);
+                        output.write(data, 0, count);
+                    }
+
+                    input.close();
+                    output.close();
+                    conn.disconnect();
+
+                    if (editor != null) {
+                        if (mCanceled)
+                            editor.abort();
+                        else
+                            editor.commit();
+                    }
+                    if (tmpFile != null) {
+                        if (mCanceled)
+                            tmpFile.delete();
+                        else
+                            tmpFile.renameTo(saveFile);
+                    }
+
+                    return mCanceled ? "calceled" : null;
+                }
+                catch (Throwable e) {
+                    return e.getMessage();
+                }
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                mCanceled = process.onResponse(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callback.onResponse(s);
+            }
+        };
+        task.execute();
+    }
+
+    static Pattern searchMessagePatt = Pattern.compile("<div id=\"messagetext\" class=\"alert_info\">\\s*<p>(.*?)<",
             Pattern.DOTALL | Pattern.MULTILINE);
     public static void search(final String text,
                               final Map<String, Object> params,
@@ -932,7 +1097,7 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
     }
-
+//login函数是基于execute 定义的，因为body不为空，所以是POST方法
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
@@ -951,6 +1116,7 @@ public class Discuz {
     }
 
     // Note: "Logout" is not found in the api source =.=
+    //因为api中没有logout，于是就清除一下本地数据就行了
     public static void logout(final Response.Listener<JSONObject> callback) {
         sUid = 0;
         sNewMessages = 0;
@@ -963,8 +1129,9 @@ public class Discuz {
         callback.onResponse(new JSONObject());
     }
 
+//signin 并没有调用execute，而是自己创建了一个request 加入requestqueuue
+//返回的String 看起来是HTML代码，于是用正则匹配"<p>(.*?)</p>" 来找到是否申请成功
     static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
-
     public static void signin(final Response.Listener<String> callback) {
         String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
         Request request = new StringRequest(url, new Response.Listener<String>() {
@@ -985,4 +1152,49 @@ public class Discuz {
         ThisApp.requestQueue.add(request);
     }
 
+    //
+    // helpers
+    //
+    //把hashmap转化成 name value pair 链表的函数
+    //是为了方便做成JSON数据包而定义的，下面的函数有用到
+    private static List<NameValuePair> map2list(Map<String, Object> map) {
+        List<NameValuePair> list = new ArrayList<NameValuePair>();
+        for (Map.Entry<String, Object> e : map.entrySet())
+            list.add(new BasicNameValuePair(e.getKey(),
+                    e.getValue() != null ? e.getValue().toString() : ""));
+        return list;
+    }
+
+    //发送通知
+    private static void notifyNewMessage() {
+        //这里决定跳到哪个界面
+        Class activityClass = UserProfileActivity.class;
+        if (sNewMessages > 0 && sNewPrompts == 0)
+            activityClass = PMListActivity.class;
+        else if (sNewMessages == 0 && sNewPrompts > 0)
+            activityClass = NoticeActivity.class;
+
+        Context context = ThisApp.context;
+        Intent intents[] = {new Intent(context, activityClass)};
+        //pendingintent 是自带操作的intent，这里是打开activity操作
+        PendingIntent pendingIntent = PendingIntent.getActivities(context,
+                0,
+                intents,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        String text = context.getString(R.string.prompt_1) + " " +
+                (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
+                (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
+        //notification 在android 3.0 之后的推荐用法：用Builder创建
+        //详细文档：http://developer.android.com/guide/topics/ui/notifiers/notifications.html
+        Notification notification = new NotificationCompat.Builder(ThisApp.context)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setContentTitle(context.getString(R.string.notify_title_text))
+                .setContentText(text)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build();
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(NOTIFICATION_ID, notification);
+    }
 }

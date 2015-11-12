@@ -94,7 +94,7 @@ public class MessagesActivity extends BaseThemedActivity
                             public void onClick(View view) {
                                 String text = input.getText().toString();
                                 if (!text.isEmpty()) {
-                                    Helper.disableDialog(mReplyDialog);
+                                    Helper.enableDialog(mReplyDialog, false);
                                     doSendMessage(text);
                                 }
                             }

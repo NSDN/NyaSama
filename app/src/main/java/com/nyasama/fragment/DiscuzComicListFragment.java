@@ -45,9 +45,8 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
                 viewHolder.setText(R.id.title, Html.fromHtml(item.title));
                 final NetworkImageView imageView = (NetworkImageView) viewHolder.getView(R.id.image_view);
                 imageView.setDefaultImageResId(R.drawable.ic_launcher);
-                imageView.setImageUrl(
-                        item.attachments > 0 ? Discuz.getThreadCoverThumb(item.id) : null,
-                        ThisApp.imageLoader);
+                imageView.setErrorImageResId(R.drawable.ic_launcher);
+                imageView.setImageUrl(Discuz.getThreadCoverThumb(item.id), ThisApp.imageLoader);
             }
         };
     }
