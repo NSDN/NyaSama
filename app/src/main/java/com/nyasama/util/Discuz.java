@@ -70,6 +70,18 @@ import java.util.regex.Pattern;
 /**
  * Created by Oxyflour on 2014/11/13.
  * utils to handle Discuz data
+ * 
+ * 这里是整个客户端的核心，所有论坛操作都由这里控制
+ * 大体工作思路仍然是：上传request，然后下载所需数，这个工作流程建立在 ThisApp 中的 requestqueue 基础上
+ * 看来Discuz！的工作流程也就是接受JSON数据包（无论来自浏览器还是来自客户端）
+ * 然后进行处理并显示
+ * 
+ * 这里的注释将分别对各个函数进行
+ * execute 函数以上的部分，基本上都是工具
+ * execute 函数一下的部分，则是一些Discuz！的操作
+ * execute 则是核心中的核心
+ * 
+ * JSON数据包的分析是由OFZ完成的
  */
 public class Discuz {
     public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
@@ -99,7 +111,7 @@ public class Discuz {
             this(e.getMessage());
         }
     }
-
+//论坛类
     public static class Forum {
         public int id;
         public String name;
@@ -107,13 +119,17 @@ public class Discuz {
         public int posts;
         public int threads;
         public int todayPosts;
-
+//从JSON中抽取各个论坛属性
         public Forum(JSONObject data) {
             id = Integer.parseInt(data.optString("fid"));
             name = data.optString("name");
             posts = Integer.parseInt(data.optString("posts"));
             threads = Integer.parseInt(data.optString("threads"));
             todayPosts = Integer.parseInt(data.optString("todayposts"));
+             /*
+            这里比较令人在意，因为论坛的图标是不经常变化的，所以建议下载图标后放入工程作为本地资源使用
+            嘛，不过下载几个图标，也不会太费流量
+            */
             if (!data.isNull("icon")) {
                 String html = data.optString("icon");
                 Matcher matcher = Pattern.compile(" src=\"([^\"]+)\"").matcher(html);
@@ -132,7 +148,7 @@ public class Discuz {
             this.name = name;
         }
     }
-
+//话题类
     public static class Thread {
         public int id;
         public String title;
@@ -142,7 +158,7 @@ public class Discuz {
         public int replies;
         public int views;
         public int attachments;
-
+//从JSON中抽取话题的各个属性
         public Thread(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("tid"), 0);
             title = data.optString("subject");
@@ -158,7 +174,7 @@ public class Discuz {
             attachments = Helper.toSafeInteger(data.optString("attachment"), 0);
         }
     }
-
+//发言类
     public static class Post {
         public int id;
         public int authorId;
@@ -167,7 +183,7 @@ public class Discuz {
         public String message;
         public String dateline;
         public List<Attachment> attachments;
-
+//从JSON中抽取信息
         public Post(JSONObject data) {
             id = Integer.parseInt(data.optString("pid", "0"));
             author = data.optString("author");
@@ -190,7 +206,7 @@ public class Discuz {
             }
         }
     }
-
+//上面的Post类中用到的 Attachment 类，有图片附件或者String
     public static class Attachment {
         public int id;
         public boolean isImage;
@@ -200,7 +216,7 @@ public class Discuz {
 
         public Attachment() {
         }
-
+//从JSON中提取附加图片的URL
         public Attachment(JSONObject data) {
             id = Integer.parseInt(data.optString("aid", "0"));
             name = data.optString("filename");
@@ -210,25 +226,25 @@ public class Discuz {
             isImage = !"0".equals(data.optString("isimage"));
         }
     }
-
+//点评类
     public static class Comment {
         public int authorId;
         public String author;
         public String comment;
-
+//抽取点评
         public Comment(JSONObject data) {
             authorId = Integer.parseInt(data.optString("authorid"));
             author = data.optString("author");
             comment = data.optString("comment");
         }
-
+//创建点评
         public Comment(int authorId, String author, String comment) {
             this.authorId = authorId;
             this.author = author;
             this.comment = comment;
         }
     }
-
+//私信列表
     public static class PMList {
         public boolean isNew;
         public String author;
@@ -240,7 +256,7 @@ public class Discuz {
         public String message;
         public int number;
         public String lastdate;
-
+//依然是从JSON中提取私信信息
         public PMList(JSONObject data) {
             isNew = "1".equals(data.optString("isnew"));
             author = data.optString("author");
@@ -263,13 +279,13 @@ public class Discuz {
                 number = Integer.parseInt(data.optString("pmnum"));
         }
     }
-
+//通知类
     public static class Notice {
         public int id;
         public String type;
         public String note;
         public String dateline;
-
+//抽取通知信息
         public Notice(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("id"), 0);
             type = data.optString("type");
@@ -278,14 +294,14 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
+//收藏类
     public static class FavItem {
         public int id;
         public String type;
         public int dataId;
         public String title;
         public String dateline;
-
+//抽取信息
         public FavItem(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("favid"), 0);
             type = data.optString("idtype");
@@ -295,13 +311,13 @@ public class Discuz {
                     Integer.parseInt(data.optString("dateline")), null);
         }
     }
-
+//投票类
     public static class PollOption {
         public int id;
         public String option;
         public int votes;
         public double percent;
-
+//抽取信息并整理
         public PollOption(JSONObject data) {
             id = Helper.toSafeInteger(data.optString("polloptionid"), 0);
             option = data.optString("polloption");
@@ -310,6 +326,24 @@ public class Discuz {
         }
     }
 
+//表情组
+/*
+表情获得是一个非常复杂的流程，大概可以描述为：
+1.有什么人调用了全局函数LoadSmileies 附带一个 response.listener
+2.于是getSmileies 就创建了一个Stringrequest，发到discuz 的 common_smilies_var.js 那里进行处理
+3.common_smilies_var.js 理解这边的意图后，发回来一个String，里面装着smilies_type ; smilies_array 两个信息
+  实质上也包含了所有表情的名称和URL，但是返回的String 还要经过编码转化（gb18030）才能用
+4.得到字符串并完成编码转化后，调用parseSmileyString进行字符串的解析
+5.字符串的解析过程是用ThisApp 中的webview，调用javascript 完成的，之所以这么做是想用webview 来显示表情
+  于是在webview中，把这个字符串转化成了JSON
+6.然而JSON的解析则要回到java中完成，于是创建了JSInterface 类以便让javascript 调用其中的setSmilies 函数
+7.但是setSmilies 本身不解析JSON，它把解析JSON 的工作交给parseSmilies 完成
+8.parseSmilies 就完全是一般的JSON 解析函数了，它解析之后把信息放入事先定义的sSmilies 中
+9.以上全部完成之后，setSmilies会通过调用onResponse函数通知调用getSmileies 的组件，说载入表情已经完成
+  都装在sSmilies 里，用getSmilies 获得
+
+  具体见函数注释
+*/
     public static class Smiley {
         public String code;
         public String image;
@@ -393,7 +427,9 @@ public class Discuz {
             return smileyGroups;
         }
 
+        //JS接口类
         private static class JSInterface {
+            //这句会使这个方法暴露给javascript代码，使其能被调用
             @JavascriptInterface
             @SuppressWarnings("unused")
             public void setSmilies(String json) {
@@ -407,6 +443,9 @@ public class Discuz {
             }
         }
 
+        //content中含有smilies_type 和smilies_array 两个域
+        //因此才能在javascript中调用
+        //调用JSinterface 的语句位于443行
         private static void parseSmileyString(String content) {
             content = "<script>" + content + "</script>" +
                     "<script>" +
@@ -491,6 +530,7 @@ public class Discuz {
     public static boolean sIsModerator;
 
     // REF: Discuz\src\net\discuz\json\helper\x25\ViewThreadParseHelperX25.java
+    //根据Discuz API 定义的获得缩略图URL 的函数
     public static String getAttachmentThumb(int attachmentId, String size) {
         String key = Helper.toSafeMD5(attachmentId + "|" + size.replace('x', '|'));
         Map<String, Object> params = new HashMap<String, Object>();
@@ -503,10 +543,12 @@ public class Discuz {
         return DISCUZ_API + "?" + URLEncodedUtils.format(map2list(params), DISCUZ_ENC);
     }
 
+    //根据Discuz API 定义的获得缩略图URL 的函数
     public static String getThreadCoverThumb(int threadId) {
         return DISCUZ_API + "?module=threadcover&tid=" + threadId + "&version=2";
     }
 
+    //检查并修改URL 格式
     public static String getSafeUrl(String url) {
         if (url == null)
             return "";
@@ -615,6 +657,16 @@ public class Discuz {
         }
     }
 
+/*
+核心中的核心，execute 函数
+还是比较朴素的
+module决定调用哪种操作
+根据body是否为空决定GET还是POST
+如果是POST方法，其参数放在body当中
+然后对接受到的JSON进行解析，并返回数据
+具体用途得参见用例才能明确
+不过具体的param和body到底有哪些职责，哪些域，怎样解析，恐怕只有OFZ知道了
+*/
     public static Request execute(String module,
                                   final Map<String, Object> params,
                                   final Map<String, Object> body,
@@ -664,6 +716,7 @@ public class Discuz {
         if (module.equals("editpost") && body != null) {
             Map<String, ContentBody> contentBody = new HashMap<String, ContentBody>();
             try {
+                //把body中的参数转入一个新的params map中，返回
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
                             new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
@@ -676,6 +729,7 @@ public class Discuz {
                     new ResponseErrorListener(callback));
         }
         else {
+            //创建Stringrequest ，详细文档：http://afzaln.com/volley/
             request =  new StringRequest(
                     body == null ? Request.Method.GET : Request.Method.POST, url,
                     new ResponseListener(callback),
@@ -715,9 +769,11 @@ public class Discuz {
                     }
                 }
 
+                //这个getparam函数用来获得当方法为POST时，需要的参数
                 @Override
                 protected Map<String, String> getParams() {
                     HashMap<String, String> params = new HashMap<String, String>();
+                    //把body中的参数转入一个新的params map中，返回
                     if (body != null)
                         for (Map.Entry<String, Object> e : body.entrySet())
                             if (e.getValue() != null)
@@ -727,6 +783,7 @@ public class Discuz {
 
                 @Override
                 protected String getParamsEncoding() {
+                    //返回参数的编码方式
                     return DISCUZ_ENC;
                 }
             };
@@ -1040,7 +1097,7 @@ public class Discuz {
         };
         ThisApp.requestQueue.add(request);
     }
-
+//login函数是基于execute 定义的，因为body不为空，所以是POST方法
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
                              final Response.Listener<JSONObject> callback) {
@@ -1059,6 +1116,7 @@ public class Discuz {
     }
 
     // Note: "Logout" is not found in the api source =.=
+    //因为api中没有logout，于是就清除一下本地数据就行了
     public static void logout(final Response.Listener<JSONObject> callback) {
         sUid = 0;
         sNewMessages = 0;
@@ -1071,6 +1129,8 @@ public class Discuz {
         callback.onResponse(new JSONObject());
     }
 
+//signin 并没有调用execute，而是自己创建了一个request 加入requestqueuue
+//返回的String 看起来是HTML代码，于是用正则匹配"<p>(.*?)</p>" 来找到是否申请成功
     static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
     public static void signin(final Response.Listener<String> callback) {
         String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
@@ -1095,6 +1155,8 @@ public class Discuz {
     //
     // helpers
     //
+    //把hashmap转化成 name value pair 链表的函数
+    //是为了方便做成JSON数据包而定义的，下面的函数有用到
     private static List<NameValuePair> map2list(Map<String, Object> map) {
         List<NameValuePair> list = new ArrayList<NameValuePair>();
         for (Map.Entry<String, Object> e : map.entrySet())
@@ -1103,14 +1165,18 @@ public class Discuz {
         return list;
     }
 
+    //发送通知
     private static void notifyNewMessage() {
+        //这里决定跳到哪个界面
         Class activityClass = UserProfileActivity.class;
         if (sNewMessages > 0 && sNewPrompts == 0)
             activityClass = PMListActivity.class;
         else if (sNewMessages == 0 && sNewPrompts > 0)
             activityClass = NoticeActivity.class;
+
         Context context = ThisApp.context;
         Intent intents[] = {new Intent(context, activityClass)};
+        //pendingintent 是自带操作的intent，这里是打开activity操作
         PendingIntent pendingIntent = PendingIntent.getActivities(context,
                 0,
                 intents,
@@ -1118,6 +1184,8 @@ public class Discuz {
         String text = context.getString(R.string.prompt_1) + " " +
                 (sNewMessages > 0 ? sNewMessages + " " + context.getString(R.string.prompt_2) : "") +
                 (sNewPrompts > 0 ? (sNewMessages > 0 ? " " + context.getString(R.string.prompt_3) + " " : "") + sNewPrompts + " " + context.getString(R.string.prompt_4) : "");
+        //notification 在android 3.0 之后的推荐用法：用Builder创建
+        //详细文档：http://developer.android.com/guide/topics/ui/notifiers/notifications.html
         Notification notification = new NotificationCompat.Builder(ThisApp.context)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setDefaults(Notification.DEFAULT_SOUND)
