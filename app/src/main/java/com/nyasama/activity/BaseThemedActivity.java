@@ -33,7 +33,7 @@ public class BaseThemedActivity extends FragmentActivity {
      */
     public int getOverrideAccentColor() {
         // Note: we have to use ThisApp context to get string, or it will fail
-        return ThisApp.preferences.getInt(ThisApp.context.getString(R.string.pref_key_theme_color), 0xD06B82);
+        return ThisApp.preferences.getInt(ThisApp.context.getString(R.string.pref_key_theme_color), 0x66849F);
         // Colorful theme...
         //int Color[] = {0xE51C23, 0xE91E63, 0x9C27B0, 0x673AB7, 0x3F51B5, 0x5677FC, 0x03A9F4, 0x00BCD4, 0x009688, 0x259B24, 0x8BC34A, 0xCDDC39, 0xFFEB3B, 0xFFC107, 0xFF9800, 0xFF5722, 0x795548, 0x9E9E9E, 0x607D8B};
         //Double DoubleTmp = Math.random() * Color.length;
