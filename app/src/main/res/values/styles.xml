@@ -6,10 +6,10 @@
             REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
         <!--item name="android:windowContentOverlay">@null</item-->
 
-        <item name="android:windowTranslucentStatus">false</item>
+        <!--item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowTranslucentNavigation">true</item>
 
-        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:fitsSystemWindows">true</item-->
         <!--item name="android:clipToPadding">false</item-->
 
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
@@ -32,10 +32,10 @@
     </style>
 
     <style name="AppTheme.NoActionBar.FullScreen" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
-        <item name="android:windowTranslucentStatus">true</item>
+        <!--item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
 
-        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:fitsSystemWindows">false</item-->
         <!--item name="android:clipToPadding">false</item-->
     </style>
 
@@ -65,14 +65,12 @@
 
     <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
 
-
-
-    <color name="ThemeColor">#d06b82</color>
+    <color name="ThemeColor">#66849f</color>
     <color name="ThemeColorLight">#ffffff</color>
-    <color name="ThemeColorDark">#973f53</color>
-    <color name="ThemeBackground">#d6afaa</color>
-    <color name="text_color_primary">#613640</color>
-    <color name="text_color_secondary">#95737b</color>
+    <color name="ThemeColorDark">#4f5b73</color>
+    <color name="ThemeBackground">#7c8e9c</color>
+    <color name="text_color_primary">#2a4254</color>
+    <color name="text_color_secondary">#3f596d</color>
 
     <!--color name="ThemeColor">#9d544d</color>
     <color name="ThemeColorLight">#ffffff</color>
