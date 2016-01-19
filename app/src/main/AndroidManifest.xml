@@ -163,6 +163,10 @@
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
+            android:name=".activity.NyaSecActivity"
+            android:label="NyaSec">
+        </activity>
+        <activity
             android:launchMode="singleTop"
             android:name=".activity.SearchActivity"
             android:label="@string/title_activity_search" >
