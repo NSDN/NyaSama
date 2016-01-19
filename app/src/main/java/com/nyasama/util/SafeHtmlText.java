@@ -27,10 +27,7 @@ public class SafeHtmlText extends TextView {
     protected void onSelectionChanged(int selStart, int selEnd) {
         if (selStart == -1 || selEnd == -1) {
             // @hack : https://code.google.com/p/android/issues/detail?id=137509
-            CharSequence text = getText();
-            if (text instanceof Spannable) {
-                Selection.setSelection((Spannable) text, 0, 0);
-            }
+            // also see #96
         } else {
             super.onSelectionChanged(selStart, selEnd);
         }
