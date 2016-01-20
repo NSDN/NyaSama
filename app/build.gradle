@@ -8,7 +8,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 21
         versionCode 1
-        versionName 'nightly-api-21-nyasec-160119'
+        versionName 'nightly-api-21-nyasec-160120'
     }
     buildTypes {
         release {
