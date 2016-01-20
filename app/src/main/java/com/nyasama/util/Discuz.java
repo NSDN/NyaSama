@@ -394,8 +394,7 @@ public class Discuz {
                 @Override
                 protected Response<String> parseNetworkResponse(NetworkResponse response) {
                     try {
-                        // Note: charset not confirmed in other Discuz versions
-                        return Response.success(new String(response.data, "gb18030"), getCacheEntry());
+                        return Response.success(new String(response.data, DISCUZ_ENC), getCacheEntry());
                     } catch (UnsupportedEncodingException e) {
                         return Response.error(new VolleyError("decode failed!"));
                     }
