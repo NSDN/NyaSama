@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ThemeColor">@color/accent_material_light</color>
+    <color name="ThemeColorDark">@color/colorPrimaryDark</color>
+    <color name="ThemeColorLight">@color/background_material</color>
+    <color name="primary_dark_material_dark">#1c3858</color>
+    <color name="primary_material_dark">#143753</color>
+    <color name="accent_material_light">#5c9ac5</color>
+    <color name="colorPrimaryDark">#306284</color>
+    <color name="background_material">#acc8e2</color>
+    <color name="background_material_light">#bdd4e5</color>
+    <color name="primary_text">#de000000</color>
+    <color name="secondary_text">#8A000000</color>
+</resources>

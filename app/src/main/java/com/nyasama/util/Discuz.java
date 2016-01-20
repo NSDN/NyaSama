@@ -85,7 +85,7 @@ import java.util.regex.Pattern;
  * JSON数据包的分析是由OFZ完成的
  */
 public class Discuz {
-    public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
+    public static final String DISCUZ_HOST = "http://3t.tbsgroup.info";
     public static final String DISCUZ_URL = DISCUZ_HOST + "/";
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";

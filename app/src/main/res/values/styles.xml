@@ -2,27 +2,17 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
-        <!-- Note: remove shadow under actionbar
-            REF: http://stackoverflow.com/questions/12246388/remove-shadow-below-actionbar -->
-        <!--item name="android:windowContentOverlay">@null</item-->
-
-        <!--item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-
-        <item name="android:fitsSystemWindows">true</item-->
-        <!--item name="android:clipToPadding">false</item-->
-
-        <item name="android:actionBarStyle">@style/ActionBarStyle</item>
-
-        <item name="android:colorPrimary">@color/ThemeColor</item>
-        <item name="android:colorPrimaryDark">@color/ThemeColorDark</item>
-        <item name="android:textColorPrimary">@color/text_color_primary</item>
-        <item name="android:textColor">@color/text_color_primary</item>
-        <item name="android:windowBackground">@color/ThemeBackground</item>
-        <item name="android:textColorLink">@color/text_color_secondary</item>
-        <item name="android:colorAccent">@color/ThemeColorLight</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="android:colorPrimary">@color/primary_material_dark</item>
+        <item name="android:colorAccent">@color/accent_material_light</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/background_material_light</item>
+        <item name="android:textColorPrimary">@color/primary_text</item>
+        <item name="android:textColorSecondary">@color/secondary_text</item>
+        <item name="android:textColorLink">@color/accent_material_light</item>
     </style>
-
+    
     <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
@@ -31,52 +21,22 @@
         <!--item name="android:clipToPadding">false</item-->
     </style>
 
-    <style name="AppTheme.NoActionBar.FullScreen" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
-        <!--item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-
-        <item name="android:fitsSystemWindows">false</item-->
-        <!--item name="android:clipToPadding">false</item-->
-    </style>
+    <style name="AppTheme.NoActionBar.FullScreen" parent="android:Theme.Material.Light.NoActionBar.Fullscreen"> </style>
 
     <!-- animated theme. -->
     <style name="AppThemeAni" parent="AppTheme">
         <item name="android:animateLayoutChanges">true</item>
-    </style>
-
-    <style name="ActionBarStyle" parent="android:Widget.Material.Light.ActionBar">
-        <item name="android:background">@color/ThemeColor</item>
+        <item name="android:animation">@android:anim/accelerate_decelerate_interpolator</item>
     </style>
 
     <style name="PagerTabStrip" parent="AppTheme">
         <!-- Note: remember to use color as color & drawable as background -->
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@color/ThemeColor</item>
+        <item name="android:background">@color/primary_material_dark</item>
     </style>
 
-    <style name="NavigationDrawerStyle" parent="android:Widget.Material.Toolbar">
-        <item name="android:background">@color/ThemeBackground</item>
-    </style>
-
-    <style name="ButtonStyle" parent="@android:style/Widget.Material.Button">
-        <item name="android:backgroundTint">@color/ThemeColor</item>
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style name="ProgressBarStyle" parent="@android:style/Widget.Material.Light.ProgressBar.Horizontal"> </style>
-
-    <color name="ThemeColor">#66849f</color>
-    <color name="ThemeColorLight">#ffffff</color>
-    <color name="ThemeColorDark">#4f5b73</color>
-    <color name="ThemeBackground">#7c8e9c</color>
-    <color name="text_color_primary">#2a4254</color>
-    <color name="text_color_secondary">#3f596d</color>
-
-    <!--color name="ThemeColor">#9d544d</color>
-    <color name="ThemeColorLight">#ffffff</color>
-    <color name="ThemeColorDark">#83433a</color>
-    <color name="ThemeBackground">#cb876e</color>
-    <color name="text_color_primary">#4c2523</color>
-    <color name="text_color_secondary">#8b6663</color-->
+    <color name="ThemeBackground">@color/background_material_light</color>
+    <color name="text_color_primary">@color/primary_text</color>
+    <color name="text_color_secondary">@color/secondary_text</color>
 
 </resources>

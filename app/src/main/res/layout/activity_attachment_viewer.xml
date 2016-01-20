@@ -6,12 +6,12 @@
 
     <ProgressBar
         android:id="@+id/loading"
-        style="@style/ProgressBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:scaleY="0.5"
-        android:translationY="-6dp" />
+        android:translationY="-6dp"
+        style="@android:style/Widget.Material.Light.ProgressBar.Horizontal" />
 
     <com.nyasama.util.PhotoViewPager
         android:id="@+id/view_pager"

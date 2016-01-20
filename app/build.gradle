@@ -4,11 +4,11 @@ android {
     compileSdkVersion 21
     buildToolsVersion '21.1.2'
     defaultConfig {
-        applicationId 'com.nyasama'
+        applicationId 'com.nyasama.nyasec'
         minSdkVersion 21
         targetSdkVersion 21
         versionCode 1
-        versionName 'nightly-api-21-151202'
+        versionName 'nightly-api-21-nyasec-160119'
     }
     buildTypes {
         release {

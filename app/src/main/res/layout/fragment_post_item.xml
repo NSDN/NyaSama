@@ -74,7 +74,6 @@
 
         <Button
             android:id="@+id/attachment_list"
-            style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/comment_list"
@@ -85,7 +84,6 @@
 
         <Button
             android:id="@+id/votes"
-            style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -96,7 +94,6 @@
 
         <Button
             android:id="@+id/pay"
-            style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"

@@ -65,8 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="doSignin"
-                android:text="@string/signin_button_text"
-                style="@style/ButtonStyle" />
+                android:text="@string/signin_button_text" />
         </RelativeLayout>
 
         <LinearLayout
@@ -340,7 +339,7 @@
                 <TextView
                     android:id="@+id/my_sec"
                     android:text="@string/auth_button_text"
-                    android:background="@android:color/white"
+                    android:background="@color/ThemeColorLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doAuth"
@@ -358,8 +357,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/logout_button_text"
-                android:onClick="doLogout"
-                style="@style/ButtonStyle" />
+                android:onClick="doLogout" />
 
         </LinearLayout>
 

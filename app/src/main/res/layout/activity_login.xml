@@ -77,8 +77,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_gravity="center_horizontal"
-            style="@style/ButtonStyle" />
+            android:layout_gravity="center_horizontal" />
 
     </LinearLayout>
 

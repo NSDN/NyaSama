@@ -100,7 +100,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    style="@style/NavigationDrawerStyle">
+    android:background="@color/background_material">
 
     <RelativeLayout
         android:onClick="gotoProfile"
@@ -151,8 +151,7 @@
             android:text="@string/drawer_button_login"
             android:onClick="gotoLogin"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/ButtonStyle" />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
@@ -163,7 +162,8 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:id="@+id/drawer_list"
-        tools:context=".NavigationDrawerFragment" />
+        tools:context=".NavigationDrawerFragment"
+        />
 
     <ImageView
         android:layout_width="match_parent"
