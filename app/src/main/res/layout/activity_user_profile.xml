@@ -17,7 +17,7 @@
             android:layout_height="@dimen/ActivityPaddingTop" /-->
 
         <RelativeLayout
-            android:background="@color/ThemeColorLight"
+            android:background="@color/colorPrimaryLight"
             android:paddingLeft="6dp"
             android:paddingRight="6dp"
             android:layout_width="match_parent"
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content">
 
             <FrameLayout
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:paddingLeft="6dp"
                 android:paddingRight="6dp"
                 android:layout_width="match_parent"
@@ -138,7 +138,7 @@
 
             <TextView
                 android:id="@+id/user_gender"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -147,7 +147,7 @@
 
             <TextView
                 android:id="@+id/user_reside"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -156,7 +156,7 @@
 
             <TextView
                 android:id="@+id/user_likes"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -165,7 +165,7 @@
 
             <TextView
                 android:id="@+id/user_site"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -176,7 +176,7 @@
 
             <TextView
                 android:id="@+id/last_activity"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -185,7 +185,7 @@
 
             <TextView
                 android:id="@+id/last_post"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -194,7 +194,7 @@
 
             <TextView
                 android:id="@+id/last_visit"
-                android:background="@color/ThemeColorLight"
+                android:background="@color/colorPrimaryLight"
                 android:padding="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -217,7 +217,7 @@
 
                 <TextView
                     android:text="@string/mythread_button_text"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doShowThreads"
@@ -235,7 +235,7 @@
 
                 <TextView
                     android:text="@string/send_message_button"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doSendMessage"
@@ -260,7 +260,7 @@
                 <TextView
                     android:id="@+id/my_threads"
                     android:text="@string/mythread_button_text"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doShowThreads"
@@ -278,7 +278,7 @@
 
                 <TextView
                     android:text="@string/show_favs_button"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doShowFavs"
@@ -299,7 +299,7 @@
                 <TextView
                     android:id="@+id/my_messages"
                     android:text="@string/my_message_button"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doShowMessages"
@@ -318,7 +318,7 @@
                 <TextView
                     android:id="@+id/my_notice"
                     android:text="@string/my_notice_button"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doShowNotice"
@@ -339,7 +339,7 @@
                 <TextView
                     android:id="@+id/my_sec"
                     android:text="@string/auth_button_text"
-                    android:background="@color/ThemeColorLight"
+                    android:background="@color/colorPrimaryLight"
                     android:padding="12dp"
                     android:clickable="true"
                     android:onClick="doAuth"
