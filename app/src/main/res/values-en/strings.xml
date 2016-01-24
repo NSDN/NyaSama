@@ -168,6 +168,11 @@
     <string name="update_naysec_key_success">更新密钥成功</string>
     <string name="action_clear_key">清除密钥</string>
     <string name="toast_key_cleared">已清除保存在设备上的密钥</string>
+    <string name="nyasec_invalid_phone_number">The phone number you input seems invalid</string>
+    <string name="nyasec_retry_later">Please retry later</string>
+    <string name="nyasec_send_sms_failed">Send SMS failed</string>
+    <string name="nyasec_invalid_download_link">The request code is invalid</string>
+    <string name="clear_key_confirm">Are you sure to clear stored key on this device?</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
