@@ -19,4 +19,20 @@
         android:text="..."
         android:id="@+id/menu"
         android:layout_gravity="right|top" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:id="@+id/nyasec_count"
+        android:layout_gravity="left|top" />
+
+    <TextView
+        android:id="@+id/nyasec_game"
+        android:visibility="invisible"
+        android:textSize="32sp"
+        android:textColor="#ff8b8b8b"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="o" />
 </FrameLayout>
