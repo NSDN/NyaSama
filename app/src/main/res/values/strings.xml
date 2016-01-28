@@ -173,6 +173,11 @@
     <string name="update_naysec_key_success">更新密钥成功</string>
     <string name="action_clear_key">清除密钥</string>
     <string name="toast_key_cleared">已清除保存在设备上的密钥</string>
+    <string name="nyasec_invalid_phone_number">输入的手机号码格式有误(；¬д¬) </string>
+    <string name="nyasec_retry_later">访问太频繁，请稍后再试</string>
+    <string name="nyasec_send_sms_failed">发送短消息失败</string>
+    <string name="nyasec_invalid_download_link">输入的验证码不正确</string>
+    <string name="clear_key_confirm">你真的要清除保存在本设备上的密钥嘛？</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>
