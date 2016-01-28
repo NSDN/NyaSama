@@ -27,7 +27,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class SplashActivity extends Activity {
 
-    public static final String releaseUrl = "http://dev.nyasama.com/release";
+    public static final String releaseUrl = "http://dev.nyasama.com/beta-21";
 
     public static class UTF8StringRequest extends StringRequest {
 
@@ -119,7 +119,7 @@ public class SplashActivity extends Activity {
                 checkInitJobs();
             }
         });
-        else ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/version_and_feature.txt", new Response.Listener<String>() {
+        else ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/update.apk", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 if (s != null) {
