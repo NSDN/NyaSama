@@ -842,8 +842,14 @@ public class PostListActivity extends BaseThemedActivity
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    static CallbackMatcher msgAttachmentMatcher = new CallbackMatcher("\\[attach\\](\\d+?)\\[/attach\\]",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
     static String compileMessage(String message, final Map<String, Attachment> attachments, final String size) {
+        final SparseArray<String> idToSourceMap = new SparseArray<String>();
+        for (Map.Entry<String, Attachment> entry : attachments.entrySet())
+            idToSourceMap.put(entry.getValue().id, entry.getKey());
+
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -859,6 +865,25 @@ public class PostListActivity extends BaseThemedActivity
                 }
                 Log.w(PostListActivity.class.toString(),
                         "attachment image not found (" + matchResult.group(1) + ")");
+                return "";
+            }
+        });
+
+        message = msgAttachmentMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
+            @Override
+            public String foundMatch(MatchResult matchResult) {
+                int attachmentId = Helper.toSafeInteger(matchResult.group(1), 0);
+                if (attachmentId > 0) {
+                    String src = idToSourceMap.get(attachmentId);
+                    Attachment attachment = attachments.get(src);
+                    if (attachment != null) {
+                        String url = Discuz.getAttachmentThumb(attachment.id, size);
+                        attachments.put(url, attachment);
+                        return "<img src=\"" + url + "\" />";
+                    }
+                }
+                Log.w(PostListActivity.class.toString(),
+                        "attachment not found (#" + attachmentId + ")");
                 return "";
             }
         });

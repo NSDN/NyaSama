@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +44,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,24 +122,38 @@ public class AttachmentViewer extends BaseThemedActivity {
         });
     }
 
+    static Pattern msgAttachPattern = Pattern.compile("\\[attach\\](\\d+?)\\[/attach\\]");
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
     static List<Attachment> compileAttachments(String message, final List<Attachment> attachments) {
         List<Attachment> list = new ArrayList<Attachment>();
         Matcher matcher;
 
-        Map<String, Attachment> map = new HashMap<String, Attachment>();
-        for (Attachment attachment : attachments)
-            map.put(attachment.src, attachment);
+        Map<String, Attachment> sourceMap = new HashMap<String, Attachment>();
+        SparseArray<String> idToSourceMap = new SparseArray<String>();
+        for (Attachment attachment : attachments) {
+            sourceMap.put(attachment.src, attachment);
+            idToSourceMap.put(attachment.id, attachment.src);
+        }
 
         message = message.replaceAll(" src=\"(.*?)\"", " file=\"$1\"");
+
+        matcher = msgAttachPattern.matcher(message);
+        while (matcher.find()) {
+            int attachmentId = Helper.toSafeInteger(matcher.group(1), 0);
+            String src = attachmentId > 0 ? idToSourceMap.get(attachmentId) : null;
+            if (src != null && sourceMap.containsKey(src)) {
+                list.add(sourceMap.get(src));
+                sourceMap.remove(src);
+            }
+        }
 
         matcher = msgPathPattern.matcher(message);
         while (matcher.find()) {
             String src = matcher.group(1);
             // attachment image
-            if (map.containsKey(src)) {
-                list.add(map.get(src));
-                map.remove(src);
+            if (sourceMap.containsKey(src)) {
+                list.add(sourceMap.get(src));
+                sourceMap.remove(src);
             }
             // external images
             else if (!Discuz.getSafeUrl(src).startsWith(Discuz.DISCUZ_HOST)) {
@@ -148,7 +162,7 @@ public class AttachmentViewer extends BaseThemedActivity {
         }
 
         // add the rest attachments
-        for (Map.Entry<String, Attachment> entry : map.entrySet())
+        for (Map.Entry<String, Attachment> entry : sourceMap.entrySet())
             list.add(entry.getValue());
 
         return list;
