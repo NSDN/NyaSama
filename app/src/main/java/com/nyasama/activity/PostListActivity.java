@@ -890,6 +890,7 @@ public class PostListActivity extends BaseThemedActivity
 
         message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
         message = message.replaceAll("<script[^>]*>(.*?)</script>", "");
+        message = message.replaceAll("\\[media\\](.*?)\\[\\/media\\]", "");
 
         return message;
     }
