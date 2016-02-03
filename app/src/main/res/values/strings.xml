@@ -160,6 +160,9 @@
     <string name="text_view_pay">[购买主题]</string>
     <string name="buy_thread">购买帖子</string>
     <string name="thread_price_info">此帖子价格为 %d，确认购买吗？</string>
+    <string name="diag_loading_seccodes">正在载入验证码...</string>
+    <string name="diag_ask_input_seccode">请输入验证码</string>
+    <string name="diag_ask_which">下面哪一只是</string>
     <string-array name="thumb_size">
         <item>较小</item>
         <item>中等</item>

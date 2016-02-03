@@ -54,6 +54,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <TextView
+        android:id="@+id/secnote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <GridView
+        android:id="@+id/secimgs"
+        android:choiceMode="singleChoice"
+        android:listSelector="@android:color/darker_gray"
+        android:numColumns="3"
+        android:verticalSpacing="5dp"
+        android:horizontalSpacing="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

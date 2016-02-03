@@ -84,8 +84,8 @@ import java.util.regex.Pattern;
  * JSON数据包的分析是由OFZ完成的
  */
 public class Discuz {
-    public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
-    public static final String DISCUZ_URL = DISCUZ_HOST + "/";
+    public static final String DISCUZ_HOST = "http://v.ofr.me";
+    public static final String DISCUZ_URL = DISCUZ_HOST + "/dz3/";
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
 
@@ -706,6 +706,8 @@ module决定调用哪种操作
         } else if (module.equals("buythread")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "paysubmit", "yes");
+        } else if (module.equals("plugin")) {
+            Helper.putIfNull(params, "version", 4);
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
@@ -1099,6 +1101,7 @@ module决定调用哪种操作
 //login函数是基于execute 定义的，因为body不为空，所以是POST方法
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
+                             final String sechash, final String seccode,
                              final Response.Listener<JSONObject> callback) {
         execute("login", new HashMap<String, Object>() {{
             put("loginsubmit", "yes");
@@ -1110,6 +1113,10 @@ module决定调用哪种操作
             if (questionId > 0) {
                 put("questionid", questionId);
                 put("answer", answer);
+            }
+            if (sechash != null) {
+                put("seccodehash", sechash);
+                put("seccodeverify", seccode);
             }
         }}, callback);
     }
