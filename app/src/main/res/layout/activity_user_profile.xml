@@ -328,6 +328,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="20dp" />
 
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/my_sec"
+                    android:text="@string/auth_button_text"
+                    android:background="@android:color/white"
+                    android:padding="12dp"
+                    android:clickable="true"
+                    android:onClick="doAuth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <include layout="@layout/include_indicator_right" />
+            </FrameLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

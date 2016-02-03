@@ -155,6 +155,21 @@
     <string name="diag_loading_seccodes">loading seccodes</string>
     <string name="diag_ask_input_seccode">please input the seccode</string>
     <string name="diag_ask_which">"which one is "</string>
+    <string name="auth_button_text">登陆口令</string>
+    <string name="diag_request_key">申请口令密钥</string>
+    <string name="diag_input_phone_number">输入接收的手机号码</string>
+    <string name="action_request_key">申请密钥</string>
+    <string name="action_update_key">更新密钥</string>
+    <string name="diag_update_key">更新密钥</string>
+    <string name="diag_input_downloadcode">请输入接收到的短信验证码</string>
+    <string name="update_naysec_key_success">更新密钥成功</string>
+    <string name="action_clear_key">清除密钥</string>
+    <string name="toast_key_cleared">已清除保存在设备上的密钥</string>
+    <string name="nyasec_invalid_phone_number">The phone number you input seems invalid</string>
+    <string name="nyasec_retry_later">Please retry later</string>
+    <string name="nyasec_send_sms_failed">Send SMS failed</string>
+    <string name="nyasec_invalid_download_link">The request code is invalid</string>
+    <string name="clear_key_confirm">Are you sure to clear stored key on this device?</string>
     <string-array name="thumb_size">
         <item>小さい</item>
         <item>中等</item>

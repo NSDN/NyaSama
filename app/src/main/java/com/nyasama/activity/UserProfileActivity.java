@@ -31,6 +31,11 @@ public class UserProfileActivity extends BaseThemedActivity {
         });
     }
 
+    public void doAuth(View view) {
+        Intent intent = new Intent(this, NyaSecActivity.class);
+        startActivity(intent);
+    }
+
     public void doSignin(View view) {
         findViewById(R.id.signin_button).setEnabled(false);
         Discuz.signin(new Response.Listener<String>() {
