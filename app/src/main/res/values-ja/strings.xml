@@ -245,4 +245,6 @@
     <string name="toast_draft_saved">TRANS:草稿已保存</string>
     <string name="toast_open_file_failed">TRANS:读取文件失败</string>
     <string name="thread_price_info">TRANS:此帖子价格为 %d，确认购买吗？</string>
+    <string name="new_prompts">TRANS:新提醒</string>
+    <string name="click_to_view_prompts">TRANS:点击查看 %d 条消息</string>
 </resources>
