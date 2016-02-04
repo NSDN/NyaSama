@@ -176,6 +176,8 @@
     <string name="nyasec_send_sms_failed">Send SMS failed</string>
     <string name="nyasec_invalid_download_link">The request code is invalid</string>
     <string name="clear_key_confirm">Are you sure to clear stored key on this device?</string>
+    <string name="click_to_view_prompts">Click to view %d prompts</string>
+    <string name="new_prompts">新提醒</string>
     <string-array name="thumb_size">
         <item>Small thumbs</item>
         <item>Large thumbs</item>
