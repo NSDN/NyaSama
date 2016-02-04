@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:padding="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/img"
+        android:scaleType="centerCrop"
+        android:layout_gravity="center"
+        android:layout_width="72dp"
+        android:layout_height="72dp" />
+</FrameLayout>

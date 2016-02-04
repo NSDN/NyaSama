@@ -22,6 +22,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.R;
@@ -706,6 +707,8 @@ module决定调用哪种操作
         } else if (module.equals("buythread")) {
             Helper.putIfNull(body, "formhash", sFormHash);
             Helper.putIfNull(body, "paysubmit", "yes");
+        } else if (module.equals("plugin")) {
+            Helper.putIfNull(params, "version", 4);
         }
         params.put("module", module);
         Helper.putIfNull(params, "submodule", "checkpost");
@@ -1099,6 +1102,7 @@ module决定调用哪种操作
 //login函数是基于execute 定义的，因为body不为空，所以是POST方法
     public static void login(final String username, final String password,
                              final int questionId, final String answer,
+                             final String sechash, final String seccode,
                              final Response.Listener<JSONObject> callback) {
         execute("login", new HashMap<String, Object>() {{
             put("loginsubmit", "yes");
@@ -1110,6 +1114,10 @@ module决定调用哪种操作
             if (questionId > 0) {
                 put("questionid", questionId);
                 put("answer", answer);
+            }
+            if (sechash != null) {
+                put("seccodehash", sechash);
+                put("seccodeverify", seccode);
             }
         }}, callback);
     }
@@ -1130,9 +1138,9 @@ module决定调用哪种操作
 
 //signin 并没有调用execute，而是自己创建了一个request 加入requestqueuue
 //返回的String 看起来是HTML代码，于是用正则匹配"<p>(.*?)</p>" 来找到是否申请成功
-    static Pattern signinMessagePattern = Pattern.compile("<p>(.*?)</p>");
+    static Pattern signinMessagePattern = Pattern.compile("showDialog\\('(.*?)'");
     public static void signin(final Response.Listener<String> callback) {
-        String url = DISCUZ_URL + "plugin.php?id=dsu_amupper:pper&ppersubmit=true&formhash=" + sFormHash + "&mobile=yes";
+        String url = DISCUZ_URL + "plugin.php?id=dsu_amupper&ppersubmit=true&formhash="+sFormHash+"&infloat=yes&handlekey=dsu_amupper&inajax=1&ajaxtarget=fwin_content_dsu_amupper";
         Request request = new StringRequest(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
@@ -1146,6 +1154,34 @@ module决定调用哪种操作
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 callback.onResponse(volleyError.getMessage());
+            }
+        });
+        ThisApp.requestQueue.add(request);
+    }
+
+    public static void pluginapi(Map<String, Object> params, final Response.Listener<JSONObject> callback) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            for (Map.Entry<String, Object> e : params.entrySet()) {
+                builder.append(URLEncoder.encode(e.getKey(), DISCUZ_ENC));
+                builder.append('=');
+                builder.append(URLEncoder.encode(e.getValue() + "", DISCUZ_ENC));
+                builder.append('&');
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        String url = DISCUZ_URL + "plugin.php?" + builder.toString();
+        Request request = new JsonObjectRequest(url, new JSONObject(), new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                callback.onResponse(jsonObject);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                callback.onResponse(new JSONVolleyError(volleyError.getMessage()));
             }
         });
         ThisApp.requestQueue.add(request);
