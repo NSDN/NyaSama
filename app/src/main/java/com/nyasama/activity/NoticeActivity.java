@@ -1,15 +1,12 @@
 package com.nyasama.activity;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
+import android.support.v4.app.Fragment;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spannable;
-import android.text.method.LinkMovementMethod;
-import android.text.style.URLSpan;
-import android.util.Log;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,37 +14,68 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
+import com.nyasama.fragment.DiscuzNoticeListFragment;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.Discuz;
-import com.nyasama.util.Discuz.Notice;
 import com.nyasama.util.Helper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-public class NoticeActivity extends BaseThemedActivity
-    implements CommonListFragment.OnListFragmentInteraction<Notice> {
+public class NoticeActivity extends BaseThemedActivity {
 
-    public static String TAG = "Notice";
+    static class NoticeItem {
+        int viewIndex;
+        int typeIndex;
+        String title1;
+        String title2;
+    }
 
-    private CommonListFragment<Notice> mListFragment;
-    private boolean mShowRead = false;
+    final static String[] NOTICE_VIEWS = {
+        "mypost",
+        "interactive",
+        "system",
+        "manage",
+        "app"
+    };
+    final static String[][] NOTICE_TYPES = {
+        {"post", "pcomment", "activity", "reward", "goods", "at"},
+        {"poke", "friend", "wall", "comment", "click", "sharenotice"},
+        {"system"},
+        {"manage"},
+        {"app"},
+    };
+
+    // TODO: load strings from resource
+    static String[] sViewNames = {
+            "我的帖子",
+            "坛友互动",
+            "系统提醒",
+            "管理工作",
+            "应用提醒",
+    };
+    static String[][] sTypeNames = {
+            {"帖子", "点评", "活动", "悬赏", "商品", "提到我的"},
+            {"打招呼", "好友", "留言", "评论", "挺你", "分享"},
+            {"系统提醒"},
+            {"管理工作"},
+            {"应用提醒"},
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_framelayout);
 
-        ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getActionBar();
         if (actionBar == null)
             return;
 
@@ -55,12 +83,13 @@ public class NoticeActivity extends BaseThemedActivity
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-        String spinnerText[] = {
-                getString(R.string.title_notice_unread),
-                getString(R.string.title_notice_read),
-        };
-        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
-                R.layout.fragment_spinner_item_2, android.R.id.text1, spinnerText) {
+        List<String> spinnerTexts = new ArrayList<String>(){{
+            add(getString(R.string.new_prompts));
+            for (String name : sViewNames)
+                add(name);
+        }};
+        final ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                R.layout.fragment_spinner_item_2, android.R.id.text1, spinnerTexts) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -69,156 +98,137 @@ public class NoticeActivity extends BaseThemedActivity
             }
         };
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         actionBar.setListNavigationCallbacks(spinnerAdapter, new ActionBar.OnNavigationListener() {
             @Override
-            public boolean onNavigationItemSelected(int i, long l) {
-                mShowRead = i != 0;
-
-                mListFragment = CommonListFragment.getNewFragment(
-                        Notice.class,
-                        R.layout.fragment_simple_list,
-                        R.layout.fragment_notice_item,
-                        R.id.list);
+            public boolean onNavigationItemSelected(final int i, long l) {
+                Fragment fragment;
+                if (i == 0)
+                    fragment = new NewNoticeListFragment();
+                else if (NOTICE_TYPES[i - 1].length <= 1)
+                    fragment = DiscuzNoticeListFragment.getNewFragment(NOTICE_VIEWS[i - 1], "");
+                else
+                    fragment = ViewPagerFragment.getNewFragment(i - 1);
 
                 getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, mListFragment)
+                    .replace(R.id.container, fragment)
                     .commit();
+
                 return true;
             }
         });
+
+        int viewIndex = getIntent().getIntExtra("viewIndex", -1);
+        if (viewIndex >= 0) {
+            actionBar.setSelectedNavigationItem(viewIndex + 1);
+            getIntent().removeExtra("viewIndex");
+        }
     }
 
+    public static class NewNoticeListFragment extends CommonListFragment<NoticeItem>
+            implements CommonListFragment.OnListFragmentInteraction<NoticeItem> {
+        @Override
+        public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
+            return new CommonListAdapter<NoticeItem>() {
+                @Override
+                public View createView(ViewGroup parent, int position) {
+                    return LayoutInflater.from(parent.getContext())
+                            .inflate(android.R.layout.simple_list_item_2, parent, false);
+                }
+                @Override
+                public void convertView(ViewHolder viewHolder, NoticeItem item) {
+                    ((TextView) viewHolder.getView(android.R.id.text1)).setText(item.title1);
+                    ((TextView) viewHolder.getView(android.R.id.text2)).setText(item.title2);
+                }
+            };
+        }
+        @Override
+        public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
+            NoticeItem item = (NoticeItem) fragment.getData(position);
+            Intent intent = getActivity().getIntent();
+            intent.putExtra("viewIndex", item.viewIndex);
+            intent.putExtra("typeIndex", item.typeIndex);
+            startActivity(intent);
+        }
+        @Override
+        public void onLoadingMore(final CommonListFragment fragment, final List data) {
+            Discuz.execute("profile", new HashMap<String, Object>(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    if (response.has(Discuz.VOLLEY_ERROR)) {
+                        Helper.toast(R.string.network_error_toast);
+                    }
+                    else {
+                        JSONObject var = response.optJSONObject("Variables");
+                        JSONObject notifyViewNumbers = var != null ? var.optJSONObject("notice_number") : null;
+                        final JSONObject notifyTypeNumbers = var != null ? var.optJSONObject("prompt_number") : null;
+                        if (notifyViewNumbers != null) for (int i = 0; i < NOTICE_VIEWS.length; i ++) {
+                            if (notifyTypeNumbers != null && notifyViewNumbers.has(NOTICE_VIEWS[i])) for (int j = 0; j < NOTICE_TYPES[i].length; j ++) {
+                                final int finalI = i;
+                                final int finalJ = j;
+                                if (notifyTypeNumbers.has(NOTICE_TYPES[i][j])) data.add(new NoticeItem(){{
+                                    viewIndex = finalI;
+                                    typeIndex = finalJ;
+                                    int number = notifyTypeNumbers.optInt(NOTICE_TYPES[finalI][finalJ]);
+                                    title1 = sTypeNames[viewIndex][typeIndex];
+                                    title2 = String.format(getString(R.string.click_to_view_prompts), number);
+                                }});
+                            }
+                        }
+                    }
+                    fragment.loadMoreDone(data.size());
+                }
+            });
+        }
+    }
+
+    public static class ViewPagerFragment extends Fragment {
+        static ViewPagerFragment getNewFragment(int index) {
+            ViewPagerFragment fragment = new ViewPagerFragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt("viewIndex", index);
+            fragment.setArguments(bundle);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            final int index = getArguments().getInt("viewIndex");
+            final String viewId = NOTICE_VIEWS[index];
+            final String[] typeIds = NOTICE_TYPES[index];
+            final String[] typeNames = sTypeNames[index];
+            View rootView = inflater.inflate(R.layout.fragment_main_home, container, false);
+            ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
+            viewPager.setAdapter(new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
+                @Override
+                public Fragment getItem(int position) {
+                    return DiscuzNoticeListFragment.getNewFragment(viewId, typeIds[position]);
+                }
+                @Override
+                public int getCount() {
+                    return typeIds.length;
+                }
+                @Override
+                public CharSequence getPageTitle(int position) {
+                    return typeNames[position];
+                }
+            });
+
+            Intent intent = getActivity().getIntent();
+            int typeIndex = intent.getIntExtra("typeIndex", -1);
+            if (typeIndex > 0) {
+                viewPager.setCurrentItem(typeIndex, false);
+                intent.removeExtra("typeIndex");
+            }
+
+            return rootView;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_notice, menu);
         return true;
-    }
-
-    @Override
-    public CommonListAdapter getListViewAdaptor(CommonListFragment fragment) {
-        return new CommonListAdapter<Notice>() {
-            @Override
-            public void convertView(ViewHolder viewHolder, Notice item) {
-                viewHolder.setText(R.id.date, item.dateline);
-                Spannable note = (Spannable) Html.fromHtml(item.note);
-                note = (Spannable) Helper.setSpanClickListener(note, URLSpan.class, new Helper.OnSpanClickListener() {
-                    @Override
-                    public boolean onClick(View widget, String data) {
-                        final Uri uri = Uri.parse(data);
-                        String mod = uri.getQueryParameter("mod");
-                        // TODO: complete these actions
-                        if ("space".equals(mod)) {
-                            startActivity(new Intent(NoticeActivity.this, UserProfileActivity.class) {{
-                                putExtra("uid", Helper.toSafeInteger(uri.getQueryParameter("uid"), 0));
-                            }});
-                            return true;
-                        }
-                        else if ("viewthread".equals(mod)) {
-                            startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
-                                putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("tid"), 0));
-                            }});
-                            return true;
-                        }
-                        else if ("redirect".equals(mod)) {
-                            String go = uri.getQueryParameter("goto");
-                            if (go.equals("findpost")) {
-                                startActivity(new Intent(NoticeActivity.this, PostListActivity.class) {{
-                                    putExtra("tid", Helper.toSafeInteger(uri.getQueryParameter("ptid"), 0));
-                                }});
-                                return true;
-                            }
-                        }
-                        else if ("spacecp".equals(mod) &&
-                                "friend".equals(uri.getQueryParameter("ac")) &&
-                                "add".equals(uri.getQueryParameter("op"))) {
-                            final AlertDialog dialog = new AccentAlertDialog.Builder(NoticeActivity.this)
-                                    .setMessage(R.string.list_loading_text)
-                                    .show();
-                            final int uid = Helper.toSafeInteger(uri.getQueryParameter("uid"), 0);
-                            Discuz.execute("friendcp", new HashMap<String, Object>() {{
-                                put("op", "add");
-                                put("uid", uid);
-                            }}, new HashMap<String, Object>() {{
-                                // gid = 1 means "friends known from this forum"
-                                // TODO: make this changable
-                                put("gid", 1);
-                            }}, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject data) {
-                                    if (data.has("Message")) {
-                                        JSONObject message = data.optJSONObject("Message");
-                                        Helper.toast(message.optString("messagestr"));
-                                    }
-                                    else {
-                                        Helper.toast(R.string.there_is_something_wrong);
-                                    }
-                                    dialog.dismiss();
-                                }
-                            });
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-
-                TextView noteText = (TextView) viewHolder.getView(R.id.note);
-                noteText.setMovementMethod(LinkMovementMethod.getInstance());
-                noteText.setText(note);
-            }
-        };
-    }
-
-    @Override
-    public void onItemClick(CommonListFragment fragment, View view, int position, long id) {
-        // do nothing
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void onLoadingMore(CommonListFragment fragment, final List listData) {
-        Discuz.execute("profile", new HashMap<String, Object>() {{
-            put("do", "notice");
-            if (mShowRead)
-                put("isread", 1);
-        }}, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject data) {
-                int total = -1;
-                if (data.has(Discuz.VOLLEY_ERROR)) {
-                    Helper.toast(R.string.network_error_toast);
-                }
-                else {
-                    try {
-                        JSONObject var = data.getJSONObject("Variables");
-
-                        if (var.opt("list") instanceof JSONObject) {
-                            JSONObject list = var.getJSONObject("list");
-                            for (Iterator<String> iter = list.keys(); iter.hasNext(); ) {
-                                String key = iter.next();
-                                Notice notice = new Notice(list.getJSONObject(key));
-                                listData.add(notice);
-                            }
-                            // sort by id
-                            Collections.sort(listData, new Comparator() {
-                                @Override
-                                public int compare(Object o, Object o2) {
-                                    return ((Notice) o).id - ((Notice) o2).id;
-                                }
-                            });
-                        }
-
-                        // No pager
-                        total = listData.size();
-
-                    } catch (JSONException e) {
-                        Log.e(TAG, "JsonError: Load PM Lists Failed (" + e.getMessage() + ")");
-                        Helper.toast(R.string.load_failed_toast);
-                    }
-                }
-                mListFragment.loadMoreDone(total);
-            }
-        });
     }
 }
