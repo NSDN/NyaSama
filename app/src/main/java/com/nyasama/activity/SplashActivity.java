@@ -27,7 +27,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class SplashActivity extends Activity {
 
-    public static final String releaseUrl = "http://dev.nyasama.com/beta-21";
+    public static final String releaseUrl = "http://dev.nyasama.com/beta";
 
     public static class UTF8StringRequest extends StringRequest {
 

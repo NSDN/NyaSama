@@ -85,7 +85,7 @@ import java.util.regex.Pattern;
  * JSON数据包的分析是由OFZ完成的
  */
 public class Discuz {
-    public static final String DISCUZ_HOST = "https://bbs.nyasama.com";
+    public static final String DISCUZ_HOST = "http://bbs.nyasama.com";
     public static final String DISCUZ_URL = DISCUZ_HOST + "/";
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
@@ -721,7 +721,7 @@ module决定调用哪种操作
                 //把body中的参数转入一个新的params map中，返回
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
-                            new StringBody(entry.getValue().toString(), Charset.forName(DISCUZ_ENC)));
+                            new StringBody(entry.getValue().toString(), Charset.forName("utf-8")));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -786,7 +786,7 @@ module决定调用哪种操作
                 @Override
                 protected String getParamsEncoding() {
                     //返回参数的编码方式
-                    return DISCUZ_ENC;
+                    return "utf-8";
                 }
             };
             // tell volley NOT TO RETRY POST request (solve #60)
