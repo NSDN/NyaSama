@@ -163,6 +163,9 @@
     <string name="text_view_pay">[购买主题]</string>
     <string name="buy_thread">购买帖子</string>
     <string name="thread_price_info">此帖子价格为 %d，确认购买吗？</string>
+    <string name="diag_loading_seccodes">正在载入验证码...</string>
+    <string name="diag_ask_input_seccode">请输入验证码</string>
+    <string name="diag_ask_which">下面哪一只是</string>
     <string name="auth_button_text">登陆口令</string>
     <string name="diag_request_key">申请口令密钥</string>
     <string name="diag_input_phone_number">输入接收的手机号码</string>

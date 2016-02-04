@@ -81,7 +81,7 @@ public class PostListActivity extends BaseThemedActivity
     public static final int REQUEST_CODE_REPLY_THREAD = 2;
 
     private static final int PAGE_SIZE_COUNT = 10;
-    private static final int COMMENT_PAGE_SIZE = 10;
+    private static final int COMMENT_PAGE_SIZE = 5;
     private static final int MAX_TRIMSTR_LENGTH = 30;
 
     private boolean isPaused = false;
@@ -515,7 +515,7 @@ public class PostListActivity extends BaseThemedActivity
 
         // set count to negative
         mCommentCount.put(pid, -1);
-        doLoadComment(pid, (int) Math.floor(comments.size() / 10));
+        doLoadComment(pid, (int) Math.floor(comments.size() / COMMENT_PAGE_SIZE));
     }
 
     public void gotoReply(final Post item) {
@@ -842,8 +842,14 @@ public class PostListActivity extends BaseThemedActivity
     static Pattern msgPathPattern = Pattern.compile("<img[^>]* file=\"(.*?)\"");
     static CallbackMatcher msgMatcher = new CallbackMatcher("<ignore_js_op>(.*?)</ignore_js_op>",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    static CallbackMatcher msgAttachmentMatcher = new CallbackMatcher("\\[attach\\](\\d+?)\\[/attach\\]",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     // this function compiles the message to display in android TextViews
     static String compileMessage(String message, final Map<String, Attachment> attachments, final String size) {
+        final SparseArray<String> idToSourceMap = new SparseArray<String>();
+        for (Map.Entry<String, Attachment> entry : attachments.entrySet())
+            idToSourceMap.put(entry.getValue().id, entry.getKey());
+
         message = msgMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
             @Override
             public String foundMatch(MatchResult matchResult) {
@@ -863,8 +869,28 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
 
+        message = msgAttachmentMatcher.replaceMatches(message, new CallbackMatcher.Callback() {
+            @Override
+            public String foundMatch(MatchResult matchResult) {
+                int attachmentId = Helper.toSafeInteger(matchResult.group(1), 0);
+                if (attachmentId > 0) {
+                    String src = idToSourceMap.get(attachmentId);
+                    Attachment attachment = attachments.get(src);
+                    if (attachment != null) {
+                        String url = Discuz.getAttachmentThumb(attachment.id, size);
+                        attachments.put(url, attachment);
+                        return "<img src=\"" + url + "\" />";
+                    }
+                }
+                Log.w(PostListActivity.class.toString(),
+                        "attachment not found (#" + attachmentId + ")");
+                return "";
+            }
+        });
+
         message = message.replaceAll(" file=\"(.*?)\"", " src=\"$1\"");
         message = message.replaceAll("<script[^>]*>(.*?)</script>", "");
+        message = message.replaceAll("\\[media\\](.*?)\\[\\/media\\]", "");
 
         return message;
     }
@@ -1316,7 +1342,7 @@ public class PostListActivity extends BaseThemedActivity
                         int replies = Integer.parseInt(thread.has("replies") ?
                                 thread.getString("replies") : thread.getString("allreplies"));
                         // get thread price
-                        mThreadPrice = var.getBoolean("forum_threadpay") ?
+                        mThreadPrice = var.optString("forum_threadpay") != null ?
                                 Helper.toSafeInteger(thread.optString("price"), 0) : 0;
                         // setup action bar only once when loading items
                         if (page == 0)
