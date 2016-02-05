@@ -1138,7 +1138,7 @@ module决定调用哪种操作
 
 //signin 并没有调用execute，而是自己创建了一个request 加入requestqueuue
 //返回的String 看起来是HTML代码，于是用正则匹配"<p>(.*?)</p>" 来找到是否申请成功
-    static Pattern signinMessagePattern = Pattern.compile("showDialog\\('(.*?)'");
+    static Pattern signinMessagePattern = Pattern.compile("errorhandle_dsu_amupper\\('(.*?)'");
     public static void signin(final Response.Listener<String> callback) {
         String url = DISCUZ_URL + "plugin.php?id=dsu_amupper&ppersubmit=true&formhash="+sFormHash+"&infloat=yes&handlekey=dsu_amupper&inajax=1&ajaxtarget=fwin_content_dsu_amupper";
         Request request = new StringRequest(url, new Response.Listener<String>() {
