@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimaryLight">@color/colorBackground</color>
-    <color name="color_navibar">#1c3858</color>
-    <color name="color_statusbar">#143753</color>
-    <color name="colorPrimary">#5c9ac5</color>
-    <color name="colorPrimaryDark">#306284</color>
-    <color name="colorBackground">#acc8e2</color>
-    <color name="colorBackgroundLight">#bdd4e5</color>
+    <color name="color_navibar">#c41411</color>
+    <color name="color_statusbar">#b0120a</color>
+    <color name="colorPrimary">#f44336</color>
+    <color name="colorPrimaryDark">#d32f2f</color>
+    <color name="colorBackground">#f69988</color>
+    <color name="colorBackgroundLight">#f9bdbb</color>
+    <!--color name="colorBackground">#acc8e2</color>
+    <color name="colorBackgroundLight">#bdd4e5</color-->
     <color name="primary_text">#de000000</color>
     <color name="secondary_text">#8A000000</color>
 </resources>
+
+<!--resources>
+<color name="colorPrimaryLight">@color/colorBackground</color>
+<color name="color_navibar">#1c3858</color>
+<color name="color_statusbar">#143753</color>
+<color name="colorPrimary">#5c9ac5</color>
+<color name="colorPrimaryDark">#306284</color>
+<color name="colorBackground">#acc8e2</color>
+<color name="colorBackgroundLight">#bdd4e5</color>
+<color name="primary_text">#de000000</color>
+<color name="secondary_text">#8A000000</color>
+</resources-->
