@@ -69,6 +69,9 @@ public class SettingActivity extends BaseThemedActivity {
                 findPreference(getString(R.string.pref_key_thumb_size))
                         .setEnabled(!"false".equals(sharedPreferences.getString(key, "")));
             }
+            else if (key.equals(getString(R.string.pref_key_encoding))) {
+
+            }
         }
     }
 }

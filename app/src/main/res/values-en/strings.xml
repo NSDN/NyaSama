@@ -247,4 +247,6 @@
     <string name="preference_web_cache">Web Cache Size</string>
     <string name="new_prompts">New Prompts</string>
     <string name="click_to_view_prompts">Click to view %d prompts</string>
+    <string name="preference_encoding">Content encoding</string>
+    <string name="pref_diag_title_select_encoding">Select content encoding</string>
 </resources>

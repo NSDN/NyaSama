@@ -21,6 +21,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.nyasama.activity.SplashActivity;
 import com.nyasama.util.BitmapLruCache;
+import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.PersistenceCookieStore;
 
@@ -117,6 +118,9 @@ public class ThisApp extends Application {
         if (s.equals(context.getString(R.string.pref_key_language))) {
             loadLocale(pref.getString(s, ""));
         }
+        else if (s.equals(context.getString(R.string.pref_key_encoding))) {
+            Discuz.CONTENT_ENC = pref.getString(s,"");
+        }
         else if (s.equals(context.getString(R.string.pref_key_web_cache_size))) {
             volleyCache = new DiskBasedCache(new File(context.getCacheDir(), "NyasamaVolleyCache"),
                     1024 * 1024 * Helper.toSafeInteger(pref.getString(s, ""), 32));
@@ -147,6 +151,7 @@ public class ThisApp extends Application {
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_web_cache_size));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_manga_cache_size));
+        ThisApp.onSharedPreferenceChanged(preferences,getString(R.string.pref_key_encoding));
 
         // REF: http://stackoverflow.com/questions/18786059/change-redirect-policy-of-volley-framework
 //创建 HTML 请求队列

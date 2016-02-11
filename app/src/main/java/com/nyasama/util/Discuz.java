@@ -90,6 +90,8 @@ public class Discuz {
     public static final String DISCUZ_API = DISCUZ_URL + "api/mobile/index.php";
     public static final String DISCUZ_ENC = "gbk";
 
+    public static String CONTENT_ENC = "UTF-8";
+
     public static final int MAX_COMMENT_LENGTH = 200;
 
     public static final String VOLLEY_ERROR = "volleyError";
@@ -721,7 +723,7 @@ module决定调用哪种操作
                 //把body中的参数转入一个新的params map中，返回
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
-                            new StringBody(entry.getValue().toString(), Charset.forName("gbk")));
+                            new StringBody(entry.getValue().toString(), Charset.forName(CONTENT_ENC)));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -786,7 +788,7 @@ module决定调用哪种操作
                 @Override
                 protected String getParamsEncoding() {
                     //返回参数的编码方式
-                    return "gbk";
+                    return CONTENT_ENC;
                 }
             };
             // tell volley NOT TO RETRY POST request (solve #60)
