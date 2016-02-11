@@ -5,6 +5,7 @@
 -->
 <resources>
     <string name="pref_key_language" translatable="false">language</string>
+    <string name="pref_key_encoding" translatable="false">encoding</string>
     <string name="pref_key_theme_color" translatable="false">theme_color</string>
 
     <string-array name="language_preference" translatable="false">
@@ -65,6 +66,11 @@
         <item>18</item>
         <item>20</item>
         <item>22</item>
+    </string-array>
+
+    <string-array name="content_encoding" translatable="false">
+        <item>UTF-8</item>
+        <item>GBK</item>
     </string-array>
 
     <string name="pref_key_version" translatable="false">version_number</string>

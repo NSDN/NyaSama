@@ -11,6 +11,15 @@
             android:summary="%s"
             android:title="@string/preference_language" />
 
+        <com.negusoft.holoaccent.preference.ListPreference
+            android:defaultValue="UTF-8"
+            android:dialogTitle="Content encoding"
+            android:entries="@array/content_encoding"
+            android:entryValues="@array/content_encoding"
+            android:key="@string/pref_key_encoding"
+            android:summary="%s"
+            android:title="Content encoding" />
+
         <com.negusoft.holoaccent.preference.SwitchPreference
             android:defaultValue="false"
             android:key="@string/pref_key_animation"

@@ -721,7 +721,7 @@ module决定调用哪种操作
                 //把body中的参数转入一个新的params map中，返回
                 for (Map.Entry<String, Object> entry : body.entrySet())
                     if (entry.getValue() != null) contentBody.put(entry.getKey(),
-                            new StringBody(entry.getValue().toString(), Charset.forName("utf-8")));
+                            new StringBody(entry.getValue().toString(), Charset.forName("gbk")));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -786,7 +786,7 @@ module决定调用哪种操作
                 @Override
                 protected String getParamsEncoding() {
                     //返回参数的编码方式
-                    return "utf-8";
+                    return "gbk";
                 }
             };
             // tell volley NOT TO RETRY POST request (solve #60)
