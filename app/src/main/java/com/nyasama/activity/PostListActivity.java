@@ -1355,10 +1355,10 @@ public class PostListActivity extends BaseThemedActivity
                             JSONObject comments = var.getJSONObject("comments");
                             for(Iterator<String> iter = comments.keys(); iter.hasNext(); ) {
                                 String key = iter.next();
-                                JSONArray commentListData = comments.getJSONArray(key);
                                 int pid = Integer.parseInt(key);
+                                JSONArray commentListData = comments.optJSONArray(key);
                                 List<Comment> commentList = new ArrayList<Comment>();
-                                for (int i = 0; i < commentListData.length(); i ++) {
+                                for (int i = 0; commentListData != null && i < commentListData.length(); i ++) {
                                     JSONObject commentData = commentListData.getJSONObject(i);
                                     commentList.add(new Comment(commentData));
                                 }
