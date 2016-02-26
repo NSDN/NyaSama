@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">喵玉殿</string>
@@ -248,5 +248,5 @@
     <string name="new_prompts">TRANS:新提醒</string>
     <string name="click_to_view_prompts">TRANS:点击查看 %d 条消息</string>
     <string name="preference_encoding">TRANS:Content encoding</string>
-    <string name="pref_diag_title_encoding">TRANS:Select content encoding</string>
+    <string name="pref_diag_title_select_encoding">TRANS:Select content encoding</string>
 </resources>

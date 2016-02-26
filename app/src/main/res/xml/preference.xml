@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/pref_category_general">
@@ -13,7 +13,7 @@
 
         <com.negusoft.holoaccent.preference.ListPreference
             android:defaultValue="UTF-8"
-            android:dialogTitle="@string/pref_diag_title_encoding"
+            android:dialogTitle="@string/pref_diag_title_select_encoding"
             android:entries="@array/content_encoding"
             android:entryValues="@array/content_encoding"
             android:key="@string/pref_key_encoding"
