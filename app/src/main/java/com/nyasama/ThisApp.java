@@ -149,6 +149,7 @@ public class ThisApp extends Application {
         // load preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_language));
+        ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_encoding));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_web_cache_size));
         ThisApp.onSharedPreferenceChanged(preferences, getString(R.string.pref_key_manga_cache_size));
         ThisApp.onSharedPreferenceChanged(preferences,getString(R.string.pref_key_encoding));
