@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimaryLight">@color/colorBackground</color>
-    <color name="color_navibar">#0288d1</color>
-    <color name="color_statusbar">#01579b</color>
-    <color name="colorPrimary">#2196f3</color>
-    <color name="colorPrimaryDark">#1976d2</color>
-    <color name="colorBackground">#81d4fa</color>
-    <color name="colorBackgroundLight">#b3e5fc</color>
+    <color name="color_navibar">#304ffe</color>
+    <color name="color_statusbar">#283593</color>
+    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimaryDark">#303f9f</color>
+    <color name="colorBackground">#c5cae9</color>
+    <color name="colorBackgroundLight">#e8eaf6</color>
     <!--color name="colorBackground">#acc8e2</color>
     <color name="colorBackgroundLight">#bdd4e5</color-->
     <color name="primary_text">#de000000</color>
