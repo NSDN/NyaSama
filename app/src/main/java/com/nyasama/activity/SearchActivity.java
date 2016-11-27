@@ -3,13 +3,14 @@ package com.nyasama.activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.view.Menu;
 import android.view.View;
 import android.widget.SearchView;
 
 import com.android.volley.Response;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.fragment.CommonListFragment;
 import com.nyasama.util.CommonListAdapter;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class SearchActivity extends BaseThemedActivity
+public class SearchActivity extends AppCompatActivity
     implements CommonListFragment.OnListFragmentInteraction<Object> {
 
     private static final int PAGE_SIZE_COUNT = 25;
@@ -121,7 +122,7 @@ public class SearchActivity extends BaseThemedActivity
                 if (data.has(Discuz.VOLLEY_ERROR)) {
                     Helper.toast(R.string.there_is_something_wrong);
                 } else if (data.has("Message")) {
-                    new AccentAlertDialog.Builder(SearchActivity.this)
+                    new AlertDialog.Builder(SearchActivity.this)
                             .setTitle(R.string.error_no_internet)
                             .setMessage(data.optJSONObject("Message").optString("messagestr"))
                             .setPositiveButton(android.R.string.ok, null)

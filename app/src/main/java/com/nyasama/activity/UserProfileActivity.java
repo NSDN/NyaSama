@@ -2,6 +2,7 @@ package com.nyasama.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
@@ -20,7 +21,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class UserProfileActivity extends BaseThemedActivity {
+public class UserProfileActivity extends AppCompatActivity {
 
     public void doLogout(View view) {
         Discuz.logout(new Response.Listener<JSONObject>() {

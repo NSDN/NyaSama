@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_forum"
+            android:title="@string/title_section1" />
+        <item
+            android:id="@+id/nav_pref"
+            android:title="@string/title_section4" />
+        <item
+            android:id="@+id/nav_about"
+            android:title="@string/title_section5" />
+    </group>
+
+    <item android:title="=v=">
+        <menu>
+            <item
+                android:id="@+id/nav_thb"
+                android:title="@string/title_section2" />
+            <item
+                android:id="@+id/nav_thv"
+                android:title="@string/title_section3" />
+            <item
+                android:id="@+id/nav_donate"
+                android:title="跟瓦格啊我噶哇嘎嘎"
+                android:icon="@drawable/joessr" />
+        </menu>
+    </item>
+
+</menu>

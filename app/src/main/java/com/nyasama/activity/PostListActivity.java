@@ -1,7 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
@@ -41,8 +42,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
-import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.fragment.CommonListFragment;
@@ -74,7 +73,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PostListActivity extends BaseThemedActivity
+public class PostListActivity extends AppCompatActivity
     implements CommonListFragment.OnListFragmentInteraction<Post> {
 
     public static final int REQUEST_CODE_EDIT_POST = 1;
@@ -436,7 +435,7 @@ public class PostListActivity extends BaseThemedActivity
 
     public void quickReply(final Post item) {
         final EditText input = new EditText(this);
-        mReplyDialog = new AccentAlertDialog.Builder(PostListActivity.this)
+        mReplyDialog = new AlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -446,7 +445,6 @@ public class PostListActivity extends BaseThemedActivity
         mReplyDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(PostListActivity.this).paint(mReplyDialog.getWindow());
                 mReplyDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                     .setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -477,7 +475,7 @@ public class PostListActivity extends BaseThemedActivity
                     "(" + editable.toString().length() + "/" + Discuz.MAX_COMMENT_LENGTH + ")");
             }
         });
-        mCommentDialog = new AccentAlertDialog.Builder(PostListActivity.this)
+        mCommentDialog = new AlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.action_comment)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -487,7 +485,6 @@ public class PostListActivity extends BaseThemedActivity
         mCommentDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(PostListActivity.this).paint(mCommentDialog.getWindow());
                 mCommentDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -603,7 +600,7 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
 
-        AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(PostListActivity.this)
+        AlertDialog.Builder builder = new AlertDialog.Builder(PostListActivity.this)
                 .setTitle(getString(R.string.diag_title_vote_result) +
                         " (" + String.format(getString(R.string.diag_title_max_choices), mMaxChoices) + ")")
                 .setView(listView)
@@ -615,7 +612,6 @@ public class PostListActivity extends BaseThemedActivity
         if (mAllowVote) mVoteDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(PostListActivity.this).paint(mVoteDialog.getWindow());
                 mVoteDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -642,7 +638,7 @@ public class PostListActivity extends BaseThemedActivity
     }
 
     public void showPayDialog() {
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.buy_thread)
                 .setMessage(String.format(getString(R.string.thread_price_info), mThreadPrice))
                 .setPositiveButton(android.R.string.ok, null)
@@ -651,7 +647,6 @@ public class PostListActivity extends BaseThemedActivity
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(PostListActivity.this).paint(dialog.getWindow());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -722,7 +717,7 @@ public class PostListActivity extends BaseThemedActivity
             }
         });
 
-        mThreadModerateDialog = new AccentAlertDialog.Builder(PostListActivity.this)
+        mThreadModerateDialog = new AlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.action_moderate_thread)
                 .setView(dialogView)
                 .setPositiveButton(android.R.string.ok, null)
@@ -731,7 +726,6 @@ public class PostListActivity extends BaseThemedActivity
         mThreadModerateDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(PostListActivity.this).paint(mThreadModerateDialog.getWindow());
                 mThreadModerateDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -809,7 +803,7 @@ public class PostListActivity extends BaseThemedActivity
 
     public void showModerateOptions() {
         final ListView listView = new ListView(this);
-        final AlertDialog dialog =  new AccentAlertDialog.Builder(PostListActivity.this)
+        final AlertDialog dialog =  new AlertDialog.Builder(PostListActivity.this)
                 .setTitle(R.string.action_moderate_thread)
                 .setView(listView)
                 .create();
@@ -1300,7 +1294,7 @@ public class PostListActivity extends BaseThemedActivity
                     try {
                         JSONObject message = data.getJSONObject("Message");
                         listData.clear();
-                        new AccentAlertDialog.Builder(PostListActivity.this)
+                        new AlertDialog.Builder(PostListActivity.this)
                                 .setTitle(R.string.there_is_something_wrong)
                                 .setMessage(message.getString("messagestr"))
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

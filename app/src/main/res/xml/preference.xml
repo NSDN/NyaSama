@@ -34,7 +34,7 @@
             android:summary="%s"
             android:title="@string/preference_web_cache" />
 
-        <com.negusoft.holoaccent.preference.ListPreference
+        <ListPreference
             android:defaultValue="256"
             android:dialogTitle="@string/preference_manga_cache"
             android:entries="@array/manga_cache_size"

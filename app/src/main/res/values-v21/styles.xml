@@ -1,10 +1,11 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:statusBarColor">@color/color_statusbar</item>
+        <item name="android:navigationBarColor">@color/color_navibar</item>
         <item name="android:colorBackground">@color/colorBackgroundLight</item>
         <item name="android:textColorPrimary">@color/primary_text</item>
         <item name="android:textColorSecondary">@color/secondary_text</item>
@@ -26,14 +27,14 @@
         <item name="android:windowBackground">@null</item>
     </style>
 
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">#66000000</item>
+    </style>
+
     <style name="AppTheme.NoActionBar.FullScreen" parent="AppTheme.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowBackground">@null</item>
-    </style>
-
-    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">#66000000</item>
     </style>
 
     <!-- animated theme. -->

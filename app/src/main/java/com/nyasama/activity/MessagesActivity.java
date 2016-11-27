@@ -1,9 +1,10 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -17,8 +18,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
-import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -34,7 +33,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class MessagesActivity extends BaseThemedActivity
+public class MessagesActivity extends AppCompatActivity
     implements CommonListFragment.OnListFragmentInteraction<PMList> {
 
     public static String TAG = "PMList";
@@ -77,7 +76,7 @@ public class MessagesActivity extends BaseThemedActivity
 
     public void sendMessage() {
         final EditText input = new EditText(this);
-        mReplyDialog = new AccentAlertDialog.Builder(MessagesActivity.this)
+        mReplyDialog = new AlertDialog.Builder(MessagesActivity.this)
                 .setTitle(R.string.diag_quick_reply_title)
                 .setMessage(R.string.diag_hint_type_something)
                 .setView(input)
@@ -87,7 +86,6 @@ public class MessagesActivity extends BaseThemedActivity
         mReplyDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(MessagesActivity.this).paint(mReplyDialog.getWindow());
                 mReplyDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override

@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +31,7 @@ import java.util.List;
  * Note: this activity handles both forum threads and user threads
  */
 
-public class ThreadListActivity extends BaseThemedActivity implements
+public class ThreadListActivity extends AppCompatActivity implements
         DiscuzThreadListFragment.OnThreadListInteraction {
 
     public final int REQUEST_CODE_NEW_THREAD = 1;

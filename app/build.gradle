@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '21.1.2'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
     defaultConfig {
-        applicationId 'com.nyasama.beta'
-        minSdkVersion 21
-        targetSdkVersion 21
+        applicationId 'com.nyasama'
+        minSdkVersion 18
+        targetSdkVersion 24
         versionCode 1
         versionName 'beta-160904'
     }
@@ -28,19 +28,25 @@ android {
     sourceSets {
         main {
             assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
         }
     }
+    useLibrary 'org.apache.http.legacy'
 }
 
 task copyAndroidNatives() {
     file("libs/armeabi/").mkdirs();
     file("libs/armeabi-v7a/").mkdirs();
+    file("libs/arm64-v8a/").mkdirs();
+    file("libs/x86_64/").mkdirs();
     file("libs/x86/").mkdirs();
 
     configurations.natives.files.each { jar ->
         def outputDir = null
+        if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
         if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
         if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
+        if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
         if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
         if(outputDir != null) {
             copy {
@@ -52,23 +58,17 @@ task copyAndroidNatives() {
     }
 }
 
-tasks.withType(com.android.build.gradle.tasks.PackageApplication) { pkgTask ->
-    pkgTask.jniFolders = new HashSet<File>()
-    pkgTask.jniFolders.add(new File(projectDir, 'libs'))
-}
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v4:21.0.2'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:design:24.0.0'
+    compile 'com.android.support:support-v4:24.0.0'
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     // adding this dependency causes gradle problem
     // REF: http://stackoverflow.com/questions/20673888/duplicate-files-copied-android-studio-0-4-0
     compile 'org.apache.httpcomponents:httpmime:4.2.2'
-    compile 'com.badlogicgames.gdx:gdx:1.5.0'
-    compile "com.badlogicgames.gdx:gdx-backend-android:1.5.0"
     compile 'com.etsy.android.grid:library:1.0.5'
-    compile 'com.negusoft.holoaccent:library:1.1'
     compile 'com.jakewharton:disklrucache:2.0.2'
     compile 'ch.acra:acra:4.6.2'
 }

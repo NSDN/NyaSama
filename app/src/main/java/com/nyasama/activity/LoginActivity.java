@@ -1,30 +1,24 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridLayout;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
+
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
-import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -38,7 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class LoginActivity extends BaseThemedActivity
+public class LoginActivity extends AppCompatActivity
     implements AdapterView.OnItemSelectedListener {
 
     public static final int REQUEST_CODE_LOGIN = 1;
@@ -105,7 +99,7 @@ public class LoginActivity extends BaseThemedActivity
         gridView.setLayoutParams(new AbsListView.LayoutParams(
                 AbsListView.LayoutParams.WRAP_CONTENT,
                 AbsListView.LayoutParams.WRAP_CONTENT));
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
             .setTitle(R.string.diag_ask_input_seccode)
             .setMessage(R.string.diag_loading_seccodes)
             .setView(gridView)
@@ -115,7 +109,6 @@ public class LoginActivity extends BaseThemedActivity
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(dialog.getContext()).paint(dialog.getWindow());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

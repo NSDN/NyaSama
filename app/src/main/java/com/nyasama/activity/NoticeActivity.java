@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -15,7 +16,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
-import com.nyasama.ThisApp;
 import com.nyasama.fragment.DiscuzNoticeListFragment;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.fragment.CommonListFragment;
@@ -24,13 +24,11 @@ import com.nyasama.util.Helper;
 
 import org.json.JSONObject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class NoticeActivity extends BaseThemedActivity {
+public class NoticeActivity extends AppCompatActivity {
 
     static class NoticeItem {
         int viewIndex;

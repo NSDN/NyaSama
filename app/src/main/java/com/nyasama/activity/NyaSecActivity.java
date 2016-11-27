@@ -1,11 +1,12 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -18,8 +19,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
-import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.Discuz;
@@ -35,7 +34,7 @@ import java.util.Random;
  * Created by oxyflour on 2015/10/18.
  *
  */
-public class NyaSecActivity extends BaseThemedActivity {
+public class NyaSecActivity extends AppCompatActivity {
 
     private final static String PREF_KEY_PREFIX = "nyasec-key-";
 
@@ -137,7 +136,7 @@ public class NyaSecActivity extends BaseThemedActivity {
     private void requestKey() {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_PHONE);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.diag_request_key)
                 .setMessage(R.string.diag_input_phone_number)
                 .setView(input)
@@ -147,7 +146,6 @@ public class NyaSecActivity extends BaseThemedActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(NyaSecActivity.this).paint(dialog.getWindow());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -164,7 +162,7 @@ public class NyaSecActivity extends BaseThemedActivity {
     private void updateKey() {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_PHONE);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.diag_update_key)
                 .setMessage(R.string.diag_input_downloadcode)
                 .setView(input)
@@ -174,7 +172,6 @@ public class NyaSecActivity extends BaseThemedActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(NyaSecActivity.this).paint(dialog.getWindow());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -189,7 +186,7 @@ public class NyaSecActivity extends BaseThemedActivity {
     }
 
     private void clearKey() {
-        final AlertDialog dialog = new AccentAlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.action_clear_key)
                 .setMessage(R.string.clear_key_confirm)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

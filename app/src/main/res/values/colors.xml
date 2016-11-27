@@ -10,4 +10,8 @@
     <color name="primary_text">#de000000</color>
     <color name="secondary_text">#8A000000</color>
     <color name="colorAccent">#08aaf7</color>
+
+    <color name="ThemeBackground">@color/colorBackgroundLight</color>
+    <color name="text_color_primary">@color/primary_text</color>
+    <color name="text_color_secondary">@color/secondary_text</color>
 </resources>

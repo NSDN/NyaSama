@@ -1,7 +1,7 @@
 package com.nyasama.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -30,7 +31,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.Discuz;
@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 
 import uk.co.senab.photoview.PhotoView;
 
-public class AttachmentViewer extends BaseThemedActivity {
+public class AttachmentViewer extends AppCompatActivity {
 
     private static class ExternalImageAttachment extends Attachment {
         public ExternalImageAttachment(String src) {
@@ -109,7 +109,7 @@ public class AttachmentViewer extends BaseThemedActivity {
                 names));
         listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         listView.setItemChecked(mPager.getCurrentItem(), true);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(AttachmentViewer.this)
+        final AlertDialog dialog = new AlertDialog.Builder(AttachmentViewer.this)
                 .setTitle("Attachments")
                 .setView(listView)
                 .show();
@@ -182,7 +182,7 @@ public class AttachmentViewer extends BaseThemedActivity {
             try {
                 JSONObject message = data.getJSONObject("Message");
                 mAttachmentList.clear();
-                new AccentAlertDialog.Builder(AttachmentViewer.this)
+                new AlertDialog.Builder(AttachmentViewer.this)
                         .setTitle(R.string.there_is_something_wrong)
                         .setMessage(message.getString("messagestr"))
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

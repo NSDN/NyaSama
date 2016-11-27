@@ -1,6 +1,6 @@
 package com.nyasama.activity;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -32,8 +33,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.NetworkImageView;
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
-import com.negusoft.holoaccent.dialog.DividerPainter;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.CommonListAdapter;
@@ -56,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NewPostActivity extends BaseThemedActivity {
+public class NewPostActivity extends AppCompatActivity {
 
     static final Size MAX_UPLOAD_SIZE = new Size(2048, 2048);
     static final Size THUMBNAIL_SIZE = new Size(100, 100);
@@ -260,7 +259,7 @@ public class NewPostActivity extends BaseThemedActivity {
                             ThisApp.preferences.edit()
                                     .putBoolean(PREF_KEY_HAS_DRAFT, false);
                         } else {
-                            AccentAlertDialog.Builder builder = new AccentAlertDialog.Builder(NewPostActivity.this)
+                            AlertDialog.Builder builder = new AlertDialog.Builder(NewPostActivity.this)
                                     .setTitle(R.string.error_new_post)
                                     .setMessage(message.getString("messagestr"))
                                     .setPositiveButton(android.R.string.ok, null);
@@ -392,7 +391,7 @@ public class NewPostActivity extends BaseThemedActivity {
         choicesText.setText("" + mPollChoices);
         final EditText expirationText = (EditText) view.findViewById(R.id.expiration);
         expirationText.setText("" + mPollExpiration);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(getString(R.string.action_setup_poll))
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, null)
@@ -401,7 +400,6 @@ public class NewPostActivity extends BaseThemedActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                new DividerPainter(NewPostActivity.this).paint(dialog.getWindow());
                 dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -424,7 +422,7 @@ public class NewPostActivity extends BaseThemedActivity {
 
         GridView smileyList = new GridView(this);
         smileyList.setNumColumns(3);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(smileyList)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -446,7 +444,7 @@ public class NewPostActivity extends BaseThemedActivity {
 
     public void showInsertImageOptions() {
         ListView attachList = new ListView(this);
-        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_options)
                 .setView(mImageAttachments.size() > 0 ? attachList : null)
                 .setPositiveButton(R.string.diag_insert_from_gallery, new DialogInterface.OnClickListener() {
@@ -494,7 +492,7 @@ public class NewPostActivity extends BaseThemedActivity {
         view.setLayoutParams(new AbsListView.LayoutParams(
                 AbsListView.LayoutParams.WRAP_CONTENT,
                 AbsListView.LayoutParams.WRAP_CONTENT));
-        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.diag_insert_smiley_title)
                 .setView(view)
                 .setPositiveButton(getString(R.string.button_back), new DialogInterface.OnClickListener() {
@@ -525,7 +523,7 @@ public class NewPostActivity extends BaseThemedActivity {
     }
 
     public void refreshFormHash() {
-        final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+        final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                 .setTitle(R.string.dialog_update_user).setCancelable(false)
                 .show();
         // refresh the form hash, or posting will fail
@@ -665,7 +663,7 @@ public class NewPostActivity extends BaseThemedActivity {
                     " (" + bitmapSize.width + "x" + bitmapSize.height + ")";
             View loadingView = LayoutInflater.from(this)
                     .inflate(R.layout.fragment_upload_process, null, false);
-            final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+            final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                     .setTitle(R.string.dialog_uploading).setCancelable(false)
                     .setView(loadingView)
                     .show();
@@ -735,7 +733,7 @@ public class NewPostActivity extends BaseThemedActivity {
         }
         else if (id == R.id.action_add_smiley) {
             if (SmileyGroup.getSmilies() == null) {
-                final AlertDialog dialog = new AccentAlertDialog.Builder(NewPostActivity.this)
+                final AlertDialog dialog = new AlertDialog.Builder(NewPostActivity.this)
                         .setTitle(R.string.diag_loading_smilies).setCancelable(false)
                         .show();
                 SmileyGroup.loadSmilies(new Response.Listener<List<SmileyGroup>>() {

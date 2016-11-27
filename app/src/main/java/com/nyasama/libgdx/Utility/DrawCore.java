@@ -24,7 +24,7 @@ public class DrawCore {
     }
 
     public void DrawString(float x, float y, float Scale, Color color, String Str) {
-        Font.setScale(Scale);
+        Font.getData().setScale(Scale);
         Font.setColor(color);
         Font.draw(Batch, Str, x, y);
     }

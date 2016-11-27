@@ -4,8 +4,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-
-import com.negusoft.holoaccent.dialog.AccentAlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 
@@ -20,7 +20,7 @@ import com.nyasama.ThisApp;
 //              见详细文档 Setting Default Values 节，虽然感觉上不加这句也没问题，但还是加上安心
 //            2，明确创建出 OnSharedPreferenceChangeListener 实例
 //              见详细文档Reading Preference 节，Listening for preference changes 块的最后部分，同样是加上更安心
-public class SettingActivity extends BaseThemedActivity {
+public class SettingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class SettingActivity extends BaseThemedActivity {
 
             ThisApp.onSharedPreferenceChanged(sharedPreferences, key);
             if (key.equals(getString(R.string.pref_key_language))) {
-                if (!getActivity().isFinishing()) new AccentAlertDialog.Builder(getActivity())
+                if (!getActivity().isFinishing()) new AlertDialog.Builder(getActivity())
                         .setTitle(getString(R.string.alert_need_reboot))
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
