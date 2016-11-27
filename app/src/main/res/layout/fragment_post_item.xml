@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/avatar"
             android:paddingLeft="5dp"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
             android:id="@+id/date"

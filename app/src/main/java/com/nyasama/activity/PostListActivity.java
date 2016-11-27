@@ -186,7 +186,7 @@ public class PostListActivity extends BaseThemedActivity
         mPrefMaxImageSize.y = mPrefMaxImageSize.x * size.y / size.x;
 
         mPrefFontSize = Helper.toSafeInteger(
-                ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 16);
+                ThisApp.preferences.getString(getString(R.string.pref_key_text_size), ""), 12);
     }
 
     public void doReply(final String text, final String trimstr) {

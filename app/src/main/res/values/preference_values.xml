@@ -62,6 +62,8 @@
 
     <string name="pref_key_text_size" translatable="false">text_size</string>
     <string-array name="text_size" translatable="false">
+        <item>12</item>
+        <item>14</item>
         <item>16</item>
         <item>18</item>
         <item>20</item>

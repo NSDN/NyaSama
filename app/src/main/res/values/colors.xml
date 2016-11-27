@@ -1,26 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimaryLight">@color/colorBackground</color>
-    <color name="color_navibar">#304ffe</color>
-    <color name="color_statusbar">#283593</color>
-    <color name="colorPrimary">#3f51b5</color>
-    <color name="colorPrimaryDark">#303f9f</color>
-    <color name="colorBackground">#c5cae9</color>
-    <color name="colorBackgroundLight">#e8eaf6</color>
-    <!--color name="colorBackground">#acc8e2</color>
-    <color name="colorBackgroundLight">#bdd4e5</color-->
+    <color name="color_navibar">#ca3f44</color>
+    <color name="color_statusbar">@color/colorPrimaryDark</color>
+    <color name="colorPrimary">#b10000</color>
+    <color name="colorPrimaryDark">#9b0000</color>
+    <color name="colorBackground">#f0ac67</color>
+    <color name="colorBackgroundLight">#eeeeee</color>
     <color name="primary_text">#de000000</color>
     <color name="secondary_text">#8A000000</color>
+    <color name="colorAccent">#08aaf7</color>
 </resources>
-
-<!--resources>
-<color name="colorPrimaryLight">@color/colorBackground</color>
-<color name="color_navibar">#1c3858</color>
-<color name="color_statusbar">#143753</color>
-<color name="colorPrimary">#5c9ac5</color>
-<color name="colorPrimaryDark">#306284</color>
-<color name="colorBackground">#acc8e2</color>
-<color name="colorBackgroundLight">#bdd4e5</color>
-<color name="primary_text">#de000000</color>
-<color name="secondary_text">#8A000000</color>
-</resources-->
