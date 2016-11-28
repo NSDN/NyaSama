@@ -44,8 +44,8 @@ public class DiscuzComicListFragment extends DiscuzThreadListFragment {
             public void convertView(ViewHolder viewHolder, final Thread item) {
                 viewHolder.setText(R.id.title, Html.fromHtml(item.title));
                 final NetworkImageView imageView = (NetworkImageView) viewHolder.getView(R.id.image_view);
-                imageView.setDefaultImageResId(R.drawable.ic_launcher);
-                imageView.setErrorImageResId(R.drawable.ic_launcher);
+                imageView.setDefaultImageResId(R.mipmap.ic_launcher);
+                imageView.setErrorImageResId(R.mipmap.ic_launcher);
                 imageView.setImageUrl(Discuz.getThreadCoverThumb(item.id), ThisApp.imageLoader);
             }
         };

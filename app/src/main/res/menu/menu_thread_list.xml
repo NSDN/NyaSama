@@ -1,10 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context="com.nyasama.activity.ThreadListActivity">
     <item android:id="@+id/action_new_post" android:title="@string/action_new_post"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="always" />
+        app:showAsAction="always" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" />
+        android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
 </menu>

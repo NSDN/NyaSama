@@ -5,10 +5,10 @@ android {
     buildToolsVersion '24.0.0'
     defaultConfig {
         applicationId 'com.nyasama'
-        minSdkVersion 18
+        minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
-        versionName 'beta-160904'
+        versionName 'debug-no-update'
     }
     buildTypes {
         release {

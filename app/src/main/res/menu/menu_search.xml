@@ -1,8 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.nyasama.activity.SearchActivity">
     <item android:id="@+id/action_search" android:title="@string/action_example"
         android:icon="@drawable/ic_action_search"
-        android:actionViewClass="com.negusoft.holoaccent.widget.AccentSearchView"
-        android:showAsAction="ifRoom" />
+        android:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom" />
 </menu>

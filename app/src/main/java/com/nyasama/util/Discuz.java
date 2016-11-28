@@ -1224,7 +1224,7 @@ module决定调用哪种操作
         //notification 在android 3.0 之后的推荐用法：用Builder创建
         //详细文档：http://developer.android.com/guide/topics/ui/notifiers/notifications.html
         Notification notification = new NotificationCompat.Builder(ThisApp.context)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(Notification.DEFAULT_SOUND)
                 .setContentTitle(context.getString(R.string.notify_title_text))
                 .setContentText(text)

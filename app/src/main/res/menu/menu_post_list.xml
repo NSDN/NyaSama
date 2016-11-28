@@ -1,25 +1,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.nyasama.activity.PostListActivity">
     <item android:id="@+id/action_reply" android:title="@string/action_reply"
         android:icon="@drawable/ic_action_reply"
-        android:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom" />
     <item android:id="@+id/action_moderate_thread" android:title="@string/action_moderate_thread"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_quick_reply" android:title="@string/action_quick_reply"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_reverse_order" android:title="@string/action_reverse_order"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_see_author" android:title="@string/action_see_author"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_mark_fav" android:title="@string/action_mark_fav"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_goto_forum" android:title="@string/action_goto_forum"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_share" android:title="@string/action_share"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_my_profile" android:title="@string/action_my_profile"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
 </menu>

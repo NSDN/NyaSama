@@ -1046,6 +1046,14 @@ public class PostListActivity extends AppCompatActivity
             showModerateOptions();
             return true;
         }
+        else if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_my_profile) {
+            startActivity(new Intent(this, UserProfileActivity.class));
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
