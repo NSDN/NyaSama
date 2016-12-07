@@ -1,11 +1,9 @@
 package com.nyasama.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,10 +19,7 @@ import android.widget.ListView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nyasama.ThisApp;
-import com.nyasama.fragment.DiscuzComicListFragment;
-import com.nyasama.fragment.DiscuzForumIndexFragment;
 import com.nyasama.fragment.DiscuzThreadListFragment;
-import com.nyasama.fragment.SimpleLayoutFragment;
 import com.nyasama.util.CommonListAdapter;
 import com.nyasama.R;
 import com.nyasama.fragment.DiscuzTopListFragment;
@@ -60,8 +55,15 @@ public class ThreadListActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thread_list);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setNavigationIcon(R.drawable.ic_action_nya);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+            public void onClick(View view){
+                finish();
+            }
+        });
 
         String title = getIntent().getStringExtra("title");
         if (title != null) setTitle(title);
@@ -156,8 +158,11 @@ public class ThreadListActivity extends AppCompatActivity implements
             }
         });
 
+        PagerTabStrip tab = (PagerTabStrip) findViewById(R.id.view_strip);
+        ((ViewPager.LayoutParams) tab.getLayoutParams()).isDecor = true;
+
         if (mPageAdapter.getCount() == 1)
-            Helper.updateVisibility(findViewById(R.id.view_strip), false);
+            Helper.updateVisibility(tab, false);
 
     }
 

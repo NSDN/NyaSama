@@ -2,28 +2,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.nyasama.activity.AttachImageViewer">
+    tools:context="com.nyasama.activity.AttachmentViewer">
 
-    <ProgressBar
-        android:id="@+id/loading"
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/about_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:scaleY="0.5"
-        android:translationY="-6dp"
-        style="@android:style/Widget.Material.Light.ProgressBar.Horizontal" />
+        android:layout_height="match_parent">
 
-    <com.nyasama.util.PhotoViewPager
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:scaleY="0.5"
+            android:translationY="-6dp"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
 
-    <com.nyasama.util.SimpleIndicator
-        android:id="@+id/view_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:gravity="center_horizontal"
-        android:padding="5dp" />
+        <com.nyasama.util.PhotoViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.nyasama.util.SimpleIndicator
+            android:id="@+id/view_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center_horizontal"
+            android:padding="5dp" />
+
+    </FrameLayout>
 
 </FrameLayout>

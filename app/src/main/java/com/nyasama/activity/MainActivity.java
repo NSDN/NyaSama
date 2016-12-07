@@ -164,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+        toolbar.setNavigationIcon(R.drawable.ic_action_nya);
+
         /*
         TODO: enable this to use umeng
         PushAgent mPushAgent = PushAgent.getInstance(this);
@@ -205,6 +207,10 @@ public class MainActivity extends AppCompatActivity implements
         }
         else if (id == R.id.nav_thv) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://thvideo.tv")));
+            return true;
+        }
+        else if (id == R.id.nav_nsdn) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://dev.nyasama.com")));
             return true;
         }
         else if (id == R.id.nav_donate) {

@@ -1,38 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="54sp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="XXXXXX"
-        android:id="@+id/code"
-        android:layout_gravity="center" />
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:padding="10dp"
-        android:text="..."
-        android:id="@+id/menu"
-        android:layout_gravity="right|top" />
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:elevation="0dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:id="@+id/nyasec_count"
-        android:layout_gravity="left|top" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-    <TextView
-        android:id="@+id/nyasec_game"
-        android:visibility="invisible"
-        android:textSize="32sp"
-        android:textColor="#ff8b8b8b"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="o" />
+        </android.support.design.widget.AppBarLayout>
+
+        <TextView
+            android:id="@+id/code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="XXXXXX"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="54sp" />
+
+        <TextView
+            android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:padding="10dp"
+            android:text="..."
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/nyasec_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top"
+            android:padding="10dp" />
+
+        <TextView
+            android:id="@+id/nyasec_game"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="o"
+            android:textColor="#ff8b8b8b"
+            android:textSize="32sp"
+            android:visibility="invisible" />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+
 </FrameLayout>
