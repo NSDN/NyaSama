@@ -85,7 +85,8 @@
                     android:onClick="doSignin"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
-                    android:text="@string/signin_button_text" />
+                    android:text="@string/signin_button_text"
+                    style="?android:textAppearanceSmall" />
             </RelativeLayout>
 
             <LinearLayout
@@ -377,7 +378,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="doLogout"
-                    android:text="@string/logout_button_text" />
+                    android:text="@string/logout_button_text"
+                    style="?android:textAppearanceSmall"
+                    android:layout_marginTop="16dp" />
 
             </LinearLayout>
 

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">NyaSama Pre-release</string>
+    <string name="app_name">NyaSama</string>
     <string name="title_section1">Forum</string>
     <string name="title_section2">THBWiki</string>
     <string name="title_section3">THVideo</string>

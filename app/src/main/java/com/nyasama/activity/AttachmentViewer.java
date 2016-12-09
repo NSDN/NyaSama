@@ -516,6 +516,12 @@ public class AttachmentViewer extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        delayedHide(3000);
+    }
+
     public static class AttachmentFragment extends Fragment {
         private AttachmentViewer mActivity;
 

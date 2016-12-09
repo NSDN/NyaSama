@@ -1,5 +1,7 @@
 package com.nyasama.activity;
 
+import android.annotation.SuppressLint;
+import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
@@ -29,7 +31,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class SplashActivity extends AppCompatActivity {
 
-    public static final String releaseUrl = "http://dev.nyasama.com/beta";
+    public static final String releaseUrl = "http://dev.nyasama.com/public";
 
     public static class UTF8StringRequest extends StringRequest {
 
@@ -101,10 +103,20 @@ public class SplashActivity extends AppCompatActivity {
         }
         else {
             Log.e(SplashActivity.class.toString(), "check update failed: no new version found");
+            mHandler.removeCallbacks(mRunable);
+            mHandler.postDelayed(mRunable, 3000);
+        }
+    }
+
+    private final Handler mHandler = new Handler();
+    private final Runnable mRunable = new Runnable() {
+        @SuppressLint("InlinedApi")
+        @Override
+        public void run() {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }
-    }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +146,7 @@ public class SplashActivity extends AppCompatActivity {
                 checkInitJobs();
             }
         });
-        else ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/update.apk", new Response.Listener<String>() {
+        else ThisApp.requestQueue.add(new UTF8StringRequest(releaseUrl + "/update.html", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 if (s != null) {
