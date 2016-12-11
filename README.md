@@ -31,5 +31,7 @@ NyaSama
 
 这个项目使用了 [OpenJDK](http://openjdk.java.net/) 中的源代码
 
+##### 目前这个分支已经去掉了对HoloAccent的引用，界面部分使用AppCompat v7
+
 ## License
 GPL v2
