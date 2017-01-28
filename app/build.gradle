@@ -8,7 +8,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
-        versionName 'debug-no-update'
+        versionName 'public-170128'
     }
     buildTypes {
         release {
