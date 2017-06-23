@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -19,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -165,6 +168,16 @@ public class MainActivity extends AppCompatActivity implements
         toggle.syncState();
 
         toolbar.setNavigationIcon(R.drawable.ic_action_nya);
+        //toolbar.setLogo(R.drawable.ic_action_nya);
+        toolbar.setOnCreateContextMenuListener(this);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.search_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(view.getContext(), SearchActivity.class));
+            }
+        });
 
         /*
         TODO: enable this to use umeng

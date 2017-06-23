@@ -1049,7 +1049,7 @@ module决定调用哪种操作
         final Request request = new StringRequest(
                 Request.Method.POST,
                 // set #noredirect# so volley will throw error 302
-                DISCUZ_URL + "search.php?searchsubmit=yes##hurlstack:noredirect#",
+                DISCUZ_URL + "search.php?&searchsubmit=yes##hurlstack:noredirect#",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -1091,7 +1091,6 @@ module决定调用哪种操作
                     put("srhfid", "");
                     put("srhlocality", "forum:index");
                     put("srchtxt", text);
-                    put("searchsubmit", "true");
                 }};
             }
             @Override

@@ -3,13 +3,14 @@ package com.nyasama.activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.Menu;
 import android.view.View;
-import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 
 import com.android.volley.Response;
 import com.nyasama.R;
@@ -40,6 +41,7 @@ public class SearchActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         toolbar.setNavigationIcon(R.drawable.ic_action_nya);
+        //toolbar.setLogo(R.drawable.ic_action_nya);
         toolbar.setNavigationOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
                 finish();
@@ -63,7 +65,7 @@ public class SearchActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
         searchView.setIconified(false);
 
         String query = getIntent().getStringExtra(SearchManager.QUERY);

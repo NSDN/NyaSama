@@ -80,6 +80,7 @@ public class NoticeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         toolbar.setNavigationIcon(R.drawable.ic_action_nya);
+        //toolbar.setLogo(R.drawable.ic_action_nya);
         toolbar.setNavigationOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
                 finish();
