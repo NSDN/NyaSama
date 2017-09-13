@@ -22,6 +22,8 @@ import com.nyasama.util.Discuz.Thread;
 
 import org.json.JSONObject;
 
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -118,6 +120,9 @@ public class SearchActivity extends AppCompatActivity
     @SuppressWarnings("unchecked")
     public void onLoadingMore(final CommonListFragment fragment, final List listData) {
         String query = getIntent().getStringExtra(SearchManager.QUERY);
+        if (query != null) { // 这里进行了一次转码，POST需要是GBK编码而手机不一定是GBK
+            query = new String(query.getBytes(), Charset.forName(Discuz.DISCUZ_ENC));
+        }
         if (query == null || query.isEmpty()) {
             fragment.loadMoreDone(0);
             return;
