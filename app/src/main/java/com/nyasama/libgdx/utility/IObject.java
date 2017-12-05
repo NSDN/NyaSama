@@ -5,6 +5,11 @@ package com.nyasama.libgdx.utility;
  */
 
 public interface IObject {
-    void onUpdate(int t);
-    void onRender(Renderer renderer);
+
+    enum Result {
+        DONE, END
+    }
+
+    Result onUpdate(int t);
+    Result onRender(Renderer renderer);
 }

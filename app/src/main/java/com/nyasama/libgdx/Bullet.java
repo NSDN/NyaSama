@@ -9,18 +9,22 @@ import com.nyasama.libgdx.utility.Renderer;
  * Created by drzzm on 2017.12.3.
  */
 
-public class Bullet implements IObject {
+public abstract class Bullet implements IObject {
 
-    private Vector2 pos;
-    private Vector2 vel;
-    private Vector2 acc;
-    private Vector2 dir;
+    protected Vector2 pos;
+    protected Vector2 vel;
+    protected Vector2 acc;
+    protected Vector2 dir;
 
     private Texture tex;
-    private float scale;
-    private float r, g, b, a;
+    protected float scale;
+    protected float r, g, b, a;
 
     public boolean grazed;
+
+    public Bullet(Vector2 pos, Vector2 dir, Texture tex) {
+        this(pos, dir, tex, 1.0F);
+    }
 
     public Bullet(Vector2 pos, Vector2 dir, Texture tex, float scale) {
         this.pos = pos; this.dir = dir;
@@ -32,13 +36,15 @@ public class Bullet implements IObject {
         grazed = false;
     }
 
-    public void onUpdate(int t) {
+    public Result onUpdate(int t) {
         vel = vel.add(acc);
         pos = pos.add(vel);
+        return Result.DONE;
     }
 
-    public void onRender(Renderer renderer) {
+    public Result onRender(Renderer renderer) {
         renderer.draw(tex, pos.x, pos.y, dir.angle(), scale, r, g, b, a);
+        return Result.DONE;
     }
 
 }
