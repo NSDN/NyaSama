@@ -1,9 +1,10 @@
-package com.nyasama.libgdx;
+package cn.ac.nya.nsgdx.entity;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.nyasama.libgdx.utility.IObject;
-import com.nyasama.libgdx.utility.Renderer;
+import cn.ac.nya.nsgdx.utility.IObject;
+import cn.ac.nya.nsgdx.utility.Renderer;
+import cn.ac.nya.nsgdx.utility.Utility;
 
 /**
  * Created by drzzm on 2017.12.5.
@@ -19,8 +20,8 @@ public abstract class Player implements IObject {
 
     public Player(Texture tex) {
         this.tex = tex;
-        pos = Vector2.Zero;
-        dir = Vector2.Zero;
+        pos = Utility.vec2(0, 0);
+        dir = Utility.vec2(0, 0);
     }
 
     public void flash(Vector2 vec) {

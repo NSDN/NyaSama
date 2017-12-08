@@ -8,7 +8,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 26
         versionCode 1
-        versionName 'public-170914'
+        versionName 'public-171209'
     }
     buildTypes {
         release {
@@ -32,6 +32,16 @@ android {
         }
     }
     useLibrary 'org.apache.http.legacy'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
 }
 
 task copyAndroidNatives() {
@@ -63,12 +73,12 @@ dependencies {
     compile "com.android.support:appcompat-v7:$supportLib"
     compile "com.android.support:design:$supportLib"
     compile "com.android.support:support-v4:$supportLib"
-    compile 'com.mcxiaoke.volley:library-aar:1.0.0'
+    compile 'com.android.volley:volley:1.0.0'
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     // adding this dependency causes gradle problem
     // REF: http://stackoverflow.com/questions/20673888/duplicate-files-copied-android-studio-0-4-0
-    //compile 'org.apache.httpcomponents:httpmime:4.3.3'
+    compile 'org.apache.httpcomponents:httpmime:4.5.4'
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'com.jakewharton:disklrucache:2.0.2'
-    compile 'ch.acra:acra:4.6.2'
+    compile 'ch.acra:acra:4.9.2'
 }

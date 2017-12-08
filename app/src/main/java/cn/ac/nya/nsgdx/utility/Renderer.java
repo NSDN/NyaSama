@@ -1,4 +1,4 @@
-package com.nyasama.libgdx.utility;
+package cn.ac.nya.nsgdx.utility;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -46,7 +46,12 @@ public class Renderer {
     public void draw(Texture texture, float x, float y, float rotate, float scale, float r, float g, float b, float a) {
         int Width = texture.getWidth(), Height = texture.getHeight();
         batch.setColor(r, g, b, a);
-        batch.draw(texture, x - Width / 2 * scale, y - Height / 2 * scale, Width / 2, Height / 2, Width, Height, scale, scale, rotate, 0, 0, Width, Height, false, false);
+        batch.draw(texture,
+                x - (float) Width / 2.0F, y - (float) Height / 2.0F,
+                (float) Width / 2.0F, (float) Height / 2.0F,
+                Width, Height, scale, scale, rotate,
+                0, 0, Width, Height, false, false
+        );
         batch.setColor(1, 1, 1, 1);
     }
 
@@ -54,4 +59,5 @@ public class Renderer {
         batch = new SpriteBatch();
         font = new BitmapFont();
     }
+
 }

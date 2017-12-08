@@ -6,3 +6,4 @@ gradle.properties
 /build
 .log
 /release
+*.log

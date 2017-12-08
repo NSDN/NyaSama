@@ -1,9 +1,10 @@
-package com.nyasama.libgdx;
+package cn.ac.nya.nsgdx.entity;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.nyasama.libgdx.utility.IObject;
-import com.nyasama.libgdx.utility.Renderer;
+import cn.ac.nya.nsgdx.utility.IObject;
+import cn.ac.nya.nsgdx.utility.Renderer;
+import cn.ac.nya.nsgdx.utility.Utility;
 
 import java.util.LinkedList;
 
@@ -13,13 +14,13 @@ import java.util.LinkedList;
 
 public class Animator implements IObject {
 
-    private Texture tex;
-
-    enum Interpolation {
+    public enum Interpolation {
         LINEAR, QUADRATIC, SINE
     }
 
     private class State {
+        private Texture tex;
+
         private final Interpolation inter;
         private int length;
 
@@ -28,9 +29,10 @@ public class Animator implements IObject {
         private float scale;
         private float r, g, b, a;
 
-        private State(Interpolation inter) {
+        private State(Texture tex, Interpolation inter) {
+            this.tex = tex;
             this.inter = inter;
-            pos = Vector2.Zero;
+            pos = Utility.vec2(0, 0);
             rotate = scale = 0;
             r = g = b = a = 1.0F;
         }
@@ -41,21 +43,27 @@ public class Animator implements IObject {
 
     private int step;
 
-    public Animator(Texture tex) {
-        this.tex = tex;
+    public Animator() {
+        this(null);
+    }
 
-        now = new State(null);
-        original = new State(null);
+    public Animator(Texture tex) {
+        now = new State(tex, null);
+        original = new State(tex, null);
         destinations = new LinkedList<>();
         step = 0;
     }
 
     public Animator start(Vector2 pos) {
-        return start(pos, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+        return start(pos, 0.0F, 1.0F);
     }
 
     public Animator start(Vector2 pos, float rotate, float scale) {
-        return start(pos, rotate, scale, 1.0F, 1.0F, 1.0F, 1.0F);
+        return start(pos, rotate, scale, 1.0F);
+    }
+
+    public Animator start(Vector2 pos, float rotate, float scale, float alpha) {
+        return start(pos, rotate, scale, 1.0F, 1.0F, 1.0F, alpha);
     }
 
     public Animator start(Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
@@ -65,12 +73,63 @@ public class Animator implements IObject {
         return this;
     }
 
+    public Animator start(Texture texture, Vector2 pos) {
+        return start(texture, pos, 0.0F, 1.0F);
+    }
+
+    public Animator start(Texture texture, Vector2 pos, float rotate, float scale) {
+        return start(texture, pos, rotate, scale, 1.0F);
+    }
+
+    public Animator start(Texture texture, Vector2 pos, float rotate, float scale, float alpha) {
+        return start(texture, pos, rotate, scale, 1.0F, 1.0F, 1.0F, alpha);
+    }
+
+    public Animator start(Texture texture, Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
+        original.tex = texture;
+        original.pos = pos; original.rotate = rotate; original.scale = scale;
+        original.r = r; original.g = g; original.b = b; original.a = a; original.length = 0;
+
+        return this;
+    }
+
+    public Animator next(Interpolation inter, int length, Vector2 pos) {
+        return next(inter, length, pos, 0.0F, 1.0F);
+    }
+
     public Animator next(Interpolation inter, int length, Vector2 pos, float rotate, float scale) {
         return next(inter, length, pos, rotate, scale, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
+    public Animator next(Interpolation inter, int length, Vector2 pos, float rotate, float scale, float alpha) {
+        return next(inter, length, pos, rotate, scale, 1.0F, 1.0F, 1.0F, alpha);
+    }
+
     public Animator next(Interpolation inter, int length, Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
-        State dst = new State(inter);
+        Texture nextTex = original.tex;
+        if (!this.destinations.isEmpty()) nextTex = this.destinations.getLast().tex;
+        State dst = new State(nextTex, inter);
+        dst.pos = pos; dst.rotate = rotate; dst.scale = scale;
+        dst.r = r; dst.g = g; dst.b = b; dst.a = a; dst.length = length;
+        this.destinations.addLast(dst);
+
+        return this;
+    }
+
+    public Animator next(Texture texture, Interpolation inter, int length, Vector2 pos) {
+        return next(texture, inter, length, pos, 0.0F, 1.0F);
+    }
+
+    public Animator next(Texture texture, Interpolation inter, int length, Vector2 pos, float rotate, float scale) {
+        return next(texture, inter, length, pos, rotate, scale, 1.0F);
+    }
+
+    public Animator next(Texture texture, Interpolation inter, int length, Vector2 pos, float rotate, float scale, float alpha) {
+        return next(texture, inter, length, pos, rotate, scale, 1.0F, 1.0F, 1.0F, alpha);
+    }
+
+    public Animator next(Texture texture, Interpolation inter, int length, Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
+        State dst = new State(texture, inter);
         dst.pos = pos; dst.rotate = rotate; dst.scale = scale;
         dst.r = r; dst.g = g; dst.b = b; dst.a = a; dst.length = length;
         this.destinations.addLast(dst);
@@ -79,7 +138,7 @@ public class Animator implements IObject {
     }
 
     private State interpolation(State original, State destination, int step) {
-        State result = new State(null);
+        State result = new State(original.tex, null);
         result.pos = interpolation(destination.inter, original.pos, destination.pos, step, destination.length);
         result.rotate = interpolation(destination.inter, original.rotate, destination.rotate, step, destination.length);
         result.scale = interpolation(destination.inter, original.scale, destination.scale, step, destination.length);
@@ -93,7 +152,7 @@ public class Animator implements IObject {
     }
 
     private Vector2 interpolation(Interpolation inter, Vector2 original, Vector2 destination, int step, int length) {
-        Vector2 result = Vector2.Zero;
+        Vector2 result = Utility.vec2(0, 0);
         result.x = interpolation(inter, original.x, destination.x, step, length);
         result.y = interpolation(inter, original.y, destination.y, step, length);
 
@@ -101,7 +160,7 @@ public class Animator implements IObject {
     }
 
     private float interpolation(Interpolation inter, float original, float destination, int step, int length) {
-        float x = ((float) step - (float) length) / (float) length;
+        float x = (float) step / (float) length;
         float k = destination - original;
         switch (inter) {
             case LINEAR: // y = x, x = 0 to 1
@@ -124,14 +183,15 @@ public class Animator implements IObject {
         step += 1;
         if (step > next.length) {
             step = 0;
-            original = destinations.getFirst();
+            original = destinations.removeFirst();
         }
 
         return Result.DONE;
     }
 
     public Result onRender(Renderer renderer) {
-        renderer.draw(tex, now.pos.x, now.pos.y, now.rotate, now.scale, now.r, now.g, now.b, now.a);
+        if (now.tex == null) return Result.END;
+        renderer.draw(now.tex , now.pos.x, now.pos.y, now.rotate, now.scale, now.r, now.g, now.b, now.a);
         return Result.DONE;
     }
 

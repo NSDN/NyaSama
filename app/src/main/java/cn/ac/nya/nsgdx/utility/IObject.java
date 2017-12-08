@@ -1,4 +1,4 @@
-package com.nyasama.libgdx.utility;
+package cn.ac.nya.nsgdx.utility;
 
 /**
  * Created by drzzm on 2017.12.4.
