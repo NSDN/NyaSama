@@ -35,6 +35,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HurlStack;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.nyasama.R;
 import com.nyasama.ThisApp;
 import com.nyasama.util.Discuz;
@@ -56,7 +57,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import uk.co.senab.photoview.PhotoView;
+
 
 public class AttachmentViewer extends AppCompatActivity {
 
