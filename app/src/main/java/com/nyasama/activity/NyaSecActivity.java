@@ -1,5 +1,6 @@
 package com.nyasama.activity;
 
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.media.AudioManager;
@@ -40,7 +41,6 @@ public class NyaSecActivity extends AppCompatActivity {
     private final static String PREF_KEY_PREFIX = "nyasec-key-";
 
     private TextView mCode;
-    private TextView mMenu;
 
     private String translateMessage(String msg) {
         if ("invalid phone number".equals(msg))
@@ -222,7 +222,6 @@ public class NyaSecActivity extends AppCompatActivity {
         });
 
         mCode = (TextView) findViewById(R.id.code);
-        mMenu = (TextView) findViewById(R.id.menu);
 
         mCode.setText(getCode());
         mCode.setOnClickListener(new View.OnClickListener() {
@@ -230,31 +229,6 @@ public class NyaSecActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mCode.setText(getCode());
                 mGameEnabled = true;
-            }
-        });
-
-        mMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PopupMenu popup = new PopupMenu(NyaSecActivity.this, view);
-                Menu menu = popup.getMenu();
-                popup.getMenuInflater().inflate(R.menu.menu_nyasec, menu);
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        int action = menuItem.getItemId();
-                        if (action == R.id.action_reset)
-                            requestKey();
-                        else if (action == R.id.action_update)
-                            updateKey();
-                        else if (action == R.id.action_clear)
-                            clearKey();
-                        return false;
-                    }
-                });
-
-                popup.show();
             }
         });
 
@@ -280,6 +254,25 @@ public class NyaSecActivity extends AppCompatActivity {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_nyasec, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int action = item.getItemId();
+        if (action == R.id.action_reset)
+            requestKey();
+        else if (action == R.id.action_update)
+            updateKey();
+        else if (action == R.id.action_clear)
+            clearKey();
+        return super.onOptionsItemSelected(item);
     }
 
     private final static int GAME_INTERVAL = 1000 / 16;

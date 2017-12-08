@@ -1,21 +1,32 @@
 package com.nyasama.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.etsy.android.grid.StaggeredGridView;
 import com.nyasama.R;
+import com.nyasama.ThisApp;
+import com.nyasama.activity.PostListActivity;
 import com.nyasama.util.CommonListAdapter;
+import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 
 import java.util.ArrayList;
@@ -158,6 +169,75 @@ public class CommonListFragment<T> extends Fragment
                 mInterface.onItemClick(CommonListFragment.this, view, i, l);
             }
         });
+
+        /*iew view = mListLayoutView.findViewById(bundle.getInt(ARG_LIST_VIEW_ID, R.id.list));
+        if (view instanceof ListView) {
+            ListView listView = (ListView) view;
+            View loading = inflater.inflate(R.layout.fragment_simple_list_loading, listView, false);
+            listView.addFooterView(loading, null, false);
+            // setup list view
+            mListAdapter = mInterface.getListViewAdaptor(this);
+            mListAdapter.setup(mListData, bundle.getInt(ARG_ITEM_LAYOUT, android.R.layout.simple_list_item_1));
+            listView.setAdapter(mListAdapter);
+            listView.setOnScrollListener(this);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    mInterface.onItemClick(CommonListFragment.this, view, i, l);
+                }
+            });
+        }
+        else if (view instanceof RecyclerView) {
+            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+            // setup list view
+            mListAdapter = mInterface.getListViewAdaptor(this);
+            mListAdapter.setup(mListData, bundle.getInt(ARG_ITEM_LAYOUT, android.R.layout.simple_list_item_1));
+
+            recyclerView.setAdapter(new RecyclerView.Adapter() {
+                @Override
+                public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                    return new RecyclerView.ViewHolder(mListAdapter.createView(parent, viewType)) {};
+                }
+
+                @Override
+                public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+                    if (mListAdapter.getItem(position) instanceof Discuz.Thread) {
+                        Discuz.Thread thread = (Discuz.Thread) mListAdapter.getItem(position);
+                        ((TextView) holder.itemView.findViewById(R.id.title)).setText(Html.fromHtml(thread.title));
+                        final NetworkImageView imageView = (NetworkImageView) holder.itemView.findViewById(R.id.image_view);
+                        imageView.setDefaultImageResId(R.mipmap.ic_launcher);
+                        imageView.setErrorImageResId(R.mipmap.ic_launcher);
+                        imageView.setImageUrl(Discuz.getThreadCoverThumb(thread.id), ThisApp.imageLoader);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(getActivity(), PostListActivity.class);
+                                if (thread.id > 0) {
+                                    intent.putExtra("tid", thread.id);
+                                    intent.putExtra("title", thread.title);
+                                    intent.putExtra("fid", getArguments() != null ? getArguments().getInt("fid") : 0);
+                                    startActivity(intent);
+                                }
+                            }
+                        });
+                    }
+
+                }
+
+                @Override
+                public int getItemCount() {
+                    return mListData == null ? 0 : mListData.size();
+                }
+            });
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+        }*/
 
         // setup reload button
         Button reloadButton = (Button) mListLayoutView.findViewById(R.id.reload);

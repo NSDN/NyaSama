@@ -31,15 +31,12 @@
                 android:layout_height="@dimen/ActivityPaddingBottom" />
         </LinearLayout-->
 
-        <com.etsy.android.grid.StaggeredGridView xmlns:app="http://schemas.android.com/apk/res-auto"
+        <com.etsy.android.grid.StaggeredGridView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:column_count_landscape="4"
-            app:column_count_portrait="2"
-            app:item_margin="8dp" />
+            android:layout_height="match_parent" />
 
-        <!--GridView
+        <!--android.support.v7.widget.RecyclerView
             android:columnWidth="128dp"
             android:numColumns="auto_fit"
             android:stretchMode="columnWidth"

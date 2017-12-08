@@ -31,6 +31,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class NSGDX extends ApplicationAdapter {
 
+    private Runnable exitCallback;
+
+    public NSGDX setOnExitCallback(Runnable exitCallback) {
+        this.exitCallback = exitCallback;
+        return this;
+    }
+
 	private Renderer renderer;
 	private float devWidth, devHeight;
 	private int counter = 0;
@@ -176,30 +183,30 @@ public class NSGDX extends ApplicationAdapter {
             public Result onUpdate(int t) {
                 if (t == 500) {
                     objectPool.add(new Animator()
-                            .start(Tget("screen_1"), Utility.vec2h(devWidth, devHeight).add(256, 0), 0.0F, 1.5F, 0.0F)
+                            .start(Tget("screen_1"), Utility.vec2h(devWidth, devHeight).add(devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                             .next(Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F, 1.0F)
                             .next(Interpolation.LINEAR, 200, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F)
-                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
 
-                            .next(Tget("screen_2"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Tget("screen_2"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                             .next(Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F, 1.0F)
                             .next(Interpolation.LINEAR, 200, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F)
-                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
 
-                            .next(Tget("screen_3"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Tget("screen_3"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                             .next(Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F, 1.0F)
                             .next(Interpolation.LINEAR, 200, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F)
-                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
 
-                            .next(Tget("screen_4"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Tget("screen_4"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                             .next(Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F, 1.0F)
                             .next(Interpolation.LINEAR, 200, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F)
-                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
 
-                            .next(Tget("screen_5"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Tget("screen_5"), Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight).add(devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                             .next(Interpolation.SINE, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F, 1.0F)
                             .next(Interpolation.LINEAR, 200, Utility.vec2h(devWidth, devHeight), 0.0F, 1.0F)
-                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-256, 0), 0.0F, 1.5F, 0.0F)
+                            .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight).add(-devWidth / 2, 0), 0.0F, 1.5F, 0.0F)
                     );
 
                     return Result.END;
@@ -218,6 +225,16 @@ public class NSGDX extends ApplicationAdapter {
                             .next(Interpolation.QUADRATIC, 100, Utility.vec2h(devWidth, devHeight), 0.0F, 0.5F, 0.0F)
                     );
 
+                    return Result.END;
+                }
+                return Result.DONE;
+            }
+        });
+        objectPool.add(new Exectuor() {
+            @Override
+            public Result onUpdate(int t) {
+                if (t == 3600) {
+                    exitCallback.run();
                     return Result.END;
                 }
                 return Result.DONE;
