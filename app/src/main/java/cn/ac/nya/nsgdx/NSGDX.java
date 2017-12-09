@@ -84,11 +84,11 @@ public class NSGDX extends ApplicationAdapter {
             i.onRender(renderer);
         }
 		renderer.end();
-
+        /*
 		renderer.begin();
 		renderer.drawString(4, 16, 1, Color.WHITE, "counter: " + counter);
 		renderer.end();
-
+        */
 	}
 
     @Override
