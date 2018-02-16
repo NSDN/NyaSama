@@ -67,7 +67,7 @@ public class Animator implements IObject {
     }
 
     public Animator start(Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
-        original.pos = pos; original.rotate = rotate; original.scale = scale;
+        original.pos = pos.cpy(); original.rotate = rotate; original.scale = scale;
         original.r = r; original.g = g; original.b = b; original.a = a; original.length = 0;
 
         return this;
@@ -87,7 +87,7 @@ public class Animator implements IObject {
 
     public Animator start(Texture texture, Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
         original.tex = texture;
-        original.pos = pos; original.rotate = rotate; original.scale = scale;
+        original.pos = pos.cpy(); original.rotate = rotate; original.scale = scale;
         original.r = r; original.g = g; original.b = b; original.a = a; original.length = 0;
 
         return this;
@@ -109,7 +109,7 @@ public class Animator implements IObject {
         Texture nextTex = original.tex;
         if (!this.destinations.isEmpty()) nextTex = this.destinations.getLast().tex;
         State dst = new State(nextTex, inter);
-        dst.pos = pos; dst.rotate = rotate; dst.scale = scale;
+        dst.pos = pos.cpy(); dst.rotate = rotate; dst.scale = scale;
         dst.r = r; dst.g = g; dst.b = b; dst.a = a; dst.length = length;
         this.destinations.addLast(dst);
 
@@ -130,7 +130,7 @@ public class Animator implements IObject {
 
     public Animator next(Texture texture, Interpolation inter, int length, Vector2 pos, float rotate, float scale, float r, float g, float b, float a) {
         State dst = new State(texture, inter);
-        dst.pos = pos; dst.rotate = rotate; dst.scale = scale;
+        dst.pos = pos.cpy(); dst.rotate = rotate; dst.scale = scale;
         dst.r = r; dst.g = g; dst.b = b; dst.a = a; dst.length = length;
         this.destinations.addLast(dst);
 

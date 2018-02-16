@@ -164,6 +164,11 @@
             android:theme="@style/AppTheme.NoActionBar.FullScreen" >
         </activity>
         <activity
+            android:name=".activity.EggActivity"
+            android:label="Egg"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen" >
+        </activity>
+        <activity
             android:name=".activity.NyaSecActivity"
             android:label="NyaSec">
         </activity>

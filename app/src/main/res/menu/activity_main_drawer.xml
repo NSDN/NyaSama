@@ -28,9 +28,9 @@
                 android:title="NSDN"
                 android:icon="@drawable/logo_nsdn" />
             <item
-                android:id="@+id/nav_thv"
+                android:id="@+id/nav_egg"
                 android:title="@string/title_section3"
-                android:icon="@drawable/logo_thvideo"/>
+                android:icon="@drawable/logo_stg"/>
         </menu>
     </item>
 
