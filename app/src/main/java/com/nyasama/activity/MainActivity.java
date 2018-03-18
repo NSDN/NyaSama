@@ -63,8 +63,10 @@ public class MainActivity extends AppCompatActivity implements
                             ((TextView) headerView.findViewById(R.id.drawer_username)).setText(Discuz.sUsername);
                             ((TextView) headerView.findViewById(R.id.drawer_group)).setText(Discuz.sGroupName);
                         }
-                        findViewById(R.id.nav_view).findViewById(R.id.show_logined).setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
-                        findViewById(R.id.nav_view).findViewById(R.id.hide_logined).setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
+                        View view = navigationView.findViewById(R.id.show_logined);
+                        if (view != null) view.setVisibility(Discuz.sHasLogined ? View.VISIBLE : View.GONE);
+                        view = navigationView.findViewById(R.id.hide_logined);
+                        if (view != null) view.setVisibility(Discuz.sHasLogined ? View.GONE : View.VISIBLE);
                     }
                 });
     }

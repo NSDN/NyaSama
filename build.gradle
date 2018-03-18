@@ -15,8 +15,8 @@ buildscript {
 
  allprojects {
      ext {
-         gdxVersion = '1.9.7'
-         supportLib = '26.1.0'
+         gdxVersion = '1.9.8'
+         supportLib = '27.1.0'
      }
      repositories {
          jcenter()

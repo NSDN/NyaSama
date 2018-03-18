@@ -219,12 +219,12 @@ public class MessagesActivity extends AppCompatActivity
 
                         // we need pmid to reply
                         if (var.has("pmid"))
-                            mPMId = Integer.parseInt(var.getString("pmid"));
+                            mPMId = Helper.toSafeInteger(var.getString("pmid"), 0);
                         // Discuz might return false for count!
                         if (var.has("count"))
                             mCount = Helper.toSafeInteger(var.getString("count"), 0);
                         if (var.has("page"))
-                            mPage = Integer.parseInt(var.getString("page"));
+                            mPage = Helper.toSafeInteger(var.getString("page"), 0);
                         total = mPage == 1 ? listData.size() : mCount;
 
                     } catch (JSONException e) {

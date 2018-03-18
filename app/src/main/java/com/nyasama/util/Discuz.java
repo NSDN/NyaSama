@@ -1074,6 +1074,9 @@ module决定调用哪种操作
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
+                        if (volleyError.networkResponse == null) return;
+                        if (volleyError.networkResponse.headers == null) return;
+
                         String searchUrl = volleyError.networkResponse.headers.get("location");
                         if (searchUrl == null) {
                             callback.onResponse(new JSONVolleyError(volleyError));
