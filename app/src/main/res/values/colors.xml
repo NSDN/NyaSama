@@ -2,13 +2,13 @@
 <resources>
     <color name="colorPrimaryLight">@color/colorBackground</color>
     <color name="color_statusbar">@color/colorPrimaryDark</color>
-    <color name="colorPrimary">#03a9f4</color>
-    <color name="colorPrimaryDark">#0288d1</color>
-    <color name="colorBackground">#bbdefb</color>
+    <color name="colorPrimary">#009688</color>
+    <color name="colorPrimaryDark">#00796b</color>
+    <color name="colorBackground">#e0f2f1</color>
     <color name="colorBackgroundLight">#fafafa</color>
     <color name="primary_text">#de000000</color>
     <color name="secondary_text">#8A000000</color>
-    <color name="colorAccent">#ff9e80</color>
+    <color name="colorAccent">#ef9a9a</color>
 
     <color name="ThemeBackground">@color/colorBackgroundLight</color>
     <color name="text_color_primary">@color/primary_text</color>
