@@ -1,10 +1,11 @@
 package cn.ac.nya.nsgdx.entity;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import cn.ac.nya.nsgdx.utility.IObject;
 import cn.ac.nya.nsgdx.utility.Renderer;
 import cn.ac.nya.nsgdx.utility.Utility;
+
+import static cn.ac.nya.nsgdx.utility.Renderer.Texture;
 
 import java.util.LinkedList;
 

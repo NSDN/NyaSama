@@ -1,5 +1,6 @@
 package cn.ac.nya.nsgdx;
 
+import cn.ac.nya.nsgdx.entity.Exectuor;
 import cn.ac.nya.nsgdx.utility.ObjectPoolCluster;
 import cn.ac.nya.nsgdx.utility.Renderer;
 
@@ -7,8 +8,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.ApplicationAdapter;
+
+import static cn.ac.nya.nsgdx.utility.Renderer.Texture;
 
 import java.util.LinkedHashMap;
 
@@ -19,8 +21,6 @@ import java.util.LinkedHashMap;
 public abstract class NSGDX extends ApplicationAdapter {
 
 	private Renderer renderer;
-	private int counter = 0;
-	protected int counter() { return counter; }
 
 	protected float devWidth, devHeight;
 
@@ -55,9 +55,8 @@ public abstract class NSGDX extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		poolCluster.tick();
 		poolCluster.render(renderer);
-		counter += 1;
-		if (counter % 60 == 0) poolCluster.balance();
 
 		render(renderer);
 	}

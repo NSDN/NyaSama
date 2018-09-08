@@ -23,7 +23,7 @@ public class NyaAbout extends NSGDX {
     @Override
     protected void render(Renderer renderer) {
         renderer.begin();
-        renderer.drawString(4, 16, 1, Color.WHITE, "counter: " + counter());
+        renderer.drawString(4, 16, 1, Color.WHITE, "frame: " + poolCluster.tickTime());
         renderer.end();
     }
 

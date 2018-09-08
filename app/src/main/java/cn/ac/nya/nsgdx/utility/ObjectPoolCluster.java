@@ -9,32 +9,60 @@ import java.util.concurrent.locks.*;
  */
 public class ObjectPoolCluster {
 
-    public class ObjectPool {
+    public static class ObjectPool {
 
-        private int counter;
         private LinkedList<IObject> objectPool;
         private LinkedList<IObject> cachePool;
         private Runnable runnable;
         private final ReentrantLock lock = new ReentrantLock();
 
+        private static final ReentrantLock cntLock = new ReentrantLock();
+        private static int counter = 0;
+        private int nowCounter;
+
+        private static void setCounter(int counter) {
+            ObjectPool.cntLock.lock();
+            ObjectPool.counter = counter;
+            ObjectPool.cntLock.unlock();
+        }
+
+        private static int getCounter() {
+            try {
+                ObjectPool.cntLock.lock();
+                return ObjectPool.counter;
+            } finally {
+                ObjectPool.cntLock.unlock();
+            }
+        }
+
         public ObjectPool() {
-            counter = 0;
+            nowCounter = -1;
             objectPool = new LinkedList<>();
             cachePool = new LinkedList<>();
             this.runnable = () -> {
                 lock.lock();
-
-                cachePool.clear();
-                cachePool.addAll(objectPool);
-                for (IObject i : cachePool) {
-                    if (i.onUpdate(counter) == IObject.Result.END) {
-                        objectPool.remove(i);
+                if (nowCounter != getCounter()) {
+                    cachePool.clear();
+                    cachePool.addAll(objectPool);
+                    for (IObject i : cachePool) {
+                        if (i.onUpdate(nowCounter) == IObject.Result.END) {
+                            objectPool.remove(i);
+                        }
                     }
-                }
-                counter += 1;
 
+                    nowCounter = getCounter();
+                }
                 lock.unlock();
             };
+        }
+
+        public boolean finished() {
+            try {
+                lock.lock();
+                return (nowCounter == getCounter());
+            } finally {
+                lock.unlock();
+            }
         }
 
         public void render(Renderer renderer) {
@@ -92,14 +120,21 @@ public class ObjectPoolCluster {
 
     }
 
+    public void setTick(int tick) {
+        ObjectPool.setCounter(tick);
+    }
+
     private ScheduledThreadPoolExecutor poolExecutor;
     private LinkedList<ObjectPool> poolCluster;
     private LinkedHashMap<ObjectPool, ScheduledFuture> poolTask;
     private int poolSize;
     private int capacity;
 
+    private int tickTime = 0;
+    public int tickTime() { return tickTime; }
+
     public ObjectPoolCluster(int poolSize, int capacity) {
-        poolExecutor = new ScheduledThreadPoolExecutor(capacity);
+        poolExecutor = new ScheduledThreadPoolExecutor(capacity + 1);
         poolCluster = new LinkedList<>();
         poolTask = new LinkedHashMap<>();
         this.poolSize = poolSize;
@@ -187,7 +222,7 @@ public class ObjectPoolCluster {
                 last().removeLast();
             }
         }
-       doSort();
+        doSort();
     }
 
     private void doSort() {
@@ -207,6 +242,22 @@ public class ObjectPoolCluster {
     public void close() {
         clear();
         poolExecutor.shutdown();
+    }
+
+    public boolean finished() {
+        boolean state = true;
+        for (ObjectPool i : poolCluster)
+            state &= i.finished();
+        return state;
+    }
+
+    public void tick() {
+        if (finished()) {
+            setTick(tickTime);
+            if (tickTime % 60 == 0)
+                balance();
+            tickTime += 1;
+        }
     }
 
     public void render(Renderer renderer) {

@@ -1,14 +1,14 @@
 package cn.ac.nya.nsgdx;
 
 import cn.ac.nya.nsgdx.entity.Exectuor;
-import cn.ac.nya.nsgdx.utility.IObject;
 import cn.ac.nya.nsgdx.utility.Renderer;
 import cn.ac.nya.nsgdx.utility.Utility;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+
+import static cn.ac.nya.nsgdx.utility.Renderer.Texture;
 
 /**
  * Created by drzzm on 2018.2.14.
@@ -45,8 +45,10 @@ public class NyaEgg extends NSGDX {
 
         @Override
         public Result onUpdate(int t) {
-            Vector2 vel = Utility.vec2((float) Gdx.input.getDeltaX(), (float) Gdx.input.getDeltaY());
-            move(vel.scl(0.5F).scl(1.0F, -1.0F));
+            if (Gdx.input.isTouched()) {
+                Vector2 vel = Utility.vec2((float) Gdx.input.getDeltaX(), (float) Gdx.input.getDeltaY());
+                move(vel.scl(0.5F).scl(1.0F, -1.0F));
+            }
             return super.onUpdate(t);
         }
 
@@ -157,7 +159,7 @@ public class NyaEgg extends NSGDX {
     @Override
     protected void render(Renderer renderer) {
         renderer.begin();
-        renderer.drawString(4, 16, 1, Color.WHITE, "frame: " + counter());
+        renderer.drawString(4, 16, 1, Color.WHITE, "frame: " + poolCluster.tickTime());
         renderer.drawString(4, devHeight - 4, 1, Color.WHITE, poolCluster.toString());
         renderer.end();
     }
@@ -181,13 +183,13 @@ public class NyaEgg extends NSGDX {
 
             @Override
             public Result onUpdate(int t) {
-                if ((t % 640) == 0) {
+                if ((t % 320) == 0) {
                     if (type == 0) {
-                        for (int i = 0; i < 128; i++)
+                        for (int i = 0; i < 64; i++)
                             poolCluster.add(new ArrowLauncher(i * 5 + t, player));
                         type = 1;
                     } else {
-                        for (int i = 0; i < 128; i++)
+                        for (int i = 0; i < 64; i++)
                             poolCluster.add(new StarLauncher(i * 5 + t, player));
                         type = 0;
                     }
