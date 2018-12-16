@@ -24,6 +24,7 @@ import com.nyasama.R;
 import com.nyasama.ThisApp;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 
 /**
  * Created by oxyflour on 2014/11/23.
@@ -130,6 +131,15 @@ public class SplashActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        int minute = calendar.get(Calendar.MINUTE);
+        if (minute != 0) {
+            mContentView.setBackgroundResource(
+                (minute % 2 == 0) ? R.drawable.back_1 : R.drawable.back_2
+            );
+        }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
