@@ -14,6 +14,22 @@
         android:layout_height="match_parent"
         android:background="@drawable/splash_back">
 
+        <GridLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/about_nsr"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary">
+
+            <ImageView
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_nsr_logo" />
+
+        </GridLayout>
+
     </FrameLayout>
 
 </FrameLayout> 
