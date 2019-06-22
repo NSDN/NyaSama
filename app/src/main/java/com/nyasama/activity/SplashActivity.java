@@ -135,7 +135,10 @@ public class SplashActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         int minute = calendar.get(Calendar.MINUTE);
-        if ((minute % 2) == 1) findViewById(R.id.about_nsr).setVisibility(View.VISIBLE);
+        if (minute == 0)
+            findViewById(R.id.about_nsr).setVisibility(View.VISIBLE);
+        else if ((minute % 2) == 1)
+            mContentView.setBackgroundResource(R.drawable.splash_back_2);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
