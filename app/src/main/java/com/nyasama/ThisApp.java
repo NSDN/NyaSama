@@ -24,6 +24,7 @@ import com.nyasama.util.BitmapLruCache;
 import com.nyasama.util.Discuz;
 import com.nyasama.util.Helper;
 import com.nyasama.util.PersistenceCookieStore;
+import com.xuexiang.xui.XUI;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
@@ -145,6 +146,7 @@ public class ThisApp extends Application {
         context = getApplicationContext();
 
         ACRA.init(this);
+        XUI.init(this);
 
         // load preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
