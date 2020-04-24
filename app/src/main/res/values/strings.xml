@@ -249,4 +249,5 @@
     <string name="action_save_draft">保存为草稿</string>
     <string name="preference_encoding">内容编码</string>
     <string name="pref_diag_title_select_encoding">选择内容编码</string>
+    <string name="splash_creator">绘师：大中2</string>
 </resources>

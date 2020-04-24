@@ -32,10 +32,13 @@ import com.nyasama.activity.PMListActivity;
 import com.nyasama.activity.UserProfileActivity;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -917,7 +920,11 @@ module决定调用哪种操作
                     setEntity(entity);
                 }};
                 try {
-                    return EntityUtils.toString(new DefaultHttpClient().execute(post).getEntity());
+                    HttpClient httpClient = new DefaultHttpClient();
+                    httpClient.getConnectionManager().getSchemeRegistry().register(
+                            new Scheme("https", SSLSocketFactory.getSocketFactory(), 443)
+                    );
+                    return EntityUtils.toString(httpClient.execute(post).getEntity());
                 } catch (IOException e) {
                     return null;
                 }

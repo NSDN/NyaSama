@@ -249,4 +249,5 @@
     <string name="click_to_view_prompts">TRANS:点击查看 %d 条消息</string>
     <string name="preference_encoding">TRANS:Content encoding</string>
     <string name="pref_diag_title_select_encoding">TRANS:Select content encoding</string>
+    <string name="splash_creator">画家：大中2</string>
 </resources>

@@ -55,7 +55,7 @@
             android:title="@string/preference_textsize" />
 
         <ListPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/pref_key_show_image"
             android:entries="@array/show_image"
             android:entryValues="@array/show_image_value"
@@ -63,7 +63,7 @@
             android:title="@string/preference_showimg" />
 
         <ListPreference
-            android:defaultValue="512"
+            android:defaultValue="0"
             android:dialogTitle="@string/preference_thumbsize"
             android:entries="@array/thumb_size"
             android:entryValues="@array/thumb_size_value"

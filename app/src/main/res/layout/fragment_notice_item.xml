@@ -7,12 +7,14 @@
     android:paddingRight="10dp"
     android:paddingTop="5dp">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.xuexiang.xui.widget.layout.XUILinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryLight"
         android:orientation="vertical"
-        android:padding="5dp">
+        android:padding="5dp"
+        app:xui_radius="@dimen/item_radius">
 
         <TextView
             android:id="@+id/date"
@@ -25,5 +27,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-    </LinearLayout>
+    </com.xuexiang.xui.widget.layout.XUILinearLayout>
 </FrameLayout>

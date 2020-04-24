@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingBottom="5dp"
@@ -6,11 +7,12 @@
     android:paddingRight="10dp"
     android:paddingTop="5dp">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.xuexiang.xui.widget.layout.XUIRelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryLight"
-        android:padding="5dp">
+        android:padding="5dp"
+        app:xui_radius="@dimen/item_radius">
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/avatar"
@@ -68,41 +70,43 @@
             android:id="@+id/comment_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
             android:layout_below="@id/message"
             android:layout_toLeftOf="@+id/menu"
             android:orientation="vertical" />
 
-        <Button
+        <com.xuexiang.xui.widget.button.roundbutton.RoundButton
+            style="@style/AccentRoundButton"
+
             android:id="@+id/attachment_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_below="@+id/comment_list"
             android:layout_toEndOf="@+id/votes"
             android:layout_toRightOf="@+id/votes"
             android:text="@string/text_view_attachments"
             android:textStyle="bold" />
 
-        <Button
+        <com.xuexiang.xui.widget.button.roundbutton.RoundButton
+            style="@style/AccentRoundButton"
+
             android:id="@+id/votes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
             android:layout_below="@+id/comment_list"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:text="@string/text_view_vote"
             android:textStyle="bold" />
 
-        <Button
+        <com.xuexiang.xui.widget.button.roundbutton.RoundButton
+            style="@style/AccentRoundButton"
+
             android:id="@+id/pay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/votes"
             android:text="@string/text_view_pay"
             android:textStyle="bold" />
 
-    </RelativeLayout>
+    </com.xuexiang.xui.widget.layout.XUIRelativeLayout>
 
 </FrameLayout>
 

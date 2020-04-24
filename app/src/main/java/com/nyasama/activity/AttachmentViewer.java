@@ -431,7 +431,7 @@ public class AttachmentViewer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attachment_viewer);
 
-        mContentView = findViewById(R.id.about_content);
+        mContentView = findViewById(R.id.attach_content);
         mVisible = true;
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {

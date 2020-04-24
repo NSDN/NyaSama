@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.volley.NetworkResponse;
@@ -132,13 +133,13 @@ public class SplashActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
-        Calendar calendar = Calendar.getInstance();
+        /*Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         int minute = calendar.get(Calendar.MINUTE);
         if (minute == 0)
             findViewById(R.id.about_nsr).setVisibility(View.VISIBLE);
         else if ((minute % 2) == 1)
-            mContentView.setBackgroundResource(R.drawable.splash_back_2);
+            mContentView.setBackgroundResource(R.drawable.splash_back_2);*/
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

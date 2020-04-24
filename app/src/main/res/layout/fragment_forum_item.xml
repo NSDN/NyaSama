@@ -8,39 +8,43 @@
     android:paddingBottom="5dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-<RelativeLayout
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:paddingLeft="6dp"
-    android:paddingRight="6dp"
-    android:background="@color/colorPrimaryLight"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/icon"
-        android:adjustViewBounds="true"
-        android:paddingRight="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="56dp" />
+    <com.xuexiang.xui.widget.layout.XUIRelativeLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:background="@color/colorPrimaryLight"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:xui_radius="@dimen/item_radius">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_toRightOf="@id/icon"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/text_color_primary"
-        android:paddingBottom="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/icon"
+            android:adjustViewBounds="true"
+            android:paddingRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp" />
 
-    <TextView
-        android:id="@+id/sub"
-        android:layout_toRightOf="@id/icon"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/text_color_secondary"
-        android:layout_below="@id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_toRightOf="@id/icon"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/text_color_primary"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/sub"
+            android:layout_toRightOf="@id/icon"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/text_color_secondary"
+            android:layout_below="@id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </com.xuexiang.xui.widget.layout.XUIRelativeLayout>
+
 </FrameLayout>

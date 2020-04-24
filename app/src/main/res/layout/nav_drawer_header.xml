@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
+        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
             android:text="@string/drawer_button_login"
             android:onClick="gotoLogin"
             android:layout_width="wrap_content"

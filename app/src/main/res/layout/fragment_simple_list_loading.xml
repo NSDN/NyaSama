@@ -2,27 +2,30 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <LinearLayout
         android:id="@+id/loading"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:layout_gravity="center"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:visibility="gone">
 
-        <ProgressBar
-            style="?android:attr/progressBarStyle"
-            android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <com.xuexiang.xui.widget.progress.loading.RotateLoadingView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            app:lv_color="@color/colorAccent"
+            app:lv_has_icon="false"/>
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/list_loading_text" />
+            android:layout_gravity="center_horizontal"
+            android:text="@string/list_loading_text"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </LinearLayout>
 </FrameLayout>
